@@ -1,0 +1,221 @@
+{
+  "main": {
+    "id": "5ab05b322d0fc4f9",
+    "type": "split",
+    "children": [
+      {
+        "id": "f258b9e4436ff41c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f162eb1de218849d",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "ea3af70c5919ff41",
+    "type": "split",
+    "children": [
+      {
+        "id": "e07349af1b2f8177",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d6de1842426fda97",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "a8663baff729e3ba",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "bc0d81cbe2e31393",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 200,
+    "collapsed": true
+  },
+  "right": {
+    "id": "b3437a4d50bedeaf",
+    "type": "split",
+    "children": [
+      {
+        "id": "6cd80940496fa32c",
+        "type": "tabs",
+        "dimension": 66.5,
+        "children": [
+          {
+            "id": "ab9a4108077d9e7b",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "4a1a034be20ef7a7",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "baf463664751721a",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "fa35313977522132",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md"
+              }
+            }
+          },
+          {
+            "id": "fd9739689dd740b8",
+            "type": "leaf",
+            "state": {
+              "type": "calendar",
+              "state": {}
+            }
+          },
+          {
+            "id": "dc1035d49256d8f5",
+            "type": "leaf",
+            "state": {
+              "type": "advanced-tables-toolbar",
+              "state": {}
+            }
+          }
+        ],
+        "currentTab": 3
+      },
+      {
+        "id": "bbd2e0085d888e02",
+        "type": "tabs",
+        "dimension": 33.5,
+        "children": [
+          {
+            "id": "56dbf548f8c80b59",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 216.5
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "workspaces:管理工作区布局": false,
+      "table-editor-obsidian:Advanced Tables Toolbar": false,
+      "obsidian-excalidraw-plugin:新建绘图文件": false
+    }
+  },
+  "active": "d6de1842426fda97",
+  "lastOpenFiles": [
+    "工具用法/markdown语法.md",
+    "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
+    "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-11 16.23.19.excalidraw.md",
+    "Assets/Images/Andromeda galaxy.jpg",
+    "Assets/Fonts/muyao.ttf",
+    "Assets/Fonts",
+    "Assets/未命名文件夹",
+    "Assets/Images",
+    "Assets/muyao.ttf",
+    "Get Things Done：The Art of Stress-Free Productivity 2023-10-11 15.21.08.excalidraw.md",
+    "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-11 15.21.08.excalidraw.md",
+    "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-11 15.21.08.excalidraw.png",
+    "Excalidraw",
+    "健身笔录/健身饮食注意事项.md",
+    "读书笔记/未命名.canvas",
+    "Assets/Andromeda galaxy.jpg",
+    "读书笔记",
+    "(/Assets/Andromeda galaxy.jpg.md",
+    "(/Assets",
+    "(",
+    "cuphead.jpg",
+    "Assets",
+    "~/Pictures/cuphead.jpg.md",
+    "[.md",
+    "英语学习/语法/Present continuous.md",
+    "Excalidraw/Drawing 2023-10-09 00.00.03.excalidraw.md",
+    "未命名.md",
+    "Excalidraw/Drawing 2023-10-08 15.50.50.excalidraw.md",
+    "健身笔录/Drawing 2023-10-08 15.32.45.excalidraw.md",
+    "健身笔录/未命名.canvas",
+    "未命名.canvas",
+    "健身.md",
+    "www.baidu.com.md"
+  ]
+}
