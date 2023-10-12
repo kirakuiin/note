@@ -69,8 +69,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200,
-    "collapsed": true
+    "width": 200
   },
   "right": {
     "id": "b3437a4d50bedeaf",
@@ -184,9 +183,11 @@
   },
   "active": "f162eb1de218849d",
   "lastOpenFiles": [
-    "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-11 16.23.19.excalidraw.md",
+    "工具用法/我的GTD实践笔记.canvas",
     "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
+    "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-11 16.23.19.excalidraw.md",
     "工具用法/markdown语法.md",
+    "工具用法/Drawing 2023-10-12 13.58.20.excalidraw.md",
     "Assets/Images/Andromeda galaxy.jpg",
     "Assets/Fonts/muyao.ttf",
     "Assets/Fonts",
