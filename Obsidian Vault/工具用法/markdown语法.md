@@ -317,8 +317,28 @@ def foo():
 - example
 - quote, cite
 
+## 高亮
+
+> [!example]
+> ==高亮文本==
+
+```markdown
+==高亮文本==
+```
+
+## 数学公式
+
+> [!example]
+> $$\begin{vmatrix}a & b\\ c & d \end{vmatrix}=ad-bc$$
+
+```markdown
+$$\begin{vmatrix}a & b\\ c & d \end{vmatrix}=ad-bc$$
+```
+
+语法使用的是Latex规则。
 # 小技巧
 
 > [!note]
 > - `&emsp;`可以表示中文空格，一般用来实现中文段落的首行双空格排版
 > - 可以使用`<font color="color-name">content</font>`语法来修改字体颜色
+> - wiki式链接`[[file_name|size]]`通过size可以指定图片大小

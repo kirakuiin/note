@@ -11,11 +11,14 @@
             "id": "f162eb1de218849d",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "canvas",
               "state": {
-                "file": "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
-                "mode": "source",
-                "source": false
+                "file": "工具用法/我的GTD实践笔记.canvas",
+                "viewState": {
+                  "x": 999.3936208943392,
+                  "y": 274.3578668943461,
+                  "zoom": 0.21218222657256303
+                }
               }
             }
           }
@@ -86,7 +89,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
+                "file": "工具用法/我的GTD实践笔记.canvas",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +106,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
+                "file": "工具用法/我的GTD实践笔记.canvas",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -126,7 +129,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md"
+                "file": "工具用法/我的GTD实践笔记.canvas"
               }
             }
           },
@@ -166,7 +169,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 216.5
+    "width": 216.5,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -183,10 +187,14 @@
   },
   "active": "f162eb1de218849d",
   "lastOpenFiles": [
-    "工具用法/我的GTD实践笔记.canvas",
     "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
+    "工具用法/我的GTD实践笔记.canvas",
     "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-11 16.23.19.excalidraw.md",
+    "Assets/Images/OmniFocus_Inbox.png",
+    "Assets/Images/Omnifocus_icon.png",
     "工具用法/markdown语法.md",
+    "Assets/未命名",
+    "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-12 23.26.32.excalidraw.md",
     "工具用法/Drawing 2023-10-12 13.58.20.excalidraw.md",
     "Assets/Images/Andromeda galaxy.jpg",
     "Assets/Fonts/muyao.ttf",
@@ -206,7 +214,6 @@
     "(/Assets",
     "(",
     "cuphead.jpg",
-    "Assets",
     "~/Pictures/cuphead.jpg.md",
     "[.md",
     "英语学习/语法/Present continuous.md",

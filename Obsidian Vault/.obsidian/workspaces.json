@@ -1,0 +1,190 @@
+{
+  "workspaces": {
+    "常用布局": {
+      "main": {
+        "id": "5ab05b322d0fc4f9",
+        "type": "split",
+        "children": [
+          {
+            "id": "f258b9e4436ff41c",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "f162eb1de218849d",
+                "type": "leaf",
+                "state": {
+                  "type": "markdown",
+                  "state": {
+                    "file": "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
+                    "mode": "preview",
+                    "source": false
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "direction": "vertical"
+      },
+      "left": {
+        "id": "ea3af70c5919ff41",
+        "type": "split",
+        "children": [
+          {
+            "id": "e07349af1b2f8177",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "d6de1842426fda97",
+                "type": "leaf",
+                "state": {
+                  "type": "file-explorer",
+                  "state": {
+                    "sortOrder": "alphabetical"
+                  }
+                }
+              },
+              {
+                "id": "a8663baff729e3ba",
+                "type": "leaf",
+                "state": {
+                  "type": "search",
+                  "state": {
+                    "query": "",
+                    "matchingCase": false,
+                    "explainSearch": false,
+                    "collapseAll": false,
+                    "extraContext": false,
+                    "sortOrder": "alphabetical"
+                  }
+                }
+              },
+              {
+                "id": "bc0d81cbe2e31393",
+                "type": "leaf",
+                "state": {
+                  "type": "bookmarks",
+                  "state": {}
+                }
+              }
+            ]
+          }
+        ],
+        "direction": "horizontal",
+        "width": 200
+      },
+      "right": {
+        "id": "b3437a4d50bedeaf",
+        "type": "split",
+        "children": [
+          {
+            "id": "6cd80940496fa32c",
+            "type": "tabs",
+            "dimension": 66.5,
+            "children": [
+              {
+                "id": "ab9a4108077d9e7b",
+                "type": "leaf",
+                "state": {
+                  "type": "backlink",
+                  "state": {
+                    "file": "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
+                    "collapseAll": false,
+                    "extraContext": false,
+                    "sortOrder": "alphabetical",
+                    "showSearch": false,
+                    "searchQuery": "",
+                    "backlinkCollapsed": false,
+                    "unlinkedCollapsed": true
+                  }
+                }
+              },
+              {
+                "id": "4a1a034be20ef7a7",
+                "type": "leaf",
+                "state": {
+                  "type": "outgoing-link",
+                  "state": {
+                    "file": "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
+                    "linksCollapsed": false,
+                    "unlinkedCollapsed": true
+                  }
+                }
+              },
+              {
+                "id": "baf463664751721a",
+                "type": "leaf",
+                "state": {
+                  "type": "tag",
+                  "state": {
+                    "sortOrder": "frequency",
+                    "useHierarchy": true
+                  }
+                }
+              },
+              {
+                "id": "fa35313977522132",
+                "type": "leaf",
+                "state": {
+                  "type": "outline",
+                  "state": {
+                    "file": "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md"
+                  }
+                }
+              },
+              {
+                "id": "fd9739689dd740b8",
+                "type": "leaf",
+                "state": {
+                  "type": "calendar",
+                  "state": {}
+                }
+              },
+              {
+                "id": "dc1035d49256d8f5",
+                "type": "leaf",
+                "state": {
+                  "type": "advanced-tables-toolbar",
+                  "state": {}
+                }
+              }
+            ],
+            "currentTab": 4
+          },
+          {
+            "id": "bbd2e0085d888e02",
+            "type": "tabs",
+            "dimension": 33.5,
+            "children": [
+              {
+                "id": "56dbf548f8c80b59",
+                "type": "leaf",
+                "state": {
+                  "type": "graph",
+                  "state": {}
+                }
+              }
+            ]
+          }
+        ],
+        "direction": "horizontal",
+        "width": 216.5
+      },
+      "left-ribbon": {
+        "hiddenItems": {
+          "switcher:打开快速切换": false,
+          "graph:查看关系图谱": false,
+          "canvas:新建白板": false,
+          "daily-notes:打开/创建今天的日记": false,
+          "templates:插入模板": false,
+          "command-palette:打开命令面板": false,
+          "workspaces:管理工作区布局": false,
+          "table-editor-obsidian:Advanced Tables Toolbar": false,
+          "obsidian-excalidraw-plugin:新建绘图文件": false
+        }
+      },
+      "active": "f162eb1de218849d"
+    }
+  },
+  "active": "常用布局"
+}

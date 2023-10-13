@@ -1,6 +1,17 @@
 {
 	"nodes":[
-		{"id":"273980e6a713a7c5","type":"text","text":"![[Get Things Done：The Art of Stress-Free Productivity#组织管理]]","x":84,"y":-240,"width":736,"height":560}
+		{"id":"9604911923284a22","type":"text","text":"# 工作篮 \n\n使用收件箱，将全部的事件以文字的形式录入其中。\n\n![[OmniFocus_Inbox.png]]","x":-175,"y":-1140,"width":250,"height":234,"color":"2"},
+		{"id":"0d49bae1c1caa29e","type":"text","text":"![[Get Things Done：The Art of Stress-Free Productivity#建立清单]]","x":8,"y":0,"width":481,"height":528},
+		{"id":"b5ac9a46521b8986","type":"text","text":"![[Get Things Done：The Art of Stress-Free Productivity#检查回顾]]","x":-600,"y":500,"width":481,"height":437},
+		{"id":"6e9410d3b840d580","type":"text","text":"![[Get Things Done：The Art of Stress-Free Productivity#收集流程]]","x":340,"y":-1158,"width":481,"height":270},
+		{"id":"eeca21e0bc0611df","type":"file","file":"Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-11 16.23.19.excalidraw.md","x":-730,"y":-523,"width":738,"height":643},
+		{"id":"b2b615dd6a842071","type":"text","text":"![[Get Things Done：The Art of Stress-Free Productivity#清空工作篮]]","x":340,"y":-600,"width":664,"height":443},
+		{"id":"0d0859a441252462","type":"text","text":"# OmniFocus3\n\n![[Omnifocus_icon.png|200]]","x":-860,"y":-1323,"width":260,"height":300,"color":"1"},
+		{"id":"fd95297822f381b3","x":672,"y":120,"width":464,"height":210,"color":"2","type":"text","text":"# OmniFocus里的标签\n"}
 	],
-	"edges":[]
+	"edges":[
+		{"id":"5760888c51fe7bf2","fromNode":"9604911923284a22","fromSide":"right","toNode":"6e9410d3b840d580","toSide":"left","toEnd":"none"},
+		{"id":"7eb32983cdcf1367","fromNode":"eeca21e0bc0611df","fromSide":"top","toNode":"9604911923284a22","toSide":"left","toEnd":"none"},
+		{"id":"cfc24958daca517a","fromNode":"9604911923284a22","fromSide":"top","toNode":"0d0859a441252462","toSide":"right","toEnd":"none"}
+	]
 }
