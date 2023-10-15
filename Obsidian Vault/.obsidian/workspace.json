@@ -4,22 +4,29 @@
     "type": "split",
     "children": [
       {
-        "id": "f258b9e4436ff41c",
+        "id": "b8244d189b9b5031",
         "type": "tabs",
         "children": [
           {
-            "id": "f162eb1de218849d",
+            "id": "e0a92e5430490856",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "graph",
+              "state": {}
+            }
+          },
+          {
+            "id": "f76ced026cedf780",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
               "state": {
-                "file": "健身笔录/健身饮食注意事项.md",
-                "mode": "source",
-                "source": false
+                "currentVersion": "1.4.16"
               }
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -86,7 +93,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "健身笔录/健身饮食注意事项.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +109,6 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "健身笔录/健身饮食注意事项.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,9 +130,7 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {
-                "file": "健身笔录/健身饮食注意事项.md"
-              }
+              "state": {}
             }
           },
           {
@@ -179,13 +182,17 @@
       "command-palette:打开命令面板": false,
       "workspaces:管理工作区布局": false,
       "table-editor-obsidian:Advanced Tables Toolbar": false,
-      "obsidian-excalidraw-plugin:新建绘图文件": false
+      "obsidian-excalidraw-plugin:新建绘图文件": false,
+      "random-note:开始漫游笔记": false
     }
   },
-  "active": "f162eb1de218849d",
+  "active": "f76ced026cedf780",
   "lastOpenFiles": [
-    "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
     "工具用法/markdown语法.md",
+    "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-11 16.23.19.excalidraw.md",
+    "未命名.canvas",
+    "健身笔录/健身饮食注意事项.md",
+    "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
     "工具用法/我的GTD实践笔记.canvas",
     "灵感/如何有效记忆.md",
     "灵感",
@@ -193,7 +200,6 @@
     "Assets/Images/Unknown",
     "Assets/Images/Omnifocus_icon.png",
     "Assets/Images/OmniFocus_Inbox.png",
-    "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-11 16.23.19.excalidraw.md",
     "Assets/未命名",
     "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-12 23.26.32.excalidraw.md",
     "工具用法/Drawing 2023-10-12 13.58.20.excalidraw.md",
@@ -207,7 +213,6 @@
     "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-11 15.21.08.excalidraw.md",
     "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-11 15.21.08.excalidraw.png",
     "Excalidraw",
-    "健身笔录/健身饮食注意事项.md",
     "读书笔记/未命名.canvas",
     "Assets/Andromeda galaxy.jpg",
     "读书笔记",
@@ -221,7 +226,6 @@
     "Excalidraw/Drawing 2023-10-08 15.50.50.excalidraw.md",
     "健身笔录/Drawing 2023-10-08 15.32.45.excalidraw.md",
     "健身笔录/未命名.canvas",
-    "未命名.canvas",
     "健身.md",
     "www.baidu.com.md"
   ]
