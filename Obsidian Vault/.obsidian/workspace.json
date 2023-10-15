@@ -11,22 +11,15 @@
             "id": "e0a92e5430490856",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {}
-            }
-          },
-          {
-            "id": "f76ced026cedf780",
-            "type": "leaf",
-            "state": {
-              "type": "release-notes",
+              "type": "markdown",
               "state": {
-                "currentVersion": "1.4.16"
+                "file": "英语学习/语法/Present continuous.md",
+                "mode": "source",
+                "source": false
               }
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -85,7 +78,7 @@
       {
         "id": "6cd80940496fa32c",
         "type": "tabs",
-        "dimension": 66.5,
+        "dimension": 66.625,
         "children": [
           {
             "id": "ab9a4108077d9e7b",
@@ -93,6 +86,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "英语学习/语法/Present continuous.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -109,6 +103,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "英语学习/语法/Present continuous.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -130,7 +125,9 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {}
+              "state": {
+                "file": "英语学习/语法/Present continuous.md"
+              }
             }
           },
           {
@@ -155,7 +152,7 @@
       {
         "id": "bbd2e0085d888e02",
         "type": "tabs",
-        "dimension": 33.5,
+        "dimension": 33.375,
         "children": [
           {
             "id": "56dbf548f8c80b59",
@@ -169,8 +166,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 216.5,
-    "collapsed": true
+    "width": 216.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -186,14 +182,20 @@
       "random-note:开始漫游笔记": false
     }
   },
-  "active": "f76ced026cedf780",
+  "active": "e0a92e5430490856",
   "lastOpenFiles": [
+    "工具用法/anki用法指南.md",
+    "英语学习/语法/Present continuous.md",
+    "Assets/Images/anki用法指南 2023-10-15 14.50.35.excalidraw.md",
+    "未命名.md",
+    "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
     "工具用法/markdown语法.md",
+    "工具用法/我的GTD实践笔记.canvas",
+    "英语学习/语法",
+    "英语学习/未命名未命名.md",
     "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-11 16.23.19.excalidraw.md",
     "未命名.canvas",
     "健身笔录/健身饮食注意事项.md",
-    "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
-    "工具用法/我的GTD实践笔记.canvas",
     "灵感/如何有效记忆.md",
     "灵感",
     "Assets/Images/Calendar_icon.png",
@@ -215,14 +217,11 @@
     "Excalidraw",
     "读书笔记/未命名.canvas",
     "Assets/Andromeda galaxy.jpg",
-    "读书笔记",
     "(/Assets/Andromeda galaxy.jpg.md",
     "cuphead.jpg",
     "~/Pictures/cuphead.jpg.md",
     "[.md",
-    "英语学习/语法/Present continuous.md",
     "Excalidraw/Drawing 2023-10-09 00.00.03.excalidraw.md",
-    "未命名.md",
     "Excalidraw/Drawing 2023-10-08 15.50.50.excalidraw.md",
     "健身笔录/Drawing 2023-10-08 15.32.45.excalidraw.md",
     "健身笔录/未命名.canvas",
