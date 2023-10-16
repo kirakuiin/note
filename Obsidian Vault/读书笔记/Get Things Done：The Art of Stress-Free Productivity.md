@@ -1,7 +1,7 @@
 ---
 tags:
-  - knowledge
-  - thought
+  - reference
+  - methodology
 aliases:
   - GTD
 ---

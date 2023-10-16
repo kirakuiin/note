@@ -13,8 +13,8 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/Present continuous.md",
-                "mode": "source",
+                "file": "技术文档/C sharp 语法简介.md",
+                "mode": "preview",
                 "source": false
               }
             }
@@ -86,7 +86,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/Present continuous.md",
+                "file": "技术文档/C sharp 语法简介.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +103,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/Present continuous.md",
+                "file": "技术文档/C sharp 语法简介.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -126,7 +126,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/Present continuous.md"
+                "file": "技术文档/C sharp 语法简介.md"
               }
             }
           },
@@ -166,7 +166,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 216.5
+    "width": 216.5,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -184,20 +185,26 @@
   },
   "active": "e0a92e5430490856",
   "lastOpenFiles": [
-    "工具用法/anki用法指南.md",
+    "日常杂谈/我的GTD实践笔记.canvas",
+    "英语学习/语法/Present simple.md",
     "英语学习/语法/Present continuous.md",
+    "日常杂谈/饮食怎么吃.md",
+    "日常杂谈/名言警句.md",
+    "日常杂谈/如何有效记忆.md",
+    "技术文档/markdown语法.md",
+    "技术文档/C sharp 语法简介.md",
+    "工具用法/VSCode使用问题记录.md",
+    "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
+    "工具用法/anki用法指南.md",
+    "技术文档",
+    "日常杂谈",
     "Assets/Images/anki用法指南 2023-10-15 14.50.35.excalidraw.md",
     "未命名.md",
-    "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
-    "工具用法/markdown语法.md",
-    "工具用法/我的GTD实践笔记.canvas",
     "英语学习/语法",
     "英语学习/未命名未命名.md",
     "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-11 16.23.19.excalidraw.md",
     "未命名.canvas",
-    "健身笔录/健身饮食注意事项.md",
-    "灵感/如何有效记忆.md",
-    "灵感",
+    "记录灵感",
     "Assets/Images/Calendar_icon.png",
     "Assets/Images/Unknown",
     "Assets/Images/Omnifocus_icon.png",
@@ -210,11 +217,9 @@
     "Assets/Fonts",
     "Assets/未命名文件夹",
     "Assets/Images",
-    "Assets/muyao.ttf",
     "Get Things Done：The Art of Stress-Free Productivity 2023-10-11 15.21.08.excalidraw.md",
     "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-11 15.21.08.excalidraw.md",
     "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-11 15.21.08.excalidraw.png",
-    "Excalidraw",
     "读书笔记/未命名.canvas",
     "Assets/Andromeda galaxy.jpg",
     "(/Assets/Andromeda galaxy.jpg.md",
@@ -225,7 +230,6 @@
     "Excalidraw/Drawing 2023-10-08 15.50.50.excalidraw.md",
     "健身笔录/Drawing 2023-10-08 15.32.45.excalidraw.md",
     "健身笔录/未命名.canvas",
-    "健身.md",
-    "www.baidu.com.md"
+    "健身.md"
   ]
 }

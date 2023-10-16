@@ -1,6 +1,7 @@
 ---
 tags:
-  - knowledge
+  - reference
+  - markdown
 ---
 # 基础语法
 
