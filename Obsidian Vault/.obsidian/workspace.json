@@ -13,8 +13,8 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/C sharp 语法简介.md",
-                "mode": "preview",
+                "file": "英语学习/语法/Present continuous and present simple.md",
+                "mode": "source",
                 "source": false
               }
             }
@@ -86,7 +86,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/C sharp 语法简介.md",
+                "file": "英语学习/语法/Present continuous and present simple.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +103,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/C sharp 语法简介.md",
+                "file": "英语学习/语法/Present continuous and present simple.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -126,7 +126,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/C sharp 语法简介.md"
+                "file": "英语学习/语法/Present continuous and present simple.md"
               }
             }
           },
@@ -166,8 +166,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 216.5,
-    "collapsed": true
+    "width": 216.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -185,14 +184,17 @@
   },
   "active": "e0a92e5430490856",
   "lastOpenFiles": [
-    "日常杂谈/我的GTD实践笔记.canvas",
-    "英语学习/语法/Present simple.md",
+    "Assets/Images/Present continuous and present simple 2023-10-17 12.46.44.excalidraw.md",
+    "英语学习/语法/Present continuous and present simple.md",
+    "技术文档/markdown语法.md",
     "英语学习/语法/Present continuous.md",
+    "英语学习/语法/时态对比.canvas",
+    "英语学习/语法/Present simple.md",
+    "日常杂谈/我的GTD实践笔记.canvas",
+    "技术文档/C sharp 语法简介.md",
     "日常杂谈/饮食怎么吃.md",
     "日常杂谈/名言警句.md",
     "日常杂谈/如何有效记忆.md",
-    "技术文档/markdown语法.md",
-    "技术文档/C sharp 语法简介.md",
     "工具用法/VSCode使用问题记录.md",
     "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
     "工具用法/anki用法指南.md",
@@ -229,7 +231,6 @@
     "Excalidraw/Drawing 2023-10-09 00.00.03.excalidraw.md",
     "Excalidraw/Drawing 2023-10-08 15.50.50.excalidraw.md",
     "健身笔录/Drawing 2023-10-08 15.32.45.excalidraw.md",
-    "健身笔录/未命名.canvas",
-    "健身.md"
+    "健身笔录/未命名.canvas"
   ]
 }
