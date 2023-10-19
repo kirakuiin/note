@@ -8,10 +8,38 @@
   "collapse-color-groups": false,
   "colorGroups": [
     {
-      "query": "tag:#knowledge  ",
+      "query": "tag:#reference  ",
       "color": {
         "a": 1,
-        "rgb": 14701145
+        "rgb": 14701138
+      }
+    },
+    {
+      "query": "tag:#methodology  ",
+      "color": {
+        "a": 1,
+        "rgb": 14725458
+      }
+    },
+    {
+      "query": "tag:#record  ",
+      "color": {
+        "a": 1,
+        "rgb": 11657298
+      }
+    },
+    {
+      "query": "tag:#language  ",
+      "color": {
+        "a": 1,
+        "rgb": 5431378
+      }
+    },
+    {
+      "query": "tag:#excalidraw  ",
+      "color": {
+        "a": 1,
+        "rgb": 11424480
       }
     }
   ],
@@ -25,6 +53,6 @@
   "repelStrength": 10,
   "linkStrength": 1,
   "linkDistance": 250,
-  "scale": 0.09002159844533429,
+  "scale": 1.0562041597781706,
   "close": true
 }

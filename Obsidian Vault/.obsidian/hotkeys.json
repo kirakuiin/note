@@ -7,12 +7,5 @@
       "key": "E"
     }
   ],
-  "obsidian-excalidraw-plugin:insert-image": [
-    {
-      "modifiers": [
-        "Mod"
-      ],
-      "key": "E"
-    }
-  ]
+  "obsidian-excalidraw-plugin:insert-link": []
 }

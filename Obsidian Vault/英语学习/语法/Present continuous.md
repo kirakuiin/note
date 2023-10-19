@@ -12,10 +12,13 @@ tags:
 语法含义:
 > 表示现在正在做的事，从过去开始，现在正在进行，并且仍可能持续下去。
 
+图示：
+![[Present continuous and present simple 2023-10-17 12.46.44.excalidraw]]
+
 语法表示：
 > **Am/is/are + -ing**
 
-> [!note]
+> [!info]
 > **today/this week/this year** 可以用来表示现在的时间段
 > > [!example]
 > > You're working hard today

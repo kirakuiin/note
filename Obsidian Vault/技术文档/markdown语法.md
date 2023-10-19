@@ -103,16 +103,17 @@ tags:
 
 无序列表中的`-`可以替换为`*`或`+`，但在使用时最好用同一个符号。
 
-## 代码
+## 行内代码
 
 > [!example]
-> `print("hello world!)"`
-> `` `转义情况` ``
+> `print("hello world!")`
 
 ```markdown
-`print("hello world!)"`
-`` `转义情况` ``
+`print("hello world!")`
 ```
+
+> [!hint] 转义
+>  使用一对\`\`进行转义
 
 ## 分隔线
 
@@ -225,7 +226,10 @@ def foo():
 ```
 ~~~
 
-波浪线 `~` 的作用和反引号`` ` ``等同，一般用于出现嵌套的情况下使用。如果在三个反引号后加上代码所使用的语言名称，则会提供语法高亮的功能
+波浪线 `~` 的作用和反引号`` ` ``等同，一般用于出现嵌套的情况下使用。如果在三个反引号后加上代码所使用的语言名称，则会提供语法高亮的功能。
+
+> [!hint]
+> c++对应语言名称是cpp，c#对应的是csharp
 
 ## 脚注
 
@@ -369,4 +373,4 @@ $$\begin{vmatrix}a & b\\ c & d \end{vmatrix}=ad-bc$$
 > [!note]
 > - `&emsp;`可以表示中文空格，一般用来实现中文段落的首行双空格排版
 > - 可以使用`<font color="color-name">content</font>`语法来修改字体颜色
-> - wiki式链接`[[file_name|size]]`通过size可以指定图片大小
+> - wiki式链接`[[file_name|custom_name]]`通过custom_name可以调整显示名称，如果链接的是一个图片则可以改变其大小

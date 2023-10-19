@@ -1,6 +1,5 @@
 ---
 tags:
-  - reference
   - methodology
 aliases:
   - GTD
