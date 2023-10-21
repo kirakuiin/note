@@ -13,8 +13,8 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/C sharp/C sharp 语法简介.md",
-                "mode": "source",
+                "file": "技术文档/C sharp/类型系统/类.md",
+                "mode": "preview",
                 "source": false
               }
             }
@@ -78,7 +78,6 @@
       {
         "id": "6cd80940496fa32c",
         "type": "tabs",
-        "dimension": 66.625,
         "children": [
           {
             "id": "ab9a4108077d9e7b",
@@ -86,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/C sharp/C sharp 语法简介.md",
+                "file": "技术文档/C sharp/类型系统/类.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/C sharp/C sharp 语法简介.md",
+                "file": "技术文档/C sharp/类型系统/类.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -126,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/C sharp/C sharp 语法简介.md"
+                "file": "技术文档/C sharp/类型系统/类.md"
               }
             }
           },
@@ -148,21 +147,6 @@
           }
         ],
         "currentTab": 3
-      },
-      {
-        "id": "bbd2e0085d888e02",
-        "type": "tabs",
-        "dimension": 33.375,
-        "children": [
-          {
-            "id": "56dbf548f8c80b59",
-            "type": "leaf",
-            "state": {
-              "type": "graph",
-              "state": {}
-            }
-          }
-        ]
       }
     ],
     "direction": "horizontal",
@@ -184,34 +168,35 @@
   },
   "active": "287c5e67af34ee6e",
   "lastOpenFiles": [
-    "技术文档/C sharp/程序入口.md",
-    "技术文档/C sharp/类型系统.md",
-    "技术文档/C sharp/类型系统",
-    "技术文档/C sharp/C sharp 语法简介.md",
     "🧠 第二大脑 🧠.md",
-    "Templates/空文档.md",
-    "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-11 16.23.19.excalidraw.md",
-    "日常杂谈/金字塔书写理论.md",
-    "日常杂谈/饮食怎么吃.md",
-    "日常杂谈/我的GTD实践笔记.canvas",
-    "日常杂谈/如何有效记忆.md",
-    "日常杂谈/名言警句.md",
-    "Excalidraw/金字塔书写理论 2023-10-18 15.54.13.excalidraw.md",
-    "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
-    "技术文档/markdown语法.md",
-    "英语学习/语法/Regular and irregular verbs.md",
-    "英语学习/语法/Past simple.md",
+    "技术文档/C sharp/类型系统/类.md",
+    "英语学习/语法/目录.md",
+    "英语学习/语法/Present perfect continuous and simple.md",
+    "英语学习/语法/Present perfect continuous.md",
+    "英语学习/语法/Present continuous and present simple.md",
+    "英语学习/语法/Present continuous.md",
+    "英语学习/语法/Present perfect.md",
     "英语学习/语法/Present simple.md",
-    "Templates/英语语法模板.md",
-    "Templates",
+    "英语学习/语法/Regular and irregular verbs.md",
+    "Excalidraw/Present perfect continuous 2023-10-20 14.30.19.excalidraw.md",
+    "Excalidraw/Present perfect 2023-10-19 13.14.15.excalidraw.md",
+    "技术文档/C sharp/C sharp 语法简介.md",
+    "技术文档/C sharp/类型系统/类型系统.md",
+    "技术文档/C sharp/类型系统/命名空间.md",
+    "工具用法/Dataview用法指南.md",
+    "英语学习/语法/Past continuous.md",
+    "英语学习/语法/Past simple.md",
+    "未命名.md",
+    "Excalidraw/Present continuous and present simple 2023-10-17 12.52.26.excalidraw.md",
     "Excalidraw/Past simple 2023-10-18 10.57.48.excalidraw.md",
     "Excalidraw/Present continuous and present simple 2023-10-17 12.46.44.excalidraw.md",
-    "英语学习/语法/Present continuous.md",
-    "英语学习/语法/Present continuous and present simple.md",
-    "工具用法/Dataview用法指南.md",
-    "Excalidraw/Present continuous and present simple 2023-10-17 12.52.26.excalidraw.md",
-    "工具用法/VSCode用法指南.md",
-    "工具用法/anki用法指南.md",
+    "Excalidraw/Past continuous 2023-10-19 10.26.50.excalidraw.md",
+    "技术文档/markdown语法.md",
+    "Templates/空文档.md",
+    "Templates/英语语法模板.md",
+    "技术文档/C sharp/类型系统",
+    "日常杂谈/我的GTD实践笔记.canvas",
+    "Templates",
     "技术文档/C sharp",
     "英语学习/语法/时态对比.canvas",
     "技术文档",

@@ -20,6 +20,7 @@ tags:
 
 > [!hint] 最佳实践
 > 在#号和标题内容间加空格，因为有的应用可能无法处理不带空格的标题语法。
+
 ## 段落
 
 > [!example]
@@ -295,6 +296,8 @@ def foo():
 
 # 特殊语法
 
+^aaf2cc
+
 > [!hint] 仅在某个应用里支持的语法，不具有泛用性。
 ## Callout
 
@@ -368,6 +371,21 @@ $$\begin{vmatrix}a & b\\ c & d \end{vmatrix}=ad-bc$$
 ```text
 ---
 ```
+
+## 块引用
+
+> [!warning] 这个语法仅在Obsidian中生效
+
+可以在内部链接内指定引用的具体块，使用语法：
+
+> ![example]
+> [[markdown语法#^aaf2cc|块引用]]
+
+```markdown
+[[markdown语法#^aaf2cc]]
+```
+
+注意`^`后的ID可以自己指定，只需要在被引用的块后加上一个`^yourid`, 这个ID只能由字母，数字和破折号构成，并且前后要有空行。
 # 小技巧
 
 > [!note]

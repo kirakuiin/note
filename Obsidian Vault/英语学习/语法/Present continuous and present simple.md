@@ -4,6 +4,7 @@ tags:
 links:
   - "[[Present simple]]"
   - "[[Present continuous]]"
+grammer_type: present and past
 ---
 > [!example]
 > **Present continuous**:
@@ -37,10 +38,15 @@ links:
 > > Do you understand what I mean?
 > > Do you see the man over there?
 > 
+
+^not-use-continuous
+
+> [!info]
 > 表示感觉的四个动词也经常用这种形式表述：
 > **can + see/hear/smell/taste**
 > > [!example]
 > > I can hear a strange noise. Can you hear it?
+
 
 > [!info] Think
 > 当**think**表达我相信，我有一个观点的时候，不使用现在进行时：

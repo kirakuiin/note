@@ -1,6 +1,7 @@
 ---
 tags:
   - language
+grammer_type: present and past
 ---
 > [!example]
 > The earth goes round the sun.

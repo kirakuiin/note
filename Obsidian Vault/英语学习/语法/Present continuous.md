@@ -1,6 +1,7 @@
 ---
 tags:
   - language
+grammer_type: present and past
 ---
 > [!example] 例子
 > Sarah is in her car. She is driving to work.
@@ -16,7 +17,9 @@ tags:
 ![[Present continuous and present simple 2023-10-17 12.46.44.excalidraw]]
 
 语法表示：
-> **Am/is/are + -ing**
+> 陈述句为：**I/he/they + Am/is/are + -ing**
+> 疑问句为：**Am/is/are + I/he/they + -ing**
+> 否定句为：**I/he/they + am/is/are + not + -ing**
 
 > [!info]
 > **today/this week/this year** 可以用来表示现在的时间段
@@ -27,6 +30,5 @@ tags:
 > **get change become increase rise fall grow improve begin start**
 > > [!example]
 > > Is your english getting better?
-
 
 
