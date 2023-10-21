@@ -31,6 +31,14 @@ links:
 > > [!example]
 > > They've played tennis three times this week.
 > > How much of that book have you read.
+> 
+> 当动词为**live**或**work**时，这两个时态都可用：
+> > [!example]
+> > How long have you been working / have you worked here?
+>
+> 当带有**always**时，只能用完成时：
+> > [!example]
+> > I've always lived in the country.
 
 > [!info] 不使用进行态的动词
 > 列表参考[[Present continuous and present simple#^not-use-continuous|不使用进行时的动词]]。不过有两个特例，你可以在现在完成进行时中使用**want，mean**。
