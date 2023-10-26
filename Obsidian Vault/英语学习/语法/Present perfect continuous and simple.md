@@ -2,9 +2,6 @@
 tags:
   - language
 grammer_type: present perfect and past
-links:
-  - "[[Present perfect continuous]]"
-  - "[[Present simple]]"
 ---
 > [!example]
 > **Present perfect continuous**:
@@ -13,11 +10,11 @@ links:
 > **Present perfect**:
 > She has painted her bedroom.
 
-现在完成进行时主要强调动作本身，是否结束并不重要。
+[[Present perfect continuous|现在完成进行时]]主要强调动作本身，是否结束并不重要。
 
 ![[Present perfect continuous 2023-10-20 14.30.19.excalidraw]]
 
-而现在完成时主要强调事情已经完成了，我们关心的动作的结果。
+而[[Present perfect|现在完成时]]主要强调事情已经完成了，我们关心的动作的结果。
 
 ![[Present perfect 2023-10-19 13.14.15.excalidraw]]
 

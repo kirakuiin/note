@@ -1,9 +1,6 @@
 ---
 tags:
   - language
-links:
-  - "[[Present simple]]"
-  - "[[Present continuous]]"
 grammer_type: present and past
 ---
 > [!example]
@@ -13,10 +10,10 @@ grammer_type: present and past
 > **Present simple**:
 > I'm always get hungry in the afternoon.
 
-现在进行时主要用于事情发生在当下时间点附近且没有结束的事：
+[[Present continuous|现在进行时]]主要用于事情发生在当下时间点附近且没有结束的事：
 ![[Present continuous and present simple 2023-10-17 12.46.44.excalidraw]]
 
-而一般现在时用来表示某事一直如此或者不断重复：
+而[[Present simple|一般现在时]]用来表示某事一直如此或者不断重复：
 ![[Present continuous and present simple 2023-10-17 12.52.26.excalidraw]]
 
 > [!info] I always do and I always doing
