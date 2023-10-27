@@ -2,6 +2,8 @@
 tags:
   - language
 grammer_type: future
+aliases:
+  - Will and shall
 ---
 > [!example]
 > I will go and shut the door.
@@ -14,10 +16,10 @@ grammer_type: future
 > 表示对将来某一时刻会发生的动作的预测，也表示**刚刚**决定做某事。
 
 图示：
-![[Will and shall 2023-10-26 11.30.26.excalidraw]]
+![[Future simple 2023-10-26 11.30.26.excalidraw]]
 
 语法形态:
-> 陈述句为：**I/he + will + verb/(verb + s/es)**
+> 陈述句为：**I/he + will + verb.**
 > 疑问句为：**Will + I/he + verb?**
 > 否定句为：**I/he + will not(won't) + verb.**
 
