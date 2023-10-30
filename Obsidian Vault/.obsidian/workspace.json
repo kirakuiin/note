@@ -4,16 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "c8803d066f8b1f54",
+        "id": "ae46f7099323e405",
         "type": "tabs",
         "children": [
           {
-            "id": "287c5e67af34ee6e",
+            "id": "42b5f46b71e1d80f",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/Future perfect.md",
+                "file": "技术文档/C Sharp 知识点.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/Future perfect.md",
+                "file": "技术文档/C Sharp 知识点.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/Future perfect.md",
+                "file": "技术文档/C Sharp 知识点.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/Future perfect.md"
+                "file": "技术文档/C Sharp 知识点.md"
               }
             }
           },
@@ -166,52 +166,52 @@
       "random-note:开始漫游笔记": false
     }
   },
-  "active": "287c5e67af34ee6e",
+  "active": "42b5f46b71e1d80f",
   "lastOpenFiles": [
-    "英语学习/语法/Future continuous.md",
-    "英语学习/语法/Future perfect.md",
-    "英语学习/语法/I will and I'm going to.md",
-    "Excalidraw/Future continuous 2023-10-27 12.46.28.excalidraw.md",
-    "Excalidraw/Future perfect 2023-10-27 12.57.37.excalidraw.md",
-    "Excalidraw/Past perfect 2023-10-23 16.32.07.excalidraw.md",
-    "英语学习/语法/Past perfect.md",
-    "英语学习/语法/Future simple.md",
-    "Excalidraw/Past continuous 2023-10-19 10.26.50.excalidraw.md",
-    "🧠 第二大脑 🧠.md",
+    "Excalidraw/C Sharp 知识点 2023-10-30 14.38.46.excalidraw.md",
+    "技术文档/C Sharp 知识点.md",
+    "日常杂谈/我的GTD实践笔记.canvas",
+    "日常杂谈/名言警句.md",
+    "日常杂谈/饮食怎么吃.md",
+    "日常杂谈/如何有效记忆.md",
     "英语学习/语法/Going to.md",
-    "Excalidraw/I will and I'm going to 2023-10-27 12.37.34.excalidraw.md",
-    "Excalidraw/I will and I'm going to 2023-10-27 12.32.00.excalidraw.md",
-    "英语学习/语法/Present perfect.md",
-    "Excalidraw/Past perfect continuous 2023-10-23 21.38.51.excalidraw.md",
+    "工具用法/VSCode用法指南.md",
+    "英语学习/语法/Must and can't.md",
+    "技术文档/C sharp/程序入口.md",
     "英语学习/语法/目录.md",
-    "未命名.md",
-    "英语学习/语法/Regular and irregular verbs.md",
-    "英语学习/语法/Present tenses for the future.md",
-    "Excalidraw/游戏编程模式 2023-10-26 22.55.13.excalidraw.md",
-    "读书笔记/游戏编程模式.md",
-    "Excalidraw/游戏编程模式 2023-10-27 00.46.08.excalidraw.md",
-    "Excalidraw/游戏编程模式 2023-10-27 00.41.55.excalidraw.md",
+    "英语学习/语法/May and might.md",
+    "英语学习/语法/Could and could have.md",
+    "英语学习/语法/Can, could and able to.md",
+    "技术文档/python装饰器.md",
     "读书笔记/设计模式.md",
-    "Excalidraw/游戏编程模式 2023-10-26 21.14.18.excalidraw.md",
-    "Excalidraw/游戏编程模式 2023-10-26 20.09.59.excalidraw.md",
+    "读书笔记/游戏编程模式.md",
+    "🧠 第二大脑 🧠.md",
+    "技术文档/C sharp/类型系统/泛型.md",
+    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-29 00.20.59.excalidraw.md",
+    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-29 15.37.09.excalidraw.md",
+    "https：/blog.csdn.net/sunshine543123/article/details/107041122.md",
+    "https：/blog.csdn.net/sunshine543123/article/details",
+    "https：/blog.csdn.net/sunshine543123/article",
+    "https：/blog.csdn.net/sunshine543123",
+    "https：/blog.csdn.net",
+    "https：",
+    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-29 15.16.05.excalidraw.md",
+    "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
+    "工具用法/Dataview用法指南.md",
+    "工具用法/anki用法指南.md",
+    "英语学习/语法/Regular and irregular verbs.md",
+    "Excalidraw/English grammer",
+    "Excalidraw/游戏编程模式",
     "Assets/Images/Andromeda galaxy.jpg",
     "Assets/Images/Blobulord.png",
     "技术文档/C sharp/类型系统",
-    "日常杂谈/我的GTD实践笔记.canvas",
     "Templates",
     "技术文档/C sharp",
     "英语学习/语法/时态对比.canvas",
-    "技术文档",
-    "日常杂谈",
-    "英语学习/语法",
     "未命名.canvas",
-    "记录灵感",
     "Assets/Images/Calendar_icon.png",
-    "Assets/Images/Unknown",
     "Assets/Images/Omnifocus_icon.png",
     "Assets/Images/OmniFocus_Inbox.png",
-    "Assets/未命名",
-    "Assets/Fonts/muyao.ttf",
     "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-11 15.21.08.excalidraw.png",
     "读书笔记/未命名.canvas",
     "Assets/Andromeda galaxy.jpg",
