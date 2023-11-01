@@ -2,5 +2,6 @@
   "promptDelete": false,
   "vimMode": true,
   "alwaysUpdateLinks": true,
-  "attachmentFolderPath": "/"
+  "attachmentFolderPath": "/",
+  "userIgnoreFilters": null
 }
