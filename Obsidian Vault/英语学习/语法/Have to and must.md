@@ -10,7 +10,7 @@ I **have to** do something 的意思我有必要这样做，我有责任这样�
 > He doesn't have to work yesterday.
 
 语法形态：
-> 疑问句：do/does + have + I/he + to。
+> 疑问句：do/does + I/he + have to。
 > 否定句：I/he + do/does + not + have to。
 
 > [!hint] 过去和将来
@@ -18,7 +18,7 @@ I **have to** do something 的意思我有必要这样做，我有责任这样�
 > > [!example]
 > > Why did you have to leave early?
 >
-> 将来可以使用[[Future simple]|I will]]，[[Going to|I'm going to]], [[May and might|I may / might]]等形式。
+> 将来可以使用[[Future simple|I will]]，[[Going to|I'm going to]], [[May and might|I may / might]]等形式。
 > > [!example]
 > > They can't fix my computer, so I'll have to buy a new on.
 > > I'm going to have to buy a new on.

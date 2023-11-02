@@ -4,6 +4,7 @@
     "cssclasses": "multitext",
     "tags": "tags",
     "links": "multitext",
-    "todo": "checkbox"
+    "todo": "checkbox",
+    "outline": "checkbox"
   }
 }

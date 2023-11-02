@@ -3,5 +3,7 @@
   "vimMode": true,
   "alwaysUpdateLinks": true,
   "attachmentFolderPath": "/",
-  "userIgnoreFilters": null
+  "userIgnoreFilters": [
+    "Excalidraw/"
+  ]
 }

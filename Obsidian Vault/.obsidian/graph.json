@@ -18,21 +18,28 @@
       "query": "tag:#methodology  ",
       "color": {
         "a": 1,
-        "rgb": 14725458
-      }
-    },
-    {
-      "query": "tag:#record  ",
-      "color": {
-        "a": 1,
-        "rgb": 11657298
+        "rgb": 15909916
       }
     },
     {
       "query": "tag:#language  ",
       "color": {
         "a": 1,
-        "rgb": 5431378
+        "rgb": 14902029
+      }
+    },
+    {
+      "query": "[\"outline\":]",
+      "color": {
+        "a": 1,
+        "rgb": 398826
+      }
+    },
+    {
+      "query": "tag:#record  ",
+      "color": {
+        "a": 1,
+        "rgb": 5413856
       }
     }
   ],
@@ -46,6 +53,6 @@
   "repelStrength": 10,
   "linkStrength": 1,
   "linkDistance": 250,
-  "scale": 1.3462550521153989,
+  "scale": 0.9122962718367847,
   "close": true
 }
