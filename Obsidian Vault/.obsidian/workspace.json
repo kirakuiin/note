@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/UML/状态图.md",
+                "file": "英语学习/语法/Request, offers, permission and invitations.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/UML/状态图.md",
+                "file": "英语学习/语法/Request, offers, permission and invitations.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/UML/状态图.md",
+                "file": "英语学习/语法/Request, offers, permission and invitations.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/UML/状态图.md"
+                "file": "英语学习/语法/Request, offers, permission and invitations.md"
               }
             }
           },
@@ -150,8 +150,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 216.5,
-    "collapsed": true
+    "width": 216.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -169,36 +168,36 @@
   },
   "active": "e382c74588b3c07f",
   "lastOpenFiles": [
-    "技术文档/UML/时序图.md",
-    "技术文档/UML/状态图.md",
-    "技术文档/UML/类图.md",
-    "技术文档/什么是UML.md",
-    "技术文档/什么是面向对象.md",
-    "Excalidraw/类图 2023-11-02 17.47.18.excalidraw.md",
-    "技术文档/C Sharp 知识点.md",
-    "技术文档/UML",
-    "技术文档/未命名.md",
-    "记录灵感/📥收件箱.md",
-    "工具用法/Anki用法指南.md",
-    "工具用法/Dataview用法指南.md",
-    "工具用法/Git用法指南.md",
-    "工具用法/Obsidian用法指南.md",
-    "工具用法/Windows用法指南.md",
-    "工具用法/VSCode用法指南.md",
-    "🧠 第二大脑.md",
-    "技术文档/Python📥.md",
-    "Templates/英语语法模板.md",
-    "技术文档/Python装饰器.md",
-    "读书笔记/设计模式/大纲（设计模式）.md",
-    "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
+    "英语学习/语法/Can, could and able to.md",
+    "英语学习/语法/Request, offers, permission and invitations.md",
+    "英语学习/语法/If I knew.md",
+    "英语学习/语法/目录（英语语法）.md",
+    "英语学习/语法/If I do.md",
+    "英语学习/语法/Could and could have.md",
+    "英语学习/语法/Present tenses for the future.md",
+    "英语学习/语法/Would.md",
     "读书笔记/Effective CSharp.md",
-    "读书笔记/游戏编程模式/类型对象.md",
-    "读书笔记/游戏编程模式/组件模式.md",
-    "读书笔记/游戏编程模式/字节码.md",
-    "读书笔记/设计模式/责任链模式.md",
+    "英语学习/语法/Had better and It's time.md",
+    "英语学习/语法/Have to and must.md",
+    "英语学习/语法/Needn't.md",
+    "英语学习/语法/Future simple.md",
+    "未命名.canvas",
+    "技术文档/UML/类图.md",
+    "Excalidraw/类图 2023-11-02 17.47.18.excalidraw.md",
+    "技术文档/Python 知识点.md",
+    "技术文档/什么是UML.md",
+    "技术文档/游戏开发 知识点.md",
+    "技术文档/C Sharp 知识点.md",
+    "读书笔记/设计模式/大纲（设计模式）.md",
+    "读书笔记/游戏编程模式/大纲（游戏编程模式）.md",
+    "读书笔记/游戏编程模式/单例模式.md",
+    "读书笔记/设计模式/单例模式.md",
+    "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
+    "英语学习/语法/Going to.md",
+    "英语学习/语法/I will and I'm going to.md",
+    "技术文档/UML",
     "读书笔记/设计模式",
     "日常杂谈/我的GTD实践笔记.canvas",
-    "未命名.canvas",
     "读书笔记/游戏编程模式",
     "https：/blog.csdn.net/sunshine543123/article/details",
     "https：/blog.csdn.net/sunshine543123/article",

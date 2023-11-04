@@ -40,7 +40,12 @@ aliases:
 > [!example]
 > Will you turn the music down?
 
---- 
+somebody **won't do** something 表达某人拒绝做某事的含义。
+
+ > [!example]
+ > The car won't start.
+
+---
 
 一般将来时也经常会和以下词一起使用：
 **probably，（I'm）sure，（I）think，（I）don't think，I wonder，I hope**

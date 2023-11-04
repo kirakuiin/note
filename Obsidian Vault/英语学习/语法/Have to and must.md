@@ -27,7 +27,6 @@ I **have to** do something 的意思我有必要这样做，我有责任这样�
 > [!hint]
 > 可以用**have got to**取代**have to**。
 
-
 ---
 
 **must**的含义和**have to**类似，当你表达你的观点或者建议某人做某事，两个都可以使用。

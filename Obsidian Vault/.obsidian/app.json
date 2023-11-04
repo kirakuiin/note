@@ -4,6 +4,7 @@
   "alwaysUpdateLinks": true,
   "attachmentFolderPath": "/",
   "userIgnoreFilters": [
-    "Excalidraw/"
+    "Excalidraw/",
+    "Templates/"
   ]
 }

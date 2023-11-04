@@ -48,7 +48,7 @@ tags:
 > - `as`只会考虑运行期是否存在可行的转换，不会考虑用户定义的转换，不会做额外操作。
 > - `cast`只会考虑编译期是否存在可行的转换，虽然会考虑用户的定义，但是如果情况是运行期可以转，编译期转不了，那么转换也不会生效。并且`cast`还会通过`long`转`short`这种会丢失信息的操作。
 
-## 使用内插字符串取代string.Format()
+## 4. 使用内插字符串取代string.Format()
 
 字符串内插能以更优雅，更直观，更健壮的方式完成信息的转换，因此只使用字符串内插即可。
 
@@ -56,7 +56,7 @@ tags:
 > - **字符串内插**通过`$"literal and {variable:format}"`的形式，使得可以直接在字符串内部编写C#表达式。完美的弥补了`String.Format()`的主要缺点，不会出现参数不匹配的问题并且容易阅读。
 > - `String.Format()`必须要对生成的字符串进行验证，编译器不会验证参数和格式字符串里的参数是否匹配。并且阅读代码的人很难将参数一一对应到格式字符串里，导致其可读性交较差。
 
-## 使用FormattableString取代专门为特定区域而写的字符串
+## 5. 使用FormattableString取代专门为特定区域而写的字符串
 
 通过`FormattableString`来承载内插生成的字符串，可以方便的利用其方法将其转换为适用于各个地区的表达形式。
 
@@ -66,3 +66,299 @@ tags:
 > FormattableString str = ${DateTime.Now};
 > Console.WriteLine(str.ToString(new CultureInfo("zh-CN")))
 > ```
+
+## 6. 不要用表示符号的名称的硬字符串来调用API
+
+通过`nameof`方法，可以运行时动态获取符号的名字，这样在调用其他程序库的时候不会因为错误的名称而导致异常。也可以让静态分析工具能够更好的运行。
+
+> [!example]
+>```csharp
+> if (func == null):
+> 	throw new ArgumentNullException(nameof(func), "can't be null");
+>```
+
+## 7. 用委托表示回调
+
+使用委托，首先保证了类型安全，其次客户端可以用最简单的lambda表达式即可实现回调。整个.Net框架的许多机制都是基于委托实现的，为了和系统API保持一致也应该使用委托。
+
+> [!hint] 多播中异常和返回值的处理
+> 由于委托是多播的，所以其返回值为最后一个执行方法的返回值。如果中途出现异常，之后全部的方法都会停止调用。为了解决这个问题，可以自己手动控制委托的调用。
+
+ ```csharp
+ public bool Foo(Func<bool> pred)
+ {
+	bool isTrue = true;
+	foreach (var pr in pred.GetInvocationList()) {
+		isContinue &= pr();
+	}
+	return isTrue;
+ }
+ ```
+
+## 8. 用null条件运算符调用事件处理程序
+
+使用`event?.Invoke()`来触发事件，有如下优点：
+- 不会因为没有绑定处理方法导致触发异常。
+- 不会因为多线程的修改导致调用那一刻触发`NullReferenceException`异常。
+
+> [!summary] null条件运算符
+> `?.`即是null条件运算符，运行时它先会判断左侧是否为空，如果为空就不再继续执行右侧操作。
+
+## 9. 尽量避免装箱和取消装箱这两种操作
+
+> [!summary] 装箱和取消装箱
+> 装箱：值类型->引用类型
+> 取消装箱：引用类型->值类型
+
+要注意那些会把值类型转换为`System.Object`类型或接口类型的地方，例如把值类型放入集合，用值类型的值做参数来调用参数类型为`System.Object`的方法以及将这些值转换为`System.Object`等。这些做法都应该避免。
+
+装箱和取消装箱的主要问题有：
+
+- 可能导致潜在的性能问题。
+- 可能会导致不是很明显的bug，比如：
+```csharp
+struct Person
+{
+	public string Name {set; get;}
+}
+List<Person> array = new() {new Person{ Name = "haha" }};
+Person p = array[0];  // 这里取出来的实际上是集合里对象的拷贝，因为struct是值类型
+p.Name = "xixi";  // 改名不会生效
+```
+
+## 10. 只有在应对新版基类和现有子类之间的冲突时才应该使用new修饰符
+
+只有在一种情况下可以使用`new`修饰符修饰方法，那就是基类里引入的成员和子类里现有的重名导致冲突（这种情况一般发生在基类不受你控制的情况，比如第三方发布的基类）。这种情况下`new`运算符可以使此方法覆盖父类的实现。
+
+即便在这情况下也要慎重考虑，这会使得其他人困惑，为何非虚方法也表现出了类似多态的性质。
+
+> [!example]
+> ```csharp
+> public class Child: Parent
+> {
+> 	public new void Method() {} // 覆盖了父类实现
+> }
+> ```
+
+# .NET 的资源管理
+
+.NET程序运行在托管环境里，所以开发者必须从CLR[^1]的角度来考虑问题才能完全发挥这套环境的优势。这意味着你要对垃圾回收，对象生命周期以及非托管资源有一定的了解。
+
+## 11. 理解并善用.NET的资源管理机制
+
+由于C#程序运行在托管环境里，所以你无需担心任何内存泄露问题（无论是循环引用，迷途指针等各种情况）。但是非托管资源必须由开发者自己进行管理，比如说文件句柄，数据库链接等。
+
+C#为非托管资源提供了两种释放机制，一个是类的**finalizer**，一个是**IDisposable**接口。任何情况下都不推荐使用**finalizer**，因为：
+
+- 无法确定**finalizer**的释放时机，你唯一能确定的是环境一定会替你释放掉。
+- 会增加垃圾回收的负担，降低系统工作效率。
+
+> [!summary] GC回收机制
+> 带有**finalizer**的对象不会立即被清理掉，而是在下一个周期根据其**finalizer**是否执行完毕来进行清理。而GC采用的世代算法会导致每多停留一个周期。在内存的驻留时间就会翻10倍。
+
+## 12. 声明字段时，尽量直接为其设定初始值
+
+要想保证成员变量总能得到初始化，最简单的方式就是在声明时直接为其设置初始值。这样无论通过哪个构造函数来创建对象都会正确的初始化它们，而且其时机还比所有的构造函数要早。
+
+不过有三种情况不应该进行初始化：
+
+1. **你想要将对象设置为0或者null**。这种环境在给声明字段分配内存时已经做过了，不需要再进行一次。
+2. **不同的构造函数需要按照各自的方式来设定某个字段的初始值**。此时每种不同的方式都会重新创建一个新对象覆盖初始值对象，也会造成性能浪费。
+3. **初始化对象可能会抛出异常**。这种要放到构造函数里进行捕捉。
+
+## 13. 用适当的方式初始化类中的静态成员
+
+类的静态成员应当在所有的实例生成之前构造完毕。要想为类静态成员设置初始值，最清晰的办法就是使用静态初始值设定和静态构造函数。
+
+如果没有复杂逻辑，没有异常等问题直接用静态初始值设定，否则使用静态构造函数。
+
+> [!hint] 单例模式
+> C#中的静态初始化是实现[[读书笔记/设计模式/单例模式|单例模式]]最自然的形式：
+> ```csharp
+> class Singleton
+> {
+> 	private static readonly Singleton s_theOneAndOnly;
+>
+> 	static Singleton()
+> 	{
+> 		s_theOneAndOnly = new Singleton();
+> 	}
+>
+> 	private Singleton () {}
+>
+> 	public Singleton GetInstance() => s_theOneAndOnly;
+> }
+> ```
+
+## 14. 尽量删减重复的初始化逻辑
+
+如果多个构造函数存在相同的初始化逻辑，那么则将共同的逻辑放到一个基础的构造函数里，让其他构造函数来调用它(使用`this`)。编译器可以对这种链式调用进行完备的优化，删除重复赋值和基类初始化。
+
+> [!example]
+> ```csharp
+> class A
+> {
+> 	public A() : this(0, 0) {}
+> 
+> 	public A(int x, int y) {// ...}
+> }
+> ```
+
+不要复制代码或者是写一个私有函数里面存放公共初始化逻辑，这样做编译器无法对生成代码进行优化。
+
+> [!summary] 首次构建实例时系统的操作
+> 1. 将存放静态变量的空间清零
+> 2. 执行静态变量初始化语句
+> 3. 执行本类静态构造函数
+> 4. 将存放类实例变量的空间清零
+> 5. 执行实例变量的初始化语句
+> 6. 构造基类(流程和上面一致, 如果没有基类则省略此步骤)
+> 7. 执行实例构造函数
+>
+> > [!hint] 静态的步骤只会执行一次。
+
+^initialize-order
+
+## 15. 不要创建无谓的对象
+
+尽管垃圾回收器可以有效的管理内存，但在堆上创建销毁对象仍然需要一定的时间，所以不要重复去创建那些不需要重复构建的对象。有三个建议：
+
+- 频繁创建的局部变量可以考虑变为成员变量
+- 很多地方经常用到的变量可以改为类的静态变量
+- 如果类型是不可变的，提供一个**builder**来逐步的构建它而不是重复创建。
+> [!example]
+> ```csharp
+> StringBuilder msg = new("hello, ");
+> msg.Append("world");
+> ```
+
+## 16. 绝对不要再构造函数里调用虚函数
+
+在基类的构造函数里调用虚函数会使得代码效果严重依赖于派生类的实现细节，而这些细节是无法控制的，因此这种做法非常容易出问题。
+
+> [!example]
+> ```csharp
+> 	var d = new Derived();  // 这里输出的会是abc，而不是hello
+> 	public class Base
+> 	{
+> 		public Base() => VirtualFunc();
+> 		public virtual void VirtualFunc() {}
+> 	}
+> 	public class Derived : Base
+> 	{
+> 		private string str = "abc";
+> 		public Derived() => str = "hello";
+> 		public override void VirtualFunc()
+> 		{
+> 			Console.WriteLine(str);
+> 		}
+> 	}
+> ```
+
+原因可以参考[[Effective CSharp#^initialize-order|初始化顺序]]。
+
+## 17. 实现标准的dispose模式
+
+在类继承树根部的类总是应该实现`IDisposable`接口，如果本身含有非托管资源或者有实现了`IDisposable`接口的成员时，必须要实现`finalizer`。以防客户忘记主动释放。另外释放操作最好由一个虚函数实现，以供子类重载。
+
+一个标准的dispose框架如下所示：
+
+```csharp
+class Base : IDisposable
+{
+	private bool _isDisposed = false;
+
+	public override void Dispose()
+	{
+		Dispose(true);
+		GC.SuppressFinalize(this);
+	}
+
+	~Base()
+	{
+		Dispose(false);
+	}
+
+	// 执行实际的释放逻辑，供finalizer和Dispose调用
+	// isDisposing代表是在接口中调用还是在finalizer里调用
+	protected virtual void Dispose(isDisposing)
+	{
+		if (_isDisposed) {
+			return;
+		}
+		if (isDisposing) {
+			// 释放托管资源
+		}
+		// 释放非托管资源
+		_isDisposed = true;
+	}
+}
+```
+
+> [!hint] 释放资源的注意事项
+> 实现时要注意释放方法里不要做任何和释放无关的事情，确保里面的唯一操作就是释放资源。
+
+# 合理地运用泛型
+
+定义泛型类型会增加程序的开销，但有时会令程序代码更加简洁。本章主要讲解泛型的各种用法，并演示怎样编写可以提高工作效率的泛型类型和泛型方法。
+
+## 18. 只定义刚好够用的约束条件
+
+约束条件不能太严格也不能没有。太严格的话会为用户带来巨大的限制，倒置用户很难使用。而太宽松的话会导致实现的代码有太多的类型判断，执行更多的类型转换。
+
+> [!summary] 泛型约束
+> 形如public class A\<T\> **where T : \<constraint\>** {}。
+> 
+> 这里的**where**子句代表的就是对类型T的约束。如果没有约束的话泛型方法里只能用`System.Object`提供的方法，而通过类型约束可以在泛型方法里调用更多方法。
+
+## 19. 通过运行期类型检查实现特定的泛型算法
+
+通过运行期的类型检查，可以在尽可能小的约束的条件下提供更好的实现方式。比如：
+
+```csharp
+public IEnumerator<T> GetEnumerator()
+{
+	if (source is string) {
+		// algo for string
+	}
+	else if (source is ICollection<T>) {
+		// algo for ICollection
+	}
+	else {
+		// default algo
+	}
+}
+```
+
+通过检查可以对不同的类型提供更高效的实现方式。
+
+## 20. 通过IComparable\<T\> 及 IComparer\<T\>定义顺序关系
+
+这两个接口是定义排序关系的标准机制。为了给类型支持排序能力，你应该这样做：
+
+```csharp
+class YourType : IComparable<YourType>, IComparable
+{
+	// 实现接口
+	public int ComepareTo(Customer other);
+	public int IComparable.CompareTo(object obj);
+	// 实现关系操作符
+	public static bool operator >(YourType left, YourType right);
+	public static bool operator >=(YourType left, YourType right);
+	public static bool operator <(YourType left, YourType right);
+	public static bool operator <=(YourType left, YourType right);
+}
+```
+
+为了向后兼容，非泛型的`IComparable`也要实现。
+
+## 21. 创建泛型类时，总是应该给实现了IDisposable的类型参数提供支持
+
+## 22. 考虑支持泛型协变与逆变
+
+## 23. 用委托要求类型参数必须支持某种方法
+
+## 24. 如果有泛型方法，就不要再创建针对基类或者接口的重载版本
+
+## 25. 如果不需要把类型参数所表示的对象设为实例字段，那么应该优先考虑泛型方法
+[^1]: Common Language Runtime，公共语言运行时。
