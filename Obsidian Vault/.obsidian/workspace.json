@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/Request, offers, permission and invitations.md",
+                "file": "英语学习/语法/Subjunctive mood.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/Request, offers, permission and invitations.md",
+                "file": "英语学习/语法/Subjunctive mood.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/Request, offers, permission and invitations.md",
+                "file": "英语学习/语法/Subjunctive mood.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/Request, offers, permission and invitations.md"
+                "file": "英语学习/语法/Subjunctive mood.md"
               }
             }
           },
@@ -168,33 +168,34 @@
   },
   "active": "e382c74588b3c07f",
   "lastOpenFiles": [
+    "英语学习/语法/📚目录（英语语法）.md",
     "英语学习/语法/Can, could and able to.md",
-    "英语学习/语法/Request, offers, permission and invitations.md",
-    "英语学习/语法/If I knew.md",
-    "英语学习/语法/目录（英语语法）.md",
-    "英语学习/语法/If I do.md",
     "英语学习/语法/Could and could have.md",
-    "英语学习/语法/Present tenses for the future.md",
-    "英语学习/语法/Would.md",
+    "英语学习/语法/Subjunctive mood.md",
+    "英语学习/语法/If I do.md",
     "读书笔记/Effective CSharp.md",
-    "英语学习/语法/Had better and It's time.md",
-    "英语学习/语法/Have to and must.md",
-    "英语学习/语法/Needn't.md",
-    "英语学习/语法/Future simple.md",
-    "未命名.canvas",
-    "技术文档/UML/类图.md",
-    "Excalidraw/类图 2023-11-02 17.47.18.excalidraw.md",
+    "技术文档/什么是面向对象.md",
     "技术文档/Python 知识点.md",
-    "技术文档/什么是UML.md",
-    "技术文档/游戏开发 知识点.md",
-    "技术文档/C Sharp 知识点.md",
-    "读书笔记/设计模式/大纲（设计模式）.md",
-    "读书笔记/游戏编程模式/大纲（游戏编程模式）.md",
+    "记录灵感/📥收件箱.md",
+    "工具用法/VSCode用法指南.md",
+    "工具用法/Obsidian用法指南.md",
+    "英语学习/语法/When and if.md",
+    "英语学习/语法/Request, offers, permission and invitations.md",
+    "读书笔记/游戏编程模式/📚大纲（游戏编程模式）.md",
+    "读书笔记/游戏编程模式/观察者模式.md",
+    "读书笔记/游戏编程模式/状态模式.md",
+    "读书笔记/游戏编程模式/字节码.md",
     "读书笔记/游戏编程模式/单例模式.md",
-    "读书笔记/设计模式/单例模式.md",
-    "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
-    "英语学习/语法/Going to.md",
-    "英语学习/语法/I will and I'm going to.md",
+    "读书笔记/游戏编程模式/命令模式.md",
+    "读书笔记/游戏编程模式/原型模式.md",
+    "读书笔记/游戏编程模式/订阅-发布模式.md",
+    "读书笔记/游戏编程模式/享元模式.md",
+    "读书笔记/设计模式/📚大纲（设计模式）.md",
+    "Excalidraw/设计模式/📚大纲（设计模式） 2023-11-05 00.59.28.excalidraw.md",
+    "Excalidraw/设计模式",
+    "Excalidraw/未命名.md",
+    "读书笔记/设计模式/状态模式.md",
+    "未命名.canvas",
     "技术文档/UML",
     "读书笔记/设计模式",
     "日常杂谈/我的GTD实践笔记.canvas",
@@ -205,7 +206,6 @@
     "https：/blog.csdn.net",
     "https：",
     "Excalidraw/English grammer",
-    "Excalidraw/游戏编程模式",
     "Assets/Images/Andromeda galaxy.jpg",
     "Assets/Images/Blobulord.png",
     "英语学习/语法/时态对比.canvas",

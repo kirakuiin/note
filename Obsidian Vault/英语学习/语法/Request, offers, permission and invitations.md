@@ -16,7 +16,7 @@ grammer_type: modals
 
 总体来说**can/could**更加常用一点。
 
-# 要求，请求某事
+# 要求，请求某物
 
 - **Can I have ...? / Could I have ...? / Can I get ...? / May I have ... ?**
 > [!example]

@@ -1,7 +1,7 @@
 ---
 tags:
   - vscode
-  - record
+  - reference
 ---
 # 小技巧
 
