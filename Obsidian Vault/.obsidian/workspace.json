@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/Effective CSharp.md",
+                "file": "读书笔记/设计模式/生成器模式.md",
                 "mode": "source",
                 "source": false
               }
@@ -97,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/Effective CSharp.md",
+                "file": "读书笔记/设计模式/生成器模式.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/Effective CSharp.md",
+                "file": "读书笔记/设计模式/生成器模式.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/Effective CSharp.md"
+                "file": "读书笔记/设计模式/生成器模式.md"
               }
             }
           },
@@ -180,8 +180,11 @@
   },
   "active": "e382c74588b3c07f",
   "lastOpenFiles": [
-    "英语学习/语法/Wish.md",
+    "读书笔记/设计模式/桥接模式.md",
+    "读书笔记/设计模式/生成器模式.md",
     "读书笔记/Effective CSharp.md",
+    "技术文档/C Sharp 知识点.md",
+    "英语学习/语法/Wish.md",
     "读书笔记/设计模式/抽象工厂模式.md",
     "读书笔记/设计模式/工厂方法模式.md",
     "Excalidraw/工厂方法模式 2023-11-07 10.47.37.excalidraw.md",
@@ -203,9 +206,6 @@
     "英语学习/语法/Should.md",
     "英语学习/语法/Subjunctive mood.md",
     "英语学习/语法/Can, could and able to.md",
-    "英语学习/语法/Could and could have.md",
-    "英语学习/语法/If I do.md",
-    "技术文档/Python 知识点.md",
     "Excalidraw/设计模式",
     "未命名.canvas",
     "技术文档/UML",
