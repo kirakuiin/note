@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/Effective CSharp.md",
+                "file": "读书笔记/设计模式/单例模式.md",
                 "mode": "source",
                 "source": false
               }
@@ -97,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/Effective CSharp.md",
+                "file": "读书笔记/设计模式/单例模式.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/Effective CSharp.md",
+                "file": "读书笔记/设计模式/单例模式.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/Effective CSharp.md"
+                "file": "读书笔记/设计模式/单例模式.md"
               }
             }
           },
@@ -181,32 +181,32 @@
   },
   "active": "e382c74588b3c07f",
   "lastOpenFiles": [
+    "技术文档/UML/类图.md",
+    "Excalidraw/类图 2023-11-02 17.47.18.excalidraw.md",
+    "读书笔记/设计模式/单例模式.md",
+    "英语学习/语法/It's said that, be supposed to.md",
+    "英语学习/语法/📚目录（英语语法）.md",
+    "英语学习/语法/Have something done.md",
+    "英语学习/语法/Passive.md",
+    "英语学习/语法/Wish.md",
+    "英语学习/语法/Subjunctive mood.md",
+    "英语学习/语法/Should.md",
+    "英语学习/语法/I will and I'm going to.md",
+    "英语学习/语法/Request, offers, permission and invitations.md",
+    "读书笔记/Effective CSharp.md",
     "读书笔记/设计模式/原型模式.md",
     "读书笔记/设计模式/📚大纲（设计模式）.md",
     "读书笔记/设计模式/工厂方法模式.md",
     "英语学习/语法/Regular and irregular verbs.md",
-    "英语学习/语法/📚目录（英语语法）.md",
-    "英语学习/语法/Passive.md",
-    "读书笔记/Effective CSharp.md",
     "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
     "读书笔记/小狗钱钱.md",
     "Excalidraw/Passive 2023-11-10 15.15.00.excalidraw.md",
-    "英语学习/语法/Wish.md",
     "英语学习/语法/Had better and It's time.md",
-    "英语学习/语法/Subjunctive mood.md",
     "英语学习/语法/When and if.md",
-    "英语学习/语法/Request, offers, permission and invitations.md",
     "读书笔记/游戏编程模式/原型模式.md",
     "Excalidraw/原型模式 2023-11-09 15.54.43.excalidraw.md",
-    "Excalidraw/类图 2023-11-02 17.47.18.excalidraw.md",
     "Excalidraw/anki用法指南 2023-10-15 14.50.35.excalidraw.md",
     "Excalidraw/时序图 2023-11-08 18.50.11.excalidraw.md",
-    "Excalidraw/什么是面向对象 2023-10-31 20.54.37.excalidraw.md",
-    "Excalidraw/什么是面向对象 2023-10-31 20.20.57.excalidraw.md",
-    "英语学习/语法/May and might.md",
-    "英语学习/语法/Needn't.md",
-    "英语学习/语法/Should.md",
-    "英语学习/语法/Could and could have.md",
     "Excalidraw/设计模式",
     "未命名.canvas",
     "技术文档/UML",
