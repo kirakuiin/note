@@ -11,8 +11,12 @@
             "id": "e382c74588b3c07f",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {}
+              "type": "markdown",
+              "state": {
+                "file": "读书笔记/代码整洁之道.md",
+                "mode": "source",
+                "source": false
+              }
             }
           },
           {
@@ -93,6 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "读书笔记/代码整洁之道.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -109,6 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "读书笔记/代码整洁之道.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -130,7 +136,9 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {}
+              "state": {
+                "file": "读书笔记/代码整洁之道.md"
+              }
             }
           },
           {
@@ -172,32 +180,32 @@
   },
   "active": "e382c74588b3c07f",
   "lastOpenFiles": [
+    "技术文档/什么是面向对象.md",
+    "读书笔记/代码整洁之道.md",
+    "英语学习/语法/Subjunctive mood.md",
+    "英语学习/语法/Present simple.md",
+    "英语学习/语法/Present perfect continuous.md",
+    "英语学习/语法/Present perfect and past.md",
+    "英语学习/语法/Present perfect.md",
+    "英语学习/语法/Present continuous.md",
+    "英语学习/语法/📚目录（英语语法）.md",
+    "英语学习/语法/Past perfect.md",
+    "英语学习/语法/Had better and It's time.md",
+    "英语学习/语法/Have and have got.md",
     "读书笔记/设计模式/📚大纲（设计模式）.md",
     "读书笔记/设计模式/创建型模式总结.md",
     "读书笔记/设计模式/抽象工厂模式.md",
     "读书笔记/设计模式/工厂方法模式.md",
     "读书笔记/设计模式/原型模式.md",
     "读书笔记/设计模式/生成器模式.md",
-    "读书笔记/代码整洁之道.md",
     "英语学习/语法/Reported speech.md",
     "英语学习/语法/Request, offers, permission and invitations.md",
     "英语学习/语法/Present tenses for the future.md",
-    "英语学习/语法/📚目录（英语语法）.md",
     "英语学习/语法/Present continuous and present simple.md",
-    "英语学习/语法/Present continuous.md",
     "英语学习/语法/Future simple.md",
     "英语学习/语法/I will and I'm going to.md",
     "英语学习/语法/It's said that, be supposed to.md",
     "Excalidraw/设计模式/📚大纲（设计模式） 2023-11-05 00.59.28.excalidraw.md",
-    "读书笔记/设计模式/单例模式.md",
-    "Excalidraw/单例模式 2023-11-11 17.20.11.excalidraw.md",
-    "技术文档/UML/类图.md",
-    "Excalidraw/类图 2023-11-02 17.47.18.excalidraw.md",
-    "英语学习/语法/Have something done.md",
-    "英语学习/语法/Passive.md",
-    "英语学习/语法/Wish.md",
-    "英语学习/语法/Subjunctive mood.md",
-    "英语学习/语法/Should.md",
     "Excalidraw/设计模式",
     "未命名.canvas",
     "技术文档/UML",
