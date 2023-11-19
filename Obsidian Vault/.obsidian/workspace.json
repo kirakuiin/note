@@ -11,8 +11,12 @@
             "id": "e382c74588b3c07f",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {}
+              "type": "markdown",
+              "state": {
+                "file": "读书笔记/设计模式/外观模式.md",
+                "mode": "source",
+                "source": false
+              }
             }
           },
           {
@@ -93,6 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "读书笔记/设计模式/外观模式.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -109,6 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "读书笔记/设计模式/外观模式.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -130,7 +136,9 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {}
+              "state": {
+                "file": "读书笔记/设计模式/外观模式.md"
+              }
             }
           },
           {
@@ -172,8 +180,25 @@
   },
   "active": "e382c74588b3c07f",
   "lastOpenFiles": [
+    "读书笔记/设计模式/装饰模式.md",
+    "读书笔记/设计模式/外观模式.md",
+    "英语学习/语法/May and might.md",
+    "英语学习/语法/Question.md",
+    "英语学习/语法/Had better and It's time.md",
+    "Excalidraw/设计模式/组合模式 2023-11-17 20.22.14.excalidraw.md",
+    "Excalidraw/anki用法指南 2023-10-15 14.50.35.excalidraw.md",
+    "Excalidraw/时序图 2023-11-08 18.50.11.excalidraw.md",
+    "Excalidraw/什么是面向对象 2023-10-31 20.54.37.excalidraw.md",
+    "Excalidraw/什么是面向对象 2023-10-31 20.20.57.excalidraw.md",
+    "Excalidraw/设计模式/桥接模式 2023-11-17 00.32.49.excalidraw.md",
+    "Excalidraw/设计模式/单例模式 2023-11-11 17.20.11.excalidraw.md",
+    "Excalidraw/English grammer/Question 2023-11-19 01.41.53.excalidraw.md",
+    "Excalidraw/English grammer/Passive 2023-11-10 15.15.00.excalidraw.md",
+    "技术文档/Emacs 问题记录.md",
+    "技术文档/Python 知识点.md",
+    "技术文档/C Sharp 知识点.md",
+    "Excalidraw/设计模式/外观模式 2023-11-18 13.34.30.excalidraw.md",
     "读书笔记/设计模式/组合模式.md",
-    "Excalidraw/组合模式 2023-11-17 20.22.14.excalidraw.md",
     "技术文档/UML/类图.md",
     "技术文档/2D坐标计算过程.md",
     "读书笔记/设计模式/原型模式.md",
@@ -181,23 +206,6 @@
     "读书笔记/设计模式/工厂方法模式.md",
     "读书笔记/设计模式/桥接模式.md",
     "读书笔记/设计模式/抽象工厂模式.md",
-    "Excalidraw/桥接模式 2023-11-17 00.32.49.excalidraw.md",
-    "读书笔记/设计模式/适配器模式.md",
-    "读书笔记/游戏编程模式/单例模式.md",
-    "Excalidraw/适配器模式 2023-11-15 19.53.35.excalidraw.md",
-    "英语学习/语法/Should.md",
-    "英语学习/语法/Passive.md",
-    "英语学习/语法/📚目录（英语语法）.md",
-    "英语学习/语法/It's said that, be supposed to.md",
-    "读书笔记/代码整洁之道.md",
-    "技术文档/什么是面向对象.md",
-    "英语学习/语法/Subjunctive mood.md",
-    "英语学习/语法/Present simple.md",
-    "英语学习/语法/Present perfect continuous.md",
-    "英语学习/语法/Present perfect and past.md",
-    "英语学习/语法/Present perfect.md",
-    "英语学习/语法/Present continuous.md",
-    "英语学习/语法/Past perfect.md",
     "Excalidraw/设计模式",
     "未命名.canvas",
     "技术文档/UML",
