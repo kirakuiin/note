@@ -8,30 +8,29 @@
         "type": "tabs",
         "children": [
           {
-            "id": "e382c74588b3c07f",
+            "id": "a7bfe904b0bd0b28",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/Auxiliary verbs.md",
+                "file": "技术文档/UML/时序图.md",
                 "mode": "source",
                 "source": false
               }
             }
           },
           {
-            "id": "a7bfe904b0bd0b28",
+            "id": "d82337dd09dce3e3",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "excalidraw",
               "state": {
-                "file": "技术文档/UML/类图.md",
-                "mode": "source",
-                "source": false
+                "file": "Excalidraw/设计图/坦克大战概念图.excalidraw.md"
               }
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -97,7 +96,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/Auxiliary verbs.md",
+                "file": "Excalidraw/设计图/坦克大战概念图.excalidraw.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +113,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/Auxiliary verbs.md",
+                "file": "Excalidraw/设计图/坦克大战概念图.excalidraw.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +136,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/Auxiliary verbs.md"
+                "file": "Excalidraw/设计图/坦克大战概念图.excalidraw.md"
               }
             }
           },
@@ -178,34 +177,35 @@
       "obsidian-excalidraw-plugin:新建绘图文件": false
     }
   },
-  "active": "e382c74588b3c07f",
+  "active": "d6de1842426fda97",
   "lastOpenFiles": [
-    "日常杂谈/基金基础知识.md",
-    "英语学习/语法/Auxiliary verbs.md",
-    "工具用法/Obsidian用法指南.md",
-    "技术文档/markdown语法.md",
-    "英语学习/语法/It's said that, be supposed to.md",
-    "英语学习/语法/📚目录（英语语法）.md",
-    "英语学习/语法/Passive.md",
+    "Excalidraw/设计图/坦克大战概念图.excalidraw的副本.md",
+    "Excalidraw/设计图",
+    "Excalidraw/未命名.md",
+    "Excalidraw/设计图/坦克大战概念图.excalidraw.md",
+    "技术文档/UML/时序图.md",
+    "Excalidraw/设计模式/享元模式 2023-11-20 14.00.17.excalidraw.md",
+    "Excalidraw/时序图 2023-11-08 18.50.11.excalidraw.md",
+    "Excalidraw/设计模式/工厂方法模式 2023-11-07 10.47.37.excalidraw.md",
+    "Excalidraw/设计模式/命令模式 2023-11-21 15.03.50.excalidraw.md",
     "英语学习/语法/Reported speech.md",
+    "英语学习/语法/Request, offers, permission and invitations.md",
+    "英语学习/语法/Question tag.md",
+    "英语学习/语法/Could and could have.md",
+    "英语学习/语法/Auxiliary verbs.md",
+    "英语学习/语法/📚目录（英语语法）.md",
+    "英语学习/语法/Subjunctive mood.md",
+    "英语学习/语法/When and if.md",
+    "英语学习/语法/Have something done.md",
     "读书笔记/设计模式/📚大纲（设计模式）.md",
-    "读书笔记/设计模式/桥接模式.md",
-    "读书笔记/设计模式/模板方法模式.md",
-    "读书笔记/设计模式/创建型模式总结.md",
-    "读书笔记/设计模式/代理模式.md",
-    "Excalidraw/代理模式 2023-11-20 14.24.10.excalidraw.md",
+    "读书笔记/设计模式/命令模式.md",
     "技术文档/UML/类图.md",
-    "读书笔记/设计模式/享元模式.md",
-    "Excalidraw/享元模式 2023-11-20 14.00.17.excalidraw.md",
-    "读书笔记/游戏编程模式/游戏循环.md",
-    "读书笔记/游戏编程模式/享元模式.md",
-    "读书笔记/设计模式/工厂方法模式.md",
-    "读书笔记/设计模式/外观模式.md",
-    "Excalidraw/设计模式/外观模式 2023-11-20 01.07.21.excalidraw.md",
-    "Excalidraw/设计模式/装饰模式 2023-11-18 13.34.30.excalidraw.md",
-    "读书笔记/设计模式/装饰模式.md",
-    "英语学习/语法/May and might.md",
-    "英语学习/语法/Question.md",
+    "Excalidraw/设计模式/命令模式 2023-11-21 14.56.20.excalidraw.md",
+    "读书笔记/设计模式/责任链模式.md",
+    "Excalidraw/设计模式/责任链模式 2023-11-21 14.37.56.excalidraw.md",
+    "读书笔记/游戏编程模式/事件队列.md",
+    "日常杂谈/基金基础知识.md",
+    "工具用法/Obsidian用法指南.md",
     "Excalidraw/设计模式",
     "未命名.canvas",
     "技术文档/UML",
@@ -217,7 +217,6 @@
     "https：/blog.csdn.net/sunshine543123",
     "https：/blog.csdn.net",
     "https：",
-    "Excalidraw/English grammer",
     "Assets/Images/Andromeda galaxy.jpg",
     "Assets/Images/Blobulord.png",
     "英语学习/语法/时态对比.canvas",

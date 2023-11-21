@@ -74,6 +74,71 @@
     "source": "https://github.com/zsviczian/obsidian-excalidraw-plugin/releases/tag/1.9.28",
     "libraryItems": [
       {
+        "id": "V2xni_PrSC2QvWxQW6WUl",
+        "status": "unpublished",
+        "elements": [
+          {
+            "type": "rectangle",
+            "version": 97,
+            "versionNonce": 1832691374,
+            "isDeleted": false,
+            "id": "uocFUpSkcKKmyDEgzxvtj",
+            "fillStyle": "solid",
+            "strokeWidth": 2,
+            "strokeStyle": "solid",
+            "roughness": 1,
+            "opacity": 100,
+            "angle": 0,
+            "x": -40,
+            "y": 100,
+            "strokeColor": "#1e1e1e",
+            "backgroundColor": "#b2f2bb",
+            "width": 120,
+            "height": 127.82797241210938,
+            "seed": 1916125102,
+            "groupIds": [],
+            "frameId": null,
+            "roundness": {
+              "type": 3
+            },
+            "boundElements": [],
+            "updated": 1700566016067,
+            "link": null,
+            "locked": false
+          },
+          {
+            "type": "rectangle",
+            "version": 14,
+            "versionNonce": 2111827374,
+            "isDeleted": false,
+            "id": "J5DVAUnnuJKLI4iKJQk25",
+            "fillStyle": "solid",
+            "strokeWidth": 2,
+            "strokeStyle": "solid",
+            "roughness": 1,
+            "opacity": 100,
+            "angle": 0,
+            "x": 0,
+            "y": 60,
+            "strokeColor": "#1e1e1e",
+            "backgroundColor": "#b2f2bb",
+            "width": 40,
+            "height": 100,
+            "seed": 171251630,
+            "groupIds": [],
+            "frameId": null,
+            "roundness": {
+              "type": 3
+            },
+            "boundElements": [],
+            "updated": 1700566012717,
+            "link": null,
+            "locked": false
+          }
+        ],
+        "created": 1700566045292
+      },
+      {
         "status": "published",
         "elements": [
           {
