@@ -40,7 +40,7 @@ grammer_type: question
 > - **no**代表我没听到。
 
 > [!hint] 以**why**开头的反义疑问句
-> 如果反义疑问句以**why**开头，后面的顺序不变。
+> 如果反义疑问句以**why**开头，主语在助动词后。
 > > [!example]
 > > Why don't we eat out tonight?
 
