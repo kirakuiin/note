@@ -12,7 +12,7 @@ source-link: https://blacksmithgu.github.io/obsidian-dataview/
 数据索引就是你在文档里留下的各种元数据，一种是位于文档开头使用`---`生成的**文档属性**，另一种就是在文档其他位置书写的**键值对**（[key::value]）
 ## 数据查询
 
-主要有两种语法进行查询，一种是使用DQL[^1]，一种时使用內联DQL[^1]；另一种是使用较为灵活但更加复杂的Javascript 查询。
+主要有两种语法进行查询，一种是使用DQL[^1]和內联DQL[^1]；另一种是使用较为灵活但更加复杂的Javascript 查询。
 
 ### DQL查询
 
@@ -38,7 +38,7 @@ source-link: https://blacksmithgu.github.io/obsidian-dataview/
 - Text，一般的文本类型
 - Number，数字类型，比如3， 3.5
 - Boolean，布尔类型，true和false
-- Date，日期类型，格式为YYYY-MM[-DDTHH:mm:ss.nnn+ZZ]，查询日期是还可获得以下数据：
+- Date，日期类型，格式为YYYY-MM[-DDTHH:mm:ss.nnn+ZZ]，查询日期时还可获得以下数据：
 	- field.year
 	- field.month
 	- field.weekyear
