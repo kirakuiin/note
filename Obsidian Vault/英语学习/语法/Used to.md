@@ -16,6 +16,9 @@ grammer_type: present perfect and past
 > > [!example]
 > > Lisa used to have very long hair when she was a kid.
 
+> [!hint]
+> 注意和[[Be used to sth]]的区别。
+
 ---
 
 疑问句：**did you use to**

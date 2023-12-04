@@ -13,19 +13,9 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/Future simple.md",
+                "file": "英语学习/语法/Verb + preposition + -ing.md",
                 "mode": "source",
                 "source": false
-              }
-            }
-          },
-          {
-            "id": "cfec2eb2407f3663",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Excalidraw/设计模式/访问者模式 2023-11-26 13.34.27.excalidraw.md"
               }
             }
           },
@@ -70,7 +60,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "have something done",
+                "query": "",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -87,8 +77,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -108,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/Future simple.md",
+                "file": "英语学习/语法/Verb + preposition + -ing.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -125,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/Future simple.md",
+                "file": "英语学习/语法/Verb + preposition + -ing.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -148,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/Future simple.md"
+                "file": "英语学习/语法/Verb + preposition + -ing.md"
               }
             }
           },
@@ -191,32 +180,32 @@
   },
   "active": "d82337dd09dce3e3",
   "lastOpenFiles": [
+    "技术文档/UML/时序图.md",
+    "英语学习/语法/Verb + preposition + -ing.md",
+    "英语学习/语法/Verb + to.md",
+    "英语学习/语法/Verb -ing or to.md",
+    "英语学习/语法/Verb + -ing.md",
+    "英语学习/语法/Verb + object + to.md",
+    "英语学习/语法/Prefer and would rather.md",
+    "英语学习/语法/Would.md",
+    "读书笔记/软技能 代码之外的生存指南.md",
+    "Excalidraw/软技能 代码之外的生存指南 2023-12-03 10.10.34.excalidraw.md",
+    "Excalidraw/设计模式/访问者模式 2023-11-26 13.34.27.excalidraw.md",
+    "读书笔记/设计模式/责任链模式.md",
+    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-24 20.52.19.excalidraw.md",
+    "Excalidraw/设计模式/代理模式 2023-11-20 14.24.10.excalidraw.md",
+    "英语学习/语法/Be used to sth.md",
+    "英语学习/语法/Used to.md",
+    "未命名.md",
+    "英语学习/语法/When and if.md",
+    "英语学习/语法/Request, offers, permission and invitations.md",
+    "英语学习/语法/Subjunctive mood.md",
+    "英语学习/语法/May and might.md",
+    "英语学习/语法/Future simple.md",
     "英语学习/语法/Preposition + -ing.md",
     "Excalidraw/设计模式/生成器模式 2023-11-08 18.26.45.excalidraw.md",
     "Excalidraw/游戏编程模式/游戏编程模式 2023-10-26 15.25.56.excalidraw.md",
     "英语学习/语法/Have something done.md",
-    "英语学习/语法/Verb + -ing.md",
-    "英语学习/语法/📚目录（英语语法）.md",
-    "英语学习/语法/Auxiliary verbs.md",
-    "英语学习/语法/Verb + to.md",
-    "英语学习/语法/Question.md",
-    "英语学习/语法/Present tenses for the future.md",
-    "英语学习/语法/Future continuous.md",
-    "英语学习/语法/Verb -ing or to.md",
-    "英语学习/语法/Prefer and would rather.md",
-    "英语学习/语法/Passive.md",
-    "英语学习/语法/I will and I'm going to.md",
-    "读书笔记/软技能 代码之外的生存指南.md",
-    "英语学习/语法/Verb + object + to.md",
-    "英语学习/语法/Had better and It's time.md",
-    "读书笔记/Effective CSharp.md",
-    "读书笔记/设计模式/策略模式.md",
-    "读书笔记/游戏编程模式/组件模式.md",
-    "Excalidraw/设计模式/策略模式 2023-11-25 13.58.39.excalidraw.md",
-    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-25 14.57.07.excalidraw.md",
-    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-28 16.45.50.excalidraw.md",
-    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-26 21.14.18.excalidraw.md",
-    "记录灵感/📥收件箱.md",
     "Excalidraw/设计图",
     "Excalidraw/设计模式",
     "未命名.canvas",
