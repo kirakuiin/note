@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/Verb + preposition + -ing.md",
+                "file": "读书笔记/软技能 代码之外的生存指南.md",
                 "mode": "source",
                 "source": false
               }
@@ -97,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/Verb + preposition + -ing.md",
+                "file": "读书笔记/软技能 代码之外的生存指南.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/Verb + preposition + -ing.md",
+                "file": "读书笔记/软技能 代码之外的生存指南.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/Verb + preposition + -ing.md"
+                "file": "读书笔记/软技能 代码之外的生存指南.md"
               }
             }
           },
@@ -180,15 +180,17 @@
   },
   "active": "d82337dd09dce3e3",
   "lastOpenFiles": [
-    "技术文档/UML/时序图.md",
+    "读书笔记/设计模式/📚大纲（设计模式）.md",
+    "读书笔记/软技能 代码之外的生存指南.md",
+    "读书笔记/小狗钱钱.md",
     "英语学习/语法/Verb + preposition + -ing.md",
+    "技术文档/UML/时序图.md",
     "英语学习/语法/Verb + to.md",
     "英语学习/语法/Verb -ing or to.md",
     "英语学习/语法/Verb + -ing.md",
     "英语学习/语法/Verb + object + to.md",
     "英语学习/语法/Prefer and would rather.md",
     "英语学习/语法/Would.md",
-    "读书笔记/软技能 代码之外的生存指南.md",
     "Excalidraw/软技能 代码之外的生存指南 2023-12-03 10.10.34.excalidraw.md",
     "Excalidraw/设计模式/访问者模式 2023-11-26 13.34.27.excalidraw.md",
     "读书笔记/设计模式/责任链模式.md",
@@ -204,8 +206,6 @@
     "英语学习/语法/Future simple.md",
     "英语学习/语法/Preposition + -ing.md",
     "Excalidraw/设计模式/生成器模式 2023-11-08 18.26.45.excalidraw.md",
-    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-26 15.25.56.excalidraw.md",
-    "英语学习/语法/Have something done.md",
     "Excalidraw/设计图",
     "Excalidraw/设计模式",
     "未命名.canvas",
