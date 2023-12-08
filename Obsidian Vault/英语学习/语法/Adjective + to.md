@@ -1,7 +1,7 @@
 ---
 tags:
   - language
-grammer_type:
+grammer_type: -ing and to
 ---
 **Adjective + to + ...** 有两种结构：
 
@@ -34,6 +34,7 @@ grammer_type:
 ---
 
 **adjective to ...**  = 某人如何对某事作出反应。
+^adjective-to
 
 可以用以下形容词：
 

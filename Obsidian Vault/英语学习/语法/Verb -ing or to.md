@@ -81,10 +81,13 @@ grammer_type: -ing and to
 
 > [!hint] like to do 和 like doing的区别
 > **I like doing sth** = 我做某事并喜欢做。
-> **I like to do sth** = 我认为做这件事是好的，但我不一定喜欢这样做。
+> **I like to do sth** = 我认为做这件事是好的，但我不一定喜欢这样做，表达了习惯和选择。
 > > [!example]
 > > I like cleaning the kitchen. (I enjoy it)
 > > It's not my favorite, but I like to the kitchen as often as possible.
+>
+> > [!warning]
+> > 否定时只可以用**ing**形式。
 
 ---
 
