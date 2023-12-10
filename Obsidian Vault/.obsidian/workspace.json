@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "工具用法/Windows用法指南.md",
+                "file": "读书笔记/重构 改善既有代码的设计.md",
                 "mode": "source",
                 "source": false
               }
@@ -97,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "工具用法/Windows用法指南.md",
+                "file": "读书笔记/重构 改善既有代码的设计.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "工具用法/Windows用法指南.md",
+                "file": "读书笔记/重构 改善既有代码的设计.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "工具用法/Windows用法指南.md"
+                "file": "读书笔记/重构 改善既有代码的设计.md"
               }
             }
           },
@@ -180,32 +180,32 @@
   },
   "active": "d82337dd09dce3e3",
   "lastOpenFiles": [
-    "英语学习/语法/See somebody do and see somebody doing.md",
-    "Excalidraw/See somebody do and see somebody doing 2023-12-09 11.50.27.excalidraw.md",
-    "Excalidraw/See somebody do and see somebody doing 2023-12-09 11.47.02.excalidraw.md",
-    "读书笔记/游戏编程模式/游戏循环.md",
-    "Excalidraw/设计模式/策略模式 2023-11-25 13.58.39.excalidraw.md",
-    "Excalidraw/设计模式/命令模式 2023-11-21 15.03.50.excalidraw.md",
-    "技术文档/UML/时序图.md",
+    "读书笔记/代码整洁之道.md",
+    "读书笔记/重构 改善既有代码的设计.md",
+    "Excalidraw/English grammer/See somebody do and see somebody doing 2023-12-09 11.47.02.excalidraw.md",
+    "Excalidraw/类图 2023-11-02 17.47.18.excalidraw.md",
     "Excalidraw/什么是面向对象 2023-10-31 20.20.57.excalidraw.md",
-    "英语学习/语法/Verb + -ing.md",
-    "英语学习/语法/To and preposition -ing.md",
-    "英语学习/语法/Adjective + to.md",
+    "Excalidraw/什么是面向对象 2023-10-31 20.54.37.excalidraw.md",
+    "Excalidraw/English grammer/Adjective + to 2023-12-07 15.49.42.excalidraw.md",
+    "读书笔记/Effective CSharp.md",
+    "英语学习/语法/Ing clauses.md",
     "英语学习/语法/📚目录（英语语法）.md",
-    "英语学习/语法/Reported speech.md",
+    "英语学习/语法/Countable and uncountable.md",
+    "读书笔记/游戏编程模式/脏标记模式.md",
+    "Excalidraw/English grammer/Question 2023-11-19 01.41.53.excalidraw.md",
+    "Excalidraw/设计模式/组合模式 2023-11-17 20.22.14.excalidraw.md",
+    "英语学习/语法/Expressions + -ing.md",
     "英语学习/语法/Verb -ing or to.md",
-    "英语学习/语法/Prefer and would rather.md",
-    "英语学习/语法/Be used to sth.md",
-    "英语学习/语法/Regular and irregular verbs.md",
-    "英语学习/语法/Present perfect and past.md",
-    "Excalidraw/设计模式/原型模式 2023-11-09 15.54.43.excalidraw.md",
-    "工具用法/Anki用法指南.md",
-    "Excalidraw/Adjective + to 2023-12-07 15.49.42.excalidraw.md",
-    "英语学习/语法/Can, could and able to.md",
-    "Excalidraw/C Sharp 知识点 2023-10-30 14.38.46.excalidraw.md",
-    "读书笔记/软技能 代码之外的生存指南.md",
-    "英语学习/语法/Would.md",
-    "英语学习/语法/To, for, so that.md",
+    "英语学习/语法/Verb + -ing.md",
+    "英语学习/语法/Verb + object + to.md",
+    "英语学习/语法/Adjective + to.md",
+    "英语学习/语法/Preposition + -ing.md",
+    "技术文档/UML/时序图.md",
+    "技术文档/UML/类图.md",
+    "记录灵感/📥收件箱.md",
+    "工具用法/Windows用法指南.md",
+    "英语学习/语法/See somebody do and see somebody doing.md",
+    "Excalidraw/English grammer/See somebody do and see somebody doing 2023-12-09 11.50.27.excalidraw.md",
     "Excalidraw/设计图",
     "Excalidraw/设计模式",
     "未命名.canvas",
