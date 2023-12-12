@@ -87,7 +87,7 @@ grammer_type: Articles and nouns
 
 当我们用**some**修饰复数可数名词时，有两种用法：
 
-- 一些/一对 ...
+- 一些/一对/一定数量的 ...
 > [!example]
 > Some friends of mine are coming to stay at the weekend.
 - 部分但不是全部

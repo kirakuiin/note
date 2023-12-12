@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/重构 改善既有代码的设计.md",
+                "file": "英语学习/语法/A an and the.md",
                 "mode": "source",
                 "source": false
               }
@@ -25,7 +25,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/UML/时序图.md",
+                "file": "技术文档/UML/类图.md",
                 "mode": "source",
                 "source": false
               }
@@ -97,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/重构 改善既有代码的设计.md",
+                "file": "英语学习/语法/A an and the.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/重构 改善既有代码的设计.md",
+                "file": "英语学习/语法/A an and the.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/重构 改善既有代码的设计.md"
+                "file": "英语学习/语法/A an and the.md"
               }
             }
           },
@@ -180,32 +180,34 @@
   },
   "active": "d82337dd09dce3e3",
   "lastOpenFiles": [
-    "英语学习/语法/Countable and uncountable.md",
-    "英语学习/语法/📚目录（英语语法）.md",
-    "英语学习/语法/Wish.md",
-    "英语学习/语法/Prefer and would rather.md",
-    "读书笔记/设计模式/状态模式.md",
-    "读书笔记/重构 改善既有代码的设计.md",
+    "读书笔记/重构/📚大纲（重构）.md",
+    "英语学习/语法/A an and the.md",
+    "读书笔记/重构/内联函数.md",
+    "读书笔记/重构/提炼函数.md",
+    "读书笔记/重构/提炼类.md",
+    "读书笔记/重构/以查询取代临时变量.md",
+    "读书笔记/重构/替换算法.md",
+    "读书笔记/重构/搬移函数.md",
+    "读书笔记/重构/搬移字段.md",
+    "读书笔记/重构/分解临时变量.md",
+    "读书笔记/重构/函数改名.md",
+    "读书笔记/重构/函数上移.md",
+    "读书笔记/重构/塑造函数模板.md",
+    "Excalidraw/提炼类 2023-12-12 14.30.29.excalidraw.md",
+    "技术文档/什么是面向对象.md",
     "读书笔记/代码整洁之道.md",
-    "Excalidraw/English grammer/See somebody do and see somebody doing 2023-12-09 11.47.02.excalidraw.md",
-    "Excalidraw/类图 2023-11-02 17.47.18.excalidraw.md",
-    "Excalidraw/什么是面向对象 2023-10-31 20.20.57.excalidraw.md",
-    "Excalidraw/什么是面向对象 2023-10-31 20.54.37.excalidraw.md",
-    "Excalidraw/English grammer/Adjective + to 2023-12-07 15.49.42.excalidraw.md",
-    "读书笔记/Effective CSharp.md",
-    "英语学习/语法/Ing clauses.md",
-    "读书笔记/游戏编程模式/脏标记模式.md",
-    "Excalidraw/English grammer/Question 2023-11-19 01.41.53.excalidraw.md",
-    "Excalidraw/设计模式/组合模式 2023-11-17 20.22.14.excalidraw.md",
-    "英语学习/语法/Expressions + -ing.md",
-    "英语学习/语法/Verb -ing or to.md",
-    "英语学习/语法/Verb + -ing.md",
-    "英语学习/语法/Verb + object + to.md",
-    "英语学习/语法/Adjective + to.md",
-    "英语学习/语法/Preposition + -ing.md",
-    "技术文档/UML/时序图.md",
+    "Excalidraw/重构",
     "技术文档/UML/类图.md",
-    "记录灵感/📥收件箱.md",
+    "什么是面向对象^single-responsibility-principle.md",
+    "读书笔记/设计模式/模板方法模式.md",
+    "Excalidraw/塑造函数模板 2023-12-12 14.03.10.excalidraw.md",
+    "Excalidraw/函数上移 2023-12-12 13.14.45.excalidraw.md",
+    "技术文档/UML/时序图.md",
+    "Templates/重构手法模板.md",
+    "Templates/设计模式模板.md",
+    "Templates/英语语法模板.md",
+    "读书笔记/游戏编程模式/📚大纲（游戏编程模式）.md",
+    "读书笔记/重构",
     "Excalidraw/设计图",
     "Excalidraw/设计模式",
     "未命名.canvas",
@@ -216,8 +218,6 @@
     "https：/blog.csdn.net/sunshine543123/article/details",
     "https：/blog.csdn.net/sunshine543123/article",
     "https：/blog.csdn.net/sunshine543123",
-    "https：/blog.csdn.net",
-    "https：",
     "Assets/Images/Andromeda galaxy.jpg",
     "Assets/Images/Blobulord.png",
     "英语学习/语法/时态对比.canvas",
