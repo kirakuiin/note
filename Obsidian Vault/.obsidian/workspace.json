@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/游戏编程模式/更新方法.md",
+                "file": "读书笔记/重构/📚大纲（重构）.md",
                 "mode": "source",
                 "source": false
               }
@@ -49,7 +49,7 @@
               "type": "search",
               "state": {
                 "query": "",
-                "matchingCase": false,
+                "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
                 "extraContext": false,
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/游戏编程模式/更新方法.md",
+                "file": "读书笔记/重构/📚大纲（重构）.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/游戏编程模式/更新方法.md",
+                "file": "读书笔记/重构/📚大纲（重构）.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/游戏编程模式/更新方法.md"
+                "file": "读书笔记/重构/📚大纲（重构）.md"
               }
             }
           },
@@ -168,32 +168,32 @@
   },
   "active": "a7bfe904b0bd0b28",
   "lastOpenFiles": [
-    "读书笔记/游戏编程模式/游戏循环.md",
-    "技术文档/Unity知识点.md",
-    "🧠 第二大脑.md",
-    "Excalidraw/设计模式/命令模式 2023-11-21 15.03.50.excalidraw.md",
-    "英语学习/语法/Passive.md",
-    "英语学习/语法/📚目录（英语语法）.md",
-    "英语学习/语法/Could and could have.md",
-    "英语学习/语法/Can, could and able to.md",
-    "读书笔记/重构/内联临时变量.md",
-    "读书笔记/重构/塑造函数模板.md",
-    "读书笔记/重构/提炼函数.md",
-    "读书笔记/重构/提炼类.md",
-    "读书笔记/重构/替换算法.md",
-    "读书笔记/重构/以查询取代临时变量.md",
-    "读书笔记/重构/自封装字段.md",
-    "读书笔记/重构/封装字段.md",
-    "技术文档/什么是面向对象.md",
-    "读书笔记/重构/搬移字段.md",
-    "Excalidraw/搬移字段 2023-12-15 15.29.10.excalidraw.md",
     "读书笔记/重构/搬移函数.md",
-    "Excalidraw/搬移函数 2023-12-15 14.59.09.excalidraw.md",
-    "读书笔记/重构/内联函数.md",
-    "读书笔记/重构/函数上移.md",
+    "读书笔记/重构/以函数取代参数.md",
     "读书笔记/重构/📚大纲（重构）.md",
+    "读书笔记/重构/复制被监视数据.md",
+    "读书笔记/重构/提炼子类.md",
+    "读书笔记/重构/分解条件表达式.md",
+    "读书笔记/重构/以函数对象取代函数.md",
+    "读书笔记/重构/保持对象完整.md",
+    "读书笔记/重构/引入参数对象.md",
+    "读书笔记/重构/自封装字段.md",
+    "读书笔记/重构/以查询取代临时变量.md",
+    "读书笔记/重构/替换算法.md",
+    "读书笔记/重构/提炼类.md",
+    "读书笔记/重构/提炼函数.md",
+    "读书笔记/重构/塑造函数模板.md",
+    "读书笔记/重构/内联临时变量.md",
+    "读书笔记/重构/内联函数.md",
+    "读书笔记/重构/将查询函数和修改函数分离.md",
+    "读书笔记/重构/函数上移.md",
     "读书笔记/重构/函数改名.md",
-    "Excalidraw/重构/函数改名 2023-12-15 13.47.14.excalidraw.md",
+    "读书笔记/重构/封装字段.md",
+    "读书笔记/重构/分解临时变量.md",
+    "读书笔记/重构/搬移字段.md",
+    "英语学习/语法/Names with and without the.md",
+    "英语学习/语法/Ing clauses.md",
+    "英语学习/语法/Going to.md",
     "未命名.canvas",
     "未命名 1.canvas",
     "Excalidraw/重构",
