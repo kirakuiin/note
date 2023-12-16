@@ -2,6 +2,8 @@
 tags:
   - reference
 ---
+# Unity开发
+
 > [!summary] Unity延迟调用
 > 以下两种方法都只能在继承了`MonoBehaviour`里的类才能使用。
 > 	1. 使用`Invoke(string, float)`来延迟调用，缺点是必须要输入方法的字符串名(可以用`nameof()`来优化)。并且即便类所挂载的对象已经消失也会调用。
@@ -37,3 +39,24 @@ tags:
 > > [!hint] 单独停止`Coroutine`和`Invoke`的方法
 > > - `StopAllCoroutines()`
 > > - `CancelInvoke()`
+
+> [!summary] **UGUI**下`Canvas`控件的三种渲染模式。
+> 所有的UI元素都必须属于一个`Canvas`对象。它有三种渲染模式：
+> > [!summary] Screen Space - Overlay
+> > 此模式下画布会进行缩放来适应屏幕，直接独立渲染，并不依赖场景里摄像机（也就是说没相机也会渲染）。
+> > 应用场景：简单的UI元素显示。
+> > > [!warning]
+> > > - 该模式下3DUI对象无法被显示。
+> ---
+> > [!summary] Screen Space - Camera
+> > UI元素由你指定的摄像机来控制。
+> > 应用场景：显示3D模型。
+> ---
+> > [!summary] World-Space
+> > 画布的行为和场景中的其他对象一致，类似于一张`Plane`。并且可以在**RectTransform**里设置画布的变换属性。
+> > 应用场景：需要渲染世界内一部分的UI，也被称为叙事界面。
+
+# Unity编辑器
+
+> [!summary] Unity编辑器打开**VSCode**，代码没有识别成功。
+> 检查偏好设置里的外部编辑器是否设置为**VSCode**，如果设置了的话再试试点击**Regenerate project files**按钮。

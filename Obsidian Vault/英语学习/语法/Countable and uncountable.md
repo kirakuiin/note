@@ -1,7 +1,7 @@
 ---
 tags:
   - language
-grammer_type: Articles and nouns
+grammer_type: articles and nouns
 ---
 名词分为可数名词和不可数名词。
 
