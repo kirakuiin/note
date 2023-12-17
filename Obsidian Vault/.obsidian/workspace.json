@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/重构/📚大纲（重构）.md",
+                "file": "读书笔记/重构/移除参数.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/重构/📚大纲（重构）.md",
+                "file": "读书笔记/重构/移除参数.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/重构/📚大纲（重构）.md",
+                "file": "读书笔记/重构/移除参数.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/重构/📚大纲（重构）.md"
+                "file": "读书笔记/重构/移除参数.md"
               }
             }
           },
@@ -168,15 +168,23 @@
   },
   "active": "a7bfe904b0bd0b28",
   "lastOpenFiles": [
-    "读书笔记/重构/搬移函数.md",
-    "读书笔记/重构/以函数取代参数.md",
+    "读书笔记/重构/添加参数.md",
+    "读书笔记/重构/移除参数.md",
+    "读书笔记/重构/函数改名.md",
     "读书笔记/重构/📚大纲（重构）.md",
+    "读书笔记/重构/引入参数对象.md",
+    "读书笔记/重构/搬移函数.md",
+    "读书笔记/重构/搬移字段.md",
+    "英语学习/语法/Names with and without the.md",
+    "英语学习/语法/Prefer and would rather.md",
+    "英语学习/语法/Can, could and able to.md",
+    "英语学习/语法/When and if.md",
+    "读书笔记/重构/以函数取代参数.md",
     "读书笔记/重构/复制被监视数据.md",
     "读书笔记/重构/提炼子类.md",
     "读书笔记/重构/分解条件表达式.md",
     "读书笔记/重构/以函数对象取代函数.md",
     "读书笔记/重构/保持对象完整.md",
-    "读书笔记/重构/引入参数对象.md",
     "读书笔记/重构/自封装字段.md",
     "读书笔记/重构/以查询取代临时变量.md",
     "读书笔记/重构/替换算法.md",
@@ -186,14 +194,6 @@
     "读书笔记/重构/内联临时变量.md",
     "读书笔记/重构/内联函数.md",
     "读书笔记/重构/将查询函数和修改函数分离.md",
-    "读书笔记/重构/函数上移.md",
-    "读书笔记/重构/函数改名.md",
-    "读书笔记/重构/封装字段.md",
-    "读书笔记/重构/分解临时变量.md",
-    "读书笔记/重构/搬移字段.md",
-    "英语学习/语法/Names with and without the.md",
-    "英语学习/语法/Ing clauses.md",
-    "英语学习/语法/Going to.md",
     "未命名.canvas",
     "未命名 1.canvas",
     "Excalidraw/重构",

@@ -41,3 +41,32 @@ grammer_type: articles and nouns
 > [!example]
 > North America
 > South Africa
+- 大部分城市街道，广场公园都不加**the**。
+> [!example]
+> Union Street
+> Queens Road
+- 重要的公共建筑和机构（机场，大学，车展）经常是两个单词，一个名字加一个名称。此时也不加**the**。
+> [!example]
+> Manchester Airport
+> Harvard University
+- 除了上一条以外的建筑一般要加**the**。
+> [!example]
+> The Sheraton Hotel
+> The Palace Theatre
+> The National Gallery
+- 带有**of**的名字一般加**the**。
+> [!example]
+> the Bank of England
+> the Tower of London
+- 很多商店，银行，旅馆以人名开头，这种不加**the**。
+> [!example]
+> McDonald's
+> Macy's restaurant
+- 教堂前面一般加**St**。
+> [!example]
+> St John's Church
+- 大部分报纸和组织的名字要加**the**。
+> [!example]
+> the Washington Post
+> the European Union
+> the BBC
