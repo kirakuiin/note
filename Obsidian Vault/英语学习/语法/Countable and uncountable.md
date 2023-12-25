@@ -40,6 +40,11 @@ grammer_type: articles and nouns
 > - 可以使用**some any much little**来修饰
 > > [!example]
 > > We didn't do much shopping.
+>
+> > [!hint]
+> > 不可数名词具有特征：
+> > 	- 分割后还是本身
+> > 	- 加量词后依然无法清晰表达数量
 
 ---
 
