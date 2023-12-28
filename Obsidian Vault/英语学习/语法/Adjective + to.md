@@ -38,7 +38,7 @@ grammer_type: -ing and to
 
 可以用以下形容词：
 
-**sorry pleased relieved surprised amazed sad disappointed**
+**sorry glad pleased relieved surprised amazed sad disappointed**
 
 > [!example]
 > Was Julia surprised to see me?

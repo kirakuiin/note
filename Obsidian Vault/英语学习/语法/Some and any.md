@@ -40,6 +40,8 @@ grammer_type: pronouns and determiners
 
 **any**有着是哪一个都没关系的含义(**it doesn't matter**)。**anybody**，**anyone**，**anything**，**anywhere**同理。
 
+^any-doesnt-matter
+
 > [!example]
 > You can take any bus. They all go to the center.
 > We forget to lock the door. Anybody could have come in.
@@ -47,6 +49,8 @@ grammer_type: pronouns and determiners
 ---
 
 **somebody/someone/anybody/anyone**都是单数词，但是在它们之后用**their/they/them**来指代。
+
+^some-they
 
 > [!example]
 > Someone has forgotten their umbrella.

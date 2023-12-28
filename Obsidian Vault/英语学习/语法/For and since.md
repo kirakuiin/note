@@ -15,7 +15,7 @@ grammer_type: present perfect and past
 > [!info]
 > 在疑问句或陈述句中是可以省略**for**的, 在否定句里可以用**in**来代替。
 > > [!example]
-> > They've been married then years.
+> > They've been married ten years.
 > > They haven't had a holiday in ten years.
 >
 > 当一段时间是**all + day / my life**等时，此时不用**for**。
