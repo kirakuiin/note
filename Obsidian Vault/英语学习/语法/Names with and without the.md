@@ -45,7 +45,7 @@ grammer_type: articles and nouns
 > [!example]
 > Union Street
 > Queens Road
-- 重要的公共建筑和机构（机场，大学，车展）经常是两个单词，一个名字加一个名称。此时也不加**the**。
+- 重要的公共建筑和机构（机场，大学，车站）经常是两个单词，一个名字加一个名称。此时也不加**the**。
 > [!example]
 > Manchester Airport
 > Harvard University
