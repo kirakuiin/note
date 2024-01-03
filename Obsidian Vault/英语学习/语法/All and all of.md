@@ -13,6 +13,8 @@ grammer_type: pronouns and determiners
 > [!hint]
 > most前不加**the**.
 
+---
+
 以下词后可以加**of**，结构为**some etc + of + the/this etc**。
 **all some any most much/many little/few half none**。
 

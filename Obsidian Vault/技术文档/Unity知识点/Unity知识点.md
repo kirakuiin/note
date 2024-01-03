@@ -56,7 +56,19 @@ tags:
 > > 画布的行为和场景中的其他对象一致，类似于一张`Plane`。并且可以在**RectTransform**里设置画布的变换属性。
 > > 应用场景：需要渲染世界内一部分的UI，也被称为叙事界面。
 
+> [!summary] Input System使用简述
+> 1. 新建一个**InputAction**来设置键位映射，这里面支持多套配置方案，可以按需激活。
+> 2. 在想要控制的对象上附加`Player Input`组件。行为选项里一般选择*C# Event*或*Unity Event*。
+> 3. 回调函数接受的参数类型为`CallbackContext`，里面比较重要的数据有：
+> 	- `ReadValue()`：获取硬件的输入值。
+> 	- `phase`：输入的执行阶段，比如开始，结束等等。
+> 	- `action.name`：对应在键位映射里的名字。
+> 	- `control.device`：这个回调是由哪个设备触发的。
 # Unity编辑器
 
 > [!summary] Unity编辑器打开**VSCode**，代码没有识别成功。
 > 检查偏好设置里的外部编辑器是否设置为**VSCode**，如果设置了的话再试试点击**Regenerate project files**按钮。
+
+> [!summary] 输入切换为使用`Input System`
+> 1. 安装`Input System`包
+> 2. 在**Edit->Player->Active Input Handling**里进行设置。

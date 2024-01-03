@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/重构/📚大纲（重构）.md",
+                "file": "技术文档/Unity知识点/Unity知识点.md",
                 "mode": "source",
                 "source": false
               }
@@ -97,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/重构/📚大纲（重构）.md",
+                "file": "技术文档/Unity知识点/Unity知识点.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/重构/📚大纲（重构）.md",
+                "file": "技术文档/Unity知识点/Unity知识点.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/重构/📚大纲（重构）.md"
+                "file": "技术文档/Unity知识点/Unity知识点.md"
               }
             }
           },
@@ -178,10 +178,27 @@
       "obsidian-excalidraw-plugin:新建绘图文件": false
     }
   },
-  "active": "a7bfe904b0bd0b28",
+  "active": "d6de1842426fda97",
   "lastOpenFiles": [
-    "读书笔记/设计模式/策略模式.md",
+    "技术文档/Unity知识点",
     "读书笔记/重构/📚大纲（重构）.md",
+    "读书笔记/重构/将值对象改为引用对象.md",
+    "读书笔记/重构/将引用对象改为值对象.md",
+    "读书笔记/重构/以对象取代数据值.md",
+    "Excalidraw/以对象取代数据值 2024-01-03 13.51.40.excalidraw.md",
+    "读书笔记/设计模式/📚大纲（设计模式）.md",
+    "工具用法/Dataview用法指南.md",
+    "读书笔记/重构/以子类取代类型码.md",
+    "读书笔记/游戏编程模式/📚大纲（游戏编程模式）.md",
+    "英语学习/语法/📚目录（英语语法）.md",
+    "读书笔记/重构/以对象取代数组.md",
+    "英语学习/语法/Both, neither, either.md",
+    "英语学习/语法/All and all of.md",
+    "英语学习/语法/Myself.md",
+    "Excalidraw/重构/以子类取代类型码 2023-12-23 16.05.45.excalidraw.md",
+    "技术文档/UML/类图.md",
+    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-26 19.19.21.excalidraw.md",
+    "读书笔记/设计模式/策略模式.md",
     "读书笔记/重构/搬移函数.md",
     "读书笔记/重构/搬移字段.md",
     "读书笔记/重构/保持对象完整.md",
@@ -189,23 +206,6 @@
     "读书笔记/重构/分解条件表达式.md",
     "读书笔记/重构/封装字段.md",
     "读书笔记/重构/复制被监视数据.md",
-    "读书笔记/重构/构造函数本体上移.md",
-    "读书笔记/重构/函数改名.md",
-    "读书笔记/重构/函数上移.md",
-    "读书笔记/重构/函数下移.md",
-    "读书笔记/重构/将查询函数和修改函数分离.md",
-    "读书笔记/重构/将类内联化.md",
-    "读书笔记/重构/内联函数.md",
-    "读书笔记/重构/内联临时变量.md",
-    "读书笔记/重构/塑造函数模板.md",
-    "读书笔记/重构/提炼超类.md",
-    "读书笔记/重构/提炼函数.md",
-    "读书笔记/重构/提炼接口.md",
-    "读书笔记/重构/提炼类.md",
-    "读书笔记/重构/提炼子类.md",
-    "读书笔记/重构/替换算法.md",
-    "读书笔记/重构/添加参数.md",
-    "读书笔记/重构/移除参数.md",
     "未命名.canvas",
     "未命名 1.canvas",
     "Excalidraw/重构",
