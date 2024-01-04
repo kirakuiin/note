@@ -64,6 +64,12 @@ tags:
 > 	- `phase`：输入的执行阶段，比如开始，结束等等。
 > 	- `action.name`：对应在键位映射里的名字。
 > 	- `control.device`：这个回调是由哪个设备触发的。
+
+> [!summary] Unity全局音量控制
+> 通过`AudioMixer`来进行控制，里面可以设置若干分组，并带有父子关系（父组的设置会影响字组）。然后把每个分组的音量暴露出来，就可以实现分别调整各个组的音量了。
+
+> [!summary] 保持UI比例不变
+> 在`Canvas Scaler`组件里（一般位于`Canvas`下），将*UI Scale Mode*设置为*Scale With Screen Size*。
 # Unity编辑器
 
 > [!summary] Unity编辑器打开**VSCode**，代码没有识别成功。
