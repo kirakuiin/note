@@ -29,6 +29,12 @@ grammer_type: relative clauses
 > [!example]
 > The key (that/which) you lost is mine.
 
+> [!hint]
+> 如果是人作为宾语，此时也可以使用**whom**。并且此时动词后的介词可以提前到**whom**前。这是一个正式用语，平时很少用。
+> > [!example]
+> > I like the people with whom I work.
+> > I like the people whom I work with.
+
 ---
 
 关系从句中的介词不会再接名词性的成分。

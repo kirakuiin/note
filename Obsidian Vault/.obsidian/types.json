@@ -5,6 +5,7 @@
     "tags": "tags",
     "links": "multitext",
     "todo": "checkbox",
-    "outline": "checkbox"
+    "outline": "checkbox",
+    "unity_type": "multitext"
   }
 }
