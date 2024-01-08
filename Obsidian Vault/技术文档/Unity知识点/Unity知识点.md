@@ -1,8 +1,15 @@
 ---
 tags:
   - reference
+outline: true
 ---
 # Unity开发
+
+```dataview
+LIST
+FROM "技术文档/Unity知识点"
+WHERE !outline and contains(unity_type, "开发")
+```
 
 > [!summary] Unity延迟调用
 > 以下两种方法都只能在继承了`MonoBehaviour`里的类才能使用。
@@ -66,11 +73,18 @@ tags:
 > 	- `control.device`：这个回调是由哪个设备触发的。
 
 > [!summary] Unity全局音量控制
-> 通过`AudioMixer`来进行控制，里面可以设置若干分组，并带有父子关系（父组的设置会影响字组）。然后把每个分组的音量暴露出来，就可以实现分别调整各个组的音量了。
+> 通过`AudioMixer`来进行控制，里面可以设置若干分组，并带有父子关系（父组的设置会影响子组）。然后把每个分组的音量暴露出来，就可以实现分别调整各个组的音量了。
 
 > [!summary] 保持UI比例不变
 > 在`Canvas Scaler`组件里（一般位于`Canvas`下），将*UI Scale Mode*设置为*Scale With Screen Size*。
+
 # Unity编辑器
+
+```dataview
+LIST
+FROM "技术文档/Unity知识点"
+WHERE !outline and contains(unity_type, "编辑器")
+```
 
 > [!summary] Unity编辑器打开**VSCode**，代码没有识别成功。
 > 检查偏好设置里的外部编辑器是否设置为**VSCode**，如果设置了的话再试试点击**Regenerate project files**按钮。
@@ -78,3 +92,4 @@ tags:
 > [!summary] 输入切换为使用`Input System`
 > 1. 安装`Input System`包
 > 2. 在**Edit->Player->Active Input Handling**里进行设置。
+
