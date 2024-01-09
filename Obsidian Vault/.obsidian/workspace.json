@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md",
+                "file": "读书笔记/游戏设计艺术.md",
                 "mode": "source",
                 "source": false
               }
@@ -60,7 +60,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "all",
+                "query": "",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -97,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md",
+                "file": "读书笔记/游戏设计艺术.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md",
+                "file": "读书笔记/游戏设计艺术.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md"
+                "file": "读书笔记/游戏设计艺术.md"
               }
             }
           },
@@ -158,7 +158,7 @@
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -180,32 +180,32 @@
   },
   "active": "a7bfe904b0bd0b28",
   "lastOpenFiles": [
-    "技术文档/Unity知识点/使用ScriptableObject存储配置数据.md",
-    "技术文档/Unity知识点/Unity知识点.md",
-    "工具用法/Dataview用法指南.md",
-    "英语学习/语法/See somebody do and see somebody doing.md",
+    "读书笔记/小狗钱钱.md",
+    "读书笔记/Effective CSharp.md",
     "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
-    "Excalidraw/设计模式/访问者模式 2023-11-26 13.20.38.excalidraw.md",
-    "Excalidraw/重构/函数上移 2023-12-12 13.14.45.excalidraw.md",
-    "英语学习/语法/Relative Clauses (whose, where).md",
-    "英语学习/语法/📚目录（英语语法）.md",
-    "英语学习/语法/Regular and irregular verbs.md",
-    "英语学习/语法/Relative clauses(who, whom, that, which).md",
+    "读书笔记/游戏设计艺术.md",
+    "读书笔记/软技能 代码之外的生存指南.md",
     "读书笔记/重构/📚大纲（重构）.md",
-    "读书笔记/重构/移除中间人.md",
     "读书笔记/重构/以继承取代委托.md",
+    "读书笔记/重构/以委托取代继承.md",
+    "Excalidraw/以继承取代委托 2024-01-09 18.49.10.excalidraw.md",
+    "技术文档/UML/类图.md",
+    "读书笔记/重构/移除中间人.md",
     "读书笔记/重构/隐藏委托关系.md",
-    "英语学习/语法/Passive.md",
-    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-26 13.40.44.excalidraw.md",
-    "英语学习/语法/All and all of.md",
-    "英语学习/语法/Countable and uncountable.md",
+    "Excalidraw/移除中间人 2024-01-09 18.26.18.excalidraw.md",
     "英语学习/语法/Much, many, little, few.md",
-    "Excalidraw/Relative clauses(who, that, which) 2024-01-06 18.44.19.excalidraw.md",
-    "Excalidraw/Relative clauses(who, that, which) 2024-01-06 18.37.49.excalidraw.md",
-    "读书笔记/重构/隐藏函数.md",
-    "Excalidraw/隐藏函数 2024-01-06 18.21.49.excalidraw.md",
-    "Excalidraw/引入空对象 2024-01-05 19.54.49.excalidraw.md",
-    "读书笔记/游戏编程模式/双缓冲.md",
+    "英语学习/语法/All, every and whole.md",
+    "英语学习/语法/📚目录（英语语法）.md",
+    "英语学习/语法/All and all of.md",
+    "英语学习/语法/Have and have got.md",
+    "技术文档/C Sharp 知识点.md",
+    "英语学习/语法/A friend of mine.md",
+    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-27 00.41.55.excalidraw.md",
+    "Excalidraw/Each and every 2024-01-05 18.37.38.excalidraw.md",
+    "Excalidraw/重构/以类取代类型码 2023-12-24 22.47.29.excalidraw.md",
+    "英语学习/语法/Would.md",
+    "英语学习/语法/Verb -ing or to.md",
+    "英语学习/语法/Subjunctive mood.md",
     "技术文档/Unity知识点",
     "未命名.canvas",
     "未命名 1.canvas",
