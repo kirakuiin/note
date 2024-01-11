@@ -78,6 +78,10 @@ WHERE !outline and contains(unity_type, "开发")
 > [!summary] 保持UI比例不变
 > 在`Canvas Scaler`组件里（一般位于`Canvas`下），将*UI Scale Mode*设置为*Scale With Screen Size*。
 
+> [!summary] `SerializeField`和`Serializable`的作用
+> `SerializeField`可以让私有的可序列化字段显示在**Inspector**中。
+> `Serializable`可以让自定义的对象支持序列化，简单来说就是让它向那些简单类型一样。有显示在**Inspector**里的能力，支持持久化存储。
+
 # Unity编辑器
 
 ```dataview
