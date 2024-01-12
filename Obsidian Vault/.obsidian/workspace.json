@@ -11,9 +11,11 @@
             "id": "a7bfe904b0bd0b28",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "markdown",
               "state": {
-                "file": "Excalidraw/游戏设计艺术 2024-01-11 00.38.33.excalidraw.md"
+                "file": "读书笔记/游戏设计艺术.md",
+                "mode": "source",
+                "source": false
               }
             }
           },
@@ -95,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Excalidraw/游戏设计艺术 2024-01-11 00.38.33.excalidraw.md",
+                "file": "读书笔记/游戏设计艺术.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -112,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Excalidraw/游戏设计艺术 2024-01-11 00.38.33.excalidraw.md",
+                "file": "读书笔记/游戏设计艺术.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -135,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Excalidraw/游戏设计艺术 2024-01-11 00.38.33.excalidraw.md"
+                "file": "读书笔记/游戏设计艺术.md"
               }
             }
           },
@@ -178,32 +180,32 @@
   },
   "active": "a7bfe904b0bd0b28",
   "lastOpenFiles": [
+    "读书笔记/游戏编程模式/空间分区.md",
     "读书笔记/游戏设计艺术.md",
+    "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
+    "日常杂谈/基金基础知识.md",
+    "技术文档/markdown语法.md",
+    "技术文档/Python 知识点.md",
+    "技术文档/Python 装饰器.md",
+    "技术文档/MVC模式.md",
+    "技术文档/C Sharp 知识点.md",
+    "读书笔记/重构/📚大纲（重构）.md",
+    "读书笔记/重构/将双向关联改为单向关联.md",
+    "Excalidraw/将双向关联改为单向关联 2024-01-11 19.35.27.excalidraw.md",
+    "技术文档/UML/类图.md",
+    "读书笔记/重构/将单向关联改为双向关联.md",
+    "读书笔记/重构/搬移函数.md",
+    "英语学习/语法/Ing and ed clauses.md",
+    "英语学习/语法/There and it.md",
+    "英语学习/语法/Relative clauses (who, whom, that, which).md",
+    "英语学习/语法/📚目录（英语语法）.md",
+    "英语学习/语法/Relative Clauses (whose, where).md",
+    "英语学习/语法/Verb + preposition + -ing.md",
+    "读书笔记/重构/隐藏委托关系.md",
+    "Excalidraw/类图 2023-11-02 17.47.18.excalidraw.md",
     "Excalidraw/游戏设计艺术 2024-01-11 00.38.33.excalidraw.md",
     "英语学习/语法/Relative clauses (extra information).md",
     "英语学习/语法/All and all of.md",
-    "英语学习/语法/Both, neither, either.md",
-    "All and all of^all-of.md",
-    "英语学习/语法/Relative clauses (who, whom, that, which).md",
-    "英语学习/语法/Verb -ing or to.md",
-    "英语学习/语法/Verb + -ing.md",
-    "英语学习/语法/Preposition + -ing.md",
-    "英语学习/语法/Ing clauses.md",
-    "英语学习/语法/Each and every.md",
-    "英语学习/语法/A an and the.md",
-    "Excalidraw/隐藏函数 2024-01-06 18.21.49.excalidraw.md",
-    "Excalidraw/重构/函数下移 2023-12-25 15.46.38.excalidraw.md",
-    "英语学习/语法/📚目录（英语语法）.md",
-    "技术文档/Unity知识点/Unity知识点.md",
-    "读书笔记/小狗钱钱.md",
-    "读书笔记/Effective CSharp.md",
-    "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
-    "读书笔记/软技能 代码之外的生存指南.md",
-    "读书笔记/重构/📚大纲（重构）.md",
-    "读书笔记/重构/以继承取代委托.md",
-    "读书笔记/重构/以委托取代继承.md",
-    "Excalidraw/以继承取代委托 2024-01-09 18.49.10.excalidraw.md",
-    "技术文档/UML/类图.md",
     "技术文档/Unity知识点",
     "未命名.canvas",
     "未命名 1.canvas",
