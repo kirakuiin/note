@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/游戏设计艺术.md",
+                "file": "读书笔记/重构/提炼函数.md",
                 "mode": "source",
                 "source": false
               }
@@ -97,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/游戏设计艺术.md",
+                "file": "读书笔记/重构/提炼函数.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/游戏设计艺术.md",
+                "file": "读书笔记/重构/提炼函数.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/游戏设计艺术.md"
+                "file": "读书笔记/重构/提炼函数.md"
               }
             }
           },
@@ -180,8 +180,14 @@
   },
   "active": "a7bfe904b0bd0b28",
   "lastOpenFiles": [
-    "读书笔记/游戏编程模式/空间分区.md",
+    "英语学习/语法/Adjectives ending in -ing and -ed.md",
+    "英语学习/语法/📚目录（英语语法）.md",
+    "英语学习/语法/When and if.md",
+    "英语学习/语法/Had better and It's time.md",
+    "英语学习/语法/Verb + -ing.md",
+    "英语学习/语法/Prefer and would rather.md",
     "读书笔记/游戏设计艺术.md",
+    "读书笔记/游戏编程模式/空间分区.md",
     "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
     "日常杂谈/基金基础知识.md",
     "技术文档/markdown语法.md",
@@ -198,14 +204,8 @@
     "英语学习/语法/Ing and ed clauses.md",
     "英语学习/语法/There and it.md",
     "英语学习/语法/Relative clauses (who, whom, that, which).md",
-    "英语学习/语法/📚目录（英语语法）.md",
     "英语学习/语法/Relative Clauses (whose, where).md",
     "英语学习/语法/Verb + preposition + -ing.md",
-    "读书笔记/重构/隐藏委托关系.md",
-    "Excalidraw/类图 2023-11-02 17.47.18.excalidraw.md",
-    "Excalidraw/游戏设计艺术 2024-01-11 00.38.33.excalidraw.md",
-    "英语学习/语法/Relative clauses (extra information).md",
-    "英语学习/语法/All and all of.md",
     "技术文档/Unity知识点",
     "未命名.canvas",
     "未命名 1.canvas",
