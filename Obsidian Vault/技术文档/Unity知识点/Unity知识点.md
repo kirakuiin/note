@@ -64,7 +64,7 @@ WHERE !outline and contains(unity_type, "开发")
 > > 应用场景：需要渲染世界内一部分的UI，也被称为叙事界面。
 
 > [!summary] Input System使用简述
-> 1. 新建一个**InputAction**来设置键位映射，这里面支持多套配置方案，可以按需激活。
+> 1. 新建一个**InputAction**来设置键位映射，这里面支持多套配置方案，可以按需激活。(使用`PlayerInput.SwitchCurrentActionMap()`)
 > 2. 在想要控制的对象上附加`Player Input`组件。行为选项里一般选择*C# Event*或*Unity Event*。
 > 3. 回调函数接受的参数类型为`CallbackContext`，里面比较重要的数据有：
 > 	- `ReadValue()`：获取硬件的输入值。
