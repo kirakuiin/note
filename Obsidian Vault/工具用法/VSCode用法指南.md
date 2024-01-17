@@ -24,12 +24,14 @@ tags:
 > ```json
 > "configurations": [
 >	{
+>		 //其他内容
 >		"logging": {
 >			"moduleLoad": false,
 >		}
 >	}
 >```
 
-> [!vs]
+> [!quesiton] 无法输入中文标点
+> 输入`Ctrl + .`切换标点输入模式。
 
 
