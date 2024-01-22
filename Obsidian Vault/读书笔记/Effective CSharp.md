@@ -271,7 +271,7 @@ class Base : IDisposable
 {
 	private bool _isDisposed = false;
 
-	public override void Dispose()
+	public void Dispose()
 	{
 		Dispose(true);
 		GC.SuppressFinalize(this);
@@ -284,7 +284,7 @@ class Base : IDisposable
 
 	// 执行实际的释放逻辑，供finalizer和Dispose调用
 	// isDisposing代表是在接口中调用还是在finalizer里调用
-	protected virtual void Dispose(isDisposing)
+	protected virtual void Dispose(bool isDisposing)
 	{
 		if (_isDisposed) {
 			return;
