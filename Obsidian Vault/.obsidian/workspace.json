@@ -25,7 +25,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/All and all of.md",
+                "file": "英语学习/语法/Comparison.md",
                 "mode": "source",
                 "source": false
               }
@@ -61,7 +61,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "line:(if whet)",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -78,7 +78,8 @@
               "state": {}
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -98,7 +99,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/All and all of.md",
+                "file": "英语学习/语法/Comparison.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -115,7 +116,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/All and all of.md",
+                "file": "英语学习/语法/Comparison.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -138,7 +139,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/All and all of.md"
+                "file": "英语学习/语法/Comparison.md"
               }
             }
           },
@@ -182,9 +183,12 @@
   "active": "ca4d696643eafad1",
   "lastOpenFiles": [
     "英语学习/语法/📚目录（英语语法）.md",
+    "英语学习/语法/Question.md",
+    "英语学习/语法/Comparison.md",
+    "读书笔记/重构/📚大纲（重构）.md",
+    "英语学习/语法/All and all of.md",
     "英语学习/语法/Countable and uncountable.md",
     "英语学习/语法/A an and the.md",
-    "读书笔记/重构/📚大纲（重构）.md",
     "读书笔记/重构/提炼继承体系.md",
     "Excalidraw/提炼继承体系 2024-01-25 22.52.57.excalidraw.md",
     "读书笔记/重构/将领域和表述显示分离.md",
@@ -204,9 +208,6 @@
     "英语学习/语法/Quite, pretty, rather and fairly.md",
     "读书笔记/重构/以委托取代继承.md",
     "工具用法/Dataview用法指南.md",
-    "英语学习/语法/Adjectives ending in -ing and -ed.md",
-    "读书笔记/重构/以继承取代委托.md",
-    "读书笔记/重构/塑造函数模板.md",
     "技术文档/Unity知识点",
     "未命名.canvas",
     "未命名 1.canvas",
