@@ -78,3 +78,37 @@ grammer_type: adjectives and adverbs
 > > [!example]
 > > My sister is older than me. (not elder)
 
+---
+
+**not as/so ... (as) ...** = 没有像 ... 那样 ...。
+
+> [!example]
+> Jack isn't as old as he looks. (he looks older than he is)
+> It's not warm, but it isn't so cold as yesterday.
+
+> [!hint]
+> **less ... than** 和 **not as ... as**含义类似。
+> > [!example]
+> > I spent less money than you.
+
+在肯定句和疑问句中，我们也使用**as ... as**。
+
+> [!example]
+> I'm sorry I'm late. I got here as fast as I could.
+
+> [!hint]
+> 这个句式前面可以加倍数，次数来形容。比如**twice as ... as**，**three times as ... as**。
+> > [!example]
+> > Their house is about three times as big as ours.
+
+**the same as** = 和...一样。
+
+> [!example]
+> David is the same age as James.
+> Laura's salary is the same as mine.
+
+**than me** = **than I am** = 比我如何。
+
+> [!example]
+> You're taller than me.
+> You're taller than I am.

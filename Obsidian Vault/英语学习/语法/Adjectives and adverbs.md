@@ -24,7 +24,7 @@ grammer_type: adjectives and adverbs
 > > quick -> quickly
 > > quiet -> quietly
 
-副词也可以位于过去分词，形容词和其他副词之后。
+副词也可以位于过去分词，形容词和其他副词之前。
 
 > [!example]
 > The meeting was badly organized.
