@@ -25,7 +25,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/Superlatives.md",
+                "file": "工具用法/Git用法指南.md",
                 "mode": "source",
                 "source": false
               }
@@ -61,7 +61,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "git",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -78,7 +78,8 @@
               "state": {}
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -98,7 +99,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/Superlatives.md",
+                "file": "工具用法/Git用法指南.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -115,7 +116,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/Superlatives.md",
+                "file": "工具用法/Git用法指南.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -138,7 +139,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/Superlatives.md"
+                "file": "工具用法/Git用法指南.md"
               }
             }
           },
@@ -181,8 +182,12 @@
   },
   "active": "ca4d696643eafad1",
   "lastOpenFiles": [
-    "英语学习/语法/Comparison.md",
+    "记录灵感/📥收件箱.md",
+    "英语学习/语法/Singular and plural.md",
+    "读书笔记/重构/添加参数.md",
+    "英语学习/语法/Wish.md",
     "英语学习/语法/Superlatives.md",
+    "英语学习/语法/Comparison.md",
     "英语学习/语法/📚目录（英语语法）.md",
     "英语学习/语法/Adjectives and adverbs.md",
     "英语学习/语法/All, every and whole.md",
@@ -203,10 +208,6 @@
     "英语学习/语法/Request, offers, permission and invitations.md",
     "读书笔记/重构/以查询取代临时变量.md",
     "读书笔记/重构/内联临时变量.md",
-    "读书笔记/重构/以测试取代异常.md",
-    "Excalidraw/设计模式/装饰模式 2023-11-18 13.34.30.excalidraw.md",
-    "读书笔记/重构/梳理并分解继承体系.md",
-    "Excalidraw/梳理并分解继承体系 2024-01-23 18.07.28.excalidraw.md",
     "技术文档/Unity知识点",
     "未命名.canvas",
     "未命名 1.canvas",
