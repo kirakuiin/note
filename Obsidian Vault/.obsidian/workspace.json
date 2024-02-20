@@ -23,12 +23,8 @@
             "id": "ca4d696643eafad1",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "工具用法/Git用法指南.md",
-                "mode": "source",
-                "source": false
-              }
+              "type": "graph",
+              "state": {}
             }
           }
         ],
@@ -61,7 +57,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "git",
+                "query": "",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -78,8 +74,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -99,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "工具用法/Git用法指南.md",
+                "file": "技术文档/UML/类图.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -116,7 +111,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "工具用法/Git用法指南.md",
+                "file": "技术文档/UML/类图.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -139,7 +134,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "工具用法/Git用法指南.md"
+                "file": "技术文档/UML/类图.md"
               }
             }
           },
@@ -182,6 +177,13 @@
   },
   "active": "ca4d696643eafad1",
   "lastOpenFiles": [
+    "技术文档/Unity知识点/NUnit的使用方法.md",
+    "技术文档/Unity知识点/Unity知识点.md",
+    "技术文档/Unity知识点/如何在编辑器内测试多人模式.md",
+    "技术文档/Unity知识点/使用ScriptableObject存储配置数据.md",
+    "英语学习/语法/Some and any.md",
+    "读书笔记/重构/移除设值函数.md",
+    "工具用法/Git用法指南.md",
     "记录灵感/📥收件箱.md",
     "英语学习/语法/Singular and plural.md",
     "读书笔记/重构/添加参数.md",
@@ -201,13 +203,6 @@
     "读书笔记/重构/将领域和表述显示分离.md",
     "技术文档/UML/类图.md",
     "Excalidraw/将领域和表述显示分离 2024-01-25 22.47.39.excalidraw.md",
-    "读书笔记/重构/复制被监视数据.md",
-    "读书笔记/重构/将过程化设计转为对象设计.md",
-    "Excalidraw/将过程化设计转为对象设计 2024-01-25 16.40.33.excalidraw.md",
-    "读书笔记/代码整洁之道.md",
-    "英语学习/语法/Request, offers, permission and invitations.md",
-    "读书笔记/重构/以查询取代临时变量.md",
-    "读书笔记/重构/内联临时变量.md",
     "技术文档/Unity知识点",
     "未命名.canvas",
     "未命名 1.canvas",
