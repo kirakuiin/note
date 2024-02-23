@@ -23,8 +23,12 @@
             "id": "ca4d696643eafad1",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {}
+              "type": "markdown",
+              "state": {
+                "file": "英语学习/语法/Relative clauses (who, whom, that, which).md",
+                "mode": "source",
+                "source": false
+              }
             }
           }
         ],
@@ -57,7 +61,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "relative",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -74,7 +78,8 @@
               "state": {}
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -94,7 +99,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/UML/类图.md",
+                "file": "英语学习/语法/Relative clauses (who, whom, that, which).md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -111,7 +116,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/UML/类图.md",
+                "file": "英语学习/语法/Relative clauses (who, whom, that, which).md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -134,7 +139,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/UML/类图.md"
+                "file": "英语学习/语法/Relative clauses (who, whom, that, which).md"
               }
             }
           },
@@ -171,12 +176,18 @@
       "command-palette:打开命令面板": false,
       "workspaces:管理工作区布局": false,
       "random-note:开始漫游笔记": false,
-      "obsidian-excalidraw-plugin:新建绘图文件": false,
-      "table-editor-obsidian:Advanced Tables Toolbar": false
+      "table-editor-obsidian:Advanced Tables Toolbar": false,
+      "obsidian-excalidraw-plugin:新建绘图文件": false
     }
   },
   "active": "ca4d696643eafad1",
   "lastOpenFiles": [
+    "英语学习/语法/Relative clauses (extra information).md",
+    "英语学习/语法/Relative Clauses (whose, where).md",
+    "读书笔记/重构/梳理并分解继承体系.md",
+    "英语学习/语法/To and preposition -ing.md",
+    "英语学习/语法/Comparison.md",
+    "英语学习/语法/So and such.md",
     "技术文档/Unity知识点/NUnit的使用方法.md",
     "技术文档/Unity知识点/Unity知识点.md",
     "技术文档/Unity知识点/如何在编辑器内测试多人模式.md",
@@ -189,7 +200,6 @@
     "读书笔记/重构/添加参数.md",
     "英语学习/语法/Wish.md",
     "英语学习/语法/Superlatives.md",
-    "英语学习/语法/Comparison.md",
     "英语学习/语法/📚目录（英语语法）.md",
     "英语学习/语法/Adjectives and adverbs.md",
     "英语学习/语法/All, every and whole.md",
@@ -198,11 +208,6 @@
     "英语学习/语法/All and all of.md",
     "英语学习/语法/Countable and uncountable.md",
     "英语学习/语法/A an and the.md",
-    "读书笔记/重构/提炼继承体系.md",
-    "Excalidraw/提炼继承体系 2024-01-25 22.52.57.excalidraw.md",
-    "读书笔记/重构/将领域和表述显示分离.md",
-    "技术文档/UML/类图.md",
-    "Excalidraw/将领域和表述显示分离 2024-01-25 22.47.39.excalidraw.md",
     "技术文档/Unity知识点",
     "未命名.canvas",
     "未命名 1.canvas",
