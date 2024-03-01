@@ -56,15 +56,6 @@ unity_type:
 	{
 	}
 	```
-- \[ExpectedException] : 被标记的函数需要抛出被标记的异常才能通过测试。
-	```csharp
-	[Test]
-	[ExpectedException(typeof(Exception))]
-	public void TestCase()
-	{
-		throw new Exception();
-	}
-	```
 - \[Ignore] : 运行时忽略此项测试用例。
 	```csharp
 	[Test]
