@@ -21,7 +21,7 @@ unity_type:
 2. 在类中声明成员，决定存储哪些类型的数据，需要暴露的要设置为公有（里面也可以定义方法）。
 
 ```csharp
-public class BulletData : ScriptableData
+public class BulletData : ScriptableObject
 {
 	public float Speed;
 	public float Damage;
@@ -36,7 +36,7 @@ public class BulletData : ScriptableData
 
 ```csharp
 [CreateAssetMenu(fileName="BulletData", menuName="数据文件/子弹数据", order=0)]
-public class BulletData : ScriptableData
+public class BulletData : ScriptableObject
 {
 	public float Speed;
 	public float Damage;
