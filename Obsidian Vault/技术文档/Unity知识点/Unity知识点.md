@@ -99,3 +99,9 @@ WHERE !outline and contains(unity_type, "编辑器")
 
 > [!note] 多人游戏开发测试
 > 使用[ParrelSync](https://github.com/VeriorPies/ParrelSync)。在**PackageManager**使用里面提供的github链接进行安装，安装完毕后会在顶部菜单里面有*ParrelSync*选单。
+
+> [!summary] MeshPro生成SDF文件方法。
+> 1. 打开**Window->TextMeshPro->Font Asset Creator**。
+> 2. 在**Character Set**选择*Characters from File*模式，设置你想要用的字集的文本文件。
+> 3. 根据文本数量的多少来设置**Altas Resolution**。越多数值必须越大。
+> 4. **Generate Font Altas**。
