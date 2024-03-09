@@ -25,7 +25,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md",
+                "file": "读书笔记/Effective CSharp.md",
                 "mode": "source",
                 "source": false
               }
@@ -98,7 +98,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md",
+                "file": "读书笔记/Effective CSharp.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -115,7 +115,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md",
+                "file": "读书笔记/Effective CSharp.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -138,7 +138,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md"
+                "file": "读书笔记/Effective CSharp.md"
               }
             }
           },
@@ -181,9 +181,19 @@
   },
   "active": "ca4d696643eafad1",
   "lastOpenFiles": [
+    "英语学习/语法/Word order. verb+object, place and time.md",
+    "英语学习/语法/of and 's.md",
+    "英语学习/语法/📚目录（英语语法）.md",
+    "英语学习/语法/The.md",
+    "英语学习/语法/Singular and plural.md",
+    "英语学习/语法/Noun + noun.md",
+    "英语学习/语法/Names with and without the.md",
+    "英语学习/语法/Countable and uncountable.md",
+    "英语学习/语法/A an and the.md",
+    "英语学习/语法/Order of Adjectives.md",
+    "技术文档/Unity知识点/Unity知识点.md",
     "技术文档/Unity知识点/如何在编辑器内测试多人模式.md",
     "技术文档/Unity知识点/使用ScriptableObject存储配置数据.md",
-    "技术文档/Unity知识点/Unity知识点.md",
     "读书笔记/重构/引入断言.md",
     "Excalidraw/设计模式/生成器模式 2023-11-08 18.26.45.excalidraw.md",
     "英语学习/语法/Future continuous.md",
@@ -197,16 +207,6 @@
     "英语学习/语法/Would.md",
     "英语学习/语法/Wish.md",
     "英语学习/语法/Subjunctive mood.md",
-    "英语学习/语法/📚目录（英语语法）.md",
-    "英语学习/语法/Preposition + -ing.md",
-    "英语学习/语法/Order of Adjectives.md",
-    "英语学习/语法/Adjectives ending in -ing and -ed.md",
-    "英语学习/语法/Ing clauses.md",
-    "读书笔记/重构/分解临时变量.md",
-    "技术文档/markdown语法.md",
-    "读书笔记/Effective CSharp.md",
-    "英语学习/语法/Can, could and able to.md",
-    "英语学习/语法/The.md",
     "技术文档/Unity知识点",
     "未命名.canvas",
     "未命名 1.canvas",
