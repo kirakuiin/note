@@ -108,3 +108,6 @@ WHERE !outline and contains(unity_type, "编辑器")
 > 2. 在**Character Set**选择*Characters from File*模式，设置你想要用的字集的文本文件。
 > 3. 根据文本数量的多少来设置**Altas Resolution**。越多数值必须越大。
 > 4. **Generate Font Altas**。
+
+>[!note] 如何使得脚本对编辑器模式生效
+>通过[ExecuteInEditMode]，[ExecuteAlways]可以让代码在编辑器模式下执行。
