@@ -85,6 +85,9 @@ WHERE !outline and contains(unity_type, "开发")
 > [!note] 如何让UI组件移动时进行对齐？
 > 在Gizmo工具那里设置为矩形工具（默认快捷键为T）。
 
+> [!note] 附加Canvas组件导致UI对象无法响应事件
+> 需要在对象上附加`Graphic Raycaster`组件。
+
 # Unity编辑器
 
 ```dataview
