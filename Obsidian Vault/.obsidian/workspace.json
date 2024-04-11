@@ -35,9 +35,11 @@
             "id": "c84aa086bf121454",
             "type": "leaf",
             "state": {
-              "type": "release-notes",
+              "type": "markdown",
               "state": {
-                "currentVersion": "1.5.12"
+                "file": "技术文档/什么是面向对象.md",
+                "mode": "source",
+                "source": false
               }
             }
           }
@@ -108,7 +110,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/Adverbs with the verb.md",
+                "file": "技术文档/什么是面向对象.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -125,7 +127,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/Adverbs with the verb.md",
+                "file": "技术文档/什么是面向对象.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -148,7 +150,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/Adverbs with the verb.md"
+                "file": "技术文档/什么是面向对象.md"
               }
             }
           },
@@ -191,6 +193,7 @@
   },
   "active": "c84aa086bf121454",
   "lastOpenFiles": [
+    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-26 19.19.21.excalidraw.md",
     "英语学习/语法/Reported speech.md",
     "英语学习/语法/Adjectives ending in -ing and -ed.md",
     "英语学习/语法/Question tag.md",
@@ -216,7 +219,6 @@
     "英语学习/语法/A an and the.md",
     "英语学习/语法/Order of Adjectives.md",
     "技术文档/Unity知识点/使用ScriptableObject存储配置数据.md",
-    "读书笔记/重构/引入断言.md",
     "技术文档/Unity知识点",
     "未命名.canvas",
     "未命名 1.canvas",
