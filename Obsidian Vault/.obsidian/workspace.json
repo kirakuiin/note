@@ -25,14 +25,24 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md",
+                "file": "英语学习/语法/Adverbs with the verb.md",
                 "mode": "source",
                 "source": false
               }
             }
+          },
+          {
+            "id": "c84aa086bf121454",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.5.12"
+              }
+            }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -61,7 +71,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "间接引语",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -98,7 +108,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md",
+                "file": "英语学习/语法/Adverbs with the verb.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -115,7 +125,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md",
+                "file": "英语学习/语法/Adverbs with the verb.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -138,7 +148,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md"
+                "file": "英语学习/语法/Adverbs with the verb.md"
               }
             }
           },
@@ -179,13 +189,25 @@
       "obsidian-excalidraw-plugin:新建绘图文件": false
     }
   },
-  "active": "ca4d696643eafad1",
+  "active": "c84aa086bf121454",
   "lastOpenFiles": [
+    "英语学习/语法/Reported speech.md",
+    "英语学习/语法/Adjectives ending in -ing and -ed.md",
+    "英语学习/语法/Question tag.md",
+    "英语学习/语法/Would.md",
+    "英语学习/语法/Request, offers, permission and invitations.md",
+    "英语学习/语法/Adverbs with the verb.md",
+    "英语学习/语法/📚目录（英语语法）.md",
+    "工具用法/Git用法指南.md",
+    "英语学习/语法/Present simple.md",
+    "英语学习/语法/Subjunctive mood.md",
+    "英语学习/语法/Wish.md",
+    "英语学习/语法/Much, many, little, few.md",
+    "技术文档/Unity知识点/Unity知识点.md",
     "技术文档/Unity知识点/如何在编辑器内测试多人模式.md",
     "读书笔记/Effective CSharp.md",
     "英语学习/语法/Word order. verb+object, place and time.md",
     "英语学习/语法/of and 's.md",
-    "英语学习/语法/📚目录（英语语法）.md",
     "英语学习/语法/The.md",
     "英语学习/语法/Singular and plural.md",
     "英语学习/语法/Noun + noun.md",
@@ -193,20 +215,8 @@
     "英语学习/语法/Countable and uncountable.md",
     "英语学习/语法/A an and the.md",
     "英语学习/语法/Order of Adjectives.md",
-    "技术文档/Unity知识点/Unity知识点.md",
     "技术文档/Unity知识点/使用ScriptableObject存储配置数据.md",
     "读书笔记/重构/引入断言.md",
-    "Excalidraw/设计模式/生成器模式 2023-11-08 18.26.45.excalidraw.md",
-    "英语学习/语法/Future continuous.md",
-    "Excalidraw/English grammer/Adjective + to 2023-12-07 15.49.42.excalidraw.md",
-    "技术文档/Unity知识点/NUnit的使用方法.md",
-    "技术文档/C Sharp 知识点.md",
-    "读书笔记/游戏编程模式/服务定位器.md",
-    "读书笔记/游戏编程模式/更新方法.md",
-    "英语学习/语法/Quite, pretty, rather and fairly.md",
-    "英语学习/语法/Prefer and would rather.md",
-    "英语学习/语法/Would.md",
-    "英语学习/语法/Wish.md",
     "技术文档/Unity知识点",
     "未命名.canvas",
     "未命名 1.canvas",
