@@ -114,3 +114,8 @@ WHERE !outline and contains(unity_type, "编辑器")
 
 >[!note] 如何使得脚本对编辑器模式生效
 >通过[ExecuteInEditMode]，[ExecuteAlways]可以让代码在编辑器模式下执行。
+
+> [!note] TMPro富文本里如何显示图片？
+> 需要根据一个包含多个图片的图集来创建一个**Sprite Asset**。可以在`TMP Settings`文件中制定默认图集所在的位置。如果不指定的话则图集默认位于:
+>
+> *TextMesh Pro/Resources/Sprite Assets*。
