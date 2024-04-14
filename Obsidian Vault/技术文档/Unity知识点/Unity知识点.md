@@ -101,7 +101,7 @@ WHERE !outline and contains(unity_type, "编辑器")
 
 > [!summary] 输入切换为使用`Input System`
 > 1. 安装`Input System`包
-> 2. 在**Edit->Player->Active Input Handling**里进行设置。
+> 2. 在**Edit->ProjectSettings->Player->Active Input Handling**里进行设置。
 
 > [!note] 多人游戏开发测试
 > 使用[ParrelSync](https://github.com/VeriorPies/ParrelSync)。在**PackageManager**使用里面提供的github链接进行安装，安装完毕后会在顶部菜单里面有*ParrelSync*选单。
