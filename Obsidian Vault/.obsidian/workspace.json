@@ -37,7 +37,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md",
+                "file": "英语学习/语法/Even.md",
                 "mode": "source",
                 "source": false
               }
@@ -73,7 +73,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "input",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -90,8 +90,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -111,7 +110,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md",
+                "file": "英语学习/语法/Even.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -128,7 +127,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md",
+                "file": "英语学习/语法/Even.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -151,7 +150,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md"
+                "file": "英语学习/语法/Even.md"
               }
             }
           },
@@ -195,6 +194,13 @@
   },
   "active": "c84aa086bf121454",
   "lastOpenFiles": [
+    "英语学习/语法/Comparison.md",
+    "英语学习/语法/Even.md",
+    "技术文档/Unity知识点/Unity知识点.md",
+    "读书笔记/设计模式/📚大纲（设计模式）.md",
+    "读书笔记/设计模式/访问者模式.md",
+    "读书笔记/设计模式/备忘录模式.md",
+    "读书笔记/设计模式/策略模式.md",
     "技术文档/算法与数据结构/伪代码语法说明.md",
     "技术文档/算法与数据结构/数组排序.md",
     "技术文档/2D坐标计算过程.md",
@@ -212,16 +218,9 @@
     "读书笔记/重构/引入本地扩展.md",
     "Excalidraw/设计图/5分钟地下城玩法状态.md",
     "英语学习/语法/Countable and uncountable.md",
-    "技术文档/Unity知识点/Unity知识点.md",
     "技术文档/什么是面向对象.md",
     "Excalidraw/游戏编程模式/游戏编程模式 2023-10-26 19.19.21.excalidraw.md",
     "英语学习/语法/Reported speech.md",
-    "英语学习/语法/Adjectives ending in -ing and -ed.md",
-    "英语学习/语法/Question tag.md",
-    "英语学习/语法/Would.md",
-    "英语学习/语法/Request, offers, permission and invitations.md",
-    "英语学习/语法/📚目录（英语语法）.md",
-    "工具用法/Git用法指南.md",
     "技术文档/Unity知识点",
     "未命名.canvas",
     "未命名 1.canvas",
