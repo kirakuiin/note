@@ -25,7 +25,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/Word order2. Adverbs with the verb.md",
+                "file": "英语学习/语法/Quite, pretty, rather and fairly.md",
                 "mode": "source",
                 "source": false
               }
@@ -37,14 +37,14 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/Unity知识点/Unity踩坑记录.md",
+                "file": "英语学习/语法/📚目录（英语语法）.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -73,7 +73,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "quite",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -90,7 +90,8 @@
               "state": {}
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -110,7 +111,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/Unity知识点/Unity踩坑记录.md",
+                "file": "英语学习/语法/Quite, pretty, rather and fairly.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -127,7 +128,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/Unity知识点/Unity踩坑记录.md",
+                "file": "英语学习/语法/Quite, pretty, rather and fairly.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -150,7 +151,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/Unity知识点/Unity踩坑记录.md"
+                "file": "英语学习/语法/Quite, pretty, rather and fairly.md"
               }
             }
           },
@@ -191,12 +192,18 @@
       "obsidian-excalidraw-plugin:新建绘图文件": false
     }
   },
-  "active": "c84aa086bf121454",
+  "active": "ca4d696643eafad1",
   "lastOpenFiles": [
-    "技术文档/Unity知识点/Unity知识点.md",
-    "技术文档/Unity知识点/Unity踩坑记录.md",
-    "英语学习/语法/Even.md",
     "英语学习/语法/Comparison.md",
+    "英语学习/语法/Superlatives.md",
+    "英语学习/语法/Although, though, in spite of, despite.md",
+    "英语学习/语法/📚目录（英语语法）.md",
+    "英语学习/语法/Word order2. Adverbs with the verb.md",
+    "英语学习/语法/Present simple.md",
+    "Excalidraw/以字段取代子类 2024-01-19 00.42.04.excalidraw.md",
+    "技术文档/Unity知识点/Unity踩坑记录.md",
+    "技术文档/Unity知识点/Unity知识点.md",
+    "英语学习/语法/Even.md",
     "读书笔记/设计模式/📚大纲（设计模式）.md",
     "读书笔记/设计模式/访问者模式.md",
     "读书笔记/设计模式/备忘录模式.md",
@@ -213,13 +220,7 @@
     "英语学习/语法/Subjunctive mood.md",
     "英语学习/语法/Present perfect.md",
     "英语学习/语法/Word order1. verb+object, place and time.md",
-    "英语学习/语法/Word order2. Adverbs with the verb.md",
     "Excalidraw/English grammer/Adjective + to 2023-12-07 15.49.42.excalidraw.md",
-    "读书笔记/重构/引入本地扩展.md",
-    "Excalidraw/设计图/5分钟地下城玩法状态.md",
-    "英语学习/语法/Countable and uncountable.md",
-    "技术文档/什么是面向对象.md",
-    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-26 19.19.21.excalidraw.md",
     "技术文档/Unity知识点",
     "未命名.canvas",
     "未命名 1.canvas",
