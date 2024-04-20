@@ -25,7 +25,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/Prefer and would rather.md",
+                "file": "读书笔记/重构/隐藏委托关系.md",
                 "mode": "source",
                 "source": false
               }
@@ -73,7 +73,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "rather",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -90,8 +90,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -111,7 +110,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/Prefer and would rather.md",
+                "file": "读书笔记/重构/隐藏委托关系.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -128,7 +127,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/Prefer and would rather.md",
+                "file": "读书笔记/重构/隐藏委托关系.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -151,7 +150,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/Prefer and would rather.md"
+                "file": "读书笔记/重构/隐藏委托关系.md"
               }
             }
           },
@@ -194,6 +193,10 @@
   },
   "active": "ca4d696643eafad1",
   "lastOpenFiles": [
+    "英语学习/语法/Unless, as long as, provided.md",
+    "读书笔记/重构/添加参数.md",
+    "英语学习/语法/Countable and uncountable.md",
+    "英语学习/语法/Prefer and would rather.md",
     "英语学习/语法/In case.md",
     "读书笔记/设计模式/生成器模式.md",
     "英语学习/语法/Quite, pretty, rather and fairly.md",
@@ -217,10 +220,6 @@
     "技术文档/算法与数据结构",
     "技术文档/算法.md",
     "英语学习/语法/Present perfect continuous and simple.md",
-    "Excalidraw/设计模式/访问者模式 2023-11-26 13.34.27.excalidraw.md",
-    "Excalidraw/设计模式/备忘录模式 2023-11-24 18.30.10.excalidraw.md",
-    "英语学习/语法/Still, yet, already, any more, any longer.md",
-    "英语学习/语法/Subjunctive mood.md",
     "技术文档/Unity知识点",
     "未命名.canvas",
     "未命名 1.canvas",
