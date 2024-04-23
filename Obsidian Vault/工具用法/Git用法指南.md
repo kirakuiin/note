@@ -25,3 +25,6 @@ tags:
 > 	Hostname ssh.github.com
 > 	Port 443
 >```
+
+> [!warning] 重置后如何找回丢失的数据！
+> 使用`git reflog`命令可以看到你所有的提交，重置记录。通过这个指令配合`git reset HEAD@{n]`可以轻松还原。
