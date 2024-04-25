@@ -119,3 +119,12 @@ WHERE !outline and contains(unity_type, "编辑器")
 > 需要根据一个包含多个图片的图集来创建一个**Sprite Asset**。可以在`TMP Settings`文件中制定默认图集所在的位置。如果不指定的话则图集默认位于:
 >
 > *TextMesh Pro/Resources/Sprite Assets*。
+
+# 实用插件
+
+## UnityAssetCleaner
+
+用于清理不需要的资源。安装后清理目录位于**Window->Delete Unused Assets**。
+
+> [!hint]
+> 注意使用后清理缓存。

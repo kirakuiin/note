@@ -25,7 +25,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/As.md",
+                "file": "英语学习/语法/Future simple.md",
                 "mode": "source",
                 "source": false
               }
@@ -61,7 +61,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "tag:",
+                "query": "parrel",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -98,7 +98,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/As.md",
+                "file": "英语学习/语法/Future simple.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -115,7 +115,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/As.md",
+                "file": "英语学习/语法/Future simple.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -138,7 +138,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/As.md"
+                "file": "英语学习/语法/Future simple.md"
               }
             }
           },
@@ -181,8 +181,11 @@
   },
   "active": "ca4d696643eafad1",
   "lastOpenFiles": [
-    "英语学习/语法/Superlatives.md",
+    "Excalidraw/设计模式/状态模式 2023-11-25 13.47.44.excalidraw.md",
+    "技术文档/Unity知识点/Unity知识点.md",
+    "技术文档/Unity知识点/如何在编辑器内测试多人模式.md",
     "英语学习/语法/As.md",
+    "英语学习/语法/Superlatives.md",
     "工具用法/Git用法指南.md",
     "记录灵感/📥收件箱.md",
     "🧠 第二大脑.md",
@@ -204,9 +207,6 @@
     "英语学习/语法/Comparison.md",
     "英语学习/语法/📚目录（英语语法）.md",
     "英语学习/语法/Word order2. Adverbs with the verb.md",
-    "英语学习/语法/Present simple.md",
-    "Excalidraw/以字段取代子类 2024-01-19 00.42.04.excalidraw.md",
-    "技术文档/Unity知识点/Unity踩坑记录.md",
     "技术文档/算法与数据结构",
     "技术文档/Unity知识点",
     "未命名.canvas",
