@@ -128,3 +128,7 @@ WHERE !outline and contains(unity_type, "编辑器")
 
 > [!hint]
 > 注意使用后清理缓存。
+
+## DoTween
+
+一个用于实现程序动画的插件，支持序列动画，混合动画，十分方便。
