@@ -113,7 +113,3 @@ unity_type:
 - `Assert.IsTrue`, `Assert.IsFalse` : 表达式真假判断。
 - `Assert.Fail` : 主动让测试失败。
 - `Assert.Ignore` : 运行时忽略一个测试。
-
-# Unity中的用法
-
-- 分为 
