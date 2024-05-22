@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md",
+                "file": "技术文档/Unity知识点/Unity踩坑记录.md",
                 "mode": "source",
                 "source": false
               }
@@ -48,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "unit",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md",
+                "file": "技术文档/Unity知识点/Unity踩坑记录.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md",
+                "file": "技术文档/Unity知识点/Unity踩坑记录.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/Unity知识点/Unity知识点.md"
+                "file": "技术文档/Unity知识点/Unity踩坑记录.md"
               }
             }
           },
@@ -168,6 +168,11 @@
   },
   "active": "d4d22d3fea448fdd",
   "lastOpenFiles": [
+    "技术文档/Unity知识点/NUnit的使用方法.md",
+    "技术文档/Unity知识点/使用ScriptableObject存储配置数据.md",
+    "英语学习/语法/Although, though, in spite of, despite.md",
+    "读书笔记/设计模式/装饰模式.md",
+    "技术文档/Unity知识点/Unity知识点.md",
     "技术文档/Unity知识点/Unity踩坑记录.md",
     "读书笔记/重构/以数据类取代记录.md",
     "英语学习/语法/Word order2. Adverbs with the verb.md",
@@ -189,11 +194,6 @@
     "Excalidraw/类图 2023-11-02 17.47.18.excalidraw.md",
     "Excalidraw/重构/提炼继承体系 2024-01-25 22.52.57.excalidraw.md",
     "Excalidraw/重构/以字段取代子类 2024-01-19 00.42.04.excalidraw.md",
-    "Excalidraw/重构/令函数携带参数 2024-01-05 19.30.51.excalidraw.md",
-    "Excalidraw/游戏设计艺术 2024-01-11 00.38.33.excalidraw.md",
-    "Excalidraw/C Sharp 知识点 2023-10-30 14.38.46.excalidraw.md",
-    "Excalidraw/重构/封装集合 2024-01-14 13.48.31.excalidraw.md",
-    "技术文档/Unity知识点/Unity知识点.md",
     "技术文档/算法与数据结构",
     "技术文档/Unity知识点",
     "未命名.canvas",
