@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/Unity知识点/Unity踩坑记录.md",
+                "file": "技术文档/Unity知识点/Unity知识点.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/Unity知识点/Unity踩坑记录.md",
+                "file": "技术文档/Unity知识点/Unity知识点.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/Unity知识点/Unity踩坑记录.md",
+                "file": "技术文档/Unity知识点/Unity知识点.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/Unity知识点/Unity踩坑记录.md"
+                "file": "技术文档/Unity知识点/Unity知识点.md"
               }
             }
           },
@@ -146,7 +146,7 @@
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
@@ -168,12 +168,13 @@
   },
   "active": "d4d22d3fea448fdd",
   "lastOpenFiles": [
+    "技术文档/Unity知识点/跟随物体移动的UI.md",
+    "技术文档/Unity知识点/Unity知识点.md",
+    "技术文档/Unity知识点/Unity踩坑记录.md",
     "技术文档/Unity知识点/NUnit的使用方法.md",
     "技术文档/Unity知识点/使用ScriptableObject存储配置数据.md",
     "英语学习/语法/Although, though, in spite of, despite.md",
     "读书笔记/设计模式/装饰模式.md",
-    "技术文档/Unity知识点/Unity知识点.md",
-    "技术文档/Unity知识点/Unity踩坑记录.md",
     "读书笔记/重构/以数据类取代记录.md",
     "英语学习/语法/Word order2. Adverbs with the verb.md",
     "英语学习/语法/📚目录（英语语法）.md",
@@ -185,7 +186,6 @@
     "技术文档/C Sharp 知识点.md",
     "Excalidraw/重构/将过程化设计转为对象设计 2024-01-25 16.40.33.excalidraw.md",
     "Excalidraw/重构/提炼子类 2023-12-22 15.47.22.excalidraw.md",
-    "技术文档/Unity知识点/跟随物体移动的UI.md",
     "技术文档/UML/类图.md",
     "Excalidraw/重构/将双向关联改为单向关联 2024-01-11 19.35.27.excalidraw.md",
     "Excalidraw/重构/将领域和表述显示分离 2024-01-25 22.47.39.excalidraw.md",

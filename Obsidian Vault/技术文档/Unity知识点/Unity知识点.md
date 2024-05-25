@@ -88,6 +88,8 @@ WHERE !outline and contains(unity_type, "开发")
 > [!note] 附加Canvas组件导致UI对象无法响应事件
 > 需要在对象上附加`Graphic Raycaster`组件。
 
+> [!note] Shader Graph中Scene Color无效
+> 需要在`URP Asset`中设置**Opaque Texture**为打开状态。
 # Unity编辑器
 
 ```dataview
