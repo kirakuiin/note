@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/Relative clauses (who, whom, that, which).md",
+                "file": "技术文档/数学基础/坐标空间.md",
                 "mode": "source",
                 "source": false
               }
@@ -60,7 +60,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "relative",
+                "query": "",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -77,8 +77,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -98,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/Relative clauses (who, whom, that, which).md",
+                "file": "技术文档/数学基础/坐标空间.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -115,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/Relative clauses (who, whom, that, which).md",
+                "file": "技术文档/数学基础/坐标空间.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -138,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/Relative clauses (who, whom, that, which).md"
+                "file": "技术文档/数学基础/坐标空间.md"
               }
             }
           },
@@ -181,12 +180,20 @@
   },
   "active": "d4d22d3fea448fdd",
   "lastOpenFiles": [
+    "技术文档/2D坐标计算过程.md",
+    "技术文档/数学基础/坐标空间.md",
+    "技术文档/数学基础",
+    "日常杂谈/理解变换的两个角度.md",
+    "Excalidraw/理解旋转变换的两个角度 2024-06-02 11.21.13.excalidraw.md",
+    "Excalidraw/理解旋转变换的两个角度 2024-06-02 11.29.26.excalidraw.md",
+    "日常杂谈/基金基础知识.md",
     "技术文档/算法与数据结构/数组排序.md",
     "技术文档/算法与数据结构/二分搜索.md",
+    "技术文档/算法与数据结构/伪代码语法说明.md",
+    "英语学习/语法/Relative clauses (who, whom, that, which).md",
     "技术文档/markdown语法.md",
     "工具用法/Obsidian用法指南.md",
     "技术文档/Unity知识点/跟随物体移动的UI.md",
-    "技术文档/算法与数据结构/伪代码语法说明.md",
     "英语学习/语法/Like as if as though.md",
     "英语学习/语法/Subjunctive mood.md",
     "技术文档/UML/类图.md",
@@ -200,13 +207,6 @@
     "英语学习/语法/Although, though, in spite of, despite.md",
     "读书笔记/设计模式/装饰模式.md",
     "读书笔记/重构/以数据类取代记录.md",
-    "英语学习/语法/Word order2. Adverbs with the verb.md",
-    "英语学习/语法/📚目录（英语语法）.md",
-    "英语学习/语法/See somebody do and see somebody doing.md",
-    "Excalidraw/重构/梳理并分解继承体系 2024-01-23 18.07.28.excalidraw.md",
-    "Excalidraw/重构/将查询函数和修改函数分离 2023-12-14 21.06.25.excalidraw.md",
-    "Excalidraw/设计图/坦克大战概念图.excalidraw.md",
-    "技术文档/C Sharp 知识点.md",
     "技术文档/算法与数据结构",
     "技术文档/Unity知识点",
     "未命名.canvas",
@@ -219,7 +219,6 @@
     "读书笔记/设计模式",
     "日常杂谈/我的GTD实践笔记.canvas",
     "读书笔记/游戏编程模式",
-    "https：/blog.csdn.net/sunshine543123/article/details",
     "Assets/Images/Andromeda galaxy.jpg",
     "Assets/Images/Blobulord.png",
     "英语学习/语法/时态对比.canvas",
