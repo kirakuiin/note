@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/Although, though, in spite of, despite.md",
+                "file": "读书笔记/游戏编程模式/📚大纲（游戏编程模式）.md",
                 "mode": "source",
                 "source": false
               }
@@ -48,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "although",
+                "query": "",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -65,8 +65,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -86,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/Although, though, in spite of, despite.md",
+                "file": "读书笔记/游戏编程模式/📚大纲（游戏编程模式）.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/Although, though, in spite of, despite.md",
+                "file": "读书笔记/游戏编程模式/📚大纲（游戏编程模式）.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -126,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/Although, though, in spite of, despite.md"
+                "file": "读书笔记/游戏编程模式/📚大纲（游戏编程模式）.md"
               }
             }
           },
@@ -169,6 +168,12 @@
   },
   "active": "d4d22d3fea448fdd",
   "lastOpenFiles": [
+    "读书笔记/游戏编程模式/单例模式.md",
+    "读书笔记/代码整洁之道.md",
+    "技术文档/Python 装饰器.md",
+    "技术文档/Python 知识点.md",
+    "技术文档/MVC模式.md",
+    "英语学习/语法/Although, though, in spite of, despite.md",
     "记录灵感/卡牌游戏构思.md",
     "Excalidraw/卡牌游戏构思 2024-06-13 08.56.04.excalidraw.md",
     "英语学习/语法/Subjunctive mood.md",
@@ -190,12 +195,6 @@
     "英语学习/语法/Relative clauses (who, whom, that, which).md",
     "技术文档/markdown语法.md",
     "工具用法/Obsidian用法指南.md",
-    "技术文档/Unity知识点/跟随物体移动的UI.md",
-    "英语学习/语法/Like as if as though.md",
-    "技术文档/UML/类图.md",
-    "读书笔记/重构/提炼类.md",
-    "Excalidraw/设计模式/观察者模式 2023-11-24 18.49.50.excalidraw.md",
-    "英语学习/语法/Like and as.md",
     "技术文档/算法与数据结构",
     "技术文档/Unity知识点",
     "未命名.canvas",
