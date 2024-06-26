@@ -11,14 +11,11 @@
             "id": "d4d22d3fea448fdd",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "markdown",
               "state": {
-                "file": "读书笔记/游戏编程模式/📚大纲.canvas",
-                "viewState": {
-                  "x": 230.58828403458926,
-                  "y": -529.4820812186501,
-                  "zoom": -1.5170233238876611
-                }
+                "file": "技术文档/算法与数据结构/数组排序.md",
+                "mode": "source",
+                "source": false
               }
             }
           }
@@ -51,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "面向对象",
+                "query": "markdo",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -88,12 +85,12 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/游戏编程模式/📚大纲.canvas",
-                "collapseAll": false,
+                "file": "技术文档/算法与数据结构/数组排序.md",
+                "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
                 "showSearch": true,
-                "searchQuery": "Extract Method",
+                "searchQuery": "",
                 "backlinkCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -105,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/游戏编程模式/📚大纲.canvas",
+                "file": "技术文档/算法与数据结构/数组排序.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -128,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/游戏编程模式/📚大纲.canvas"
+                "file": "技术文档/算法与数据结构/数组排序.md"
               }
             }
           },
@@ -148,7 +145,8 @@
               "state": {}
             }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
@@ -170,9 +168,27 @@
   },
   "active": "d4d22d3fea448fdd",
   "lastOpenFiles": [
+    "Assets/Images/bucketsort.png",
+    "Assets/Images/bucketsort",
+    "Assets/Images/heapsort.gif",
+    "技术文档/算法与数据结构/多源最短路径算法.md",
+    "技术文档/算法与数据结构/数组排序.md",
+    "Assets/Images/bubblesort.gif",
+    "Assets/Images/selectsort.gif",
+    "Assets/Images/countingsort.gif",
+    "Assets/Images/quicksort.gif",
+    "Assets/Images/mergesort.gif",
+    "Assets/Images/insertsort.gif",
+    "工具用法/Obsidian用法指南.md",
+    "技术文档/markdown语法.md",
+    "Assets/Images/Blobulord.png",
+    "Assets/Images/Andromeda galaxy.jpg",
+    "Assets/Images/Calendar_icon.png",
+    "技术文档/MVC模式.md",
+    "读书笔记/游戏编程模式/📚大纲.canvas",
+    "读书笔记/游戏编程模式/事件队列.md",
     "技术文档/什么是面向对象.md",
     "读书笔记/代码整洁之道.md",
-    "读书笔记/游戏编程模式/📚大纲.canvas",
     "读书笔记/游戏编程模式/观察者模式.md",
     "读书笔记/游戏编程模式/📚大纲（游戏编程模式）.md",
     "读书笔记/重构/📚大纲（重构）.md",
@@ -181,8 +197,6 @@
     "Excalidraw/游戏编程模式/游戏问题解决流程.md",
     "读书笔记/游戏编程模式/未命名.md",
     "读书笔记/设计模式/📚大纲（设计模式）.md",
-    "技术文档/算法与数据结构/数组排序.md",
-    "技术文档/算法与数据结构/多源最短路径算法.md",
     "技术文档/算法与数据结构/二分搜索.md",
     "技术文档/算法与数据结构/伪代码语法说明.md",
     "日常杂谈/我的GTD实践笔记.canvas",
@@ -194,11 +208,6 @@
     "读书笔记/3D数学/坐标空间.md",
     "读书笔记/设计模式/备忘录模式.md",
     "读书笔记/3D数学",
-    "读书笔记/未命名.md",
-    "英语学习/语法/I will and I'm going to.md",
-    "英语学习/语法/Although, though, in spite of, despite.md",
-    "记录灵感/卡牌游戏构思.md",
-    "Excalidraw/卡牌游戏构思 2024-06-13 08.56.04.excalidraw.md",
     "技术文档/数学基础",
     "技术文档/算法与数据结构",
     "技术文档/Unity知识点",
@@ -209,17 +218,8 @@
     "Excalidraw/设计图",
     "Excalidraw/设计模式",
     "技术文档/UML",
-    "读书笔记/设计模式",
-    "Assets/Images/Andromeda galaxy.jpg",
-    "Assets/Images/Blobulord.png",
     "英语学习/语法/时态对比.canvas",
-    "Assets/Images/Calendar_icon.png",
-    "Assets/Images/Omnifocus_icon.png",
-    "Assets/Images/OmniFocus_Inbox.png",
-    "Excalidraw/Get Things Done：The Art of Stress-Free Productivity 2023-10-11 15.21.08.excalidraw.png",
     "读书笔记/未命名.canvas",
-    "Assets/Andromeda galaxy.jpg",
-    "cuphead.jpg",
     "健身笔录/未命名.canvas"
   ]
 }
