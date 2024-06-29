@@ -124,13 +124,6 @@ WHERE !outline and contains(unity_type, "编辑器")
 
 # 实用插件
 
-## UnityAssetCleaner
-
-用于清理不需要的资源。安装后清理目录位于**Window->Delete Unused Assets**。
-
-> [!hint]
-> 注意使用后清理缓存。
-
 ## DoTween
 
 一个用于实现程序动画的插件，支持序列动画，混合动画，十分方便。
