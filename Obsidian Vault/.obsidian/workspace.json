@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/3D数学/基础知识.md",
+                "file": "读书笔记/3D数学/向量.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/3D数学/基础知识.md",
+                "file": "读书笔记/3D数学/向量.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/3D数学/基础知识.md",
+                "file": "读书笔记/3D数学/向量.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/3D数学/基础知识.md"
+                "file": "读书笔记/3D数学/向量.md"
               }
             }
           },
@@ -168,18 +168,21 @@
   },
   "active": "403dc67f2e5419e0",
   "lastOpenFiles": [
+    "Assets/Images/3D数学/vector_times_scalar_examples_fig.png",
+    "Assets/Images/3D数学/2d_vector_vs_point.png",
+    "Assets/Images/3D数学/3d_sequence_of_displacements.png",
+    "Assets/Images/3D数学/measuring_vector.png",
+    "读书笔记/3D数学/基础知识.md",
+    "读书笔记/3D数学/坐标空间.md",
+    "读书笔记/3D数学/向量.md",
+    "Assets/Images/3D数学/vector_head_tail.png",
     "Assets/Images/3D数学/pythagorean_theorem.png",
     "Assets/Images/3D数学/law_of_sines_law_of_cosines.png",
     "Assets/Images/3D数学/angle_in_standard_position_arbitrary_length_ray.png",
     "Assets/Images/3D数学/radians_measure_intercepted_arc.png",
     "读书笔记/游戏编程模式/事件队列.md",
-    "读书笔记/3D数学/基础知识.md",
     "Assets/Images/3D数学/right_hand_rule_rotation.png",
     "Assets/Images/3D数学/left_hand_rule_rotation.png",
-    "Assets/Images/3D数学/right_handed_coordinate_space.png",
-    "Assets/Images/3D数学/left_handed_coordinate_space.png",
-    "Assets/Images/3D数学/3d_locating_points.png",
-    "Assets/Images/3D数学/3d_cartesian_space.png",
     "技术文档/算法与数据结构/数组排序.md",
     "Excalidraw/3D数学/基础知识 2024-06-30 11.02.45.excalidraw.md",
     "Excalidraw/3D数学/基础知识 2024-06-30 11.13.05.excalidraw.md",
@@ -188,7 +191,6 @@
     "技术文档/算法与数据结构/伪代码语法说明.md",
     "Assets/Images/数组排序",
     "Assets/Images/未命名.md",
-    "读书笔记/3D数学/坐标空间.md",
     "日常杂谈/理解变换的两个角度.md",
     "技术文档/算法与数据结构/二分搜索.md",
     "技术文档/什么是面向对象.md",
@@ -198,7 +200,6 @@
     "技术文档/Unity知识点/Unity知识点.md",
     "技术文档/Unity知识点/Unity踩坑记录.md",
     "技术文档/Unity知识点/NUnit的使用方法.md",
-    "Assets/Images/数组排序/bucketsort.png",
     "Assets/Images/bucketsort",
     "技术文档/算法与数据结构/多源最短路径算法.md",
     "工具用法/Obsidian用法指南.md",
@@ -208,7 +209,6 @@
     "读书笔记/代码整洁之道.md",
     "读书笔记/游戏编程模式/观察者模式.md",
     "读书笔记/游戏编程模式/📚大纲（游戏编程模式）.md",
-    "读书笔记/重构/📚大纲（重构）.md",
     "日常杂谈/我的GTD实践笔记.canvas",
     "读书笔记/3D数学",
     "技术文档/数学基础",
