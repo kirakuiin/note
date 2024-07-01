@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/3D数学/向量.md",
+                "file": "读书笔记/3D数学/多重坐标空间.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/3D数学/向量.md",
+                "file": "读书笔记/3D数学/多重坐标空间.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/3D数学/向量.md",
+                "file": "读书笔记/3D数学/多重坐标空间.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/3D数学/向量.md"
+                "file": "读书笔记/3D数学/多重坐标空间.md"
               }
             }
           },
@@ -168,19 +168,20 @@
   },
   "active": "403dc67f2e5419e0",
   "lastOpenFiles": [
-    "读书笔记/3D数学/坐标空间.md",
     "读书笔记/3D数学/基础知识.md",
+    "读书笔记/3D数学/多重坐标空间.md",
     "读书笔记/3D数学/向量.md",
+    "Assets/Images/3D数学/cross_product_area.png",
+    "Assets/Images/3D数学/cross_product.png",
+    "Assets/Images/3D数学/dot_product_adj_over_hyp.png",
+    "Assets/Images/3D数学/project_vector.png",
+    "Assets/Images/3D数学/dot_product_distributes.png",
+    "Assets/Images/3D数学/dot_product_signs.png",
+    "Assets/Images/3D数学/dot_product_project.png",
+    "读书笔记/3D数学/坐标空间.md",
     "Assets/Images/3D数学/pythagorean_theorem_vectors.png",
     "Assets/Images/3D数学/triangle_rule.png",
     "Assets/Images/3D数学/vector_times_scalar_examples_fig.png",
-    "Assets/Images/3D数学/2d_vector_vs_point.png",
-    "Assets/Images/3D数学/3d_sequence_of_displacements.png",
-    "Assets/Images/3D数学/measuring_vector.png",
-    "Assets/Images/3D数学/vector_head_tail.png",
-    "Assets/Images/3D数学/pythagorean_theorem.png",
-    "Assets/Images/3D数学/law_of_sines_law_of_cosines.png",
-    "Assets/Images/3D数学/angle_in_standard_position_arbitrary_length_ray.png",
     "读书笔记/游戏编程模式/事件队列.md",
     "技术文档/算法与数据结构/数组排序.md",
     "Excalidraw/3D数学/基础知识 2024-06-30 11.02.45.excalidraw.md",
