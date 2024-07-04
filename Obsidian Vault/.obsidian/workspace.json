@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "工具用法/Latex用法指南.md",
+                "file": "读书笔记/3D数学/矩阵.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "工具用法/Latex用法指南.md",
+                "file": "读书笔记/3D数学/矩阵.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "工具用法/Latex用法指南.md",
+                "file": "读书笔记/3D数学/矩阵.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "工具用法/Latex用法指南.md"
+                "file": "读书笔记/3D数学/矩阵.md"
               }
             }
           },
@@ -168,9 +168,12 @@
   },
   "active": "403dc67f2e5419e0",
   "lastOpenFiles": [
+    "Assets/Images/3D数学/2d_skew_box.png",
     "读书笔记/3D数学/变换.md",
-    "工具用法/Latex用法指南.md",
     "读书笔记/3D数学/矩阵.md",
+    "工具用法/Latex用法指南.md",
+    "Assets/Images/3D数学/determinant_3x3.png",
+    "Assets/Images/3D数学/determinant_2x2.png",
     "Assets/Images/3D数学/shear_2d_x_example.png",
     "Assets/Images/3D数学/reflect_examples.png",
     "Assets/Images/3D数学/ortho_project_teapot.png",
@@ -180,8 +183,6 @@
     "Assets/Images/3D数学/rotate_about_z_1.png",
     "Assets/Images/3D数学/rotate_about_y_1.png",
     "Assets/Images/3D数学/rotate_about_x_1.png",
-    "Assets/Images/3D数学/2d_rotation.png",
-    "Assets/Images/3D数学/2d_matrix_box.png",
     "读书笔记/3D数学/多坐标空间.md",
     "读书笔记/3D数学/理解变换的两个角度.md",
     "读书笔记/3D数学/坐标空间.md",
@@ -207,7 +208,6 @@
     "技术文档/算法与数据结构/多源最短路径算法.md",
     "工具用法/Obsidian用法指南.md",
     "技术文档/markdown语法.md",
-    "技术文档/MVC模式.md",
     "读书笔记/游戏编程模式/📚大纲.canvas",
     "日常杂谈/我的GTD实践笔记.canvas",
     "读书笔记/3D数学",
