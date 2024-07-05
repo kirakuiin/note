@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/3D数学/矩阵.md",
+                "file": "读书笔记/3D数学/基础知识.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/3D数学/矩阵.md",
+                "file": "读书笔记/3D数学/基础知识.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/3D数学/矩阵.md",
+                "file": "读书笔记/3D数学/基础知识.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/3D数学/矩阵.md"
+                "file": "读书笔记/3D数学/基础知识.md"
               }
             }
           },
@@ -168,25 +168,26 @@
   },
   "active": "403dc67f2e5419e0",
   "lastOpenFiles": [
-    "未命名.md",
+    "Assets/Images/3D数学/2d_cartesian_polar_convert.png",
+    "Assets/Images/3D数学/2d_polar_locating_points.png",
+    "Assets/Images/3D数学/2d_polar_space.png",
     "读书笔记/3D数学/矩阵.md",
-    "Assets/Images/3D数学/2d_skew_box.png",
+    "Assets/Images/3D数学/projection_plane_in_front_of_center_of_projection.png",
+    "Assets/Images/3D数学/perspective_project_teapot.png",
     "读书笔记/3D数学/变换.md",
+    "Assets/Images/3D数学/homegenous_2d_projection.png",
+    "读书笔记/3D数学/向量.md",
+    "未命名.md",
+    "Assets/Images/3D数学/2d_skew_box.png",
     "工具用法/Latex用法指南.md",
     "Assets/Images/3D数学/determinant_3x3.png",
     "Assets/Images/3D数学/determinant_2x2.png",
     "Assets/Images/3D数学/shear_2d_x_example.png",
     "Assets/Images/3D数学/reflect_examples.png",
-    "Assets/Images/3D数学/ortho_project_teapot.png",
-    "Assets/Images/3D数学/arbitrary_scale_vectors.png",
     "读书笔记/3D数学/基础知识.md",
-    "Assets/Images/3D数学/rotate_about_arbitrary_axis_derive_matrix.png",
-    "Assets/Images/3D数学/rotate_about_z_1.png",
-    "Assets/Images/3D数学/rotate_about_y_1.png",
     "读书笔记/3D数学/多坐标空间.md",
     "读书笔记/3D数学/理解变换的两个角度.md",
     "读书笔记/3D数学/坐标空间.md",
-    "读书笔记/3D数学/向量.md",
     "读书笔记/游戏编程模式/事件队列.md",
     "技术文档/算法与数据结构/数组排序.md",
     "Excalidraw/3D数学/基础知识 2024-06-30 11.02.45.excalidraw.md",
@@ -207,7 +208,6 @@
     "Assets/Images/bucketsort",
     "技术文档/算法与数据结构/多源最短路径算法.md",
     "工具用法/Obsidian用法指南.md",
-    "技术文档/markdown语法.md",
     "读书笔记/游戏编程模式/📚大纲.canvas",
     "日常杂谈/我的GTD实践笔记.canvas",
     "读书笔记/3D数学",
