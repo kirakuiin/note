@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/3D数学/基础知识.md",
+                "file": "技术文档/算法与数据结构/栈.md",
                 "mode": "source",
                 "source": false
               }
@@ -48,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "旋转",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/3D数学/基础知识.md",
+                "file": "技术文档/算法与数据结构/栈.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/3D数学/基础知识.md",
+                "file": "技术文档/算法与数据结构/栈.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/3D数学/基础知识.md"
+                "file": "技术文档/算法与数据结构/栈.md"
               }
             }
           },
@@ -168,48 +168,49 @@
   },
   "active": "403dc67f2e5419e0",
   "lastOpenFiles": [
+    "Assets/Images/3D数学/stack_operations.png",
+    "技术文档/算法与数据结构/数组排序.md",
+    "技术文档/算法与数据结构/栈.md",
+    "技术文档/算法与数据结构/二分搜索.md",
+    "日常杂谈/名言警句.md",
+    "日常杂谈/我的GTD实践笔记.canvas",
+    "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
+    "读书笔记/Effective CSharp.md",
+    "读书笔记/游戏设计艺术.md",
+    "读书笔记/小狗钱钱.md",
+    "读书笔记/软技能 代码之外的生存指南.md",
+    "读书笔记/代码整洁之道.md",
+    "Assets/Images/Andromeda galaxy.jpg",
+    "Assets/Images/Blobulord.png",
+    "Assets/Images/Omnifocus_icon.png",
+    "Assets/Images/Calendar_icon.png",
+    "读书笔记/3D数学/总结.canvas",
+    "读书笔记/3D数学/坐标空间.md",
+    "读书笔记/3D数学/理解变换的两个角度.md",
+    "读书笔记/3D数学/矩阵.md",
+    "读书笔记/3D数学/变换.md",
+    "读书笔记/3D数学/几何原型.md",
+    "读书笔记/3D数学/图形学里的数学主题.md",
+    "读书笔记/3D数学/三维旋转.md",
+    "读书笔记/3D数学/向量.md",
+    "读书笔记/3D数学/基础知识.md",
     "Assets/Images/3D数学/spherical_to_cartesian_math_people.png",
     "Assets/Images/3D数学/spherical_coordinates_math_people.png",
     "Assets/Images/3D数学/cylindrical_coordinates.png",
     "工具用法/Latex用法指南.md",
-    "读书笔记/3D数学/基础知识.md",
     "Assets/Images/3D数学/2d_cartesian_polar_convert.png",
     "Assets/Images/3D数学/2d_polar_locating_points.png",
     "Assets/Images/3D数学/2d_polar_space.png",
-    "读书笔记/3D数学/矩阵.md",
-    "Assets/Images/3D数学/projection_plane_in_front_of_center_of_projection.png",
-    "Assets/Images/3D数学/perspective_project_teapot.png",
-    "读书笔记/3D数学/变换.md",
-    "Assets/Images/3D数学/homegenous_2d_projection.png",
-    "读书笔记/3D数学/向量.md",
     "未命名.md",
-    "Assets/Images/3D数学/2d_skew_box.png",
-    "Assets/Images/3D数学/determinant_3x3.png",
-    "读书笔记/3D数学/多坐标空间.md",
-    "读书笔记/3D数学/理解变换的两个角度.md",
-    "读书笔记/3D数学/坐标空间.md",
     "读书笔记/游戏编程模式/事件队列.md",
-    "技术文档/算法与数据结构/数组排序.md",
     "Excalidraw/3D数学/基础知识 2024-06-30 11.02.45.excalidraw.md",
     "Excalidraw/3D数学/基础知识 2024-06-30 11.13.05.excalidraw.md",
     "Excalidraw/3D数学",
     "Assets/Images/3D数学",
     "技术文档/算法与数据结构/伪代码语法说明.md",
     "Assets/Images/数组排序",
-    "Assets/Images/未命名.md",
-    "技术文档/算法与数据结构/二分搜索.md",
-    "技术文档/什么是面向对象.md",
-    "技术文档/2D坐标计算过程.md",
-    "技术文档/Unity知识点/进程，线程，协程.md",
-    "技术文档/Unity知识点/跟随物体移动的UI.md",
-    "技术文档/Unity知识点/Unity知识点.md",
-    "技术文档/Unity知识点/Unity踩坑记录.md",
-    "技术文档/Unity知识点/NUnit的使用方法.md",
     "Assets/Images/bucketsort",
-    "技术文档/算法与数据结构/多源最短路径算法.md",
-    "工具用法/Obsidian用法指南.md",
     "读书笔记/游戏编程模式/📚大纲.canvas",
-    "日常杂谈/我的GTD实践笔记.canvas",
     "读书笔记/3D数学",
     "技术文档/数学基础",
     "技术文档/算法与数据结构",

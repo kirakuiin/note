@@ -1,0 +1,23 @@
+{
+	"nodes":[
+		{"id":"6ad06cd032290bd2","type":"text","text":"[[向量]]","x":420,"y":-360,"width":250,"height":60},
+		{"id":"4cea283eaf8dd4f9","type":"text","text":"[[矩阵]]","x":420,"y":-160,"width":250,"height":60},
+		{"id":"7f3334ee645a860f","type":"text","text":"[[坐标空间]]","x":780,"y":-160,"width":183,"height":60},
+		{"id":"8deb0dfbeb256d4b","type":"text","text":"[[变换]]","x":595,"y":80,"width":250,"height":60},
+		{"id":"d8cd145fed1ffd2f","type":"text","text":"[[基础知识#3D笛卡尔坐标系]]","x":31,"y":-560,"width":389,"height":80},
+		{"id":"fa05311f7f1045f6","type":"text","text":"[[基础知识#2D笛卡尔坐标系]]","x":651,"y":-560,"width":389,"height":80},
+		{"id":"b13421475b9350be","x":170,"y":80,"width":250,"height":60,"type":"text","text":"[[三维旋转]]"},
+		{"id":"4262c3a78638bcf8","type":"text","text":"[[基础知识#球面坐标]]","x":-163,"y":-130,"width":389,"height":72}
+	],
+	"edges":[
+		{"id":"0091efb5a8791088","fromNode":"d8cd145fed1ffd2f","fromSide":"right","toNode":"6ad06cd032290bd2","toSide":"top"},
+		{"id":"2e1a1189b310ba39","fromNode":"6ad06cd032290bd2","fromSide":"bottom","toNode":"4cea283eaf8dd4f9","toSide":"top"},
+		{"id":"89af9dfe03693d53","fromNode":"fa05311f7f1045f6","fromSide":"left","toNode":"6ad06cd032290bd2","toSide":"top"},
+		{"id":"287a9565898efc46","fromNode":"6ad06cd032290bd2","fromSide":"right","toNode":"7f3334ee645a860f","toSide":"left"},
+		{"id":"055d5116e2e54894","fromNode":"4cea283eaf8dd4f9","fromSide":"bottom","toNode":"8deb0dfbeb256d4b","toSide":"top"},
+		{"id":"da2c8ea5f961d8dd","fromNode":"7f3334ee645a860f","fromSide":"bottom","toNode":"8deb0dfbeb256d4b","toSide":"top"},
+		{"id":"623cead273370de5","fromNode":"4cea283eaf8dd4f9","fromSide":"bottom","toNode":"b13421475b9350be","toSide":"top"},
+		{"id":"bfd7682a4faf1d6b","fromNode":"8deb0dfbeb256d4b","fromSide":"left","toNode":"b13421475b9350be","toSide":"right"},
+		{"id":"8d0e65de4a465513","fromNode":"4262c3a78638bcf8","fromSide":"bottom","toNode":"b13421475b9350be","toSide":"top"}
+	]
+}
