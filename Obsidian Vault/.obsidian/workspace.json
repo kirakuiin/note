@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/算法与数据结构/栈.md",
+                "file": "技术文档/算法与数据结构/链表.md",
                 "mode": "source",
                 "source": false
               }
@@ -48,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "tag:dataStructure",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/算法与数据结构/栈.md",
+                "file": "技术文档/算法与数据结构/链表.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/算法与数据结构/栈.md",
+                "file": "技术文档/算法与数据结构/链表.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/算法与数据结构/栈.md"
+                "file": "技术文档/算法与数据结构/链表.md"
               }
             }
           },
@@ -168,10 +168,25 @@
   },
   "active": "403dc67f2e5419e0",
   "lastOpenFiles": [
-    "Assets/Images/3D数学/stack_operations.png",
+    "技术文档/算法与数据结构/双指针.md",
+    "技术文档/算法与数据结构/链表.md",
     "技术文档/算法与数据结构/数组排序.md",
+    "技术文档/算法与数据结构/数组.md",
+    "技术文档/算法与数据结构/哈希表.md",
+    "技术文档/算法与数据结构/伪代码语法说明.md",
     "技术文档/算法与数据结构/栈.md",
     "技术文档/算法与数据结构/二分搜索.md",
+    "技术文档/算法与数据结构/多源最短路径算法.md",
+    "Assets/Images/算法与数据结构/two_pointer.png",
+    "Assets/Images/算法与数据结构/array_definition.png",
+    "Assets/Images/3D数学/vector_times_scalar_examples_fig.png",
+    "Assets/Images/3D数学/2d_matrix_box.png",
+    "Assets/Images/3D数学/2d_cartesian_polar_convert.png",
+    "Assets/Images/3D数学/angle_in_standard_position_arbitrary_length_ray.png",
+    "Assets/Images/3D数学/triangle_rule.png",
+    "Assets/Images/算法与数据结构/stack_operations.png",
+    "Assets/Images/算法与数据结构/hash_table_lookup.png",
+    "Assets/Images/算法与数据结构",
     "日常杂谈/名言警句.md",
     "日常杂谈/我的GTD实践笔记.canvas",
     "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
@@ -181,9 +196,6 @@
     "读书笔记/软技能 代码之外的生存指南.md",
     "读书笔记/代码整洁之道.md",
     "Assets/Images/Andromeda galaxy.jpg",
-    "Assets/Images/Blobulord.png",
-    "Assets/Images/Omnifocus_icon.png",
-    "Assets/Images/Calendar_icon.png",
     "读书笔记/3D数学/总结.canvas",
     "读书笔记/3D数学/坐标空间.md",
     "读书笔记/3D数学/理解变换的两个角度.md",
@@ -194,20 +206,9 @@
     "读书笔记/3D数学/三维旋转.md",
     "读书笔记/3D数学/向量.md",
     "读书笔记/3D数学/基础知识.md",
-    "Assets/Images/3D数学/spherical_to_cartesian_math_people.png",
-    "Assets/Images/3D数学/spherical_coordinates_math_people.png",
-    "Assets/Images/3D数学/cylindrical_coordinates.png",
     "工具用法/Latex用法指南.md",
-    "Assets/Images/3D数学/2d_cartesian_polar_convert.png",
-    "Assets/Images/3D数学/2d_polar_locating_points.png",
-    "Assets/Images/3D数学/2d_polar_space.png",
-    "未命名.md",
-    "读书笔记/游戏编程模式/事件队列.md",
-    "Excalidraw/3D数学/基础知识 2024-06-30 11.02.45.excalidraw.md",
-    "Excalidraw/3D数学/基础知识 2024-06-30 11.13.05.excalidraw.md",
     "Excalidraw/3D数学",
     "Assets/Images/3D数学",
-    "技术文档/算法与数据结构/伪代码语法说明.md",
     "Assets/Images/数组排序",
     "Assets/Images/bucketsort",
     "读书笔记/游戏编程模式/📚大纲.canvas",
@@ -218,7 +219,6 @@
     "未命名.canvas",
     "未命名 1.canvas",
     "Excalidraw/重构",
-    "读书笔记/重构",
     "英语学习/语法/时态对比.canvas",
     "读书笔记/未命名.canvas",
     "健身笔录/未命名.canvas"
