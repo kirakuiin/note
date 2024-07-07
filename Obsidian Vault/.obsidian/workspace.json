@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/3D数学/三维旋转.md",
+                "file": "读书笔记/3D数学/几何原型.md",
                 "mode": "source",
                 "source": false
               }
@@ -65,8 +65,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -86,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/3D数学/三维旋转.md",
+                "file": "读书笔记/3D数学/几何原型.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/3D数学/三维旋转.md",
+                "file": "读书笔记/3D数学/几何原型.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -126,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/3D数学/三维旋转.md"
+                "file": "读书笔记/3D数学/几何原型.md"
               }
             }
           },
@@ -169,8 +168,8 @@
   },
   "active": "403dc67f2e5419e0",
   "lastOpenFiles": [
-    "工具用法/Latex用法指南.md",
     "读书笔记/3D数学/三维旋转.md",
+    "工具用法/Latex用法指南.md",
     "工具用法/Dataview用法指南.md",
     "技术文档/markdown语法.md",
     "Assets/Images/3D数学/jet_bank.png",
