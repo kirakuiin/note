@@ -248,6 +248,15 @@ $$
 $$
 \int \iint \iiint \oint
 $$
+## 加减
+
+```latex
+\pm
+```
+
+$$
+\pm
+$$
 
 # 记号
 

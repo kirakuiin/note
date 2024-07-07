@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/算法与数据结构/链表.md",
+                "file": "读书笔记/3D数学/三维旋转.md",
                 "mode": "source",
                 "source": false
               }
@@ -48,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "tag:dataStructure",
+                "query": "latex",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -65,7 +65,8 @@
               "state": {}
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -85,7 +86,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/算法与数据结构/链表.md",
+                "file": "读书笔记/3D数学/三维旋转.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +103,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/算法与数据结构/链表.md",
+                "file": "读书笔记/3D数学/三维旋转.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +126,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/算法与数据结构/链表.md"
+                "file": "读书笔记/3D数学/三维旋转.md"
               }
             }
           },
@@ -168,8 +169,16 @@
   },
   "active": "403dc67f2e5419e0",
   "lastOpenFiles": [
-    "技术文档/算法与数据结构/双指针.md",
+    "工具用法/Latex用法指南.md",
+    "读书笔记/3D数学/三维旋转.md",
+    "工具用法/Dataview用法指南.md",
+    "技术文档/markdown语法.md",
+    "Assets/Images/3D数学/jet_bank.png",
+    "Assets/Images/3D数学/jet_pitch.png",
+    "Assets/Images/3D数学/jet_heading.png",
+    "Assets/Images/3D数学/matrix_form_tripod.png",
     "技术文档/算法与数据结构/链表.md",
+    "技术文档/算法与数据结构/双指针.md",
     "技术文档/算法与数据结构/数组排序.md",
     "技术文档/算法与数据结构/数组.md",
     "技术文档/算法与数据结构/哈希表.md",
@@ -183,9 +192,6 @@
     "Assets/Images/3D数学/2d_matrix_box.png",
     "Assets/Images/3D数学/2d_cartesian_polar_convert.png",
     "Assets/Images/3D数学/angle_in_standard_position_arbitrary_length_ray.png",
-    "Assets/Images/3D数学/triangle_rule.png",
-    "Assets/Images/算法与数据结构/stack_operations.png",
-    "Assets/Images/算法与数据结构/hash_table_lookup.png",
     "Assets/Images/算法与数据结构",
     "日常杂谈/名言警句.md",
     "日常杂谈/我的GTD实践笔记.canvas",
@@ -195,7 +201,6 @@
     "读书笔记/小狗钱钱.md",
     "读书笔记/软技能 代码之外的生存指南.md",
     "读书笔记/代码整洁之道.md",
-    "Assets/Images/Andromeda galaxy.jpg",
     "读书笔记/3D数学/总结.canvas",
     "读书笔记/3D数学/坐标空间.md",
     "读书笔记/3D数学/理解变换的两个角度.md",
@@ -203,10 +208,6 @@
     "读书笔记/3D数学/变换.md",
     "读书笔记/3D数学/几何原型.md",
     "读书笔记/3D数学/图形学里的数学主题.md",
-    "读书笔记/3D数学/三维旋转.md",
-    "读书笔记/3D数学/向量.md",
-    "读书笔记/3D数学/基础知识.md",
-    "工具用法/Latex用法指南.md",
     "Excalidraw/3D数学",
     "Assets/Images/3D数学",
     "Assets/Images/数组排序",
