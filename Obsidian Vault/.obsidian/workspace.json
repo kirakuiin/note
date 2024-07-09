@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/算法与数据结构/二叉树.md",
+                "file": "工具用法/Latex用法指南.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/算法与数据结构/二叉树.md",
+                "file": "工具用法/Latex用法指南.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/算法与数据结构/二叉树.md",
+                "file": "工具用法/Latex用法指南.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/算法与数据结构/二叉树.md"
+                "file": "工具用法/Latex用法指南.md"
               }
             }
           },
@@ -168,8 +168,14 @@
   },
   "active": "403dc67f2e5419e0",
   "lastOpenFiles": [
+    "读书笔记/3D数学/矩阵.md",
+    "读书笔记/3D数学/图形工作原理.md",
+    "读书笔记/3D数学/几何原型.md",
+    "读书笔记/3D数学/变换.md",
     "技术文档/算法与数据结构/总结.canvas",
     "技术文档/算法与数据结构/二叉树.md",
+    "技术文档/算法与数据结构/伪代码语法说明.md",
+    "Assets/Images/算法与数据结构/binary_tree_definition.png",
     "技术文档/算法与数据结构/数组.md",
     "技术文档/算法与数据结构/多源最短路径算法.md",
     "技术文档/算法与数据结构/二分搜索.md",
@@ -179,7 +185,6 @@
     "技术文档/算法与数据结构/双指针.md",
     "技术文档/算法与数据结构/链表.md",
     "技术文档/2D坐标计算过程.md",
-    "读书笔记/3D数学/几何原型.md",
     "Assets/Images/3D数学/convexity_test_turn_angle.png",
     "Assets/Images/3D数学/polygon_convex_triangulation_fan.png",
     "Assets/Images/3D数学/polygon_convex_vs_concave.png",
@@ -189,10 +194,8 @@
     "Assets/Images/3D数学/triangle_incenter.png",
     "Assets/Images/3D数学/triangle_center_of_gravity.png",
     "Assets/Images/3D数学/triangle_barycentric_coordinates_compute.png",
-    "Assets/Images/3D数学/triangle_barycentric_tessellates_plane.png",
     "英语学习/语法/Much, many, little, few.md",
     "技术文档/算法与数据结构/栈.md",
-    "技术文档/算法与数据结构/伪代码语法说明.md",
     "Excalidraw/滑动窗口 2024-07-07 20.13.50.excalidraw.md",
     "读书笔记/3D数学/总结.canvas",
     "读书笔记/3D数学/三维旋转.md",
@@ -205,8 +208,6 @@
     "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
     "读书笔记/Effective CSharp.md",
     "读书笔记/游戏设计艺术.md",
-    "读书笔记/小狗钱钱.md",
-    "读书笔记/软技能 代码之外的生存指南.md",
     "Excalidraw/3D数学",
     "Assets/Images/3D数学",
     "Assets/Images/数组排序",
