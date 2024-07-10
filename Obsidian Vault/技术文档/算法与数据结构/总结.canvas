@@ -6,9 +6,11 @@
 		{"id":"059d0a5696e5fb40","type":"text","text":"[[滑动窗口]]","x":-332,"y":271,"width":152,"height":60},
 		{"id":"ed81e588bb7fd9f0","type":"text","text":"[[二分搜索]]","x":-21,"y":271,"width":161,"height":60},
 		{"id":"453379b22f84a6fc","type":"text","text":"[[链表]]","x":-148,"y":271,"width":103,"height":60},
-		{"id":"219a8ed1c135e029","x":-91,"y":420,"width":140,"height":60,"type":"text","text":"[[二叉树]]"},
+		{"id":"219a8ed1c135e029","type":"text","text":"[[二叉树]]","x":-91,"y":420,"width":140,"height":60},
 		{"id":"1d01b03aade17e80","type":"text","text":"[[栈]]","x":-60,"y":0,"width":79,"height":60},
-		{"id":"43432a217c157b18","type":"text","text":"[[数组排序]]","x":80,"y":-60,"width":170,"height":60}
+		{"id":"43432a217c157b18","type":"text","text":"[[数组排序]]","x":80,"y":-60,"width":170,"height":60},
+		{"id":"7c3c0780ec4e4328","type":"text","text":"[[多叉树]]","x":-322,"y":620,"width":132,"height":60},
+		{"id":"9f9fe954da091bd5","x":19,"y":620,"width":121,"height":60,"type":"text","text":"[[回溯]]"}
 	],
 	"edges":[
 		{"id":"f518358d1ca0bdf4","fromNode":"e2d731075e0de27e","fromSide":"bottom","toNode":"037faa273e4ef8bc","toSide":"top"},
@@ -19,6 +21,8 @@
 		{"id":"b1fe2c91c3297939","fromNode":"037faa273e4ef8bc","fromSide":"bottom","toNode":"453379b22f84a6fc","toSide":"top"},
 		{"id":"fdfdbab03d9e4a91","fromNode":"037faa273e4ef8bc","fromSide":"bottom","toNode":"ed81e588bb7fd9f0","toSide":"top"},
 		{"id":"2d19554be8f68931","fromNode":"453379b22f84a6fc","fromSide":"bottom","toNode":"219a8ed1c135e029","toSide":"top"},
-		{"id":"2869d4058fd27106","fromNode":"ed81e588bb7fd9f0","fromSide":"bottom","toNode":"219a8ed1c135e029","toSide":"top"}
+		{"id":"2869d4058fd27106","fromNode":"ed81e588bb7fd9f0","fromSide":"bottom","toNode":"219a8ed1c135e029","toSide":"top"},
+		{"id":"ffba635287da52ab","fromNode":"219a8ed1c135e029","fromSide":"bottom","toNode":"7c3c0780ec4e4328","toSide":"top"},
+		{"id":"7a7d284af27b601b","fromNode":"219a8ed1c135e029","fromSide":"bottom","toNode":"9f9fe954da091bd5","toSide":"top"}
 	]
 }
