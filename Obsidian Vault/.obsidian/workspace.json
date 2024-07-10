@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/3D数学/3D空间变换.md",
+                "file": "读书笔记/3D数学/几何原型.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/3D数学/3D空间变换.md",
+                "file": "读书笔记/3D数学/几何原型.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/3D数学/3D空间变换.md",
+                "file": "读书笔记/3D数学/几何原型.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/3D数学/3D空间变换.md"
+                "file": "读书笔记/3D数学/几何原型.md"
               }
             }
           },
@@ -168,17 +168,21 @@
   },
   "active": "403dc67f2e5419e0",
   "lastOpenFiles": [
+    "读书笔记/3D数学/多边形网格.md",
+    "读书笔记/3D数学/变换.md",
     "读书笔记/3D数学/3D视图.md",
     "读书笔记/3D数学/3D空间变换.md",
-    "Excalidraw/3D空间变换 2024-07-10 13.17.11.excalidraw.md",
-    "读书笔记/3D数学/矩阵.md",
-    "Assets/Images/3D数学/perspective_projection_different_values_for_d.png",
-    "读书笔记/3D数学/总结.canvas",
-    "读书笔记/3D数学/坐标空间.md",
-    "读书笔记/3D数学/变换.md",
-    "读书笔记/3D数学/三维旋转.md",
-    "读书笔记/3D数学/渲染原理.md",
     "读书笔记/3D数学/纹理映射.md",
+    "读书笔记/3D数学/矩阵.md",
+    "读书笔记/3D数学/基础知识.md",
+    "读书笔记/3D数学/三维旋转.md",
+    "读书笔记/3D数学/几何原型.md",
+    "读书笔记/3D数学/总结.canvas",
+    "Assets/Images/3D数学/coordinate_spaces_summary.png",
+    "Excalidraw/3D空间变换 2024-07-10 13.17.11.excalidraw.md",
+    "Assets/Images/3D数学/perspective_projection_different_values_for_d.png",
+    "读书笔记/3D数学/坐标空间.md",
+    "读书笔记/3D数学/渲染原理.md",
     "Assets/Images/3D数学/zoom.png",
     "Assets/Images/3D数学/field_of_view.png",
     "Assets/Images/3D数学/view_frustum.png",
@@ -199,13 +203,9 @@
     "技术文档/算法与数据结构/栈.md",
     "技术文档/算法与数据结构/数组.md",
     "技术文档/算法与数据结构/滑动窗口.md",
-    "技术文档/算法与数据结构/哈希表.md",
-    "技术文档/算法与数据结构/二分搜索.md",
-    "读书笔记/3D数学/向量.md",
     "Assets/Images/算法与数据结构/two_pointer.png",
     "Assets/Images/算法与数据结构/stack_operations.png",
     "Assets/Images/3D数学/radiance_projected_area.png",
-    "Assets/Images/算法与数据结构/hash_table_lookup.png",
     "Assets/Images/算法与数据结构",
     "日常杂谈/我的GTD实践笔记.canvas",
     "Excalidraw/3D数学",
