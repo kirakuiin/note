@@ -5,15 +5,17 @@
 		{"id":"4262c3a78638bcf8","type":"text","text":"[[基础知识#球面坐标]]","x":-83,"y":-130,"width":389,"height":72},
 		{"id":"b13421475b9350be","type":"text","text":"[[三维旋转]]","x":250,"y":80,"width":250,"height":60},
 		{"id":"6ad06cd032290bd2","type":"text","text":"[[向量]]","x":500,"y":-360,"width":250,"height":60},
-		{"id":"4cea283eaf8dd4f9","type":"text","text":"[[矩阵]]","x":500,"y":-160,"width":250,"height":60},
 		{"id":"0295c402ebdd70a6","type":"text","text":"[[渲染原理]]","x":-83,"y":480,"width":153,"height":55},
-		{"id":"fa05311f7f1045f6","type":"text","text":"[[基础知识#2D笛卡尔坐标系]]","x":731,"y":-560,"width":389,"height":80},
 		{"id":"d8cd145fed1ffd2f","type":"text","text":"[[基础知识#3D笛卡尔坐标系]]","x":112,"y":-560,"width":389,"height":80},
+		{"id":"0401cf033f966e33","type":"text","text":"[[3D视图]]","x":457,"y":670,"width":168,"height":60},
+		{"id":"8b02b71863553156","type":"text","text":"[[3D空间变换]]","x":850,"y":670,"width":204,"height":60},
+		{"id":"4cea283eaf8dd4f9","type":"text","text":"[[矩阵]]","x":500,"y":-160,"width":250,"height":60},
+		{"id":"aa5b25463916858c","type":"text","text":"[[几何原型]]","x":1120,"y":140,"width":212,"height":60},
+		{"id":"fa05311f7f1045f6","type":"text","text":"[[基础知识#2D笛卡尔坐标系]]","x":731,"y":-560,"width":389,"height":80},
 		{"id":"8deb0dfbeb256d4b","type":"text","text":"[[变换]]","x":675,"y":80,"width":250,"height":60},
 		{"id":"7f3334ee645a860f","type":"text","text":"[[坐标空间]]","x":860,"y":-160,"width":183,"height":60},
-		{"id":"aa5b25463916858c","type":"text","text":"[[几何原型]]","x":1120,"y":140,"width":212,"height":60},
-		{"id":"0401cf033f966e33","type":"text","text":"[[3D视图]]","x":457,"y":670,"width":168,"height":60},
-		{"id":"8b02b71863553156","type":"text","text":"[[3D空间变换]]","x":850,"y":670,"width":204,"height":60}
+		{"id":"9b2413f4d5e31755","type":"text","text":"[[多边形网格]]","x":1143,"y":670,"width":189,"height":60},
+		{"id":"44dec65d67144885","type":"text","text":"[[纹理映射]]","x":171,"y":670,"width":159,"height":60}
 	],
 	"edges":[
 		{"id":"0091efb5a8791088","fromNode":"d8cd145fed1ffd2f","fromSide":"right","toNode":"6ad06cd032290bd2","toSide":"top"},
@@ -27,6 +29,7 @@
 		{"id":"8d0e65de4a465513","fromNode":"4262c3a78638bcf8","fromSide":"bottom","toNode":"b13421475b9350be","toSide":"top"},
 		{"id":"85d743f73343b7db","fromNode":"6ad06cd032290bd2","fromSide":"right","toNode":"aa5b25463916858c","toSide":"top"},
 		{"id":"f90b49013ca87275","fromNode":"8deb0dfbeb256d4b","fromSide":"bottom","toNode":"0401cf033f966e33","toSide":"top"},
-		{"id":"91a73b624823f864","fromNode":"7f3334ee645a860f","fromSide":"bottom","toNode":"8b02b71863553156","toSide":"top"}
+		{"id":"91a73b624823f864","fromNode":"7f3334ee645a860f","fromSide":"bottom","toNode":"8b02b71863553156","toSide":"top"},
+		{"id":"4f01a405b876cebb","fromNode":"aa5b25463916858c","fromSide":"bottom","toNode":"9b2413f4d5e31755","toSide":"top"}
 	]
 }
