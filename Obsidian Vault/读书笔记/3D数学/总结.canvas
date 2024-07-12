@@ -15,7 +15,9 @@
 		{"id":"8deb0dfbeb256d4b","type":"text","text":"[[变换]]","x":675,"y":80,"width":250,"height":60},
 		{"id":"7f3334ee645a860f","type":"text","text":"[[坐标空间]]","x":860,"y":-160,"width":183,"height":60},
 		{"id":"9b2413f4d5e31755","type":"text","text":"[[多边形网格]]","x":1143,"y":670,"width":189,"height":60},
-		{"id":"44dec65d67144885","type":"text","text":"[[纹理映射]]","x":171,"y":670,"width":159,"height":60}
+		{"id":"44dec65d67144885","type":"text","text":"[[纹理映射]]","x":171,"y":670,"width":159,"height":60},
+		{"id":"c2ba9483f9be871e","x":-136,"y":910,"width":130,"height":60,"type":"text","text":"[[光源]]"},
+		{"id":"b51290af9ddea8b2","x":126,"y":910,"width":250,"height":60,"type":"text","text":"[[标准光照模型]]"}
 	],
 	"edges":[
 		{"id":"0091efb5a8791088","fromNode":"d8cd145fed1ffd2f","fromSide":"right","toNode":"6ad06cd032290bd2","toSide":"top"},
@@ -30,6 +32,9 @@
 		{"id":"85d743f73343b7db","fromNode":"6ad06cd032290bd2","fromSide":"right","toNode":"aa5b25463916858c","toSide":"top"},
 		{"id":"f90b49013ca87275","fromNode":"8deb0dfbeb256d4b","fromSide":"bottom","toNode":"0401cf033f966e33","toSide":"top"},
 		{"id":"91a73b624823f864","fromNode":"7f3334ee645a860f","fromSide":"bottom","toNode":"8b02b71863553156","toSide":"top"},
-		{"id":"4f01a405b876cebb","fromNode":"aa5b25463916858c","fromSide":"bottom","toNode":"9b2413f4d5e31755","toSide":"top"}
+		{"id":"4f01a405b876cebb","fromNode":"aa5b25463916858c","fromSide":"bottom","toNode":"9b2413f4d5e31755","toSide":"top"},
+		{"id":"12e79fa869db09b9","fromNode":"0295c402ebdd70a6","fromSide":"bottom","toNode":"b51290af9ddea8b2","toSide":"top"},
+		{"id":"f2c421529f0cd893","fromNode":"44dec65d67144885","fromSide":"bottom","toNode":"b51290af9ddea8b2","toSide":"top"},
+		{"id":"21774841fbf86894","fromNode":"0295c402ebdd70a6","fromSide":"bottom","toNode":"c2ba9483f9be871e","toSide":"top"}
 	]
 }

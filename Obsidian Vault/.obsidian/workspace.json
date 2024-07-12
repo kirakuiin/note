@@ -11,11 +11,14 @@
             "id": "403dc67f2e5419e0",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "canvas",
               "state": {
-                "file": "读书笔记/3D数学/标准光照模型.md",
-                "mode": "source",
-                "source": false
+                "file": "读书笔记/3D数学/总结.canvas",
+                "viewState": {
+                  "x": 657.1270939911362,
+                  "y": 244.57773858653928,
+                  "zoom": -1.5663544918930998
+                }
               }
             }
           }
@@ -48,7 +51,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "线性变换",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -65,8 +68,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -86,7 +88,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/3D数学/标准光照模型.md",
+                "file": "读书笔记/3D数学/总结.canvas",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +105,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/3D数学/标准光照模型.md",
+                "file": "读书笔记/3D数学/总结.canvas",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -126,7 +128,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/3D数学/标准光照模型.md"
+                "file": "读书笔记/3D数学/总结.canvas"
               }
             }
           },
@@ -169,9 +171,12 @@
   },
   "active": "403dc67f2e5419e0",
   "lastOpenFiles": [
+    "读书笔记/3D数学/光源.md",
+    "读书笔记/3D数学/标准光照模型.md",
+    "Assets/Images/3D数学/shading_teapot_gouraud.png",
+    "Assets/Images/3D数学/shading_teapot_flat.png",
     "Assets/Images/3D数学/lighting_equation_head.png",
     "读书笔记/3D数学/渲染原理.md",
-    "读书笔记/3D数学/标准光照模型.md",
     "Assets/Images/3D数学/lighting_diffuse_reflection.png",
     "Assets/Images/3D数学/lighting_specular_blinn.png",
     "读书笔记/3D数学/变换.md",
@@ -185,9 +190,6 @@
     "读书笔记/3D数学/纹理映射.md",
     "Assets/Images/3D数学/texture_map_example_warp1.png",
     "Assets/Images/3D数学/texture_map_example_warp2_uvspace.png",
-    "Assets/Images/3D数学/texture_map_example_warp1_uvspace.png",
-    "Assets/Images/3D数学/texture_map_example_tile.png",
-    "Assets/Images/3D数学/texture_map_example_zoom_uvspace.png",
     "读书笔记/3D数学/多边形网格.md",
     "技术文档/算法与数据结构/堆.md",
     "读书笔记/3D数学/3D空间变换.md",
