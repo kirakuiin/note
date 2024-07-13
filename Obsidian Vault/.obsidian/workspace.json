@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/3D数学/光源.md",
+                "file": "读书笔记/3D数学/微积分.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/3D数学/光源.md",
+                "file": "读书笔记/3D数学/微积分.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/3D数学/光源.md",
+                "file": "读书笔记/3D数学/微积分.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/3D数学/光源.md"
+                "file": "读书笔记/3D数学/微积分.md"
               }
             }
           },
@@ -168,14 +168,19 @@
   },
   "active": "403dc67f2e5419e0",
   "lastOpenFiles": [
-    "Assets/Images/3D数学/point_light.png",
+    "读书笔记/3D数学/骨骼动画.md",
+    "读书笔记/3D数学/微积分.md",
     "读书笔记/3D数学/总结.canvas",
     "读书笔记/3D数学/光源.md",
+    "Assets/Images/3D数学/light_attenuation_curves.png",
+    "Excalidraw/光源 2024-07-13 20.03.35.excalidraw.md",
+    "读书笔记/3D数学/渲染原理.md",
+    "Assets/Images/3D数学/spot_light_conical.png",
+    "Assets/Images/3D数学/point_light.png",
     "读书笔记/3D数学/标准光照模型.md",
     "Assets/Images/3D数学/shading_teapot_gouraud.png",
     "Assets/Images/3D数学/shading_teapot_flat.png",
     "Assets/Images/3D数学/lighting_equation_head.png",
-    "读书笔记/3D数学/渲染原理.md",
     "Assets/Images/3D数学/lighting_diffuse_reflection.png",
     "Assets/Images/3D数学/lighting_specular_blinn.png",
     "读书笔记/3D数学/变换.md",
@@ -183,11 +188,8 @@
     "Assets/Images/3D数学/lighting_specular_heads.png",
     "工具用法/Latex用法指南.md",
     "Assets/Images/3D数学/lighting_specular_r.png",
-    "Assets/Images/3D数学/lighting_specular_phong.png",
     "读书笔记/3D数学/3D视图.md",
     "读书笔记/3D数学/纹理映射.md",
-    "Assets/Images/3D数学/texture_map_example_warp1.png",
-    "Assets/Images/3D数学/texture_map_example_warp2_uvspace.png",
     "读书笔记/3D数学/多边形网格.md",
     "技术文档/算法与数据结构/堆.md",
     "读书笔记/3D数学/3D空间变换.md",
@@ -204,8 +206,6 @@
     "技术文档/算法与数据结构/回溯.md",
     "技术文档/算法与数据结构/双指针.md",
     "技术文档/算法与数据结构/图.md",
-    "技术文档/算法与数据结构/多源最短路径算法.md",
-    "技术文档/算法与数据结构/多叉树.md",
     "Assets/Images/算法与数据结构",
     "日常杂谈/我的GTD实践笔记.canvas",
     "Excalidraw/3D数学",
