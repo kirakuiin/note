@@ -11,14 +11,11 @@
             "id": "403dc67f2e5419e0",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "markdown",
               "state": {
-                "file": "读书笔记/3D数学/总结.canvas",
-                "viewState": {
-                  "x": 657.1270939911362,
-                  "y": 244.57773858653928,
-                  "zoom": -1.5663544918930998
-                }
+                "file": "读书笔记/3D数学/光源.md",
+                "mode": "source",
+                "source": false
               }
             }
           }
@@ -88,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/3D数学/总结.canvas",
+                "file": "读书笔记/3D数学/光源.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -105,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/3D数学/总结.canvas",
+                "file": "读书笔记/3D数学/光源.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -128,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/3D数学/总结.canvas"
+                "file": "读书笔记/3D数学/光源.md"
               }
             }
           },
@@ -171,6 +168,8 @@
   },
   "active": "403dc67f2e5419e0",
   "lastOpenFiles": [
+    "Assets/Images/3D数学/point_light.png",
+    "读书笔记/3D数学/总结.canvas",
     "读书笔记/3D数学/光源.md",
     "读书笔记/3D数学/标准光照模型.md",
     "Assets/Images/3D数学/shading_teapot_gouraud.png",
@@ -186,7 +185,6 @@
     "Assets/Images/3D数学/lighting_specular_r.png",
     "Assets/Images/3D数学/lighting_specular_phong.png",
     "读书笔记/3D数学/3D视图.md",
-    "读书笔记/3D数学/总结.canvas",
     "读书笔记/3D数学/纹理映射.md",
     "Assets/Images/3D数学/texture_map_example_warp1.png",
     "Assets/Images/3D数学/texture_map_example_warp2_uvspace.png",
@@ -208,7 +206,6 @@
     "技术文档/算法与数据结构/图.md",
     "技术文档/算法与数据结构/多源最短路径算法.md",
     "技术文档/算法与数据结构/多叉树.md",
-    "技术文档/算法与数据结构/二叉树.md",
     "Assets/Images/算法与数据结构",
     "日常杂谈/我的GTD实践笔记.canvas",
     "Excalidraw/3D数学",
