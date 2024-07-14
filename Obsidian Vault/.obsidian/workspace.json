@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/3D数学/微积分.md",
+                "file": "读书笔记/3D数学/三维旋转.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/3D数学/微积分.md",
+                "file": "读书笔记/3D数学/三维旋转.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/3D数学/微积分.md",
+                "file": "读书笔记/3D数学/三维旋转.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/3D数学/微积分.md"
+                "file": "读书笔记/3D数学/三维旋转.md"
               }
             }
           },
@@ -168,8 +168,9 @@
   },
   "active": "403dc67f2e5419e0",
   "lastOpenFiles": [
-    "读书笔记/3D数学/骨骼动画.md",
+    "英语学习/语法/In case.md",
     "读书笔记/3D数学/微积分.md",
+    "读书笔记/3D数学/骨骼动画.md",
     "读书笔记/3D数学/总结.canvas",
     "读书笔记/3D数学/光源.md",
     "Assets/Images/3D数学/light_attenuation_curves.png",
@@ -205,7 +206,6 @@
     "[多叉树.md",
     "技术文档/算法与数据结构/回溯.md",
     "技术文档/算法与数据结构/双指针.md",
-    "技术文档/算法与数据结构/图.md",
     "Assets/Images/算法与数据结构",
     "日常杂谈/我的GTD实践笔记.canvas",
     "Excalidraw/3D数学",
