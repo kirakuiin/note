@@ -1,6 +1,6 @@
 {
   "collapse-filter": false,
-  "search": "[\"special_tag\":al]",
+  "search": "[\"special_tag\":3D]",
   "showTags": false,
   "showAttachments": false,
   "hideUnresolved": false,
@@ -32,6 +32,6 @@
   "repelStrength": 10,
   "linkStrength": 1,
   "linkDistance": 250,
-  "scale": 0.8375351282011573,
+  "scale": 0.6746642429603286,
   "close": false
 }

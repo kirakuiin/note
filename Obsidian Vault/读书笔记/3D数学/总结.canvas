@@ -1,23 +1,27 @@
 {
 	"nodes":[
 		{"id":"e21ca5ec57e5e314","type":"group","x":-160,"y":-640,"width":1560,"height":920,"label":"数学基础"},
-		{"id":"5acdf76ece7dfded","type":"group","x":-160,"y":360,"width":1560,"height":800,"label":"图形学"},
-		{"id":"4262c3a78638bcf8","type":"text","text":"[[基础知识#球面坐标]]","x":-83,"y":-130,"width":389,"height":72},
-		{"id":"b13421475b9350be","type":"text","text":"[[三维旋转]]","x":250,"y":80,"width":250,"height":60},
-		{"id":"6ad06cd032290bd2","type":"text","text":"[[向量]]","x":500,"y":-360,"width":250,"height":60},
+		{"id":"5acdf76ece7dfded","type":"group","x":-160,"y":360,"width":1560,"height":800,"label":"图形学应用"},
 		{"id":"0295c402ebdd70a6","type":"text","text":"[[渲染原理]]","x":-83,"y":480,"width":153,"height":55},
-		{"id":"d8cd145fed1ffd2f","type":"text","text":"[[基础知识#3D笛卡尔坐标系]]","x":112,"y":-560,"width":389,"height":80},
-		{"id":"0401cf033f966e33","type":"text","text":"[[3D视图]]","x":457,"y":670,"width":168,"height":60},
 		{"id":"8b02b71863553156","type":"text","text":"[[3D空间变换]]","x":850,"y":670,"width":204,"height":60},
-		{"id":"4cea283eaf8dd4f9","type":"text","text":"[[矩阵]]","x":500,"y":-160,"width":250,"height":60},
-		{"id":"aa5b25463916858c","type":"text","text":"[[几何原型]]","x":1120,"y":140,"width":212,"height":60},
-		{"id":"fa05311f7f1045f6","type":"text","text":"[[基础知识#2D笛卡尔坐标系]]","x":731,"y":-560,"width":389,"height":80},
-		{"id":"8deb0dfbeb256d4b","type":"text","text":"[[变换]]","x":675,"y":80,"width":250,"height":60},
-		{"id":"7f3334ee645a860f","type":"text","text":"[[坐标空间]]","x":860,"y":-160,"width":183,"height":60},
 		{"id":"9b2413f4d5e31755","type":"text","text":"[[多边形网格]]","x":1143,"y":670,"width":189,"height":60},
 		{"id":"44dec65d67144885","type":"text","text":"[[纹理映射]]","x":171,"y":670,"width":159,"height":60},
-		{"id":"c2ba9483f9be871e","x":-136,"y":910,"width":130,"height":60,"type":"text","text":"[[光源]]"},
-		{"id":"b51290af9ddea8b2","x":126,"y":910,"width":250,"height":60,"type":"text","text":"[[标准光照模型]]"}
+		{"id":"b51290af9ddea8b2","type":"text","text":"[[标准光照模型]]","x":126,"y":910,"width":250,"height":60},
+		{"id":"8dfd63eef8b79c66","type":"text","text":"[[实时渲染管线]]","x":415,"y":1081,"width":250,"height":60},
+		{"id":"fdad176e0a1a1a8d","type":"text","text":"[[法线贴图]]","x":1143,"y":910,"width":156,"height":60},
+		{"id":"fc53e45aa2f929aa","type":"text","text":"[[骨骼动画]]","x":850,"y":910,"width":179,"height":60},
+		{"id":"c2ba9483f9be871e","type":"text","text":"[[光源]]","x":-136,"y":760,"width":130,"height":60},
+		{"id":"0401cf033f966e33","type":"text","text":"[[3D视图]]","x":457,"y":670,"width":168,"height":60},
+		{"id":"aa5b25463916858c","type":"text","text":"[[几何原型]]","x":1120,"y":140,"width":212,"height":60},
+		{"id":"b13421475b9350be","type":"text","text":"[[三维旋转]]","x":250,"y":80,"width":250,"height":60},
+		{"id":"8deb0dfbeb256d4b","type":"text","text":"[[变换]]","x":675,"y":80,"width":250,"height":60},
+		{"id":"4cea283eaf8dd4f9","type":"text","text":"[[矩阵]]","x":500,"y":-160,"width":250,"height":60},
+		{"id":"7f3334ee645a860f","type":"text","text":"[[坐标空间]]","x":860,"y":-160,"width":183,"height":60},
+		{"id":"6ad06cd032290bd2","type":"text","text":"[[向量]]","x":500,"y":-360,"width":250,"height":60},
+		{"id":"09e34030fb695090","type":"text","text":"[[微积分]]","x":-83,"y":-420,"width":138,"height":60},
+		{"id":"4262c3a78638bcf8","type":"text","text":"[[基础知识#球面坐标]]","x":92,"y":-432,"width":283,"height":72},
+		{"id":"d8cd145fed1ffd2f","type":"text","text":"[[基础知识#3D笛卡尔坐标系]]","x":112,"y":-560,"width":389,"height":80},
+		{"id":"fa05311f7f1045f6","type":"text","text":"[[基础知识#2D笛卡尔坐标系]]","x":731,"y":-560,"width":389,"height":80}
 	],
 	"edges":[
 		{"id":"0091efb5a8791088","fromNode":"d8cd145fed1ffd2f","fromSide":"right","toNode":"6ad06cd032290bd2","toSide":"top"},
@@ -35,6 +39,12 @@
 		{"id":"4f01a405b876cebb","fromNode":"aa5b25463916858c","fromSide":"bottom","toNode":"9b2413f4d5e31755","toSide":"top"},
 		{"id":"12e79fa869db09b9","fromNode":"0295c402ebdd70a6","fromSide":"bottom","toNode":"b51290af9ddea8b2","toSide":"top"},
 		{"id":"f2c421529f0cd893","fromNode":"44dec65d67144885","fromSide":"bottom","toNode":"b51290af9ddea8b2","toSide":"top"},
-		{"id":"21774841fbf86894","fromNode":"0295c402ebdd70a6","fromSide":"bottom","toNode":"c2ba9483f9be871e","toSide":"top"}
+		{"id":"21774841fbf86894","fromNode":"0295c402ebdd70a6","fromSide":"bottom","toNode":"c2ba9483f9be871e","toSide":"top"},
+		{"id":"af91da02cbcd563a","fromNode":"8b02b71863553156","fromSide":"bottom","toNode":"fc53e45aa2f929aa","toSide":"top"},
+		{"id":"37d3c84556d1d6a4","fromNode":"8b02b71863553156","fromSide":"bottom","toNode":"fdad176e0a1a1a8d","toSide":"top"},
+		{"id":"3972fe3dda2a33ed","fromNode":"09e34030fb695090","fromSide":"bottom","toNode":"0295c402ebdd70a6","toSide":"top"},
+		{"id":"10dc9fdf9d5edd10","fromNode":"b51290af9ddea8b2","fromSide":"bottom","toNode":"8dfd63eef8b79c66","toSide":"top"},
+		{"id":"9fa0053eeaba1033","fromNode":"8b02b71863553156","fromSide":"bottom","toNode":"8dfd63eef8b79c66","toSide":"top"},
+		{"id":"a866ee303db07b8c","fromNode":"0401cf033f966e33","fromSide":"bottom","toNode":"8dfd63eef8b79c66","toSide":"top"}
 	]
 }

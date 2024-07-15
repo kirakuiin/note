@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/3D数学/骨骼动画.md",
+                "file": "读书笔记/3D数学/实时渲染管线.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/3D数学/骨骼动画.md",
+                "file": "读书笔记/3D数学/实时渲染管线.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/3D数学/骨骼动画.md",
+                "file": "读书笔记/3D数学/实时渲染管线.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/3D数学/骨骼动画.md"
+                "file": "读书笔记/3D数学/实时渲染管线.md"
               }
             }
           },
@@ -168,12 +168,18 @@
   },
   "active": "403dc67f2e5419e0",
   "lastOpenFiles": [
-    "读书笔记/3D数学/坐标空间.md",
     "读书笔记/3D数学/总结.canvas",
+    "读书笔记/3D数学/3D空间变换.md",
+    "读书笔记/3D数学/3D视图.md",
+    "读书笔记/3D数学/实时渲染管线.md",
+    "读书笔记/3D数学/法线贴图.md",
+    "读书笔记/3D数学/矩阵.md",
+    "读书笔记/3D数学/骨骼动画.md",
+    "Assets/Images/3D数学/skinned_robot_bend_elbow.png",
+    "读书笔记/3D数学/坐标空间.md",
     "读书笔记/3D数学/三维旋转.md",
     "英语学习/语法/In case.md",
     "读书笔记/3D数学/微积分.md",
-    "读书笔记/3D数学/骨骼动画.md",
     "读书笔记/3D数学/光源.md",
     "Assets/Images/3D数学/light_attenuation_curves.png",
     "Excalidraw/光源 2024-07-13 20.03.35.excalidraw.md",
@@ -187,15 +193,11 @@
     "Assets/Images/3D数学/lighting_diffuse_reflection.png",
     "Assets/Images/3D数学/lighting_specular_blinn.png",
     "读书笔记/3D数学/变换.md",
-    "读书笔记/3D数学/矩阵.md",
     "Assets/Images/3D数学/lighting_specular_heads.png",
     "工具用法/Latex用法指南.md",
-    "Assets/Images/3D数学/lighting_specular_r.png",
-    "读书笔记/3D数学/3D视图.md",
     "读书笔记/3D数学/纹理映射.md",
     "读书笔记/3D数学/多边形网格.md",
     "技术文档/算法与数据结构/堆.md",
-    "读书笔记/3D数学/3D空间变换.md",
     "读书笔记/3D数学/基础知识.md",
     "读书笔记/3D数学/向量.md",
     "读书笔记/3D数学/几何原型.md",
@@ -203,8 +205,6 @@
     "技术文档/算法与数据结构/数组.md",
     "Excalidraw/3D空间变换 2024-07-10 13.17.11.excalidraw.md",
     "技术文档/算法与数据结构/总结.canvas",
-    "[多叉树.md",
-    "技术文档/算法与数据结构/回溯.md",
     "Assets/Images/算法与数据结构",
     "日常杂谈/我的GTD实践笔记.canvas",
     "Excalidraw/3D数学",
