@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/3D数学/实时渲染管线.md",
+                "file": "读书笔记/3D数学/微积分.md",
                 "mode": "source",
                 "source": false
               }
@@ -48,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "line:(regret to)",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -65,8 +65,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -86,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/3D数学/实时渲染管线.md",
+                "file": "读书笔记/3D数学/微积分.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/3D数学/实时渲染管线.md",
+                "file": "读书笔记/3D数学/微积分.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -126,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/3D数学/实时渲染管线.md"
+                "file": "读书笔记/3D数学/微积分.md"
               }
             }
           },
@@ -169,15 +168,21 @@
   },
   "active": "403dc67f2e5419e0",
   "lastOpenFiles": [
+    "读书笔记/3D数学/实时渲染管线.md",
+    "读书笔记/3D数学/总结.canvas",
+    "读书笔记/3D数学/3D视图.md",
+    "读书笔记/3D数学/变换.md",
+    "读书笔记/3D数学/3D空间变换.md",
+    "Assets/Images/3D数学/backface_culling.png",
+    "Assets/Images/3D数学/backface_culling_vertex_order.png",
+    "Assets/Images/3D数学/clip_example.png",
+    "Assets/Images/3D数学/clip_rules.png",
+    "读书笔记/游戏编程模式/双缓冲.md",
     "Assets/Images/3D数学/graphics_pipeline_data_flow.png",
     "Assets/Images/3D数学/graphics_pipeline_division_of_labor.png",
     "英语学习/语法/Preposition + -ing.md",
     "英语学习/语法/Verb + -ing.md",
     "英语学习/语法/Verb -ing or to.md",
-    "读书笔记/3D数学/实时渲染管线.md",
-    "读书笔记/3D数学/总结.canvas",
-    "读书笔记/3D数学/3D空间变换.md",
-    "读书笔记/3D数学/3D视图.md",
     "读书笔记/3D数学/法线贴图.md",
     "读书笔记/3D数学/矩阵.md",
     "读书笔记/3D数学/骨骼动画.md",
@@ -193,19 +198,12 @@
     "Assets/Images/3D数学/spot_light_conical.png",
     "Assets/Images/3D数学/point_light.png",
     "读书笔记/3D数学/标准光照模型.md",
-    "Assets/Images/3D数学/shading_teapot_gouraud.png",
-    "Assets/Images/3D数学/shading_teapot_flat.png",
-    "Assets/Images/3D数学/lighting_equation_head.png",
-    "Assets/Images/3D数学/lighting_diffuse_reflection.png",
-    "Assets/Images/3D数学/lighting_specular_blinn.png",
-    "读书笔记/3D数学/变换.md",
     "工具用法/Latex用法指南.md",
     "读书笔记/3D数学/纹理映射.md",
     "读书笔记/3D数学/多边形网格.md",
     "技术文档/算法与数据结构/堆.md",
     "读书笔记/3D数学/基础知识.md",
     "读书笔记/3D数学/向量.md",
-    "读书笔记/3D数学/几何原型.md",
     "技术文档/算法与数据结构/总结.canvas",
     "Assets/Images/算法与数据结构",
     "日常杂谈/我的GTD实践笔记.canvas",
