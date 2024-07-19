@@ -11,11 +11,14 @@
             "id": "403dc67f2e5419e0",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "canvas",
               "state": {
-                "file": "读书笔记/3D数学/微积分.md",
-                "mode": "source",
-                "source": false
+                "file": "读书笔记/3D数学/总结.canvas",
+                "viewState": {
+                  "x": 737.3191135734073,
+                  "y": 489.5373961218829,
+                  "zoom": -1.4554296880798012
+                }
               }
             }
           }
@@ -85,7 +88,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/3D数学/微积分.md",
+                "file": "读书笔记/3D数学/总结.canvas",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +105,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/3D数学/微积分.md",
+                "file": "读书笔记/3D数学/总结.canvas",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +128,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/3D数学/微积分.md"
+                "file": "读书笔记/3D数学/总结.canvas"
               }
             }
           },
@@ -168,12 +171,13 @@
   },
   "active": "403dc67f2e5419e0",
   "lastOpenFiles": [
+    "读书笔记/3D数学/实时渲染管线.md",
+    "读书笔记/3D数学/微积分.md",
+    "Assets/Images/3D数学/uniform_circular_motion_acceleration.png",
+    "读书笔记/3D数学/总结.canvas",
     "Assets/Images/3D数学/constant_acceleration_rectangles_24.png",
     "工具用法/Latex用法指南.md",
-    "读书笔记/3D数学/微积分.md",
     "Assets/Images/3D数学/calculus.png",
-    "读书笔记/3D数学/实时渲染管线.md",
-    "读书笔记/3D数学/总结.canvas",
     "读书笔记/3D数学/3D视图.md",
     "读书笔记/3D数学/变换.md",
     "读书笔记/3D数学/3D空间变换.md",
@@ -195,10 +199,8 @@
     "读书笔记/3D数学/三维旋转.md",
     "英语学习/语法/In case.md",
     "读书笔记/3D数学/光源.md",
-    "Assets/Images/3D数学/light_attenuation_curves.png",
     "Excalidraw/光源 2024-07-13 20.03.35.excalidraw.md",
     "读书笔记/3D数学/渲染原理.md",
-    "Assets/Images/3D数学/spot_light_conical.png",
     "读书笔记/3D数学/标准光照模型.md",
     "读书笔记/3D数学/纹理映射.md",
     "读书笔记/3D数学/多边形网格.md",
