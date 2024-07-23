@@ -10,8 +10,11 @@
 		{"id":"1d01b03aade17e80","type":"text","text":"[[栈]]","x":-60,"y":0,"width":79,"height":60},
 		{"id":"43432a217c157b18","type":"text","text":"[[数组排序]]","x":80,"y":-60,"width":170,"height":60},
 		{"id":"7c3c0780ec4e4328","type":"text","text":"[[多叉树]]","x":-322,"y":620,"width":132,"height":60},
-		{"id":"9f9fe954da091bd5","type":"text","text":"[[回溯]]","x":19,"y":620,"width":121,"height":60},
-		{"id":"bba46f28fd2416b9","x":-256,"y":780,"width":105,"height":60,"type":"text","text":"[[堆]]"}
+		{"id":"bba46f28fd2416b9","type":"text","text":"[[堆]]","x":-134,"y":620,"width":105,"height":60},
+		{"id":"5230c035cd901f75","x":-455,"y":790,"width":123,"height":60,"type":"text","text":"[[区间]]"},
+		{"id":"672a11dc4ec08197","x":-199,"y":790,"width":140,"height":60,"type":"text","text":"[[贪心]]"},
+		{"id":"9f9fe954da091bd5","type":"text","text":"[[回溯]]","x":80,"y":620,"width":121,"height":60},
+		{"id":"67a545c56650abbb","x":2,"y":790,"width":78,"height":60,"type":"text","text":"[[图]]"}
 	],
 	"edges":[
 		{"id":"f518358d1ca0bdf4","fromNode":"e2d731075e0de27e","fromSide":"bottom","toNode":"037faa273e4ef8bc","toSide":"top"},
@@ -25,6 +28,9 @@
 		{"id":"2869d4058fd27106","fromNode":"ed81e588bb7fd9f0","fromSide":"bottom","toNode":"219a8ed1c135e029","toSide":"top"},
 		{"id":"ffba635287da52ab","fromNode":"219a8ed1c135e029","fromSide":"bottom","toNode":"7c3c0780ec4e4328","toSide":"top"},
 		{"id":"7a7d284af27b601b","fromNode":"219a8ed1c135e029","fromSide":"bottom","toNode":"9f9fe954da091bd5","toSide":"top"},
-		{"id":"905f931dcc87dd5a","fromNode":"219a8ed1c135e029","fromSide":"bottom","toNode":"bba46f28fd2416b9","toSide":"top"}
+		{"id":"905f931dcc87dd5a","fromNode":"219a8ed1c135e029","fromSide":"bottom","toNode":"bba46f28fd2416b9","toSide":"top"},
+		{"id":"6b4a673742fbfcca","fromNode":"9f9fe954da091bd5","fromSide":"bottom","toNode":"67a545c56650abbb","toSide":"top"},
+		{"id":"9396a9bde771bbfc","fromNode":"bba46f28fd2416b9","fromSide":"bottom","toNode":"5230c035cd901f75","toSide":"top"},
+		{"id":"302787a27d16f496","fromNode":"bba46f28fd2416b9","fromSide":"bottom","toNode":"672a11dc4ec08197","toSide":"top"}
 	]
 }
