@@ -13,12 +13,15 @@ grammer_type: prepositions
 > [!example]
 > on Friday.
 > on 16 May 2009.
-- **in**用于强调事情在一个时间段内
+- **in**用于强调事情在一个长时间段内。
 > [!example]
 > in a day.
 > in October.
 > in Winter.
 > in the 18th century.
+
+> [!hint]
+> **in on at**这三个介词可以理解为从一般化到特殊化，**in**最一般化，**at**最特殊化，**on**程度位于两者之间。
 
 上面的规则中有一些特例：
 - 圣诞节，周末用**at**。at Christmas, at the weekend.
