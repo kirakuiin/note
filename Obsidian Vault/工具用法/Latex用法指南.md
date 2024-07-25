@@ -268,6 +268,22 @@ $$
 \otimes
 $$
 
+## 交，并
+
+```latex
+\cap
+\cup
+\bigcap
+\bigcup
+```
+
+$$
+\cap \quad
+\cup \quad
+\bigcap \quad
+\bigcup
+$$
+
 # 记号
 
 ## 空格
@@ -330,6 +346,16 @@ a^{5} \
 a_{5}
 $$
 
+## 底标
+
+```latex
+\int\limits_{i=1}
+```
+
+$$
+\int\limits_{i=1}
+$$
+
 ## 帽，点
 
 ```latex
@@ -353,15 +379,19 @@ $$
 {b}\in{a} \ {a}\notin{b}
 $$
 
-## 子集
+## 子集，真子集，空集
 
 
 ```latex
+{a} \subseteq {b}
 {a} \subset {b}
+\emptyset
 ```
 
 $$
-{a} \subset {b}
+{a} \subset {b} \quad
+{a} \subseteq {b} \quad
+\emptyset
 $$
 ## 恒等于，不等，渐进等于，约等
 
@@ -428,6 +458,18 @@ $$
 
 $$
 \infty
+$$
+
+## 上，下划线
+
+```latex
+\overline{p}
+\underline {p}
+```
+
+$$
+\overline{p} \quad
+\underline {p}
 $$
 
 ## 常用函数
