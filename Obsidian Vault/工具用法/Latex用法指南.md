@@ -472,6 +472,33 @@ $$
 \underline {p}
 $$
 
+## 角
+
+```latex
+\angle{p}
+\measureangle{p}
+```
+
+$$
+\angle{p} \quad
+\measuredangle{p}
+$$
+## 逻辑符号
+
+```latex
+\land \vee \neg
+\forall \exists \nexists
+\because
+```
+
+$$
+\begin{align}
+\land \ \vee \ \neg \\
+\forall \ \exists \ \nexists \\
+\because
+\end{align}
+$$
+
 ## 常用函数
 
 一般用\\+对应函数名即可表达，比如：
