@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/When and if.md",
+                "file": "英语学习/语法/Noun+preposition.md",
                 "mode": "source",
                 "source": false
               }
@@ -48,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "line:(as soon)",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -65,8 +65,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -86,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/When and if.md",
+                "file": "英语学习/语法/Noun+preposition.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/When and if.md",
+                "file": "英语学习/语法/Noun+preposition.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -126,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/When and if.md"
+                "file": "英语学习/语法/Noun+preposition.md"
               }
             }
           },
@@ -169,6 +168,9 @@
   },
   "active": "d75469821e7eb461",
   "lastOpenFiles": [
+    "英语学习/语法/By.md",
+    "英语学习/语法/Noun+preposition.md",
+    "英语学习/语法/When and if.md",
     "英语学习/语法/At,on,in(other uses).md",
     "英语学习/语法/To,arrive,into.md",
     "英语学习/语法/At,on,in(position).md",
@@ -192,9 +194,6 @@
     "技术文档/算法与数据结构/最小生成树.md",
     "工具用法/Latex用法指南.md",
     "工具用法/VSCode用法指南.md",
-    "工具用法/Windows用法指南.md",
-    "技术文档/算法与数据结构/二分搜索.md",
-    "读书笔记/3D数学/概率.md",
     "读书笔记/3D数学/总结.canvas",
     "技术文档/算法与数据结构/总结.canvas",
     "Assets/Images/算法与数据结构/linkedlist_tree_graph.png",
