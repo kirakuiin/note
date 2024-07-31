@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/Verb + preposition.md",
+                "file": "读书笔记/游戏AI/行为树.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/Verb + preposition.md",
+                "file": "读书笔记/游戏AI/行为树.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/Verb + preposition.md",
+                "file": "读书笔记/游戏AI/行为树.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/Verb + preposition.md"
+                "file": "读书笔记/游戏AI/行为树.md"
               }
             }
           },
@@ -168,32 +168,33 @@
   },
   "active": "d75469821e7eb461",
   "lastOpenFiles": [
-    "英语学习/语法/Adjective + preposition.md",
+    "读书笔记/游戏AI/黑板架构.md",
+    "读书笔记/游戏AI/行为树.md",
+    "Excalidraw/行为树 2024-07-31 17.01.24.excalidraw.md",
+    "读书笔记/3D数学/标准光照模型.md",
+    "技术文档/Python 知识点.md",
+    "读书笔记/未命名.md",
+    "读书笔记/游戏AI",
+    "记录灵感/卡牌游戏构思.md",
+    "技术文档/MVC模式.md",
+    "技术文档/Emacs 问题记录.md",
+    "技术文档/C Sharp 知识点.md",
+    "技术文档/游戏开发 知识点.md",
+    "技术文档/什么是面向对象.md",
+    "技术文档/Python 装饰器.md",
+    "工具用法/markdown语法.md",
+    "技术文档/2D坐标计算过程.md",
+    "读书笔记/小狗钱钱.md",
+    "读书笔记/游戏设计艺术.md",
+    "读书笔记/Effective CSharp.md",
+    "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
     "英语学习/语法/Verb + preposition.md",
+    "英语学习/语法/Adjective + preposition.md",
     "英语学习/语法/📚目录（英语语法）.md",
     "英语学习/语法/Adjectives and adverbs.md",
     "英语学习/语法/Adjective + to.md",
     "英语学习/语法/Noun+preposition.md",
     "英语学习/语法/At,on,in(position).md",
-    "英语学习/语法/At,on,in(other uses).md",
-    "英语学习/语法/By.md",
-    "英语学习/语法/When and if.md",
-    "英语学习/语法/To,arrive,into.md",
-    "记录灵感/卡牌游戏构思.md",
-    "技术文档/Python 装饰器.md",
-    "技术文档/Python 知识点.md",
-    "技术文档/MVC模式.md",
-    "技术文档/markdown语法.md",
-    "技术文档/Emacs 问题记录.md",
-    "技术文档/C Sharp 知识点.md",
-    "技术文档/游戏开发 知识点.md",
-    "技术文档/什么是面向对象.md",
-    "技术文档/2D坐标计算过程.md",
-    "读书笔记/代码整洁之道.md",
-    "读书笔记/软技能 代码之外的生存指南.md",
-    "读书笔记/小狗钱钱.md",
-    "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
-    "读书笔记/Effective CSharp.md",
     "读书笔记/3D数学/总结.canvas",
     "技术文档/算法与数据结构/总结.canvas",
     "Assets/Images/算法与数据结构/linkedlist_tree_graph.png",
@@ -219,7 +220,6 @@
     "技术文档/Unity知识点",
     "未命名.canvas",
     "未命名 1.canvas",
-    "Excalidraw/重构",
     "英语学习/语法/时态对比.canvas",
     "读书笔记/未命名.canvas",
     "健身笔录/未命名.canvas"
