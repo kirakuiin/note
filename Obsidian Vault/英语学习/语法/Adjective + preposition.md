@@ -24,7 +24,7 @@ grammer_type: prepositions
 > There's no point in getting angry things that don't matter.
 > Are you annoyed with me for being late?
 
-**excited / worried / nervous / happy etc. about
+**excited / worried / nervous / happy etc. about a situation**
 
 > [!example]
 > Are you nervous about the exam?
