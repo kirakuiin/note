@@ -289,3 +289,75 @@ grammer_type: prepositions
 
 > [!example]
 > I congratulated her on doing so well in her exams.
+
+---
+
+**believe in** = 相信某事存在，某事是正确的。
+**believe sth** = 信任某人，相信某事。
+
+> [!example]
+> The story can't be true. I don't believe it.
+> Do you believe in God?
+
+**specialize/succeed in**
+
+> [!example]
+> I hope you succeed in finding the job you want.
+
+---
+
+**break/crash/drive/bump/run into**
+
+> [!example]
+> He lost control of the car and crashed into a wall.
+
+**divide/cut/split sth into two or more parts**
+
+> [!example]
+> The book is divided into three parts.
+
+**translate sth from ... into ...**
+
+> [!example]
+> Her books have been translated into many languages.
+
+---
+
+**collide with**
+
+> [!example]
+> A bus collided with a car.
+
+**fill sth with**
+
+> [!example]
+> Take his saucepan and fill it with water.
+
+**provide / supply somebody with**
+
+> [!example]
+> The school provides all its students with books.
+
+---
+
+**happen to**
+
+> [!example]
+> What happened to that gold watch?
+
+**invite somebody to**
+
+> [!example]
+> The only invited a few people to their wedding.
+
+**prefer sth to sth**
+
+> [!example]
+> I prefer tea to coffee.
+
+---
+
+**concentrate/insist/spend on**
+
+> [!example]
+> How much do you spend on food each week?
