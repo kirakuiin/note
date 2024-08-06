@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/Although, though, in spite of, despite.md",
+                "file": "英语学习/语法/Away and back.md",
                 "mode": "source",
                 "source": false
               }
@@ -48,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "although",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -65,8 +65,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -86,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/Although, though, in spite of, despite.md",
+                "file": "英语学习/语法/Away and back.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/Although, though, in spite of, despite.md",
+                "file": "英语学习/语法/Away and back.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -126,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/Although, though, in spite of, despite.md"
+                "file": "英语学习/语法/Away and back.md"
               }
             }
           },
@@ -169,6 +168,9 @@
   },
   "active": "d75469821e7eb461",
   "lastOpenFiles": [
+    "英语学习/语法/Down.md",
+    "英语学习/语法/Away and back.md",
+    "英语学习/语法/Although, though, in spite of, despite.md",
     "英语学习/语法/On and off.md",
     "英语学习/语法/In and out.md",
     "英语学习/语法/Verb + preposition.md",
@@ -177,7 +179,6 @@
     "Excalidraw/Phrasal Verbs 2024-08-02 20.38.03.excalidraw.md",
     "工具用法/markdown语法.md",
     "英语学习/语法/📚目录（英语语法）.md",
-    "英语学习/语法/Although, though, in spite of, despite.md",
     "读书笔记/游戏AI/行为树.md",
     "读书笔记/游戏AI/黑板架构.md",
     "Excalidraw/黑板架构 2024-07-31 17.52.23.excalidraw.md",
@@ -195,8 +196,6 @@
     "技术文档/什么是面向对象.md",
     "技术文档/Python 装饰器.md",
     "技术文档/2D坐标计算过程.md",
-    "读书笔记/小狗钱钱.md",
-    "读书笔记/游戏设计艺术.md",
     "读书笔记/3D数学/总结.canvas",
     "技术文档/算法与数据结构/总结.canvas",
     "Assets/Images/算法与数据结构/linkedlist_tree_graph.png",
