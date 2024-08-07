@@ -13,13 +13,24 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/Up.md",
+                "file": "技术文档/UML/类图.md",
                 "mode": "source",
                 "source": false
               }
             }
+          },
+          {
+            "id": "99eb9d6cf51547e0",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Excalidraw/设计图/5分钟地下城核心类图.md"
+              }
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -48,7 +59,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "泛化",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -85,7 +96,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/Up.md",
+                "file": "Excalidraw/设计图/5分钟地下城核心类图.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +113,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/Up.md",
+                "file": "Excalidraw/设计图/5分钟地下城核心类图.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +136,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/Up.md"
+                "file": "Excalidraw/设计图/5分钟地下城核心类图.md"
               }
             }
           },
@@ -166,10 +177,16 @@
       "obsidian-excalidraw-plugin:新建绘图文件": false
     }
   },
-  "active": "d75469821e7eb461",
+  "active": "99eb9d6cf51547e0",
   "lastOpenFiles": [
-    "英语学习/语法/Away and back.md",
+    "Excalidraw/设计图/5分钟地下城玩法状态.md",
+    "Excalidraw/设计图/坦克大战概念图.excalidraw.md",
+    "Excalidraw/设计图/5分钟地下城核心类图.md",
+    "Excalidraw/设计图/5分钟地下城核心类图.png",
+    "技术文档/UML/类图.md",
+    "Excalidraw/设计图/未命名.md",
     "英语学习/语法/Up.md",
+    "英语学习/语法/Away and back.md",
     "英语学习/语法/Down.md",
     "英语学习/语法/Although, though, in spite of, despite.md",
     "英语学习/语法/On and off.md",
@@ -190,12 +207,6 @@
     "读书笔记/未命名.md",
     "读书笔记/游戏AI",
     "记录灵感/卡牌游戏构思.md",
-    "技术文档/MVC模式.md",
-    "技术文档/Emacs 问题记录.md",
-    "技术文档/C Sharp 知识点.md",
-    "技术文档/游戏开发 知识点.md",
-    "技术文档/什么是面向对象.md",
-    "技术文档/Python 装饰器.md",
     "读书笔记/3D数学/总结.canvas",
     "技术文档/算法与数据结构/总结.canvas",
     "Assets/Images/算法与数据结构/linkedlist_tree_graph.png",
@@ -207,7 +218,6 @@
     "Assets/Images/3D数学/clip_example.png",
     "Assets/Images/3D数学/clip_rules.png",
     "Assets/Images/3D数学/graphics_pipeline_data_flow.png",
-    "Assets/Images/3D数学/graphics_pipeline_division_of_labor.png",
     "Assets/Images/算法与数据结构",
     "日常杂谈/我的GTD实践笔记.canvas",
     "Excalidraw/3D数学",
