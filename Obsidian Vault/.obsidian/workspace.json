@@ -28,9 +28,19 @@
                 "file": "Excalidraw/设计图/5分钟地下城核心类图.md"
               }
             }
+          },
+          {
+            "id": "567801feeb24d7cf",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.6.7"
+              }
+            }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -177,7 +187,7 @@
       "obsidian-excalidraw-plugin:新建绘图文件": false
     }
   },
-  "active": "99eb9d6cf51547e0",
+  "active": "567801feeb24d7cf",
   "lastOpenFiles": [
     "Excalidraw/设计图/5分钟地下城玩法状态.md",
     "Excalidraw/设计图/坦克大战概念图.excalidraw.md",
