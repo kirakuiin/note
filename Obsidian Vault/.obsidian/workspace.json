@@ -23,14 +23,11 @@
             "id": "99eb9d6cf51547e0",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "markdown",
               "state": {
-                "file": "读书笔记/游戏编程模式/📚大纲.canvas",
-                "viewState": {
-                  "x": 151.78858725761776,
-                  "y": -526.3002770083103,
-                  "zoom": -1.6640163098912184
-                }
+                "file": "读书笔记/3D数学/3D空间变换.md",
+                "mode": "source",
+                "source": false
               }
             }
           }
@@ -64,7 +61,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "markdown",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -101,7 +98,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/游戏编程模式/📚大纲.canvas",
+                "file": "读书笔记/3D数学/3D空间变换.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -118,7 +115,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/游戏编程模式/📚大纲.canvas",
+                "file": "读书笔记/3D数学/3D空间变换.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -141,7 +138,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/游戏编程模式/📚大纲.canvas"
+                "file": "读书笔记/3D数学/3D空间变换.md"
               }
             }
           },
@@ -184,37 +181,38 @@
   },
   "active": "99eb9d6cf51547e0",
   "lastOpenFiles": [
-    "读书笔记/代码整洁之道.md",
-    "读书笔记/Effective CSharp.md",
-    "读书笔记/Get Things Done：The Art of Stress-Free Productivity.md",
-    "读书笔记/设计模式/📚大纲（设计模式）.md",
-    "读书笔记/3D数学/渲染原理.md",
-    "读书笔记/3D数学/纹理映射.md",
-    "读书笔记/3D数学/微积分.md",
-    "读书笔记/3D数学/几何原型.md",
-    "读书笔记/3D数学/实时渲染管线.md",
-    "读书笔记/3D数学/标准光照模型.md",
+    "读书笔记/3D数学/3D视图.md",
     "读书笔记/3D数学/3D空间变换.md",
+    "技术文档/算法与数据结构/最短路径算法.md",
+    "技术文档/算法与数据结构/总结.canvas",
+    "技术文档/算法与数据结构/最小生成树.md",
+    "技术文档/算法与数据结构/图.md",
+    "读书笔记/游戏编程模式/组件模式.md",
+    "读书笔记/游戏编程模式/子类沙盒.md",
+    "读书笔记/游戏编程模式/字节码.md",
+    "工具用法/markdown语法.md",
+    "读书笔记/游戏编程模式/状态模式.md",
+    "读书笔记/游戏编程模式/脏标记模式.md",
+    "读书笔记/游戏编程模式/原型模式.md",
+    "读书笔记/游戏编程模式/游戏循环.md",
+    "读书笔记/游戏编程模式/享元模式.md",
+    "读书笔记/游戏编程模式/双缓冲.md",
+    "读书笔记/游戏编程模式/数据局部性.md",
+    "读书笔记/游戏编程模式/事件队列.md",
+    "读书笔记/游戏编程模式/命令模式.md",
+    "读书笔记/游戏编程模式/类型对象.md",
+    "读书笔记/游戏编程模式/空间分区.md",
+    "读书笔记/游戏编程模式/观察者模式.md",
+    "读书笔记/游戏编程模式/更新方法.md",
+    "读书笔记/游戏编程模式/服务定位器.md",
+    "读书笔记/游戏编程模式/对象池.md",
+    "读书笔记/游戏编程模式/订阅-发布模式.md",
+    "读书笔记/游戏编程模式/单例模式.md",
+    "读书笔记/游戏编程模式/📚大纲.canvas",
     "读书笔记/3D数学/总结.canvas",
-    "读书笔记/3D数学/坐标空间.md",
-    "读书笔记/重构/📚大纲（重构）.md",
-    "读书笔记/软技能 代码之外的生存指南.md",
-    "读书笔记/游戏设计艺术.md",
-    "读书笔记/小狗钱钱.md",
-    "读书笔记/游戏AI/行为树.md",
-    "读书笔记/游戏AI/黑板架构.md",
-    "技术文档/Unity知识点/进程，线程，协程.md",
-    "读书笔记/3D数学/多边形网格.md",
-    "读书笔记/3D数学/矩阵.md",
-    "读书笔记/3D数学/法线贴图.md",
-    "Excalidraw/设计图/5分钟地下城核心类图.md",
-    "Excalidraw/设计图/5分钟地下城玩法状态.md",
-    "Excalidraw/设计图/坦克大战概念图.excalidraw.md",
     "Excalidraw/设计图/5分钟地下城核心类图.png",
-    "技术文档/UML/类图.md",
     "Excalidraw/游戏AI",
     "读书笔记/游戏AI",
-    "技术文档/算法与数据结构/总结.canvas",
     "Assets/Images/算法与数据结构/linkedlist_tree_graph.png",
     "Assets/Images/3D数学/uniform_circular_motion_acceleration.png",
     "Assets/Images/3D数学/constant_acceleration_rectangles_24.png",
@@ -230,7 +228,6 @@
     "Assets/Images/3D数学",
     "Assets/Images/数组排序",
     "Assets/Images/bucketsort",
-    "读书笔记/游戏编程模式/📚大纲.canvas",
     "读书笔记/3D数学",
     "技术文档/数学基础",
     "技术文档/算法与数据结构",
