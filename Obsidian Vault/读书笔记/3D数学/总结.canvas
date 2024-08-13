@@ -19,7 +19,7 @@
 		{"id":"fc53e45aa2f929aa","type":"text","text":"[[骨骼动画]]","x":850,"y":910,"width":179,"height":60},
 		{"id":"0401cf033f966e33","type":"text","text":"[[3D视图]]","x":457,"y":670,"width":168,"height":60},
 		{"id":"8deb0dfbeb256d4b","type":"text","text":"[[变换]]","x":675,"y":80,"width":250,"height":60},
-		{"id":"35a1e1910a487f56","type":"link","url":"https://gamemath.com/book/","x":1542,"y":-159,"width":978,"height":1279},
+		{"id":"35a1e1910a487f56","type":"link","url":"https://gamemath.com/book/","x":1542,"y":-159,"width":698,"height":679},
 		{"id":"fa05311f7f1045f6","type":"text","text":"[[基础知识#2D笛卡尔坐标系]]","x":731,"y":-560,"width":389,"height":80},
 		{"id":"aa5b25463916858c","type":"text","text":"[[几何原型]]","x":1120,"y":140,"width":212,"height":60},
 		{"id":"7f3334ee645a860f","type":"text","text":"[[坐标空间]]","x":860,"y":-160,"width":183,"height":60},
