@@ -8,7 +8,7 @@ unity_type:
 
 # 常用属性
 
-- \[TestFixture] : 将一个类标记为测试类。
+- [TestFixture] : 将一个类标记为测试类。
 	- 必须能够以无参数的形式构造。
 	- 必须为`public`。
 	- 构造函数不能有副作用，NUnit可能会多次构造。
@@ -18,7 +18,7 @@ unity_type:
 	{
 	}
 	```
-- \[Test] : 标记测试函数。
+- [Test] : 标记测试函数。
 	- 必须是`public`。
 	- 没有参数。
 	- 没有返回值。
@@ -28,35 +28,35 @@ unity_type:
 	{
 	}
 	```
-- \[OneTimeSetup] : 在所有用例开始前运行。
+- [OneTimeSetup] : 在所有用例开始前运行。
 	```csharp
 	[OneTimeSetup]
 	public void InitBeforeAllCases()
 	{
 	}
 	```
-- \[OneTimeTearDown] : 在所有用例结束后运行。
+- [OneTimeTearDown] : 在所有用例结束后运行。
 	```csharp
 	[OneTimeTearDown]
 	public void DestroyAfterAllCases()
 	{
 	}
 	```
-- \[Setup] : 该函数在每个用例前都要执行。
+- [Setup] : 该函数在每个用例前都要执行。
 	```csharp
 	[Setup]
 	public void Init()
 	{
 	}
 	```
-- \[TearDown] : 该函数在每个用例后都要执行。
+- [TearDown] : 该函数在每个用例后都要执行。
 	```csharp
 	[TearDown]
 	public void Destroy()
 	{
 	}
 	```
-- \[Ignore] : 运行时忽略此项测试用例。
+- [Ignore] : 运行时忽略此项测试用例。
 	```csharp
 	[Test]
 	[Ignore("Method is ignored")]
@@ -64,7 +64,7 @@ unity_type:
 	{
 	}
 	```
-- \[Category] : 给测试用例分类，以便按类别运行。
+- [Category] : 给测试用例分类，以便按类别运行。
 	```csharp
 	[Test]
 	[Category("ClassOne")]
@@ -72,7 +72,7 @@ unity_type:
 	{
 	}
 	```
-- \[TestCase] : 用来标记带有参数的测试方法。运行时会注入参数值。
+- [TestCase] : 用来标记带有参数的测试方法。运行时会注入参数值。
 	```csharp
 	[TestCase(1, 2)]
 	public void TestCase(int a, int b)
@@ -86,14 +86,14 @@ unity_type:
 	{
 	}
 	```
-- \[Maxtime] : 标记用例的最大执行时间(ms)，超时报错但不取消测试。
+- [Maxtime] : 标记用例的最大执行时间(ms)，超时报错但不取消测试。
 	```csharp
 	[Maxtime(300)]
 	public void TestCase()
 	{
 	}
 	```
-- \[Repeat] : 标记测试方法的重复执行次数。
+- [Repeat] : 标记测试方法的重复执行次数。
 	```csharp
 	[Repeat(5)]
 	public void TestCase()

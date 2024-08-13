@@ -28,7 +28,7 @@ WHERE !outline and contains(unity_type, "开发")
 > ```
 
 > [!summary] Unity暂停时间方式
-> 最简单的做法是将`Time.timeScale`设置为0，这个静态变量影响到所有的基于时间的调用，比如`WaitForSeconds()`, `Invoke`, `Time.deltaTime`等等，调整为其他值则可以让优秀加快或者减缓（`1`是正常速度）。
+> 最简单的做法是将`Time.timeScale`设置为0，这个静态变量影响到所有的基于时间的调用，比如`WaitForSeconds()`, `Invoke`, `Time.deltaTime`等等，调整为其他值则可以让游戏加快或者减缓（`1`是正常速度）。
 > 
 > 如果你想让某部分不受这个值影响，那么可以用一些特殊的方法或者变量来实现这个效果。比如：
 > - `WaitForSecondsRealtime()`
@@ -105,8 +105,6 @@ WHERE !outline and contains(unity_type, "编辑器")
 > 1. 安装`Input System`包
 > 2. 在**Edit->ProjectSettings->Player->Active Input Handling**里进行设置。
 
-> [!note] 多人游戏开发测试
-> 使用[ParrelSync](https://github.com/VeriorPies/ParrelSync)。在**PackageManager**使用里面提供的github链接进行安装，安装完毕后会在顶部菜单里面有*ParrelSync*选单。
 
 > [!summary] MeshPro生成SDF文件方法。
 > 1. 打开**Window->TextMeshPro->Font Asset Creator**。
