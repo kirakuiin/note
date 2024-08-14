@@ -488,14 +488,14 @@ $$
 ```latex
 \land \vee \neg
 \forall \exists \nexists
-\because
+\because \therefore
 ```
 
 $$
 \begin{align}
 \land \ \vee \ \neg \\
 \forall \ \exists \ \nexists \\
-\because
+\because \ \therefore
 \end{align}
 $$
 
