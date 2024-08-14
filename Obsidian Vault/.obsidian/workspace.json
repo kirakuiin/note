@@ -11,10 +11,8 @@
             "id": "99eb9d6cf51547e0",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Excalidraw/设计图/5分钟地下城玩法状态.md"
-              }
+              "type": "empty",
+              "state": {}
             }
           },
           {
@@ -23,7 +21,7 @@
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Excalidraw/设计图/5分钟地下城核心类图.md"
+                "file": "Excalidraw/设计图/卡坦岛核心类图.md"
               }
             }
           },
@@ -106,7 +104,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Excalidraw/设计图/5分钟地下城核心类图.md",
+                "file": "Excalidraw/设计图/卡坦岛核心类图.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -123,7 +121,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Excalidraw/设计图/5分钟地下城核心类图.md",
+                "file": "Excalidraw/设计图/卡坦岛核心类图.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -146,7 +144,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Excalidraw/设计图/5分钟地下城核心类图.md"
+                "file": "Excalidraw/设计图/卡坦岛核心类图.md"
               }
             }
           },
@@ -189,10 +187,11 @@
   },
   "active": "3cd4f29e9733e40b",
   "lastOpenFiles": [
-    "Excalidraw/设计图/卡坦岛核心类图.md",
-    "Excalidraw/设计图/5分钟地下城玩法状态.md",
-    "Excalidraw/设计图/5分钟地下城核心类图.md",
     "Excalidraw/设计图/坦克大战概念图.excalidraw.md",
+    "Excalidraw/设计图/卡坦岛核心类图.md",
+    "Excalidraw/设计图/卡坦岛核心类图.png",
+    "Excalidraw/设计图/5分钟地下城核心类图.md",
+    "Excalidraw/设计图/5分钟地下城玩法状态.md",
     "技术文档/面试/Unity.md",
     "技术文档/Unity知识点/Unity知识点.md",
     "技术文档/Unity知识点/Unity踩坑记录.md",
@@ -215,7 +214,6 @@
     "读书笔记/3D数学/基础知识.md",
     "读书笔记/3D数学/几何原型.md",
     "读书笔记/3D数学/三维旋转.md",
-    "读书笔记/3D数学/微积分.md",
     "技术文档/面试",
     "技术文档/算法与数据结构/总结.canvas",
     "读书笔记/游戏编程模式/📚大纲.canvas",
@@ -230,7 +228,6 @@
     "Assets/Images/3D数学/backface_culling_vertex_order.png",
     "Assets/Images/3D数学/clip_example.png",
     "Assets/Images/3D数学/clip_rules.png",
-    "Assets/Images/3D数学/graphics_pipeline_data_flow.png",
     "Assets/Images/算法与数据结构",
     "日常杂谈/我的GTD实践笔记.canvas",
     "Excalidraw/3D数学",
