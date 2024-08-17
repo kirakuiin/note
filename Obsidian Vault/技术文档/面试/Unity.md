@@ -54,6 +54,12 @@ UGUI除了上述规则，还要满足一些额外的规则。
 - null：下一帧继续；
 - EndOfFrame：帧末继续；
 
+# timeScale会影响Update吗
+
+不会，Update和LateUpdate还会正常调用，但是FixedUpdate会受这个值的影响，如果timeScale=0，那么FixedUpdate不会在被调用。
+
+timeScale影响deltaTime，但不影响fixedDeltaTime。
+
 [^1]: 2500是不透明和透明的分界点，大于2500就是透明渲染队列了。
 [^2]: 透明队列要先渲染近的，这一点同不透明队列是不一样的，不透明的先渲染近的可能就不需要渲染远的了。
 [^3]: 根是指：全局，静态，栈上的局部，参数变量，寄存器中的变量。
