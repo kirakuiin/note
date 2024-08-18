@@ -252,4 +252,11 @@ Derived* q = dynamic_cast<Derived*>(p);
 - 用于将带有虚函数的类型的指针安全的向上转型，此时作用等于`static_cast`；
 - 用于将带有虚函数的类型的指针安全的向下转型，如果失败会返回`nullptr`；
 
+# new, delete, malloc, free的区别
+
+- new：开辟一片地址，调用构造函数；
+- malloc：仅分配地址，返回一个无类型的指针；
+- delete：调用析构函数，释放占用内存；
+- free：释放占用的内存；
+
 [^1]: 临时值，等号右边的值，不可以取地址。
