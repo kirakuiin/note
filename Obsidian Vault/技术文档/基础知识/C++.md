@@ -259,4 +259,30 @@ Derived* q = dynamic_cast<Derived*>(p);
 - delete：调用析构函数，释放占用内存；
 - free：释放占用的内存；
 
+# 公有继承，保护继承，私有继承
+
+- 公有继承：父类的public在子类中还是public，protected还是protected，private还是private。
+	- 子类内部可以访问基类的public和protected，但不能访问private。
+	- 子类对象（外部）可以访问基类的public，其他不能访问。
+- 保护继承：父类的public和protected变为protected，private还是private。
+	- 子类内部可以访问父类的public和protected，但不能访问private。
+	- 子类对象（外部）无法访问基类的任何成员。
+- 保护继承：父类的public和protected变为private，private还是private。
+	- 子类内部可以访问父类的public和protected，但不能访问private。
+	- 子类对象（外部）无法访问基类的任何成员。
+
+# 静态绑定和动态绑定
+
+所谓静态绑定，也叫做早绑定，是指它在程序中被声明时所采用的类型，这个类型在编译阶段就已经确定了。
+
+动态绑定是指“对象目前所指的类型”，也叫做晚绑定，它可以在运行期发生变化，一般通过赋值操作来实现。
+
+```cpp
+class B {};
+class D : B {};
+
+// p的静态类型是B，动态类型是D
+B* p = new D;
+```
+
 [^1]: 临时值，等号右边的值，不可以取地址。

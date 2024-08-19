@@ -387,8 +387,28 @@ public void Func()
 C# 允许开发者在泛型接口和委托中运用`in`与`out`修饰符，以表达它们与类型参数之间的逆变与协变关系。使用这两个修饰符将使得接口和委托接受子类，父类之间类型转换，提高了它们的易用性。
 
 > [!summary] 协变与逆变
-> - 协变是指：子类->父类，修饰符用`out`，一般用在返回值。
-> - 逆变是指：父类->子类，修饰符用`in`，一般用在参数。
+> - 协变是指：父类->子类，修饰符用`out`，一般用在返回值。
+> - 逆变是指：子类->父类，修饰符用`in`，一般用在参数。
+> 
+> ```csharp
+> class Mammals {}
+> class Human : Mammals {}
+> 
+> delegate Mammals Handler(Human hum);
+>
+> public static Human CoHandler(Human hum)
+> {
+> }
+> public static Mammals ContraHandler(Mammals animal)
+> {
+> }
+> 
+> // 返回人类也是一种哺乳动物，这是协变，正确
+> Handler handler = CoHandler;
+> // 传入的人类也是一种哺乳动物，这是逆变，正确
+> handler += ContraHandler;
+> ```
+> 本质上都是[[什么是面向对象#里氏替换原则|里氏替换原则]]的表现。
 
 ## 23. 用委托要求类型参数必须支持某种方法
 
