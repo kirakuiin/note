@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/基础知识/C++.md",
+                "file": "读书笔记/3D数学/标准光照模型.md",
                 "mode": "source",
                 "source": false
               }
@@ -48,7 +48,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "无穷",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/基础知识/C++.md",
+                "file": "读书笔记/3D数学/标准光照模型.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/基础知识/C++.md",
+                "file": "读书笔记/3D数学/标准光照模型.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/基础知识/C++.md"
+                "file": "读书笔记/3D数学/标准光照模型.md"
               }
             }
           },
@@ -168,8 +168,13 @@
   },
   "active": "3cd4f29e9733e40b",
   "lastOpenFiles": [
-    "技术文档/基础知识/计算机.md",
+    "读书笔记/3D数学/几何原型.md",
     "技术文档/基础知识/C++.md",
+    "技术文档/算法与数据结构/数组排序.md",
+    "工具用法/Latex用法指南.md",
+    "Excalidraw/C++ 2024-08-20 12.57.22.excalidraw.md",
+    "Excalidraw/C++ 2024-08-20 12.42.42.excalidraw.md",
+    "技术文档/基础知识/计算机.md",
     "读书笔记/Effective C++.md",
     "Excalidraw/C++ 2024-08-20 00.34.10.excalidraw.md",
     "读书笔记/游戏设计艺术.md",
@@ -189,11 +194,6 @@
     "技术文档/Unity知识点/Unity知识点.md",
     "技术文档/MVC模式.md",
     "技术文档/游戏开发 知识点.md",
-    "技术文档/Unity知识点/Unity踩坑记录.md",
-    "技术文档/Unity知识点/进程，线程，协程.md",
-    "技术文档/Unity知识点/使用ScriptableObject存储配置数据.md",
-    "技术文档/Unity知识点/NUnit的使用方法.md",
-    "技术文档/Unity知识点/Unity程序集.md",
     "技术文档/算法与数据结构/总结.canvas",
     "技术文档/Python",
     "Excalidraw/设计图/卡坦岛核心类图.png",
