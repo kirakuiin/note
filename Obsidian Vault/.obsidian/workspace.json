@@ -11,15 +11,31 @@
             "id": "3cd4f29e9733e40b",
             "type": "leaf",
             "state": {
+              "type": "canvas",
+              "state": {
+                "file": "读书笔记/3D数学/总结.canvas",
+                "viewState": {
+                  "x": 1891,
+                  "y": 180.5,
+                  "zoom": -0.04891626110749585
+                }
+              }
+            }
+          },
+          {
+            "id": "7c74c345a05128f6",
+            "type": "leaf",
+            "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/3D数学/标准光照模型.md",
+                "file": "技术文档/基础知识/Unity.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -48,7 +64,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "无穷",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -85,7 +101,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/3D数学/标准光照模型.md",
+                "file": "技术文档/基础知识/Unity.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +118,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/3D数学/标准光照模型.md",
+                "file": "技术文档/基础知识/Unity.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +141,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/3D数学/标准光照模型.md"
+                "file": "技术文档/基础知识/Unity.md"
               }
             }
           },
@@ -166,38 +182,42 @@
       "obsidian-excalidraw-plugin:新建绘图文件": false
     }
   },
-  "active": "3cd4f29e9733e40b",
+  "active": "7c74c345a05128f6",
   "lastOpenFiles": [
-    "读书笔记/3D数学/几何原型.md",
-    "技术文档/基础知识/C++.md",
-    "技术文档/算法与数据结构/数组排序.md",
-    "工具用法/Latex用法指南.md",
-    "Excalidraw/C++ 2024-08-20 12.57.22.excalidraw.md",
-    "Excalidraw/C++ 2024-08-20 12.42.42.excalidraw.md",
     "技术文档/基础知识/计算机.md",
-    "读书笔记/Effective C++.md",
-    "Excalidraw/C++ 2024-08-20 00.34.10.excalidraw.md",
-    "读书笔记/游戏设计艺术.md",
-    "技术文档/什么是面向对象.md",
-    "技术文档/基础知识/CSharp.md",
-    "读书笔记/Effective CSharp.md",
-    "读书笔记/设计模式/模板方法模式.md",
+    "读书笔记/3D数学/几何原型.md",
+    "读书笔记/3D数学/几何测试.md",
+    "Assets/Images/3D数学/intersection_ray_sphere.png",
+    "Assets/Images/3D数学/intersection_ray_plane.png",
+    "Assets/Images/3D数学/closest_point_sphere.png",
+    "Assets/Images/3D数学/closest_point_parametric_ray.png",
+    "工具用法/Latex用法指南.md",
+    "读书笔记/3D数学/总结.canvas",
+    "Assets/Images/3D数学/closest_point_implicit_line.png",
+    "读书笔记/3D数学/基础知识.md",
     "技术文档/Shader知识点.md",
-    "技术文档/C Sharp 知识点.md",
-    "技术文档/基础知识/Unity.md",
-    "日常杂谈/面试记录.md",
-    "Excalidraw/Effective C++ 2024-08-18 13.11.30.excalidraw.md",
-    "技术文档/算法与数据结构/栈.md",
-    "技术文档/算法与数据结构/最短路径算法.md",
-    "技术文档/算法与数据结构/最小生成树.md",
-    "技术文档/Python/Python 知识点.md",
-    "技术文档/Unity知识点/Unity知识点.md",
     "技术文档/MVC模式.md",
     "技术文档/游戏开发 知识点.md",
+    "技术文档/什么是面向对象.md",
+    "技术文档/基础知识/C++.md",
+    "技术文档/基础知识/Unity.md",
+    "技术文档/基础知识/CSharp.md",
+    "读书笔记/Effective C++.md",
+    "读书笔记/3D数学/变换.md",
+    "读书笔记/3D数学/矩阵.md",
+    "读书笔记/3D数学/三维旋转.md",
+    "读书笔记/3D数学/向量.md",
+    "读书笔记/3D数学/纹理映射.md",
+    "读书笔记/3D数学/概率.md",
+    "读书笔记/3D数学/标准光照模型.md",
+    "技术文档/算法与数据结构/数组排序.md",
+    "Excalidraw/C++ 2024-08-20 12.57.22.excalidraw.md",
+    "Excalidraw/C++ 2024-08-20 12.42.42.excalidraw.md",
+    "Excalidraw/C++ 2024-08-20 00.34.10.excalidraw.md",
+    "读书笔记/游戏设计艺术.md",
     "技术文档/算法与数据结构/总结.canvas",
     "技术文档/Python",
     "Excalidraw/设计图/卡坦岛核心类图.png",
-    "读书笔记/3D数学/总结.canvas",
     "技术文档/基础知识",
     "读书笔记/游戏编程模式/📚大纲.canvas",
     "Excalidraw/设计图/5分钟地下城核心类图.png",
@@ -206,11 +226,6 @@
     "Assets/Images/算法与数据结构/linkedlist_tree_graph.png",
     "Assets/Images/3D数学/uniform_circular_motion_acceleration.png",
     "Assets/Images/3D数学/constant_acceleration_rectangles_24.png",
-    "Assets/Images/3D数学/calculus.png",
-    "Assets/Images/3D数学/backface_culling.png",
-    "Assets/Images/3D数学/backface_culling_vertex_order.png",
-    "Assets/Images/3D数学/clip_example.png",
-    "Assets/Images/3D数学/clip_rules.png",
     "Assets/Images/算法与数据结构",
     "日常杂谈/我的GTD实践笔记.canvas",
     "Excalidraw/3D数学",
