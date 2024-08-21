@@ -68,7 +68,7 @@ class C : virtual public A {}
 class D : public B, public C {}
 ```
 
-使用之后内存结构里会多出虚基表，用来存储子类数据的偏移。
+使用之后内存结构里会多出虚基表，用来存储基类数据的偏移。
 
 > [!hint]
 > 虚继承会增加大小，降低速度，初始化的复杂度也会提高。
@@ -116,8 +116,8 @@ int add(int a, int b);
 int div(int a, int b);
 #ifdef __cplusplus
 }
-
 #endif
+
 // a cpp file
 #include "math.h"
 ```
