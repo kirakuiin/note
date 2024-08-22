@@ -809,6 +809,79 @@ a.C::func();
 
 # 模板与范型编程
 
+## 41. 了解隐式接口和编译期多态
+
+模板和类都支持接口和多态。
+
+类的接口是显式的，以函数签名为中心，比如`void func(int)`。多态则是通过虚函数在运行期实现的。
+
+而模板的接口是隐式的，是基于有效表达式的，比如：
+```cpp
+template <class T>
+void func(T& w)
+{
+	if (w.size() > 10)
+	{
+		T temp(w);
+	}
+}
+```
+此时可以知道T类型的隐式约束，即：
+- T必须有拷贝构造函数。
+- T必须要返回一个能和整形比较的对象。
+
+而以不同的参数具现化函数模板会导致调用不同的函数，这就是所谓的编译期多态，即编译期的函数重载解析，比如：
+```cpp
+template <class T>
+void func(T& w)
+{
+	if (w.size() > 10)
+	{
+	}
+}
+
+func<vector>(v1);  // 调用的是vector版的func
+func<deque>(d1);  // 调用的是deque版的func
+```
+
+## 42. 了解typename的双重意义
+
+对于模板来说，如果：
+- template的类型参数：`class`和`typename`作用一样。
+	```cpp
+	// 以下效果一样
+	template <class T>
+	template <typename T>
+	```
+- 当使用模板内的*嵌套从属类型*名称时，前方要加`typename`，不过当这个名称出现在基类列表和成员初始化列表时，不能加`typename`。
+
+嵌套从属名称，指的是：
+```cpp
+template <class T>
+void func()
+{
+	// 这种T::A就是嵌套从属名称，这个语句是错误的，因为编译器不知道T::A是一个类型还是一个值，所以要显式告诉编译器。
+	T::A* x;
+
+	// 正确
+	typename T::A* y;
+}
+```
+
+下面是基类列表和初始化列表的情况。
+```cpp
+template <class T>
+// 不能加typename
+class A : public Base<T>::B
+{
+public:
+	// 不能加typename
+	A() : Base<T>::B() {}
+};
+```
+
+## 43.
+
 # 定制 new 和 delete
 
 [^1]: empty base optimization，指当基类不含有任何非静态成员时，继承不会导致类型变大。

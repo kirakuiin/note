@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "日常杂谈/面试/网易.md",
+                "file": "技术文档/基础知识/C++.md",
                 "mode": "source",
                 "source": false
               }
@@ -25,13 +25,14 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/基础知识/C++.md",
+                "file": "读书笔记/Effective CSharp.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -97,7 +98,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "日常杂谈/面试/网易.md",
+                "file": "读书笔记/Effective CSharp.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +115,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "日常杂谈/面试/网易.md",
+                "file": "读书笔记/Effective CSharp.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +138,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "日常杂谈/面试/网易.md"
+                "file": "读书笔记/Effective CSharp.md"
               }
             }
           },
@@ -178,13 +179,19 @@
       "obsidian-excalidraw-plugin:新建绘图文件": false
     }
   },
-  "active": "3cd4f29e9733e40b",
+  "active": "fa35313977522132",
   "lastOpenFiles": [
-    "技术文档/基础知识/计算机.md",
-    "日常杂谈/面试",
+    "读书笔记/Effective C++.md",
+    "读书笔记/Effective CSharp.md",
     "技术文档/基础知识/C++.md",
-    "读书笔记/3D数学/三维旋转.md",
+    "技术文档/基础知识/计算机.md",
+    "日常杂谈/面试/网易.md",
+    "技术文档/什么是面向对象.md",
+    "技术文档/MVC模式.md",
+    "读书笔记/3D数学/总结.canvas",
     "读书笔记/3D数学/基础知识.md",
+    "日常杂谈/面试",
+    "读书笔记/3D数学/三维旋转.md",
     "读书笔记/3D数学/几何原型.md",
     "读书笔记/3D数学/矩阵.md",
     "读书笔记/3D数学/3D空间变换.md",
@@ -201,12 +208,7 @@
     "读书笔记/3D数学/渲染原理.md",
     "技术文档/基础知识/Unity.md",
     "技术文档/基础知识/CSharp.md",
-    "读书笔记/3D数学/总结.canvas",
-    "技术文档/什么是面向对象.md",
-    "技术文档/MVC模式.md",
     "Excalidraw/C++ 2024-08-20 00.34.10.excalidraw.md",
-    "读书笔记/Effective C++.md",
-    "读书笔记/Effective CSharp.md",
     "Assets/Images/3D数学/intersection_ray_sphere.png",
     "Assets/Images/3D数学/intersection_ray_plane.png",
     "Assets/Images/3D数学/closest_point_sphere.png",
