@@ -880,7 +880,92 @@ public:
 };
 ```
 
-## 43.
+## 43. 学习处理模版化类基类的名称
+
+当你在派生模板类中使用基类的成员时，编译器无法确定基类是否真的含有这个成员：
+```cpp
+class Company
+{
+public void sendMsg(string& msg);
+};
+
+template<class Company>
+class MsgSender
+{
+public:
+	void send(string& msg)
+	{
+		Company c;
+		c.sendMsg(msg);
+	}
+};
+
+template<class Company>
+class SpecialSender : public MsgSender<Company>
+{
+public:
+	void sendSpecial(string& msg)
+	{
+		// 这里无法通过编译
+		send(msg);
+	}
+};
+```
+
+出现错误的原因是只有到模板实例化的时候，才知道`Company`是个什么样的参数，而在这个文件的编译期，编译器没法确定父类中是否存在这个函数，所以会报错。
+
+解决方案为：
+- 使用`this->`。
+	```cpp
+	template<class Company>
+	class SpecialSender : public MsgSender<Company>
+	{
+	public:
+		void sendSpecial(string& msg)
+		{
+			// 这次可以了，这将假设这个类会被继承。
+			this->send(msg);
+		}
+	};
+	```
+- 使用`using`。
+	```cpp
+	template<class Company>
+	class SpecialSender : public MsgSender<Company>
+	{
+	public:
+		using MsgSender<Company>::send
+		void sendSpecial(string& msg)
+		{
+			// 这次可以了，这将假设这个类会被继承。
+			send(msg);
+		}
+	};
+	```
+
+## 44. 将参数无关的代码抽离templates
+
+template可能会导致隐式的代码膨胀，比如：
+```cpp
+template<typename T, size_t n>
+class Matrix
+{
+public:
+	void invert();
+};
+
+Matrix<double, 5> a;
+Matrix<double, 2> b;
+```
+
+仅仅是因为参数的些许不同，这将在内存中生成两份相同的代码，这无疑造成了代码膨胀。
+
+所以：
+- 任何模板都不应该和造成模板膨胀的参数相关联。
+- 因非类型参数造成的膨胀往往可以通过函数参数和函数成员来消除。
+- 因类型参数而导致的膨胀，往往可以通过具有完全相同的二进制的具现类型共享来缓解。
+
+## 运用成员函数模板接受所有兼容类型
 
 # 定制 new 和 delete
 
