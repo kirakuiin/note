@@ -11,9 +11,11 @@
             "id": "3cd4f29e9733e40b",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "markdown",
               "state": {
-                "file": "Excalidraw/幻唐志-洪荒再现 2024-08-25 16.40.28.excalidraw.md"
+                "file": "日常杂谈/项目总结/卡坦岛.md",
+                "mode": "source",
+                "source": false
               }
             }
           },
@@ -58,7 +60,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "merm",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -95,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Excalidraw/幻唐志-洪荒再现 2024-08-25 16.40.28.excalidraw.md",
+                "file": "日常杂谈/项目总结/卡坦岛.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -112,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Excalidraw/幻唐志-洪荒再现 2024-08-25 16.40.28.excalidraw.md",
+                "file": "日常杂谈/项目总结/卡坦岛.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -135,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Excalidraw/幻唐志-洪荒再现 2024-08-25 16.40.28.excalidraw.md"
+                "file": "日常杂谈/项目总结/卡坦岛.md"
               }
             }
           },
@@ -179,10 +181,13 @@
   "active": "3cd4f29e9733e40b",
   "lastOpenFiles": [
     "日常杂谈/项目总结/幻唐志-洪荒再现.md",
+    "日常杂谈/项目总结/卡坦岛.md",
+    "Invalid date.md",
+    "日常杂谈/项目总结/5分钟地下城.md",
     "Excalidraw/幻唐志-洪荒再现 2024-08-25 16.40.28.excalidraw.md",
+    "技术文档/UML/类图.md",
     "Assets/Images/ui-process.png",
     "Excalidraw/游戏编程模式/游戏编程模式 2023-10-24 21.45.33.excalidraw.md",
-    "技术文档/UML/类图.md",
     "日常杂谈/基金基础知识.md",
     "读书笔记/Effective CSharp.md",
     "日常杂谈/面试/网易.md",
@@ -205,9 +210,6 @@
     "日常杂谈/面试",
     "读书笔记/3D数学/三维旋转.md",
     "读书笔记/3D数学/几何原型.md",
-    "读书笔记/3D数学/矩阵.md",
-    "读书笔记/3D数学/3D空间变换.md",
-    "读书笔记/3D数学/3D视图.md",
     "Assets/Images/3D数学/intersection_ray_sphere.png",
     "Assets/Images/3D数学/intersection_ray_plane.png",
     "Assets/Images/3D数学/closest_point_sphere.png",

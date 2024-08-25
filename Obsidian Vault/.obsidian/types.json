@@ -27,6 +27,10 @@
     "excalidraw-iframe-theme": "text",
     "excalidraw-export-embed-scene": "checkbox",
     "excalidraw-embeddable-theme": "text",
-    "excalidraw-open-md": "checkbox"
+    "excalidraw-open-md": "checkbox",
+    "nop": "multitext",
+    "开发日期": "date",
+    "开始日期": "date",
+    "结束日期": "date"
   }
 }
