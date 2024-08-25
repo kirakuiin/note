@@ -11,11 +11,9 @@
             "id": "3cd4f29e9733e40b",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "excalidraw",
               "state": {
-                "file": "读书笔记/Effective C++.md",
-                "mode": "source",
-                "source": false
+                "file": "Excalidraw/幻唐志-洪荒再现 2024-08-25 16.40.28.excalidraw.md"
               }
             }
           },
@@ -25,7 +23,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/Effective CSharp.md",
+                "file": "技术文档/UML/类图.md",
                 "mode": "source",
                 "source": false
               }
@@ -60,7 +58,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "merm",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -97,7 +95,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/Effective C++.md",
+                "file": "Excalidraw/幻唐志-洪荒再现 2024-08-25 16.40.28.excalidraw.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +112,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/Effective C++.md",
+                "file": "Excalidraw/幻唐志-洪荒再现 2024-08-25 16.40.28.excalidraw.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +135,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/Effective C++.md"
+                "file": "Excalidraw/幻唐志-洪荒再现 2024-08-25 16.40.28.excalidraw.md"
               }
             }
           },
@@ -180,11 +178,26 @@
   },
   "active": "3cd4f29e9733e40b",
   "lastOpenFiles": [
-    "技术文档/基础知识/C++.md",
+    "日常杂谈/项目总结/幻唐志-洪荒再现.md",
+    "Excalidraw/幻唐志-洪荒再现 2024-08-25 16.40.28.excalidraw.md",
+    "Assets/Images/ui-process.png",
+    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-24 21.45.33.excalidraw.md",
+    "技术文档/UML/类图.md",
+    "日常杂谈/基金基础知识.md",
     "读书笔记/Effective CSharp.md",
-    "读书笔记/Effective C++.md",
-    "技术文档/基础知识/计算机.md",
     "日常杂谈/面试/网易.md",
+    "技术文档/基础知识/C++.md",
+    "读书笔记/Effective C++.md",
+    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-25 19.58.47.excalidraw.md",
+    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-26 15.25.56.excalidraw.md",
+    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-26 19.19.21.excalidraw.md",
+    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-27 22.36.07.excalidraw.md",
+    "Excalidraw/重构/搬移函数 2023-12-15 14.59.09.excalidraw.md",
+    "Excalidraw/重构/复制被监视数据 2023-12-28 14.25.37.excalidraw.md",
+    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-25 20.39.22.excalidraw.md",
+    "日常杂谈/项目总结/Drawing 2024-08-25 14.45.30.excalidraw.md",
+    "日常杂谈/项目总结",
+    "技术文档/基础知识/计算机.md",
     "技术文档/什么是面向对象.md",
     "技术文档/MVC模式.md",
     "读书笔记/3D数学/总结.canvas",
@@ -195,19 +208,6 @@
     "读书笔记/3D数学/矩阵.md",
     "读书笔记/3D数学/3D空间变换.md",
     "读书笔记/3D数学/3D视图.md",
-    "读书笔记/3D数学/变换.md",
-    "读书笔记/3D数学/标准光照模型.md",
-    "读书笔记/3D数学/坐标空间.md",
-    "读书笔记/3D数学/多边形网格.md",
-    "读书笔记/3D数学/法线贴图.md",
-    "读书笔记/3D数学/向量.md",
-    "读书笔记/3D数学/实时渲染管线.md",
-    "读书笔记/3D数学/微积分.md",
-    "读书笔记/3D数学/纹理映射.md",
-    "读书笔记/3D数学/渲染原理.md",
-    "技术文档/基础知识/Unity.md",
-    "技术文档/基础知识/CSharp.md",
-    "Excalidraw/C++ 2024-08-20 00.34.10.excalidraw.md",
     "Assets/Images/3D数学/intersection_ray_sphere.png",
     "Assets/Images/3D数学/intersection_ray_plane.png",
     "Assets/Images/3D数学/closest_point_sphere.png",
@@ -223,13 +223,11 @@
     "读书笔记/游戏AI",
     "Assets/Images/算法与数据结构/linkedlist_tree_graph.png",
     "Assets/Images/3D数学/uniform_circular_motion_acceleration.png",
-    "Assets/Images/3D数学/constant_acceleration_rectangles_24.png",
     "Assets/Images/算法与数据结构",
     "日常杂谈/我的GTD实践笔记.canvas",
     "Excalidraw/3D数学",
     "Assets/Images/3D数学",
     "Assets/Images/数组排序",
-    "Assets/Images/bucketsort",
     "未命名.canvas",
     "未命名 1.canvas",
     "英语学习/语法/时态对比.canvas",
