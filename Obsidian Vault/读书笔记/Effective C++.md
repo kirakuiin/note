@@ -967,6 +967,27 @@ Matrix<double, 2> b;
 
 ## 运用成员函数模板接受所有兼容类型
 
+当你想实现支持所有可兼容类型转换的函数时，必然不能一一用代码实现，这里只能通过模板来实现这种功能。
+
+```cpp
+template<class T>
+class SmartPtr
+{
+public:
+	// 通过新定义一个参数，编译器自行决策出合适的转换。
+	template<class U>
+	SmartPtr(const SmartPtr<U& other):
+		originPtr(other.get()) {...}
+private:
+	T* originPtr;
+};
+```
+
+> [!hint]
+> 如果你实现的是泛化版本的拷贝或者赋值构造函数，那么编译器还是会为你生成默认的拷贝和赋值函数，所以如果你不想让编译器这样做，自己主动声明它。
+
+## 46. 需要类型转换时请为模板定义非成员函数
+
 # 定制 new 和 delete
 
 [^1]: empty base optimization，指当基类不含有任何非静态成员时，继承不会导致类型变大。
