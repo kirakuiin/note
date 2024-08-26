@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/基础知识/C++.md",
+                "file": "日常杂谈/面试/网易.md",
                 "mode": "source",
                 "source": false
               }
@@ -97,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/基础知识/C++.md",
+                "file": "日常杂谈/面试/网易.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/基础知识/C++.md",
+                "file": "日常杂谈/面试/网易.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/基础知识/C++.md"
+                "file": "日常杂谈/面试/网易.md"
               }
             }
           },
@@ -162,7 +162,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 216.5
+    "width": 216.5,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -180,34 +181,35 @@
   },
   "active": "3cd4f29e9733e40b",
   "lastOpenFiles": [
-    "技术文档/基础知识/计算机.md",
-    "技术文档/Shader知识点.md",
-    "技术文档/MVC模式.md",
-    "技术文档/游戏开发 知识点.md",
-    "日常杂谈/面试/网易.md",
-    "日常杂谈/项目总结/5分钟地下城.md",
     "日常杂谈/项目总结/卡坦岛.md",
     "日常杂谈/项目总结/幻唐志-洪荒再现.md",
-    "日常杂谈/项目总结/里程碑.canvas",
+    "技术文档/基础知识/Unity.md",
     "技术文档/基础知识/CSharp.md",
     "技术文档/基础知识/C++.md",
-    "技术文档/基础知识/Unity.md",
-    "Excalidraw/设计图/卡坦岛核心类图.md",
-    "Invalid date.md",
-    "Excalidraw/幻唐志-洪荒再现 2024-08-25 16.40.28.excalidraw.md",
-    "技术文档/UML/类图.md",
+    "技术文档/基础知识/计算机.md",
+    "技术文档/什么是面向对象.md",
+    "技术文档/游戏开发 知识点.md",
+    "技术文档/MVC模式.md",
+    "技术文档/Shader知识点.md",
+    "技术文档/Python/Python 装饰器.md",
+    "读书笔记/设计模式/装饰模式.md",
+    "读书笔记/设计模式/工厂方法模式.md",
+    "读书笔记/设计模式/📚大纲（设计模式）.md",
+    "读书笔记/设计模式/备忘录模式.md",
+    "读书笔记/游戏编程模式/组件模式.md",
+    "读书笔记/设计模式/组合模式.md",
+    "读书笔记/设计模式/状态模式.md",
+    "读书笔记/设计模式/中介者模式.md",
+    "读书笔记/设计模式/责任链模式.md",
+    "读书笔记/设计模式/原型模式.md",
+    "读书笔记/设计模式/享元模式.md",
+    "读书笔记/设计模式/外观模式.md",
+    "读书笔记/设计模式/适配器模式.md",
+    "读书笔记/设计模式/生成器模式.md",
+    "读书笔记/设计模式/桥接模式.md",
+    "读书笔记/游戏编程模式/📚大纲.canvas",
+    "日常杂谈/项目总结/里程碑.canvas",
     "Assets/Images/ui-process.png",
-    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-24 21.45.33.excalidraw.md",
-    "日常杂谈/基金基础知识.md",
-    "读书笔记/Effective CSharp.md",
-    "读书笔记/Effective C++.md",
-    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-25 19.58.47.excalidraw.md",
-    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-26 15.25.56.excalidraw.md",
-    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-26 19.19.21.excalidraw.md",
-    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-27 22.36.07.excalidraw.md",
-    "Excalidraw/重构/搬移函数 2023-12-15 14.59.09.excalidraw.md",
-    "Excalidraw/重构/复制被监视数据 2023-12-28 14.25.37.excalidraw.md",
-    "Excalidraw/游戏编程模式/游戏编程模式 2023-10-25 20.39.22.excalidraw.md",
     "日常杂谈/项目总结",
     "读书笔记/3D数学/总结.canvas",
     "日常杂谈/面试",
@@ -220,7 +222,6 @@
     "技术文档/Python",
     "Excalidraw/设计图/卡坦岛核心类图.png",
     "技术文档/基础知识",
-    "读书笔记/游戏编程模式/📚大纲.canvas",
     "Excalidraw/设计图/5分钟地下城核心类图.png",
     "Excalidraw/游戏AI",
     "读书笔记/游戏AI",
