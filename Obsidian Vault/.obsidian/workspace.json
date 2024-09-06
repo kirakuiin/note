@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/📚目录（英语语法）.md",
+                "file": "英语学习/语法/Verb + preposition.md",
                 "mode": "source",
                 "source": false
               }
@@ -60,7 +60,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "care about",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -77,7 +77,8 @@
               "state": {}
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -97,7 +98,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/📚目录（英语语法）.md",
+                "file": "英语学习/语法/Verb + preposition.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +115,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/📚目录（英语语法）.md",
+                "file": "英语学习/语法/Verb + preposition.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +138,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/📚目录（英语语法）.md"
+                "file": "英语学习/语法/Verb + preposition.md"
               }
             }
           },
@@ -180,6 +181,7 @@
   },
   "active": "3cd4f29e9733e40b",
   "lastOpenFiles": [
+    "英语学习/语法/📚目录（英语语法）.md",
     "日常杂谈/面试/网易.md",
     "读书笔记/Effective CSharp.md",
     "技术文档/Godot/游戏的体系架构.md",
@@ -208,7 +210,6 @@
     "技术文档/游戏开发 知识点.md",
     "技术文档/MVC模式.md",
     "技术文档/Shader知识点.md",
-    "技术文档/Python/Python 装饰器.md",
     "读书笔记/游戏编程模式/📚大纲.canvas",
     "Assets/Images/ui-process.png",
     "日常杂谈/项目总结",
