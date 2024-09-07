@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语学习/语法/Verb + preposition.md",
+                "file": "英语学习/语法/Have to and must.md",
                 "mode": "source",
                 "source": false
               }
@@ -60,7 +60,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "care about",
+                "query": "line:(don't have to)",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -98,7 +98,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "英语学习/语法/Verb + preposition.md",
+                "file": "英语学习/语法/Have to and must.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -115,7 +115,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "英语学习/语法/Verb + preposition.md",
+                "file": "英语学习/语法/Have to and must.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -138,7 +138,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "英语学习/语法/Verb + preposition.md"
+                "file": "英语学习/语法/Have to and must.md"
               }
             }
           },
@@ -181,12 +181,16 @@
   },
   "active": "3cd4f29e9733e40b",
   "lastOpenFiles": [
+    "读书笔记/Effective C++.md",
+    "Excalidraw/Effective C++ 2024-09-06 20.55.07.excalidraw.md",
+    "技术文档/基础知识/Godot.md",
+    "技术文档/Godot/游戏的体系架构.md",
+    "技术文档/MVC模式.md",
+    "英语学习/语法/Verb + preposition.md",
     "英语学习/语法/📚目录（英语语法）.md",
     "日常杂谈/面试/网易.md",
     "读书笔记/Effective CSharp.md",
-    "技术文档/Godot/游戏的体系架构.md",
     "Excalidraw/游戏的体系架构 2024-09-01 17.11.00.excalidraw.md",
-    "技术文档/基础知识/Godot.md",
     "技术文档/Godot",
     "读书笔记/3D数学/微积分.md",
     "读书笔记/3D数学/向量.md",
@@ -206,10 +210,6 @@
     "技术文档/UML/类图.md",
     "技术文档/基础知识/Unity.md",
     "技术文档/基础知识/C++.md",
-    "技术文档/什么是面向对象.md",
-    "技术文档/游戏开发 知识点.md",
-    "技术文档/MVC模式.md",
-    "技术文档/Shader知识点.md",
     "读书笔记/游戏编程模式/📚大纲.canvas",
     "Assets/Images/ui-process.png",
     "日常杂谈/项目总结",

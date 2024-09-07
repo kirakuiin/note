@@ -35,6 +35,12 @@ extends Node
 > - `self`，`$"."`都可以用来指代自己。
 > - `$".."`，`get_parent()`用来指代父节点。
 
+## 生命周期的调用顺序
+
+对于一个树状结构，
+
+`_enter_tree`，使用先序遍历。
+`_ready`，`_exit_tree`使用后序遍历。
 # 编辑器
 
 ## AssetLib无法打开

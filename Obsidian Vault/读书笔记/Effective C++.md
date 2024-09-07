@@ -965,7 +965,7 @@ Matrix<double, 2> b;
 - 因非类型参数造成的膨胀往往可以通过函数参数和函数成员来消除。
 - 因类型参数而导致的膨胀，往往可以通过具有完全相同的二进制的具现类型共享来缓解。
 
-## 运用成员函数模板接受所有兼容类型
+## 45. 运用成员函数模板接受所有兼容类型
 
 当你想实现支持所有可兼容类型转换的函数时，必然不能一一用代码实现，这里只能通过模板来实现这种功能。
 
@@ -987,6 +987,93 @@ private:
 > 如果你实现的是泛化版本的拷贝或者赋值构造函数，那么编译器还是会为你生成默认的拷贝和赋值函数，所以如果你不想让编译器这样做，自己主动声明它。
 
 ## 46. 需要类型转换时请为模板定义非成员函数
+
+为了让所有参数支持隐式类型转换，我们需要这个函数为非成员函数，为了让编译器知道如何推导模板的类型，那么必须在类的定义中定义函数，那么符合这个条件的就是友元函数。
+
+```cpp
+template<class T>
+class Rational 
+{
+public:
+	friend const Rational<T> operator*(const Rational<T>& lhs, const Rational<T>& rhs)
+	{
+		return ...;
+	}
+}
+```
+
+## 47. 请使用traits classes表现类型信息
+
+所谓的traits可以理解为在编译期的一种接口，它是一种技术而不是一个关键字。支持traits的类需要`typedef`某个符号以供某些函数对类型在编译期进行识别来做特殊化的处理。
+
+```cpp
+// 以下为特性，可以理解为编译期的接口。
+struct input_iterator_tag {}
+struct forward_iterator_tag : public input_iterator_tag {}
+
+// 功能函数。编译期的条件执行用重载来实现。
+template<class T>
+void advance(T& iter, input_iterator_tag tag)
+{
+}
+
+template<class T>
+void advance(T& iter, forward_iterator_tag tag)
+{
+}
+
+// 自定义类型实现约定。在内部嵌入信息。
+template<class T>
+class list
+{
+	typedef forward_iterator_tag iter_tag;
+}
+
+// 对于内建类型，由于无法在内部嵌入信息，所以需要一层模板包装和特化，这步叫做特性萃取。
+template<class T>
+struct iterator_traits
+{
+	typedef typename T::iter_tag iter_tag;
+}
+
+template<class T>
+struct iterator_traits<T*>
+{
+	typedef input_iterator_tag iter_tag;
+}
+
+// 调用函数时
+list l;
+
+advance(l, typename iterator_traits<list>::iter_tag())
+
+advance(new list(), typename iterator_traits<list*>::iter_tag())
+```
+
+![[Effective C++ 2024-09-06 20.55.07.excalidraw]]
+
+## 48. 认识template元编程
+
+元编程可以理解为编译期的编程，可以把运行期的操作移动到编译期来完成。这种编程方式会极大的延长编译时间，但运行时却可以有更小的内存占用和更快的运行速度。
+
+用一个元编程的*hello world*来展现元编程的基础。
+
+```cpp
+template<unsigned n>
+struct Factorial
+{
+	enum {value = n * Factorial<n-1>::value};
+}
+
+template<>
+struct Factorial<0>
+{
+	enum {value = 1};
+}
+
+// 以下结果在编译期就会计算完毕。
+std::cout << Factorial<15>::value;
+```
 
 # 定制 new 和 delete
 
