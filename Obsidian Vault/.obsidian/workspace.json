@@ -60,7 +60,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "网易",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -77,8 +77,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -179,7 +178,7 @@
       "table-editor-obsidian:Advanced Tables Toolbar": false
     }
   },
-  "active": "3cd4f29e9733e40b",
+  "active": "d6de1842426fda97",
   "lastOpenFiles": [
     "日常杂谈/面试/网易.md",
     "技术文档/算法与数据结构/数组排序.md",
