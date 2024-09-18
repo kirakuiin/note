@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/Cocos/UI框架/事件系统.md",
+                "file": "技术文档/Unity/Anchor，Pivot，Offset.md",
                 "mode": "source",
                 "source": false
               }
@@ -60,7 +60,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "merm",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -97,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/Cocos/UI框架/事件系统.md",
+                "file": "技术文档/Unity/Anchor，Pivot，Offset.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/Cocos/UI框架/事件系统.md",
+                "file": "技术文档/Unity/Anchor，Pivot，Offset.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/Cocos/UI框架/事件系统.md"
+                "file": "技术文档/Unity/Anchor，Pivot，Offset.md"
               }
             }
           },
@@ -182,9 +182,20 @@
   "active": "f9c2e7a8138820d0",
   "lastOpenFiles": [
     "技术文档/UML/类图.md",
+    "技术文档/Unity/Anchor，Pivot，Offset.md",
+    "Excalidraw/Anchor，Pivot，Offset 2024-09-18 20.08.51.excalidraw.md",
+    "Excalidraw/anchor，offset和pivot 2024-09-18 20.02.49.excalidraw.md",
+    "Excalidraw/anchor，offset和pivot 2024-09-18 19.57.40.excalidraw.md",
+    "Excalidraw/anchor，offset和pivot 2024-09-18 19.40.44.excalidraw.md",
+    "Excalidraw/anchor，offset和pivot 2024-09-18 19.47.46.excalidraw.md",
+    "技术文档/Unity/Unity知识点.md",
+    "技术文档/Unity/Unity程序集.md",
+    "🧠 第二大脑.md",
+    "技术文档/Unity/使用ScriptableObject存储配置数据.md",
+    "Excalidraw/事件系统 2024-09-18 16.28.29.excalidraw.md",
     "技术文档/Cocos/UI框架/事件系统.md",
-    "Excalidraw/事件系统 2024-09-18 14.36.24.excalidraw.md",
     "技术文档/游戏的体系架构.md",
+    "Excalidraw/事件系统 2024-09-18 14.36.24.excalidraw.md",
     "技术文档/Cocos/UI框架",
     "技术文档/什么是面向对象.md",
     "技术文档/Cocos",
@@ -198,20 +209,9 @@
     "读书笔记/Effective C++.md",
     "Excalidraw/Effective C++ 2024-09-06 20.55.07.excalidraw.md",
     "技术文档/基础知识/Godot.md",
-    "英语学习/语法/Verb + preposition.md",
-    "英语学习/语法/📚目录（英语语法）.md",
-    "读书笔记/Effective CSharp.md",
-    "Excalidraw/游戏的体系架构 2024-09-01 17.11.00.excalidraw.md",
     "技术文档/Godot",
-    "读书笔记/3D数学/微积分.md",
-    "读书笔记/3D数学/向量.md",
     "日常杂谈/我的GTD实践笔记.canvas",
-    "日常杂谈/项目总结/5分钟地下城.md",
-    "日常杂谈/项目总结/幻唐志-洪荒再现.md",
-    "日常杂谈/项目总结/卡坦岛.md",
     "日常杂谈/项目总结/里程碑.canvas",
-    "技术文档/基础知识/CSharp.md",
-    "读书笔记/重构/引入断言.md",
     "读书笔记/游戏编程模式/📚大纲.canvas",
     "Assets/Images/ui-process.png",
     "日常杂谈/项目总结",
