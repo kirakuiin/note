@@ -13,19 +13,19 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/Unity/Anchor，Pivot，Offset.md",
+                "file": "技术文档/Cocos/UI框架/Handle.md",
                 "mode": "source",
                 "source": false
               }
             }
           },
           {
-            "id": "79357593d4b05711",
+            "id": "d78d4f83c9575f05",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/UML/类图.md",
+                "file": "技术文档/UML/时序图.md",
                 "mode": "source",
                 "source": false
               }
@@ -97,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/Unity/Anchor，Pivot，Offset.md",
+                "file": "技术文档/Cocos/UI框架/Handle.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/Unity/Anchor，Pivot，Offset.md",
+                "file": "技术文档/Cocos/UI框架/Handle.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/Unity/Anchor，Pivot，Offset.md"
+                "file": "技术文档/Cocos/UI框架/Handle.md"
               }
             }
           },
@@ -181,8 +181,14 @@
   },
   "active": "f9c2e7a8138820d0",
   "lastOpenFiles": [
+    "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md",
+    "技术文档/Cocos/UI框架/Handle.md",
+    "技术文档/UML/时序图.md",
+    "技术文档/Cocos/UI框架/事件系统.md",
+    "技术文档/UML/状态图.md",
     "技术文档/UML/类图.md",
     "技术文档/Unity/Anchor，Pivot，Offset.md",
+    "Excalidraw/事件系统 2024-09-18 16.28.29.excalidraw.md",
     "Excalidraw/Anchor，Pivot，Offset 2024-09-18 20.08.51.excalidraw.md",
     "Excalidraw/anchor，offset和pivot 2024-09-18 20.02.49.excalidraw.md",
     "Excalidraw/anchor，offset和pivot 2024-09-18 19.57.40.excalidraw.md",
@@ -192,8 +198,6 @@
     "技术文档/Unity/Unity程序集.md",
     "🧠 第二大脑.md",
     "技术文档/Unity/使用ScriptableObject存储配置数据.md",
-    "Excalidraw/事件系统 2024-09-18 16.28.29.excalidraw.md",
-    "技术文档/Cocos/UI框架/事件系统.md",
     "技术文档/游戏的体系架构.md",
     "Excalidraw/事件系统 2024-09-18 14.36.24.excalidraw.md",
     "技术文档/Cocos/UI框架",
@@ -205,10 +209,6 @@
     "工具用法/NUnit用法指南.md",
     "技术文档/算法与数据结构/数组排序.md",
     "日常杂谈/面试/网易.md",
-    "英语学习/语法/Have to and must.md",
-    "读书笔记/Effective C++.md",
-    "Excalidraw/Effective C++ 2024-09-06 20.55.07.excalidraw.md",
-    "技术文档/基础知识/Godot.md",
     "技术文档/Godot",
     "日常杂谈/我的GTD实践笔记.canvas",
     "日常杂谈/项目总结/里程碑.canvas",
