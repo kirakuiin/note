@@ -29,8 +29,7 @@
               }
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -96,7 +95,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/UML/时序图.md",
+                "file": "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -113,7 +112,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/UML/时序图.md",
+                "file": "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -136,7 +135,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/UML/时序图.md"
+                "file": "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md"
               }
             }
           },
@@ -178,11 +177,11 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "d78d4f83c9575f05",
+  "active": "f9c2e7a8138820d0",
   "lastOpenFiles": [
+    "技术文档/UML/时序图.md",
     "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md",
     "技术文档/Cocos/UI框架/Handle.md",
-    "技术文档/UML/时序图.md",
     "技术文档/Cocos/UI框架/事件系统.md",
     "技术文档/UML/状态图.md",
     "技术文档/UML/类图.md",
