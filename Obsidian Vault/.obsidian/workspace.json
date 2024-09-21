@@ -11,9 +11,11 @@
             "id": "d4d22d3fea448fdd",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "Assets/Images/3D数学/convexity_test_turn_angle.png"
+                "file": "读书笔记/3D数学/标准光照模型.md",
+                "mode": "source",
+                "source": false
               }
             }
           }
@@ -83,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Assets/Images/3D数学/convexity_test_turn_angle.png",
+                "file": "读书笔记/3D数学/标准光照模型.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -100,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Assets/Images/3D数学/convexity_test_turn_angle.png",
+                "file": "读书笔记/3D数学/标准光照模型.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -123,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Assets/Images/3D数学/convexity_test_turn_angle.png"
+                "file": "读书笔记/3D数学/标准光照模型.md"
               }
             }
           },
@@ -165,8 +167,9 @@
       "obsidian-excalidraw-plugin:新建绘图文件": false
     }
   },
-  "active": "d6de1842426fda97",
+  "active": "d4d22d3fea448fdd",
   "lastOpenFiles": [
+    "Assets/Images/3D数学/convexity_test_turn_angle.png",
     "Assets/Images/3D数学/cylinder_hexagon_interpolated_normals.png",
     "Assets/Images/3D数学/dot_product_adj_over_hyp.png",
     "lighting_specular_r.png.md",
@@ -180,7 +183,6 @@
     "Assets/Images/3D数学/spherical_coordinates_math_people.png",
     "Assets/Images/3D数学/skinned_robot_bend_elbow.png",
     "Assets/Images/3D数学/shear_2d_x_example.png",
-    "Assets/Images/3D数学/shading_teapot_gouraud.png",
     "读书笔记/3D数学/多边形网格.md",
     "读书笔记/3D数学/法线贴图.md",
     "读书笔记/3D数学/光源.md",
