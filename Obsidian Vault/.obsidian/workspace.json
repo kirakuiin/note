@@ -4,35 +4,20 @@
     "type": "split",
     "children": [
       {
-        "id": "a83d904fcc24dd1a",
+        "id": "52ae11529d6b27b0",
         "type": "tabs",
         "children": [
           {
-            "id": "f9c2e7a8138820d0",
+            "id": "d4d22d3fea448fdd",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "image",
               "state": {
-                "file": "技术文档/Cocos/UI框架/Handle.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "d78d4f83c9575f05",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "工具用法/SVN用法指南.md",
-                "mode": "preview",
-                "source": false
+                "file": "Assets/Images/3D数学/convexity_test_turn_angle.png"
               }
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -62,7 +47,7 @@
               "type": "search",
               "state": {
                 "query": "",
-                "matchingCase": false,
+                "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
                 "extraContext": false,
@@ -82,7 +67,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 401.5
   },
   "right": {
     "id": "b3437a4d50bedeaf",
@@ -98,11 +83,11 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "工具用法/SVN用法指南.md",
+                "file": "Assets/Images/3D数学/convexity_test_turn_angle.png",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
-                "showSearch": true,
+                "showSearch": false,
                 "searchQuery": "",
                 "backlinkCollapsed": false,
                 "unlinkedCollapsed": true
@@ -115,7 +100,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "工具用法/SVN用法指南.md",
+                "file": "Assets/Images/3D数学/convexity_test_turn_angle.png",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -138,7 +123,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "工具用法/SVN用法指南.md"
+                "file": "Assets/Images/3D数学/convexity_test_turn_angle.png"
               }
             }
           },
@@ -167,74 +152,73 @@
   },
   "left-ribbon": {
     "hiddenItems": {
-      "switcher:Open quick switcher": false,
-      "graph:Open graph view": false,
-      "canvas:Create new canvas": false,
-      "daily-notes:Open today's daily note": false,
-      "templates:Insert template": false,
-      "command-palette:Open command palette": false,
-      "random-note:Open random note": false,
-      "workspaces:Manage workspace layouts": false,
-      "obsidian-excalidraw-plugin:Create new drawing": false,
+      "obsidian-git:Open Git source control": false,
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "workspaces:管理工作区布局": false,
+      "random-note:开始漫游笔记": false,
       "table-editor-obsidian:Advanced Tables Toolbar": false,
-      "obsidian-git:Open Git source control": false
+      "obsidian-excalidraw-plugin:新建绘图文件": false
     }
   },
-  "active": "d78d4f83c9575f05",
+  "active": "d6de1842426fda97",
   "lastOpenFiles": [
-    "Excalidraw/SVN用法指南 2024-09-20 19.44.00.excalidraw.md",
+    "Assets/Images/3D数学/cylinder_hexagon_interpolated_normals.png",
+    "Assets/Images/3D数学/dot_product_adj_over_hyp.png",
+    "lighting_specular_r.png.md",
+    "读书笔记/3D数学/标准光照模型.md",
+    "记录灵感/📥收件箱.md",
+    "Assets/Images/3D数学/texture_map_example_clamp.png",
+    "Assets/Images/3D数学/texture_map_example_tile.png",
+    "Assets/Images/3D数学/texture_map_example_warp1.png",
+    "Assets/Images/3D数学/spot_light_conical.png",
+    "Assets/Images/3D数学/spherical_to_cartesian_math_people.png",
+    "Assets/Images/3D数学/spherical_coordinates_math_people.png",
+    "Assets/Images/3D数学/skinned_robot_bend_elbow.png",
+    "Assets/Images/3D数学/shear_2d_x_example.png",
+    "Assets/Images/3D数学/shading_teapot_gouraud.png",
+    "读书笔记/3D数学/多边形网格.md",
+    "读书笔记/3D数学/法线贴图.md",
+    "读书笔记/3D数学/光源.md",
+    "读书笔记/3D数学/基础知识.md",
     "工具用法/SVN用法指南.md",
-    "工具用法/Git用法指南.md",
-    "Excalidraw/SVN用法指南 2024-09-20 17.54.06.excalidraw.md",
-    "技术文档/UML/时序图.md",
-    "技术文档/Cocos/UI框架/Handle.md",
-    "技术文档/Cocos/UI框架/事件系统.md",
-    "Excalidraw/事件系统 2024-09-18 16.28.29.excalidraw.md",
-    "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md",
-    "技术文档/UML/状态图.md",
-    "技术文档/UML/类图.md",
-    "技术文档/Unity/Anchor，Pivot，Offset.md",
-    "Excalidraw/Anchor，Pivot，Offset 2024-09-18 20.08.51.excalidraw.md",
-    "Excalidraw/anchor，offset和pivot 2024-09-18 20.02.49.excalidraw.md",
-    "Excalidraw/anchor，offset和pivot 2024-09-18 19.57.40.excalidraw.md",
-    "Excalidraw/anchor，offset和pivot 2024-09-18 19.40.44.excalidraw.md",
-    "Excalidraw/anchor，offset和pivot 2024-09-18 19.47.46.excalidraw.md",
-    "技术文档/Unity/Unity知识点.md",
-    "技术文档/Unity/Unity程序集.md",
-    "🧠 第二大脑.md",
-    "技术文档/Unity/使用ScriptableObject存储配置数据.md",
-    "技术文档/游戏的体系架构.md",
-    "Excalidraw/事件系统 2024-09-18 14.36.24.excalidraw.md",
-    "技术文档/Cocos/UI框架",
-    "技术文档/什么是面向对象.md",
-    "技术文档/Cocos",
-    "技术文档/游戏开发 知识点.md",
-    "技术文档/MVC模式.md",
-    "技术文档/Godot",
-    "日常杂谈/我的GTD实践笔记.canvas",
     "日常杂谈/项目总结/里程碑.canvas",
-    "读书笔记/游戏编程模式/📚大纲.canvas",
-    "Assets/Images/ui-process.png",
+    "日常杂谈/项目总结/幻唐志-洪荒再现.md",
+    "日常杂谈/项目总结/卡坦岛.md",
+    "日常杂谈/项目总结/5分钟地下城.md",
     "日常杂谈/项目总结",
-    "读书笔记/3D数学/总结.canvas",
+    "日常杂谈/面试/网易.md",
     "日常杂谈/面试",
-    "Assets/Images/3D数学/intersection_ray_sphere.png",
-    "Assets/Images/3D数学/intersection_ray_plane.png",
-    "Assets/Images/3D数学/closest_point_sphere.png",
-    "Assets/Images/3D数学/closest_point_parametric_ray.png",
-    "Assets/Images/3D数学/closest_point_implicit_line.png",
-    "技术文档/算法与数据结构/总结.canvas",
-    "技术文档/Python",
-    "Excalidraw/设计图/卡坦岛核心类图.png",
-    "技术文档/基础知识",
-    "Excalidraw/设计图/5分钟地下城核心类图.png",
-    "Excalidraw/游戏AI",
+    "读书笔记/游戏AI/黑板架构.md",
+    "读书笔记/游戏AI/行为树.md",
     "读书笔记/游戏AI",
-    "Assets/Images/算法与数据结构/linkedlist_tree_graph.png",
-    "Assets/Images/3D数学/uniform_circular_motion_acceleration.png",
-    "Assets/Images/算法与数据结构",
+    "读书笔记/Effective C++.md",
+    "读书笔记/3D数学/骨骼动画.md",
+    "读书笔记/3D数学/纹理映射.md",
+    "读书笔记/3D数学/矩阵.md",
+    "读书笔记/3D数学/渲染原理.md",
+    "读书笔记/3D数学/概率.md",
+    "读书笔记/3D数学/总结.canvas",
+    "读书笔记/3D数学/微积分.md",
+    "读书笔记/3D数学/实时渲染管线.md",
+    "读书笔记/3D数学/向量.md",
+    "读书笔记/3D数学/变换.md",
+    "读书笔记/3D数学/几何测试.md",
+    "技术文档/基础知识",
+    "技术文档/Unity",
+    "技术文档/Python",
+    "技术文档/Cocos/UI框架",
+    "技术文档/Cocos",
+    "Excalidraw/游戏AI",
+    "Excalidraw/3D数学",
+    "读书笔记/游戏编程模式/📚大纲.canvas",
     "未命名.canvas",
     "未命名 1.canvas",
+    "日常杂谈/我的GTD实践笔记.canvas",
     "英语学习/语法/时态对比.canvas",
     "读书笔记/未命名.canvas",
     "健身笔录/未命名.canvas"
