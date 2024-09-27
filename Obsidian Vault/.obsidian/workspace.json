@@ -11,19 +11,21 @@
             "id": "f9c2e7a8138820d0",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "markdown",
               "state": {
-                "file": "Excalidraw/Anchor，Pivot，Offset 2024-09-26 19.34.27.excalidraw.md"
+                "file": "技术文档/Cocos/UI框架/状态和属性.md",
+                "mode": "source",
+                "source": false
               }
             }
           },
           {
-            "id": "d78d4f83c9575f05",
+            "id": "f87d1be7962ee44f",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/Unity/Anchor，Pivot，Offset.md",
+                "file": "技术文档/UML/类图.md",
                 "mode": "source",
                 "source": false
               }
@@ -58,7 +60,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "delta",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -75,8 +77,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -96,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Excalidraw/Anchor，Pivot，Offset 2024-09-26 19.34.27.excalidraw.md",
+                "file": "技术文档/Cocos/UI框架/状态和属性.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -113,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Excalidraw/Anchor，Pivot，Offset 2024-09-26 19.34.27.excalidraw.md",
+                "file": "技术文档/Cocos/UI框架/状态和属性.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -136,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Excalidraw/Anchor，Pivot，Offset 2024-09-26 19.34.27.excalidraw.md"
+                "file": "技术文档/Cocos/UI框架/状态和属性.md"
               }
             }
           },
@@ -180,34 +181,36 @@
   },
   "active": "f9c2e7a8138820d0",
   "lastOpenFiles": [
-    "技术文档/Unity/Anchor，Pivot，Offset.md",
-    "Excalidraw/Anchor，Pivot，Offset 2024-09-26 19.34.27.excalidraw.md",
-    "Excalidraw/anchor，offset和pivot 2024-09-18 19.57.40.excalidraw.md",
+    "技术文档/Cocos/UI框架/事件系统.md",
+    "技术文档/Cocos/UI框架/状态和属性.md",
+    "Excalidraw/状态和属性 2024-09-27 15.05.12.excalidraw.md",
+    "Excalidraw/fonts/muyao.ttf",
+    "Excalidraw/fonts",
+    "Excalidraw/新建文件夹",
+    "技术文档/UML/类图.md",
+    "技术文档/什么是面向对象.md",
+    "读书笔记/重构/搬移函数.md",
     "技术文档/Cocos/UI框架/Handle.md",
+    "Excalidraw/Anchor，Pivot，Offset 2024-09-26 19.34.27.excalidraw.md",
+    "技术文档/Unity/Anchor，Pivot，Offset.md",
+    "Excalidraw/anchor，offset和pivot 2024-09-18 19.57.40.excalidraw.md",
     "Excalidraw/anchor，offset和pivot 2024-09-18 20.02.49.excalidraw.md",
     "工具用法/SVN用法指南.md",
     "Excalidraw/SVN用法指南 2024-09-20 19.44.00.excalidraw.md",
     "工具用法/Git用法指南.md",
     "Excalidraw/SVN用法指南 2024-09-20 17.54.06.excalidraw.md",
     "技术文档/UML/时序图.md",
-    "技术文档/Cocos/UI框架/事件系统.md",
     "Excalidraw/事件系统 2024-09-18 16.28.29.excalidraw.md",
     "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md",
     "技术文档/UML/状态图.md",
-    "技术文档/UML/类图.md",
     "Excalidraw/Anchor，Pivot，Offset 2024-09-18 20.08.51.excalidraw.md",
     "Excalidraw/anchor，offset和pivot 2024-09-18 19.40.44.excalidraw.md",
     "Excalidraw/anchor，offset和pivot 2024-09-18 19.47.46.excalidraw.md",
     "技术文档/Unity/Unity知识点.md",
     "技术文档/Unity/Unity程序集.md",
     "🧠 第二大脑.md",
-    "技术文档/Unity/使用ScriptableObject存储配置数据.md",
-    "技术文档/游戏的体系架构.md",
-    "Excalidraw/事件系统 2024-09-18 14.36.24.excalidraw.md",
     "技术文档/Cocos/UI框架",
-    "技术文档/什么是面向对象.md",
     "技术文档/Cocos",
-    "技术文档/游戏开发 知识点.md",
     "技术文档/Godot",
     "日常杂谈/我的GTD实践笔记.canvas",
     "日常杂谈/项目总结/里程碑.canvas",
@@ -226,11 +229,8 @@
     "Excalidraw/设计图/卡坦岛核心类图.png",
     "技术文档/基础知识",
     "Excalidraw/设计图/5分钟地下城核心类图.png",
-    "Excalidraw/游戏AI",
-    "读书笔记/游戏AI",
     "Assets/Images/算法与数据结构/linkedlist_tree_graph.png",
     "Assets/Images/3D数学/uniform_circular_motion_acceleration.png",
-    "Assets/Images/算法与数据结构",
     "未命名.canvas",
     "未命名 1.canvas",
     "英语学习/语法/时态对比.canvas",
