@@ -42,6 +42,8 @@ pivot反映了UI元素旋转和缩放的中心，是一个描述自身的属性�
 
 ## sizeDelta
 
+![[Anchor，Pivot，Offset 2024-09-26 19.34.27.excalidraw]]
+
 这个属性的计算方式为：
 $$
 sizeDelta = offset \ max - offset \ min
