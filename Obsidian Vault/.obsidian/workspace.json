@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/Cocos/UI框架/状态和属性.md",
+                "file": "技术文档/Python/Python调试和性能分析.md",
                 "mode": "source",
                 "source": false
               }
@@ -97,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/Cocos/UI框架/状态和属性.md",
+                "file": "技术文档/Python/Python调试和性能分析.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/Cocos/UI框架/状态和属性.md",
+                "file": "技术文档/Python/Python调试和性能分析.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/Cocos/UI框架/状态和属性.md"
+                "file": "技术文档/Python/Python调试和性能分析.md"
               }
             }
           },
@@ -181,13 +181,27 @@
   },
   "active": "f9c2e7a8138820d0",
   "lastOpenFiles": [
-    "技术文档/Cocos/UI框架/事件系统.md",
+    "Excalidraw/Python调试和性能分析 2024-09-29 20.10.30.excalidraw.md",
+    "技术文档/Python/Python调试和性能分析.md",
+    "技术文档/Python/Python 编译过程和对象.md",
+    "技术文档/基础知识/CSharp.md",
+    "Excalidraw/Python 编译过程和对象 2024-09-29 17.17.52.excalidraw.md",
+    "技术文档/基础知识/C++.md",
+    "技术文档/UML/类图.md",
+    "技术文档/基础知识/Godot.md",
+    "技术文档/基础知识/Unity.md",
+    "技术文档/基础知识/计算机.md",
+    "读书笔记/Effective C++.md",
+    "Excalidraw/Python 编译过程和对象 2024-09-29 16.19.19.excalidraw.md",
+    "Excalidraw/Python 编译过程和对象 2024-09-29 15.34.51.excalidraw.md",
+    "Excalidraw/Python 虚拟机和对象 2024-09-29 15.26.11.excalidraw.md",
+    "技术文档/Python/Python 知识点.md",
     "技术文档/Cocos/UI框架/状态和属性.md",
+    "技术文档/Cocos/UI框架/事件系统.md",
     "Excalidraw/状态和属性 2024-09-27 15.05.12.excalidraw.md",
     "Excalidraw/fonts/muyao.ttf",
     "Excalidraw/fonts",
     "Excalidraw/新建文件夹",
-    "技术文档/UML/类图.md",
     "技术文档/什么是面向对象.md",
     "读书笔记/重构/搬移函数.md",
     "技术文档/Cocos/UI框架/Handle.md",
@@ -196,19 +210,6 @@
     "Excalidraw/anchor，offset和pivot 2024-09-18 19.57.40.excalidraw.md",
     "Excalidraw/anchor，offset和pivot 2024-09-18 20.02.49.excalidraw.md",
     "工具用法/SVN用法指南.md",
-    "Excalidraw/SVN用法指南 2024-09-20 19.44.00.excalidraw.md",
-    "工具用法/Git用法指南.md",
-    "Excalidraw/SVN用法指南 2024-09-20 17.54.06.excalidraw.md",
-    "技术文档/UML/时序图.md",
-    "Excalidraw/事件系统 2024-09-18 16.28.29.excalidraw.md",
-    "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md",
-    "技术文档/UML/状态图.md",
-    "Excalidraw/Anchor，Pivot，Offset 2024-09-18 20.08.51.excalidraw.md",
-    "Excalidraw/anchor，offset和pivot 2024-09-18 19.40.44.excalidraw.md",
-    "Excalidraw/anchor，offset和pivot 2024-09-18 19.47.46.excalidraw.md",
-    "技术文档/Unity/Unity知识点.md",
-    "技术文档/Unity/Unity程序集.md",
-    "🧠 第二大脑.md",
     "技术文档/Cocos/UI框架",
     "技术文档/Cocos",
     "技术文档/Godot",
