@@ -41,21 +41,34 @@ test.foo = new_foo
 一些常见的热更辅助函数为：
 ```python
 def update_func(old_f, new_f):
-	# setattr 替换 __code__, __doc__, __dict__, __defaults__ 属性
+	# setattr 替换关键属性
+	setattr(old_f, "__code__", new_f.__code__)
+	setattr(old_f, "__defaults", new_f.__defaults__)
+	setattr(old_f, "__doc__", new_f.__doc__)
+	setattr(old_f, "__dict__", new_f.__dict__)
 	# 处理闭包__closure__，对闭包中的函数递归调用。
-	pass
+	if old_f.__closure__:
+		for idx, unit in enumerate(old_f.__closure__):
+			if inspect.isfunction(unit.cell_contents):
+				new_unit = new_f.__closure__[idx]
+				update_func(unit.cell_contents,
+							new_unit.cell_contents)
 
 def update_cls(old_c, new_c):
 	# 分别处理普通函数，类和静态函数，以及嵌套类的替换。
-	for name, n_attr in new_class.__dict__.items():
-		pass
-
-def update_mod(old_m, new_m):
-	# 分别更新类，函数
-	for name, attr in inspect.getmembers(new_m):
-		pass
-	# 非类和全局函数的变量保持不变
-	new_m.__dict__.update(old_m)
+	for name, n_attr in new_c.__dict__.items():
+		o_attr = old_c.__dict__[name]
+		if inspect.isfunction(o_attr)
+			and inspect.isfunction(n_attr):
+			update_func(o_attr, n_attr)
+		elif isinstance(n_attr, staticmethod)
+			or isinstance(n_attr, classmethod):
+			if hasattr(o_attr, "__func__")
+				and hasattr(n_attr, "__func__"):
+				update_func(o_attr.__func__, n_attr.__func__)
+		elif inspect.isclass(n_attr)
+			and n_attr.__name__ is o_attr.__name__:
+			update_cls(o_attr, n_attr)
 ```
 
 # 性能分析工具
@@ -79,3 +92,54 @@ def update_mod(old_m, new_m):
 - objgraph，可以分析对象之间的引用关系，用来排查内存泄漏。
 
 # 性能优化方法
+
+## CPU优化
+
+python运行慢的主要原因是：
+- 动态类型导致运行时需要进行类型检查。
+- 万物皆对象导致运行时要频繁查字典来查找属性。
+	![[Python调试和性能 2024-09-30 14.27.16.excalidraw]]
+- GIL导致无法利用多核心优势。
+- 由于是解释型语言，在虚拟机执行时，每个循环内重复解释语句，无法把各种查表，类型检查提取到循环外。这是CPU性能差的根本原因。
+
+针对上述原因，有以下优化方案：
+1. 对于一些特殊类型的数值运算，尽量采用引擎提供的数学库，库中不会进行多余的检查。
+2. 使用更高效的虚拟机，来避免大量的类型检查。
+3. 当大量访问属性时（无论是类属性还是全局变量），使用局部变量缓存属性，从访问速度上来说：局部>闭包>全局>内建。
+4. 对于导入来说，每次导入还是会有查询`sys.modules`的开销，因此对于广泛使用的基础通用模块还是放到模块头部。对于调用次数少，用途仅限某几个函数的可以放到函数内部。
+5. 官方在PEP-684中提出了子解释器的概念，突破了GIL的封锁。甚至在PEP-703中提出了逐步移除GIL的想法。
+6. 考虑引入编译型语言的优点，比如PyPy可以利用JIT加速执行；或者将性能热点下沉的C/C++，比如使用PyBind11，NanoBind；或者将Py转为C或C++，比如Cython。
+
+> [!hint]
+> 如果代码是大量的逻辑调用，而不是大量的计算，将代码改为C/C++也未必能获得多大的提升。
+
+## 内存优化
+
+由于一切都是对象，无论基本类型还是自定义类型，这导致python为了存储类型信息在存储每个对象是都产生了大量的额外开销。这也是python内存占用需要优化的原因。
+
+1. 部分python类型，比如字典，列表。其空的对象在内存中可能就要占据几十字节，因此最好将其默认值设置为更节省空间的类型。`"", {}, [] => None`
+2. 不常用的变量延迟初始化。
+3. 用组合替代继承。
+4. 使用迭代器而不是列表，迭代器会按需生成元素。
+5. 对一些大量使用且属性不变的对象，考虑使用`__slot__`类属性来定义属性。可以大量降低内存占用，提高访问速度。
+6. 对于字典格式的导表数据，可以用如下方式优化：
+	- 重复的数据抽离为一个新的表，并将其替换为索引来引用新的表。
+	- 考虑将字典替换为元组，比如：
+		```python
+		table = {
+			1001 : {"name": "hello", "age": 20},
+			1002 : {"name": "world", "age": 3},
+		}
+		
+		# 优化为如下形式
+		ID = 0
+		NAME = 1
+		AGE = 2
+		table = (
+			(1001, "hello", 20),
+			(1002, "world", 3),
+		)
+		# 但这种优化会降低可读性，也会导致索引时不如字典快速(为了解决这个问题可能要让ID和元组下标一一对应。)
+		```
+	- 使用自定义的字典，采用更加合理的内存分布。
+	- 不用python来存储数据，用嵌入式数据库，C/C++等。
