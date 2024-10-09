@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/Python/Python调试和性能.md",
+                "file": "工具用法/SVN用法指南.md",
                 "mode": "preview",
                 "source": false
               }
@@ -60,7 +60,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "svn",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -77,7 +77,8 @@
               "state": {}
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -97,7 +98,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/Python/Python调试和性能.md",
+                "file": "工具用法/SVN用法指南.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +115,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/Python/Python调试和性能.md",
+                "file": "工具用法/SVN用法指南.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +138,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/Python/Python调试和性能.md"
+                "file": "工具用法/SVN用法指南.md"
               }
             }
           },
@@ -181,8 +182,8 @@
   },
   "active": "f9c2e7a8138820d0",
   "lastOpenFiles": [
-    "Excalidraw/Python调试和性能 2024-09-30 14.27.16.excalidraw.md",
     "技术文档/Python/Python调试和性能.md",
+    "Excalidraw/Python调试和性能 2024-09-30 14.27.16.excalidraw.md",
     "Excalidraw/Python调试和性能分析 2024-09-29 20.10.30.excalidraw.md",
     "技术文档/Python/Python 装饰器.md",
     "技术文档/Python/Python 知识点.md",
