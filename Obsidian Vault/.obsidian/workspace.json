@@ -13,8 +13,8 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "工具用法/SVN用法指南.md",
-                "mode": "preview",
+                "file": "技术文档/Python/Python3 新特性.md",
+                "mode": "source",
                 "source": false
               }
             }
@@ -60,7 +60,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "svn",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -77,8 +77,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -98,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "工具用法/SVN用法指南.md",
+                "file": "技术文档/Python/Python3 新特性.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -115,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "工具用法/SVN用法指南.md",
+                "file": "技术文档/Python/Python3 新特性.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -138,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "工具用法/SVN用法指南.md"
+                "file": "技术文档/Python/Python3 新特性.md"
               }
             }
           },
@@ -182,12 +181,14 @@
   },
   "active": "f9c2e7a8138820d0",
   "lastOpenFiles": [
-    "技术文档/Python/Python调试和性能.md",
+    "技术文档/Python/Python 调试和性能.md",
+    "技术文档/Python/Python3 新特性.md",
+    "技术文档/Python/Python 装饰器.md",
+    "技术文档/Python/Python 编译过程和对象.md",
+    "技术文档/Python/Python 导入问题.md",
+    "工具用法/SVN用法指南.md",
     "Excalidraw/Python调试和性能 2024-09-30 14.27.16.excalidraw.md",
     "Excalidraw/Python调试和性能分析 2024-09-29 20.10.30.excalidraw.md",
-    "技术文档/Python/Python 装饰器.md",
-    "技术文档/Python/Python 知识点.md",
-    "技术文档/Python/Python 编译过程和对象.md",
     "Excalidraw/Python 编译过程和对象 2024-09-29 17.17.52.excalidraw.md",
     "Excalidraw/Python 编译过程和对象 2024-09-29 16.19.19.excalidraw.md",
     "Excalidraw/Python 编译过程和对象 2024-09-29 15.34.51.excalidraw.md",
@@ -209,8 +210,6 @@
     "读书笔记/重构/搬移函数.md",
     "技术文档/Cocos/UI框架/Handle.md",
     "Excalidraw/Anchor，Pivot，Offset 2024-09-26 19.34.27.excalidraw.md",
-    "技术文档/Unity/Anchor，Pivot，Offset.md",
-    "Excalidraw/anchor，offset和pivot 2024-09-18 19.57.40.excalidraw.md",
     "技术文档/Cocos/UI框架",
     "技术文档/Cocos",
     "技术文档/Godot",
