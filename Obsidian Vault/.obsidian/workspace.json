@@ -11,11 +11,9 @@
             "id": "f9c2e7a8138820d0",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "excalidraw",
               "state": {
-                "file": "技术文档/Cocos/UI框架/创建过程.md",
-                "mode": "source",
-                "source": false
+                "file": "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md"
               }
             }
           },
@@ -23,15 +21,14 @@
             "id": "f87d1be7962ee44f",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "excalidraw",
               "state": {
-                "file": "技术文档/UML/类图.md",
-                "mode": "source",
-                "source": false
+                "file": "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md"
               }
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -97,7 +94,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/Cocos/UI框架/创建过程.md",
+                "file": "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -117,7 +114,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/Cocos/UI框架/创建过程.md"
+                "file": "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md"
               }
             }
           },
@@ -127,7 +124,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/Cocos/UI框架/创建过程.md",
+                "file": "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -179,10 +176,11 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "f9c2e7a8138820d0",
+  "active": "f87d1be7962ee44f",
   "lastOpenFiles": [
-    "技术文档/Cocos/UI框架/事件系统.md",
     "技术文档/Cocos/UI框架/创建过程.md",
+    "技术文档/Cocos/UI框架/事件系统.md",
+    "技术文档/UML/类图.md",
     "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md",
     "技术文档/Cocos/UI框架/状态和属性.md",
     "技术文档/Python/Python 导入问题.md",
@@ -200,7 +198,6 @@
     "Excalidraw/Python 虚拟机和对象 2024-09-29 15.26.11.excalidraw.md",
     "技术文档/基础知识/CSharp.md",
     "技术文档/基础知识/C++.md",
-    "技术文档/UML/类图.md",
     "技术文档/基础知识/Godot.md",
     "技术文档/基础知识/Unity.md",
     "技术文档/基础知识/计算机.md",
