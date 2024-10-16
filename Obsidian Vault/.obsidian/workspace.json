@@ -21,9 +21,11 @@
             "id": "f87d1be7962ee44f",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "markdown",
               "state": {
-                "file": "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md"
+                "file": "技术文档/Python/Python3 新特性.md",
+                "mode": "source",
+                "source": false
               }
             }
           }
@@ -155,7 +157,7 @@
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 2
       }
     ],
     "direction": "horizontal",
@@ -176,12 +178,12 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "f87d1be7962ee44f",
+  "active": "fa35313977522132",
   "lastOpenFiles": [
+    "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md",
     "技术文档/Cocos/UI框架/创建过程.md",
     "技术文档/Cocos/UI框架/事件系统.md",
     "技术文档/UML/类图.md",
-    "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md",
     "技术文档/Cocos/UI框架/状态和属性.md",
     "技术文档/Python/Python 导入问题.md",
     "技术文档/Python/Python 编译过程和对象.md",
