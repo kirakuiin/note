@@ -20,21 +20,8 @@
               "icon": "lucide-file",
               "title": "Python3 新特性"
             }
-          },
-          {
-            "id": "8b7a03ac45484d8f",
-            "type": "leaf",
-            "state": {
-              "type": "release-notes",
-              "state": {
-                "currentVersion": "1.7.4"
-              },
-              "icon": "lucide-file",
-              "title": "Release Notes 1.7.4"
-            }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -199,14 +186,15 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "8b7a03ac45484d8f",
+  "active": "f87d1be7962ee44f",
   "lastOpenFiles": [
-    "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md",
-    "技术文档/Python/Python3 新特性.md",
     "技术文档/Cocos/UI框架/创建过程.md",
-    "技术文档/Cocos/UI框架/事件系统.md",
-    "技术文档/UML/类图.md",
+    "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md",
+    "技术文档/Cocos/UI框架/Untitled.md",
     "技术文档/Cocos/UI框架/状态和属性.md",
+    "技术文档/Cocos/UI框架/事件系统.md",
+    "技术文档/Python/Python3 新特性.md",
+    "技术文档/UML/类图.md",
     "技术文档/Python/Python 导入问题.md",
     "技术文档/Python/Python 编译过程和对象.md",
     "技术文档/Python/Python 装饰器.md",
@@ -229,7 +217,6 @@
     "Excalidraw/fonts/muyao.ttf",
     "Excalidraw/fonts",
     "Excalidraw/新建文件夹",
-    "技术文档/什么是面向对象.md",
     "技术文档/Cocos/UI框架",
     "技术文档/Cocos",
     "技术文档/Godot",
