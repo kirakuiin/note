@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/Python/Python3 新特性.md",
-                "mode": "preview",
+                "file": "技术文档/Python/Python 调试和性能.md",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Python3 新特性"
+              "title": "Python 调试和性能"
             }
           }
         ]
@@ -93,10 +93,10 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/Python/Python3 新特性.md"
+                "file": "技术文档/Python/Python 调试和性能.md"
               },
               "icon": "lucide-list",
-              "title": "Outline of Python3 新特性"
+              "title": "Outline of Python 调试和性能"
             }
           },
           {
@@ -188,15 +188,16 @@
   },
   "active": "f87d1be7962ee44f",
   "lastOpenFiles": [
+    "技术文档/Python/Python 导入问题.md",
+    "技术文档/Python/Python 编译过程和对象.md",
+    "Excalidraw/Python 虚拟机和对象 2024-09-29 15.26.11.excalidraw.md",
+    "技术文档/Python/Python3 新特性.md",
     "技术文档/Cocos/UI框架/创建过程.md",
     "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md",
     "技术文档/Cocos/UI框架/Untitled.md",
     "技术文档/Cocos/UI框架/状态和属性.md",
     "技术文档/Cocos/UI框架/事件系统.md",
-    "技术文档/Python/Python3 新特性.md",
     "技术文档/UML/类图.md",
-    "技术文档/Python/Python 导入问题.md",
-    "技术文档/Python/Python 编译过程和对象.md",
     "技术文档/Python/Python 装饰器.md",
     "技术文档/Python/Python 调试和性能.md",
     "Excalidraw/Python3 新特性 2024-10-09 19.45.04.excalidraw.md",
@@ -206,7 +207,6 @@
     "Excalidraw/Python 编译过程和对象 2024-09-29 17.17.52.excalidraw.md",
     "Excalidraw/Python 编译过程和对象 2024-09-29 16.19.19.excalidraw.md",
     "Excalidraw/Python 编译过程和对象 2024-09-29 15.34.51.excalidraw.md",
-    "Excalidraw/Python 虚拟机和对象 2024-09-29 15.26.11.excalidraw.md",
     "技术文档/基础知识/CSharp.md",
     "技术文档/基础知识/C++.md",
     "技术文档/基础知识/Godot.md",
