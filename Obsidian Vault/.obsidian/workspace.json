@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/Python/Python 调试和性能.md",
+                "file": "技术文档/Python/Python3 新特性.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Python 调试和性能"
+              "title": "Python3 新特性"
             }
           }
         ]
@@ -93,10 +93,10 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/Python/Python 调试和性能.md"
+                "file": "技术文档/Python/Python3 新特性.md"
               },
               "icon": "lucide-list",
-              "title": "Outline of Python 调试和性能"
+              "title": "Outline of Python3 新特性"
             }
           },
           {
@@ -188,6 +188,7 @@
   },
   "active": "f87d1be7962ee44f",
   "lastOpenFiles": [
+    "技术文档/Python/Python 调试和性能.md",
     "技术文档/Python/Python 导入问题.md",
     "技术文档/Python/Python 编译过程和对象.md",
     "Excalidraw/Python 虚拟机和对象 2024-09-29 15.26.11.excalidraw.md",
@@ -199,7 +200,6 @@
     "技术文档/Cocos/UI框架/事件系统.md",
     "技术文档/UML/类图.md",
     "技术文档/Python/Python 装饰器.md",
-    "技术文档/Python/Python 调试和性能.md",
     "Excalidraw/Python3 新特性 2024-10-09 19.45.04.excalidraw.md",
     "工具用法/SVN用法指南.md",
     "Excalidraw/Python调试和性能 2024-09-30 14.27.16.excalidraw.md",
