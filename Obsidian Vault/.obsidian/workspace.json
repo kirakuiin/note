@@ -20,8 +20,21 @@
               "icon": "lucide-file",
               "title": "Python3 新特性"
             }
+          },
+          {
+            "id": "9caafc2cfb169568",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.7.7"
+              },
+              "icon": "lucide-file",
+              "title": "Release Notes 1.7.7"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -52,7 +65,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "decora",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -73,7 +86,8 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -92,11 +106,9 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {
-                "file": "技术文档/Python/Python3 新特性.md"
-              },
+              "state": {},
               "icon": "lucide-list",
-              "title": "Outline of Python3 新特性"
+              "title": "Outline"
             }
           },
           {
@@ -186,7 +198,7 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "f87d1be7962ee44f",
+  "active": "a8663baff729e3ba",
   "lastOpenFiles": [
     "技术文档/Python/Python 调试和性能.md",
     "技术文档/Python/Python 导入问题.md",
