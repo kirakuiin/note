@@ -35,8 +35,7 @@
               "title": "Python 装饰器"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -67,7 +66,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "装饰器",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -109,10 +108,10 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/Python/Python 装饰器.md"
+                "file": "技术文档/Python/Python3 新特性.md"
               },
               "icon": "lucide-list",
-              "title": "Outline of Python 装饰器"
+              "title": "Outline of Python3 新特性"
             }
           },
           {
@@ -202,8 +201,9 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "9caafc2cfb169568",
+  "active": "f87d1be7962ee44f",
   "lastOpenFiles": [
+    "技术文档/Python/Python 装饰器.md",
     "技术文档/Python/Python 调试和性能.md",
     "技术文档/Python/Python 导入问题.md",
     "技术文档/Python/Python 编译过程和对象.md",
@@ -215,7 +215,6 @@
     "技术文档/Cocos/UI框架/状态和属性.md",
     "技术文档/Cocos/UI框架/事件系统.md",
     "技术文档/UML/类图.md",
-    "技术文档/Python/Python 装饰器.md",
     "Excalidraw/Python3 新特性 2024-10-09 19.45.04.excalidraw.md",
     "工具用法/SVN用法指南.md",
     "Excalidraw/Python调试和性能 2024-09-30 14.27.16.excalidraw.md",

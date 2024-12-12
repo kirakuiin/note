@@ -185,7 +185,7 @@ python3引入了类型注解这一功能，让python可以享受到静态类型�
 用来实现简单的数据类。
 
 ```python
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 @dataclass
 class Item:
