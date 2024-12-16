@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "技术文档/Python/Python3 新特性.md",
+                "file": "读书笔记/3D数学/微积分.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Python3 新特性"
+              "title": "微积分"
             }
           },
           {
@@ -66,7 +66,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "bu'din",
+                "query": "不定积分",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -108,10 +108,10 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/Python/Python3 新特性.md"
+                "file": "读书笔记/3D数学/微积分.md"
               },
               "icon": "lucide-list",
-              "title": "Outline of Python3 新特性"
+              "title": "Outline of 微积分"
             }
           },
           {
@@ -201,14 +201,14 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "a8663baff729e3ba",
+  "active": "f87d1be7962ee44f",
   "lastOpenFiles": [
+    "技术文档/Python/Python3 新特性.md",
     "技术文档/Python/Python 装饰器.md",
     "技术文档/Python/Python 调试和性能.md",
     "技术文档/Python/Python 导入问题.md",
     "技术文档/Python/Python 编译过程和对象.md",
     "Excalidraw/Python 虚拟机和对象 2024-09-29 15.26.11.excalidraw.md",
-    "技术文档/Python/Python3 新特性.md",
     "技术文档/Cocos/UI框架/创建过程.md",
     "Excalidraw/UI创建过程 2024-09-19 09.34.15.excalidraw.md",
     "技术文档/Cocos/UI框架/Untitled.md",
