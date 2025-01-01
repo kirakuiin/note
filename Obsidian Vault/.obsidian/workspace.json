@@ -11,11 +11,9 @@
             "id": "d4d22d3fea448fdd",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "excalidraw",
               "state": {
-                "file": "技术文档/Cocos/UI框架/事件系统.md",
-                "mode": "source",
-                "source": false
+                "file": "Excalidraw/卡牌游戏构思 2025-01-01 13.55.11.excalidraw.md"
               }
             }
           }
@@ -85,7 +83,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "技术文档/Cocos/UI框架/事件系统.md",
+                "file": "Excalidraw/卡牌游戏构思 2025-01-01 13.55.11.excalidraw.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +100,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "技术文档/Cocos/UI框架/事件系统.md",
+                "file": "Excalidraw/卡牌游戏构思 2025-01-01 13.55.11.excalidraw.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +123,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "技术文档/Cocos/UI框架/事件系统.md"
+                "file": "Excalidraw/卡牌游戏构思 2025-01-01 13.55.11.excalidraw.md"
               }
             }
           },
@@ -169,10 +167,13 @@
   },
   "active": "d4d22d3fea448fdd",
   "lastOpenFiles": [
-    "技术文档/Cocos/UI框架/Handle.md",
-    "技术文档/Cocos/UI框架/事件系统.md",
-    "技术文档/Godot/未命名.md",
+    "记录灵感/卡牌游戏构思.md",
+    "Excalidraw/卡牌游戏构思 2025-01-01 13.55.11.excalidraw.md",
     "记录灵感/📥收件箱.md",
+    "🧠 第二大脑.md",
+    "技术文档/Cocos/UI框架/事件系统.md",
+    "技术文档/Cocos/UI框架/Handle.md",
+    "技术文档/Godot/未命名.md",
     "技术文档/Godot",
     "读书笔记/3D数学/标准光照模型.md",
     "Assets/Images/3D数学/convexity_test_turn_angle.png",
@@ -208,9 +209,6 @@
     "读书笔记/3D数学/渲染原理.md",
     "读书笔记/3D数学/概率.md",
     "读书笔记/3D数学/总结.canvas",
-    "读书笔记/3D数学/微积分.md",
-    "读书笔记/3D数学/实时渲染管线.md",
-    "读书笔记/3D数学/向量.md",
     "技术文档/基础知识",
     "技术文档/Unity",
     "技术文档/Python",
