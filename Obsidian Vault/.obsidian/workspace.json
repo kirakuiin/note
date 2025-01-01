@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "读书笔记/3D数学/标准光照模型.md",
+                "file": "技术文档/Cocos/UI框架/事件系统.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "读书笔记/3D数学/标准光照模型.md",
+                "file": "技术文档/Cocos/UI框架/事件系统.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "读书笔记/3D数学/标准光照模型.md",
+                "file": "技术文档/Cocos/UI框架/事件系统.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "读书笔记/3D数学/标准光照模型.md"
+                "file": "技术文档/Cocos/UI框架/事件系统.md"
               }
             }
           },
@@ -169,12 +169,16 @@
   },
   "active": "d4d22d3fea448fdd",
   "lastOpenFiles": [
+    "技术文档/Cocos/UI框架/Handle.md",
+    "技术文档/Cocos/UI框架/事件系统.md",
+    "技术文档/Godot/未命名.md",
+    "记录灵感/📥收件箱.md",
+    "技术文档/Godot",
+    "读书笔记/3D数学/标准光照模型.md",
     "Assets/Images/3D数学/convexity_test_turn_angle.png",
     "Assets/Images/3D数学/cylinder_hexagon_interpolated_normals.png",
     "Assets/Images/3D数学/dot_product_adj_over_hyp.png",
     "lighting_specular_r.png.md",
-    "读书笔记/3D数学/标准光照模型.md",
-    "记录灵感/📥收件箱.md",
     "Assets/Images/3D数学/texture_map_example_clamp.png",
     "Assets/Images/3D数学/texture_map_example_tile.png",
     "Assets/Images/3D数学/texture_map_example_warp1.png",
@@ -182,7 +186,6 @@
     "Assets/Images/3D数学/spherical_to_cartesian_math_people.png",
     "Assets/Images/3D数学/spherical_coordinates_math_people.png",
     "Assets/Images/3D数学/skinned_robot_bend_elbow.png",
-    "Assets/Images/3D数学/shear_2d_x_example.png",
     "读书笔记/3D数学/多边形网格.md",
     "读书笔记/3D数学/法线贴图.md",
     "读书笔记/3D数学/光源.md",
@@ -208,15 +211,12 @@
     "读书笔记/3D数学/微积分.md",
     "读书笔记/3D数学/实时渲染管线.md",
     "读书笔记/3D数学/向量.md",
-    "读书笔记/3D数学/变换.md",
-    "读书笔记/3D数学/几何测试.md",
     "技术文档/基础知识",
     "技术文档/Unity",
     "技术文档/Python",
     "技术文档/Cocos/UI框架",
     "技术文档/Cocos",
     "Excalidraw/游戏AI",
-    "Excalidraw/3D数学",
     "读书笔记/游戏编程模式/📚大纲.canvas",
     "未命名.canvas",
     "未命名 1.canvas",
