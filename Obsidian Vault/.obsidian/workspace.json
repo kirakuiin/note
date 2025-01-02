@@ -14,7 +14,21 @@
               "type": "excalidraw",
               "state": {
                 "file": "Excalidraw/卡牌游戏构思 2025-01-01 13.55.11.excalidraw.md"
-              }
+              },
+              "icon": "excalidraw-icon",
+              "title": "卡牌游戏构思 2025-01-01 13.55.11.excalidraw"
+            }
+          },
+          {
+            "id": "486b00514d234946",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.7.7"
+              },
+              "icon": "lucide-file",
+              "title": "Release Notes 1.7.7"
             }
           }
         ]
@@ -37,7 +51,9 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical"
-              }
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
             }
           },
           {
@@ -52,7 +68,9 @@
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical"
-              }
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
             }
           },
           {
@@ -60,7 +78,9 @@
             "type": "leaf",
             "state": {
               "type": "bookmarks",
-              "state": {}
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "书签"
             }
           }
         ]
@@ -91,7 +111,9 @@
                 "searchQuery": "",
                 "backlinkCollapsed": false,
                 "unlinkedCollapsed": true
-              }
+              },
+              "icon": "links-coming-in",
+              "title": "卡牌游戏构思 2025-01-01 13.55.11.excalidraw 的反向链接列表"
             }
           },
           {
@@ -103,7 +125,9 @@
                 "file": "Excalidraw/卡牌游戏构思 2025-01-01 13.55.11.excalidraw.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
-              }
+              },
+              "icon": "links-going-out",
+              "title": "卡牌游戏构思 2025-01-01 13.55.11.excalidraw 的出链列表"
             }
           },
           {
@@ -114,7 +138,9 @@
               "state": {
                 "sortOrder": "frequency",
                 "useHierarchy": true
-              }
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
             }
           },
           {
@@ -124,7 +150,9 @@
               "type": "outline",
               "state": {
                 "file": "Excalidraw/卡牌游戏构思 2025-01-01 13.55.11.excalidraw.md"
-              }
+              },
+              "icon": "lucide-list",
+              "title": "卡牌游戏构思 2025-01-01 13.55.11.excalidraw 的大纲"
             }
           },
           {
@@ -132,7 +160,9 @@
             "type": "leaf",
             "state": {
               "type": "calendar",
-              "state": {}
+              "state": {},
+              "icon": "calendar-with-checkmark",
+              "title": "Calendar"
             }
           },
           {
@@ -140,7 +170,9 @@
             "type": "leaf",
             "state": {
               "type": "advanced-tables-toolbar",
-              "state": {}
+              "state": {},
+              "icon": "spreadsheet",
+              "title": "Advanced Tables"
             }
           }
         ],
