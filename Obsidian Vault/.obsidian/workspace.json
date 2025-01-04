@@ -1,0 +1,248 @@
+{
+  "main": {
+    "id": "5ab05b322d0fc4f9",
+    "type": "split",
+    "children": [
+      {
+        "id": "52ae11529d6b27b0",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "486b00514d234946",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "记录灵感/卡牌游戏构思.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "卡牌游戏构思"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "ea3af70c5919ff41",
+    "type": "split",
+    "children": [
+      {
+        "id": "e07349af1b2f8177",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d6de1842426fda97",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "a8663baff729e3ba",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": true,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "bc0d81cbe2e31393",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 401.5
+  },
+  "right": {
+    "id": "b3437a4d50bedeaf",
+    "type": "split",
+    "children": [
+      {
+        "id": "6cd80940496fa32c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "ab9a4108077d9e7b",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Excalidraw/卡牌游戏构思 2025-01-01 13.55.11.excalidraw.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "卡牌游戏构思 2025-01-01 13.55.11.excalidraw 的反向链接列表"
+            }
+          },
+          {
+            "id": "4a1a034be20ef7a7",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Excalidraw/卡牌游戏构思 2025-01-01 13.55.11.excalidraw.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "卡牌游戏构思 2025-01-01 13.55.11.excalidraw 的出链列表"
+            }
+          },
+          {
+            "id": "baf463664751721a",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "fa35313977522132",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "记录灵感/卡牌游戏构思.md"
+              },
+              "icon": "lucide-list",
+              "title": "卡牌游戏构思 的大纲"
+            }
+          },
+          {
+            "id": "fd9739689dd740b8",
+            "type": "leaf",
+            "state": {
+              "type": "calendar",
+              "state": {},
+              "icon": "calendar-with-checkmark",
+              "title": "Calendar"
+            }
+          },
+          {
+            "id": "dc1035d49256d8f5",
+            "type": "leaf",
+            "state": {
+              "type": "advanced-tables-toolbar",
+              "state": {},
+              "icon": "spreadsheet",
+              "title": "Advanced Tables"
+            }
+          }
+        ],
+        "currentTab": 3
+      }
+    ],
+    "direction": "horizontal",
+    "width": 216.5
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "obsidian-git:Open Git source control": false,
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "workspaces:管理工作区布局": false,
+      "random-note:开始漫游笔记": false,
+      "table-editor-obsidian:Advanced Tables Toolbar": false,
+      "obsidian-excalidraw-plugin:新建绘图文件": false
+    }
+  },
+  "active": "486b00514d234946",
+  "lastOpenFiles": [
+    "conflict-files-obsidian-git.md",
+    "Excalidraw/卡牌游戏构思 2025-01-01 13.55.11.excalidraw.md",
+    "日常杂谈/年度总结/2024年工作总结近暨来年规划.md",
+    "日常杂谈/年度总结",
+    "技术文档/Python/Python3 新特性.md",
+    "技术文档/Python/Python 调试和性能.md",
+    "技术文档/Python/Python 编译过程和对象.md",
+    "技术文档/Python/Python 导入问题.md",
+    "技术文档/Cocos/UI框架/状态和属性.md",
+    "技术文档/Cocos/UI框架/创建过程.md",
+    "Excalidraw/状态和属性 2024-09-27 15.05.12.excalidraw.md",
+    "Excalidraw/fonts/muyao.ttf",
+    "Excalidraw/fonts",
+    "Excalidraw/Python调试和性能分析 2024-09-29 20.10.30.excalidraw.md",
+    "Excalidraw/Python调试和性能 2024-09-30 14.27.16.excalidraw.md",
+    "Excalidraw/Python3 新特性 2024-10-09 19.45.04.excalidraw.md",
+    "Excalidraw/Python 虚拟机和对象 2024-09-29 15.26.11.excalidraw.md",
+    "Excalidraw/Python 编译过程和对象 2024-09-29 17.17.52.excalidraw.md",
+    "Excalidraw/Python 编译过程和对象 2024-09-29 16.19.19.excalidraw.md",
+    "Excalidraw/Python 编译过程和对象 2024-09-29 15.34.51.excalidraw.md",
+    "Excalidraw/Anchor，Pivot，Offset 2024-09-26 19.34.27.excalidraw.md",
+    "记录灵感/卡牌游戏构思.md",
+    "记录灵感/📥收件箱.md",
+    "🧠 第二大脑.md",
+    "技术文档/Cocos/UI框架/事件系统.md",
+    "技术文档/Cocos/UI框架/Handle.md",
+    "技术文档/Godot/未命名.md",
+    "技术文档/Godot",
+    "读书笔记/3D数学/标准光照模型.md",
+    "Assets/Images/3D数学/convexity_test_turn_angle.png",
+    "Assets/Images/3D数学/cylinder_hexagon_interpolated_normals.png",
+    "Assets/Images/3D数学/dot_product_adj_over_hyp.png",
+    "lighting_specular_r.png.md",
+    "Assets/Images/3D数学/texture_map_example_clamp.png",
+    "Assets/Images/3D数学/texture_map_example_tile.png",
+    "Assets/Images/3D数学/texture_map_example_warp1.png",
+    "Assets/Images/3D数学/spot_light_conical.png",
+    "Assets/Images/3D数学/spherical_to_cartesian_math_people.png",
+    "Assets/Images/3D数学/spherical_coordinates_math_people.png",
+    "Assets/Images/3D数学/skinned_robot_bend_elbow.png",
+    "日常杂谈/项目总结/里程碑.canvas",
+    "日常杂谈/项目总结",
+    "日常杂谈/面试",
+    "读书笔记/游戏AI",
+    "读书笔记/3D数学/总结.canvas",
+    "技术文档/基础知识",
+    "技术文档/Unity",
+    "技术文档/Python",
+    "读书笔记/游戏编程模式/📚大纲.canvas",
+    "未命名.canvas",
+    "未命名 1.canvas",
+    "日常杂谈/我的GTD实践笔记.canvas",
+    "英语学习/语法/时态对比.canvas",
+    "读书笔记/未命名.canvas",
+    "健身笔录/未命名.canvas"
+  ]
+}
