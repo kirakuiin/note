@@ -13,8 +13,8 @@ tags:
 > 	   - 标准导入：直接导入`sys.path`内可以找到的模块(`import xxx`)
 
 > [!note] 导入的一般规则
-> 1. 禁止使用隐式相对导入，在python2.7中可以通过 ~from __future__ import absolute_import~ 来禁止隐式相对导入。
-> 2. 使用绝对导入的时候使用相同的前缀，即都使用import yy.xxx的形式，要么都是用zz.yy.xxx。
+> 1. 禁止使用隐式相对导入，在python2.7中可以通过 `from __future__ import absolute_import` 来禁止隐式相对导入。
+> 2. 使用绝对导入的时候使用相同的前缀，即都使用`import yy.xxx`的形式，要么都是用`import zz.yy.xxx`。
 > 3. 父包如果在`sys.path`，那么子包就不应该在`sys.path`里面。
 > 4. 包外对象导入包内模块时，也使用绝对导入形式，不要使用标准导入。
 

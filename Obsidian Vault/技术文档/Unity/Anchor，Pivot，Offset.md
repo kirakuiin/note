@@ -25,7 +25,7 @@ unity_type:
 
 ## 相对布局
 
-此时有`left`，`right`，`top`，`bottom`属性，分别描述UI对象四条边距离父对象四个边的距离。
+此时有`left`，`right`，`top`，`bottom`属性，分别描述UI对象四条边距离父对象四个边的距离。此时[[#Pivot]]对UI位置无影响。
 
 ![[anchor，offset和pivot 2024-09-18 19.57.40.excalidraw]]
 # Pivot
@@ -41,6 +41,8 @@ pivot反映了UI元素旋转和缩放的中心，是一个描述自身的属性�
 ![[Anchor，Pivot，Offset 2024-09-18 20.08.51.excalidraw]]
 
 ## sizeDelta
+
+![[Anchor，Pivot，Offset 2024-09-26 19.34.27.excalidraw]]
 
 这个属性的计算方式为：
 $$
