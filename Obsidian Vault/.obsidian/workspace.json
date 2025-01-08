@@ -4,21 +4,33 @@
     "type": "split",
     "children": [
       {
-        "id": "a83d904fcc24dd1a",
+        "id": "46f5a99f141d7008",
         "type": "tabs",
         "children": [
           {
-            "id": "f87d1be7962ee44f",
+            "id": "ad1f1f03451eca40",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Excalidraw/Untitled 2025-01-07 19.49.33.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Untitled 2025-01-07 19.49.33.excalidraw"
+            }
+          },
+          {
+            "id": "f4378227a6d0aca8",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "记录灵感/卡牌游戏构思.md",
+                "file": "技术文档/Unity/Anchor，Pivot，Offset.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "卡牌游戏构思"
+              "title": "Anchor，Pivot，Offset"
             }
           }
         ]
@@ -52,7 +64,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "不定积分",
+                "query": "锚点",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -73,7 +85,8 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -93,10 +106,10 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "记录灵感/卡牌游戏构思.md"
+                "file": "Excalidraw/Untitled 2025-01-07 19.49.33.excalidraw.md"
               },
               "icon": "lucide-list",
-              "title": "Outline of 卡牌游戏构思"
+              "title": "Outline of Untitled 2025-01-07 19.49.33.excalidraw"
             }
           },
           {
@@ -186,11 +199,15 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "f87d1be7962ee44f",
+  "active": "ad1f1f03451eca40",
   "lastOpenFiles": [
-    "日常杂谈/年度总结/2024年工作总结近暨来年规划.md",
-    "记录灵感/卡牌游戏构思.md",
+    "技术文档/Unity/Anchor，Pivot，Offset.md",
+    "Excalidraw/Untitled 2025-01-07 19.49.33.excalidraw.md",
+    "记录灵感/Untitled.md",
+    "记录灵感/Untitled.canvas",
     "Excalidraw/卡牌游戏构思 2025-01-01 13.55.11.excalidraw.md",
+    "记录灵感/卡牌游戏构思.md",
+    "日常杂谈/年度总结/2024年工作总结近暨来年规划.md",
     "技术文档/Python/Python 装饰器.md",
     "日常杂谈/年度总结/Drawing 2024-12-27 17.42.04.excalidraw.md",
     "日常杂谈/面试/网易.md",
@@ -212,9 +229,6 @@
     "Excalidraw/Python调试和性能 2024-09-30 14.27.16.excalidraw.md",
     "Excalidraw/Python调试和性能分析 2024-09-29 20.10.30.excalidraw.md",
     "Excalidraw/Python 编译过程和对象 2024-09-29 17.17.52.excalidraw.md",
-    "Excalidraw/Python 编译过程和对象 2024-09-29 16.19.19.excalidraw.md",
-    "Excalidraw/Python 编译过程和对象 2024-09-29 15.34.51.excalidraw.md",
-    "技术文档/基础知识/CSharp.md",
     "Excalidraw/fonts/muyao.ttf",
     "Excalidraw/fonts",
     "Excalidraw/新建文件夹",
@@ -242,7 +256,6 @@
     "未命名.canvas",
     "未命名 1.canvas",
     "英语学习/语法/时态对比.canvas",
-    "读书笔记/未命名.canvas",
-    "健身笔录/未命名.canvas"
+    "读书笔记/未命名.canvas"
   ]
 }
