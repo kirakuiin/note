@@ -11,12 +11,10 @@
             "id": "ad1f1f03451eca40",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Excalidraw/Untitled 2025-01-07 19.49.33.excalidraw.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "Untitled 2025-01-07 19.49.33.excalidraw"
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
             }
           },
           {
@@ -85,8 +83,7 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -105,11 +102,9 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {
-                "file": "Excalidraw/Untitled 2025-01-07 19.49.33.excalidraw.md"
-              },
+              "state": {},
               "icon": "lucide-list",
-              "title": "Outline of Untitled 2025-01-07 19.49.33.excalidraw"
+              "title": "Outline"
             }
           },
           {
@@ -201,8 +196,8 @@
   },
   "active": "ad1f1f03451eca40",
   "lastOpenFiles": [
-    "技术文档/Unity/Anchor，Pivot，Offset.md",
     "Excalidraw/Untitled 2025-01-07 19.49.33.excalidraw.md",
+    "技术文档/Unity/Anchor，Pivot，Offset.md",
     "记录灵感/Untitled.md",
     "记录灵感/Untitled.canvas",
     "Excalidraw/卡牌游戏构思 2025-01-01 13.55.11.excalidraw.md",
