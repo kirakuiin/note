@@ -1,0 +1,111 @@
+/*
+  Kanban-plugin column colors
+*/
+
+:root{
+    --kanban-ccolor-column-1: rgb(92, 95, 119);
+    --kanban-ccolor-column-2: rgb(94, 141, 235);
+    --kanban-ccolor-column-3: rgb(64, 160, 43);
+    --kanban-ccolor-column-4: rgb(223, 142, 29);
+  }
+  
+  .kanban-plugin__lane-wrapper:nth-of-type(1)
+  .kanban-plugin__lane {
+    border-color: var(--kanban-ccolor-column-1);
+  }
+  
+  .kanban-plugin__lane-wrapper:nth-of-type(1)
+  .kanban-plugin__lane-header-wrapper,
+  .kanban-plugin__lane-wrapper:nth-of-type(1)
+  .kanban-plugin__new-item-button:hover  {
+    background-color: var(--kanban-ccolor-column-1);
+  }
+  
+  
+  .kanban-plugin__lane-wrapper:nth-of-type(2)
+  .kanban-plugin__lane {
+    border-color: var(--kanban-ccolor-column-2);
+  }
+  
+  .kanban-plugin__lane-wrapper:nth-of-type(2)
+  .kanban-plugin__lane-header-wrapper,
+  .kanban-plugin__lane-wrapper:nth-of-type(2)
+  .kanban-plugin__new-item-button:hover  {
+    background-color: var(--kanban-ccolor-column-2);
+  }
+  
+  .kanban-plugin__lane-wrapper:nth-of-type(3)
+  .kanban-plugin__lane,
+  .kanban-plugin__lane-wrapper:nth-of-type(3)
+  .kanban-plugin__new-item-button:hover {
+    border-color: var(--kanban-ccolor-column-3);
+  }
+  
+  .kanban-plugin__lane-wrapper:nth-of-type(3)
+  .kanban-plugin__lane-header-wrapper,
+  .kanban-plugin__lane-wrapper:nth-of-type(3)
+  .kanban-plugin__new-item-button:hover  {
+    background-color: var(--kanban-ccolor-column-3);
+  }
+  
+  .kanban-plugin__lane-wrapper:nth-of-type(4)
+  .kanban-plugin__lane {
+    border-color: var(--kanban-ccolor-column-4);
+  }
+  
+  .kanban-plugin__lane-wrapper:nth-of-type(4)
+  .kanban-plugin__lane-header-wrapper,
+  .kanban-plugin__lane-wrapper:nth-of-type(4)
+  .kanban-plugin__new-item-button:hover  {
+    background-color: var(--kanban-ccolor-column-4);
+  }
+  
+  .kanban-plugin__lane-wrapper:nth-of-type(5)
+  .kanban-plugin__lane {
+    border-color: var(--kanban-ccolor-column-5);
+  }
+  
+  .kanban-plugin__lane-wrapper:nth-of-type(5)
+  .kanban-plugin__lane-header-wrapper,
+  .kanban-plugin__lane-wrapper:nth-of-type(5)
+  .kanban-plugin__new-item-button:hover {
+    background-color: var(--kanban-ccolor-column-5);
+  }
+  
+  .kanban-plugin__lane {
+    border: 2px solid;
+  }
+  
+  .kanban-plugin__lane-grip,
+  .kanban-plugin__lane-header-wrapper,
+  .kanban-plugin__lane-title-count,
+  .kanban-plugin__lane-settings-button {
+    color: white !important;
+  }
+  
+  /*
+    Kanban-plugin UI improvements for new column colors
+  */
+  
+  .kanban-plugin__lane-header-wrapper,
+  .kanban-plugin__item-button-wrapper,
+  .kanban-plugin__item-form {
+    border: none;
+  }
+  
+  .kanban-plugin__item {
+    border: none;
+  }
+  
+  .kanban-plugin__new-item-button {
+    box-shadow: none !important;
+  }
+  
+  .kanban-plugin__new-item-button:hover {
+    background-color: rgba(255,255,255,0.055);
+  }
+  
+  .kanban-plugin__item-form
+  .kanban-plugin__item-input {
+    background-color: transparent;
+  }
