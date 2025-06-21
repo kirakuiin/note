@@ -3,16 +3,13 @@
     "aliases": "aliases",
     "cssclasses": "multitext",
     "tags": "tags",
-    "links": "multitext",
-    "todo": "checkbox",
-    "outline": "checkbox",
-    "unity_type": "multitext",
     "excalidraw-plugin": "text",
     "excalidraw-export-transparent": "checkbox",
     "excalidraw-mask": "checkbox",
     "excalidraw-export-dark": "checkbox",
     "excalidraw-export-padding": "number",
     "excalidraw-export-pngscale": "number",
+    "excalidraw-export-embed-scene": "checkbox",
     "excalidraw-link-prefix": "text",
     "excalidraw-url-prefix": "text",
     "excalidraw-link-brackets": "checkbox",
@@ -24,13 +21,7 @@
     "excalidraw-border-color": "text",
     "excalidraw-css": "text",
     "excalidraw-autoexport": "text",
-    "excalidraw-iframe-theme": "text",
-    "excalidraw-export-embed-scene": "checkbox",
     "excalidraw-embeddable-theme": "text",
-    "excalidraw-open-md": "checkbox",
-    "nop": "multitext",
-    "开发日期": "date",
-    "开始日期": "date",
-    "结束日期": "date"
+    "excalidraw-open-md": "checkbox"
   }
 }
