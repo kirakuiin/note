@@ -1,0 +1,8 @@
+views:
+  - type: table
+    name: Table
+  - type: cards
+    name: View
+  - type: table
+    name: View 2
+    limit: 30
