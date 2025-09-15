@@ -24,6 +24,10 @@
     "excalidraw-embeddable-theme": "text",
     "excalidraw-open-md": "checkbox",
     "excalidraw-embed-md": "checkbox",
-    "progress": "number"
+    "progress": "number",
+    "ets制作": "checkbox",
+    "需要buff": "checkbox",
+    "技能id": "number",
+    "是否完成": "checkbox"
   }
 }
