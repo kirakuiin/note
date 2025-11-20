@@ -53,6 +53,10 @@ extends Node
 
 如果按住`ctrl`在拖动，会生成`onready`标记的延迟赋值节点。
 
+## 外部编辑器Debug
+
+如果是C#的话，需要创建C#可执行程序的调试配置。
+
 # UI
 
 ## Container中子对象的容器大小设置
