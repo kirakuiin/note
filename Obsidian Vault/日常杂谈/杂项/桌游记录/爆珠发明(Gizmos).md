@@ -1,5 +1,5 @@
 ---
-time: 12分钟每人
+time: 15分钟每人
 categories:
   - 德式
   - 聚会
