@@ -1,0 +1,38 @@
+filters:
+  and:
+    - file.inFolder("日常杂谈/杂项/桌游记录")
+formulas:
+  icon: ' image(note["game image"])'
+properties:
+  formula.icon:
+    displayName: cover
+views:
+  - type: table
+    name: Table
+    order:
+      - formula.icon
+      - file.name
+      - time
+      - players
+      - categories
+      - rating
+      - desc
+    sort:
+      - property: rating
+        direction: DESC
+      - property: categories
+        direction: ASC
+      - property: file.name
+        direction: ASC
+      - property: formula.icon
+        direction: ASC
+    rowHeight: extra
+    cardSize: 350
+    imageFit: contain
+    columnSize:
+      formula.icon: 185
+      file.name: 271
+      note.time: 98
+      note.categories: 204
+      note.rating: 94
+      note.desc: 340

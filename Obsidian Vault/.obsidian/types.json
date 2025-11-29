@@ -28,6 +28,8 @@
     "ets制作": "checkbox",
     "需要buff": "checkbox",
     "技能id": "number",
-    "是否完成": "checkbox"
+    "是否完成": "checkbox",
+    "categories": "multitext",
+    "rating": "number"
   }
 }
