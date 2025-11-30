@@ -8,6 +8,6 @@ categories:
 rating: 50
 desc:
 game image: Assets/Images/桌游记录/exploding_kittens.webp
-weight: 15
+weight: 18
 play times: 3
 ---

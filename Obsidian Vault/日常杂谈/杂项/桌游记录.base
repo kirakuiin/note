@@ -24,6 +24,8 @@ views:
     sort:
       - property: weight
         direction: DESC
+      - property: play times
+        direction: DESC
       - property: rating
         direction: DESC
       - property: categories

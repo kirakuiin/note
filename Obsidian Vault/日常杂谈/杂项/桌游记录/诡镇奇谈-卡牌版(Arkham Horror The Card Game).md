@@ -8,6 +8,9 @@ categories:
   - solo
   - 传承
   - 卡牌
+  - 角色扮演
+  - 地图变形
+  - 出局
 rating: 80
 desc:
 game image: Assets/Images/桌游记录/ahlcg.webp

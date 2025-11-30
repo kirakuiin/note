@@ -10,5 +10,5 @@ rating: 55
 desc:
 game image: Assets/Images/桌游记录/just_one.webp
 play times: 1
-weight: 10
+weight: 15
 ---
