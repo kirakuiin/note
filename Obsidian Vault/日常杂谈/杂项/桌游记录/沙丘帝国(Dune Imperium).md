@@ -5,8 +5,12 @@ categories:
   - 竞争
   - 卡牌
   - 构筑
-rating: 9
+  - 工放
+  - 区控
+rating: 90
 desc:
 game image: Assets/Images/桌游记录/dune-imperium.webp
 players: 2-4
+weight: 60
+play times: 10
 ---

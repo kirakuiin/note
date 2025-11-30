@@ -6,6 +6,8 @@ formulas:
 properties:
   formula.icon:
     displayName: cover
+  note.weight:
+    displayName: complexity
 views:
   - type: table
     name: Table
@@ -16,6 +18,8 @@ views:
       - players
       - categories
       - rating
+      - weight
+      - play times
       - desc
     sort:
       - property: rating
@@ -31,8 +35,10 @@ views:
     imageFit: contain
     columnSize:
       formula.icon: 185
-      file.name: 271
+      file.name: 318
       note.time: 98
       note.categories: 204
-      note.rating: 94
+      note.rating: 88
+      note.weight: 102
+      note.play times: 97
       note.desc: 340

@@ -30,6 +30,8 @@
     "技能id": "number",
     "是否完成": "checkbox",
     "categories": "multitext",
-    "rating": "number"
+    "rating": "number",
+    "weight": "number",
+    "play times": "number"
   }
 }
