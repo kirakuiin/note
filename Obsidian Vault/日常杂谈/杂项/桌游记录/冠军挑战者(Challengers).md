@@ -7,6 +7,7 @@ categories:
   - 构筑
   - 卡牌
   - 瑞士轮
+  - 聚会
 rating: 71
 desc:
 game image: Assets/Images/桌游记录/challengers.webp

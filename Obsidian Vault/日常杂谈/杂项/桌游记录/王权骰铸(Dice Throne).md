@@ -10,4 +10,5 @@ rating: 50
 desc:
 game image: Assets/Images/桌游记录/dice_throne.webp
 play times: 3
+weight: 43
 ---

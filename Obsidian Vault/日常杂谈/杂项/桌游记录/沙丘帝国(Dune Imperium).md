@@ -12,6 +12,6 @@ rating: 90
 desc:
 game image: Assets/Images/桌游记录/dune-imperium.webp
 players: 2-4
-weight: 60
+weight: 65
 play times: 10
 ---

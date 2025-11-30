@@ -1,9 +1,13 @@
 ---
-time:
-players:
+time: 30分钟
+players: 2-5
 categories:
-rating:
+  - 聚会
+  - 推理
+  - 合作
+rating: 80
 desc:
 game image: Assets/Images/桌游记录/bomb_busters.webp
 play times: 0
+weight: 38
 ---
