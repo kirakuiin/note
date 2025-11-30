@@ -9,5 +9,5 @@ categories:
 rating: 7
 desc:
 game image: Assets/Images/桌游记录/coh.webp
-play times: 6
+play times: 2
 ---
