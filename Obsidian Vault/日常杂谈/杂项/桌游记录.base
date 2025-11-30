@@ -22,17 +22,7 @@ views:
       - play times
       - desc
     sort:
-      - property: weight
-        direction: DESC
       - property: play times
-        direction: DESC
-      - property: rating
-        direction: DESC
-      - property: categories
-        direction: ASC
-      - property: file.name
-        direction: ASC
-      - property: formula.icon
         direction: ASC
     rowHeight: extra
     cardSize: 350
@@ -44,5 +34,5 @@ views:
       note.categories: 204
       note.rating: 88
       note.weight: 102
-      note.play times: 97
+      note.play times: 114
       note.desc: 340
