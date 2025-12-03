@@ -8,6 +8,6 @@ categories:
 rating: 80
 desc:
 game image: Assets/Images/桌游记录/bomb_busters.webp
-play times: 0
+play times: 1
 weight: 38
 ---
