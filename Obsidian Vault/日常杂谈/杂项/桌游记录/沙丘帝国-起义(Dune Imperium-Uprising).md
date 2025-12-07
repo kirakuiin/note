@@ -14,6 +14,6 @@ categories:
 rating: 85
 desc:
 game image: Assets/Images/桌游记录/dune_imperium_uprising.webp
-play times: 0
+play times: 1
 weight: 70
 ---
