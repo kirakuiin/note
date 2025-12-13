@@ -9,7 +9,7 @@ categories:
   - 模式构建
 rating: 80
 weight: 40
-play times: 0
+play times: 1
 desc:
 game image: Assets/Images/桌游记录/harmonies.webp
 ---
