@@ -7,7 +7,7 @@ categories:
   - 竞争
 rating: 70
 weight: 27
-play times: 0
+play times: 3
 desc:
 game image: Assets/Images/桌游记录/things_in_rings.webp
 ---
