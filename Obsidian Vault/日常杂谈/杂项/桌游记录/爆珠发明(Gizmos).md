@@ -12,5 +12,5 @@ desc: "你是一个发明家，通过使用能量珠来建造发明。\r\r你的
 game image: Assets/Images/桌游记录/gizmos.webp
 players: 2-4
 weight: 40
-play times: 2
+play times: 5
 ---

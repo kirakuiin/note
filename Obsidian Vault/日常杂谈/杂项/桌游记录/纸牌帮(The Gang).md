@@ -7,7 +7,7 @@ categories:
   - 推理
 rating: 70
 weight: 30
-play times: 1
+play times: 6
 desc:
 game image: Assets/Images/桌游记录/the_gang.webp
 ---
