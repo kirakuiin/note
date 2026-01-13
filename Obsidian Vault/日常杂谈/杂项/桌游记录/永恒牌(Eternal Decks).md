@@ -3,6 +3,7 @@ time:
 players:
 categories:
   - 合作
+  - 聚会
 rating:
 weight:
 play times:

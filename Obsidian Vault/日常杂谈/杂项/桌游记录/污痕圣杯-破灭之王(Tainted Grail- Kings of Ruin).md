@@ -2,6 +2,8 @@
 time:
 players:
 categories:
+  - 合作
+  - 美式
 rating:
 weight:
 play times:

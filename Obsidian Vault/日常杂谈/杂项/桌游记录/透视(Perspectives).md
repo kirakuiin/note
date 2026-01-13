@@ -3,6 +3,8 @@ time:
 players:
 categories:
   - 合作
+  - 推理
+  - 解密
 rating:
 weight:
 play times:
