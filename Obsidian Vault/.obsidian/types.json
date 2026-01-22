@@ -32,6 +32,7 @@
     "categories": "multitext",
     "rating": "number",
     "weight": "number",
-    "play times": "number"
+    "play times": "number",
+    "excalidraw-export-internal-links": "checkbox"
   }
 }
