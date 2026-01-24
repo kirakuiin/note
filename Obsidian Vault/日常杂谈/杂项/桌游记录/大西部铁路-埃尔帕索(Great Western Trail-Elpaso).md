@@ -9,7 +9,7 @@ categories:
   - solo
 rating: 75
 desc:
-game image: Assets/Images/桌游记录/gwt_newzealand.webp
-play times: 0
+game image: Assets/Images/桌游记录/gwt_elpaso.webp
+play times: 1
 weight: 80
 ---
