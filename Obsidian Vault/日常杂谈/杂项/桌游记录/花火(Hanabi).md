@@ -8,7 +8,7 @@ categories:
   - 记忆
 rating: 60
 weight: 20
-play times: 2
+play times: 3
 desc:
 game image: Assets/Images/桌游记录/hanabi.webp
 ---
