@@ -8,7 +8,7 @@ categories:
   - 吃墩
 rating: 80
 weight: 40
-play times: 1
+play times: 18
 desc:
 game image: Assets/Images/桌游记录/tlortt.webp
 ---
