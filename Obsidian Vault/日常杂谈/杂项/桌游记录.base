@@ -24,6 +24,8 @@ views:
     sort:
       - property: play times
         direction: ASC
+      - property: weight
+        direction: ASC
     rowHeight: extra
     cardSize: 350
     imageFit: contain
