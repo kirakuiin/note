@@ -42,6 +42,7 @@
   "isLeftHanded": false,
   "desktopUIMode": "tray",
   "tabletUIMode": "compact",
+  "phoneUIMode": "mobile",
   "iframeMatchExcalidrawTheme": true,
   "matchTheme": false,
   "matchThemeAlways": false,
@@ -94109,7 +94110,7 @@
       }
     }
   },
-  "previousRelease": "2.19.2",
+  "previousRelease": "2.21.2",
   "showReleaseNotes": true,
   "compareManifestToPluginVersion": true,
   "showNewVersionNotification": true,
