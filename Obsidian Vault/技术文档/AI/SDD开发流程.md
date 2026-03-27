@@ -35,7 +35,7 @@ SDD 的核心价值：
 
 ---
 
-## 2. SDD 全流程（增强版）
+## 2. SDD 全流程
 
 ```mermaid
 flowchart LR
