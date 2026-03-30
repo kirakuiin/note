@@ -50,14 +50,18 @@ python -c "import os; path=r'<目标路径>'; print('EXISTS: file' if os.path.is
 #### 步骤 4 的 Python 命令
 
 ```bash
-python -c "import os; src=r'<临时文件路径>'; dst=r'<目标文件路径>'; content=open(src,'r',encoding='gbk').read(); open(dst,'w',encoding='utf-8').write(content); os.remove(src)"
+python -c "import os; src=r'<临时文件路径>'; dst=r'<目标文件路径>'; content=open(src,'r',encoding='gbk').read().replace('\r\n','\n'); open(dst,'w',encoding='utf-8',newline='\n').write(content); os.remove(src)"
 ```
+
+> **关键点**：
+> - `replace('\r\n','\n')` 统一换行符，避免 CRLF/LF 混合导致空行
+> - `newline='\n'` 强制使用 LF，确保跨平台一致性
 
 **完整示例**：
 
 ```bash
 # 假设临时文件和目标文件路径如下：
-python -c "import os; src=r'C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\2026\03\_temp_daily.md'; dst=r'C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\2026\03\2026-03-30_日报.md'; content=open(src,'r',encoding='gbk').read(); open(dst,'w',encoding='utf-8').write(content); os.remove(src)"
+python -c "import os; src=r'C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\2026\03\_temp_daily.md'; dst=r'C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\2026\03\2026-03-30_日报.md'; content=open(src,'r',encoding='gbk').read().replace('\r\n','\n'); open(dst,'w',encoding='utf-8',newline='\n').write(content); os.remove(src)"
 ```
 
 #### 为什么用临时文件？
@@ -314,7 +318,7 @@ tags:                          # 标签列表
 - 生成文件前，务必先确保目录存在
 - 追加内容时，先读取已有文件，再做结构化合并、去重、续号、统计更新
 - 如果周报跨月，将周报放在该周周四所在月份目录（ISO 规则）
-- 工时估算要合理：简单问答约 0.5h，复杂任务约 2-4h
+- 工时估算要合理：简单问答约 0.5h，复杂任务约 2-4h，总工时要限制在8h之内，合并之后如果出现超过8h的情况，则根据复杂度重新分配工时
 - **信息安全**：不得写入代码片段、密钥、内部接口地址等敏感信息
 - **Obsidian 兼容**：wikilinks 使用不含路径的文件名
 - **Tags 规范**：tags 仅包含字母、数字、下划线、连字符、斜杠，且不能以数字开头
