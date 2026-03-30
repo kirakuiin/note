@@ -34,28 +34,45 @@ python -c "import os; path=r'<目标路径>'; print('EXISTS: file' if os.path.is
 - 检测目录是否存在
 - 生成周报前检测本周各日报是否存在
 
-### 2. UTF-8 编码写入（两步流程）
+### 2. UTF-8 编码写入（临时文件流程）
 
-由于 AI 的 `edit_file` 工具在某些项目环境下默认使用 GBK 编码，**必须使用以下两步流程**确保 UTF-8 编码：
+由于 AI 的 `edit_file` 工具在某些项目环境下默认使用 GBK 编码，且已存在的 UTF-8 文件不能用 GBK 方式处理，**必须使用临时文件流程**确保编码正确：
 
-#### 步骤 1：使用 edit_file 创建/写入文件
+#### 统一流程（新建和追加都适用）
+
 ```
-使用 edit_file 工具写入文件内容
-（此时文件可能是 GBK 编码）
-```
-
-#### 步骤 2：用 PowerShell 转换为 UTF-8
-```powershell
-powershell -NoProfile -Command "[System.IO.File]::WriteAllText('<文件路径>', [System.IO.File]::ReadAllText('<文件路径>', [System.Text.Encoding]::GetEncoding('gbk')), [System.Text.UTF8Encoding]::new(`$false))"
+步骤 1：如果目标文件已存在，用 read_file 读取原内容（UTF-8）
+步骤 2：AI 合并新旧内容，生成完整文档
+步骤 3：用 edit_file 写入临时文件（如 _temp_daily.md，与目标文件同目录）
+步骤 4：用 Python 将临时文件（GBK）转为目标文件（UTF-8）
 ```
 
-> **说明**：由于 `edit_file` 写入的是 GBK 编码，此命令用 GBK 读取后以 UTF-8（无 BOM）写入。
+#### 步骤 4 的 Python 命令
+
+```bash
+python -c "import os; src=r'<临时文件路径>'; dst=r'<目标文件路径>'; content=open(src,'r',encoding='gbk').read(); open(dst,'w',encoding='utf-8').write(content); os.remove(src)"
+```
 
 **完整示例**：
+
 ```bash
-# 先用 edit_file 写入内容，然后执行：
-powershell -NoProfile -Command "[System.IO.File]::WriteAllText('C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\2026\03\2026-03-27_日报.md', [System.IO.File]::ReadAllText('C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\2026\03\2026-03-27_日报.md', [System.Text.Encoding]::GetEncoding('gbk')), [System.Text.UTF8Encoding]::new(`$false))"
+# 假设临时文件和目标文件路径如下：
+python -c "import os; src=r'C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\2026\03\_temp_daily.md'; dst=r'C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\2026\03\2026-03-30_日报.md'; content=open(src,'r',encoding='gbk').read(); open(dst,'w',encoding='utf-8').write(content); os.remove(src)"
 ```
+
+#### 为什么用临时文件？
+
+| 问题                | 临时文件方案如何解决                 |
+| ----------------- | -------------------------- |
+| edit_file 默认 GBK  | 临时文件用 GBK 读取，转为 UTF-8 写入目标 |
+| 已存在的 UTF-8 文件会被破坏 | 不直接修改目标文件，而是覆盖写入           |
+| 命令行长度限制           | 内容在文件中，不受命令行长度限制           |
+
+#### 临时文件命名规范
+
+- 固定前缀：`_temp_`
+- 放在目标文件同目录
+- 示例：`_temp_daily.md`、`_temp_weekly.md`
 
 ### 3. 目录创建
 
@@ -71,13 +88,11 @@ New-Item -ItemType Directory -Path "<目录路径>" -Force
 ### ⚠️ 强制执行规则
 
 1. **先检后写**：写入任何文件前，必须先通过终端命令检测文件是否存在
-2. **两步写入**：
-   - 第一步：使用 `edit_file` 写入内容
-   - 第二步：使用 PowerShell `Set-Content -Encoding UTF8` 转换编码
-3. **UTF-8 验证**：写入后可选验证编码是否正确
-   ```bash
-   python -c "f=open(r'<文件路径>','rb'); print('UTF-8 BOM' if f.read(3)==b'\xef\xbb\xbf' else 'No BOM'); f.close()"
-   ```
+2. **已存在文件先读取**：如果目标文件已存在，用 `read_file` 读取原内容后合并
+3. **临时文件流程**：
+   - 第一步：用 `edit_file` 写入临时文件（`_temp_xxx.md`）
+   - 第二步：用 Python 命令将临时文件（GBK）转为目标文件（UTF-8）并删除临时文件
+4. **禁止直接修改已存在的 UTF-8 文件**：必须通过临时文件流程，否则会导致乱码
 
 ---
 
