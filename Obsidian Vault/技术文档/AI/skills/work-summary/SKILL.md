@@ -214,9 +214,7 @@ title: {YYYY} 第{W}周 周报     # 标题
 type: weekly                   # 文档类型（固定值）
 year: {YYYY}                   # 年份
 week: {W}                      # ISO 周数（1-53）
-date_range:                    # 周日期范围
-  start: {YYYY-MM-DD}          # 周一日期
-  end: {YYYY-MM-DD}            # 周五日期
+date: {YYYY-MM-DD}             # 今天的日期
 tags:                          # 标签列表
   - 周报
   - {项目标签}
@@ -252,9 +250,7 @@ title: {YYYY}年{MM}月 月报     # 标题
 type: monthly                  # 文档类型（固定值）
 year: {YYYY}                   # 年份
 month: {MM}                    # 月份（01-12）
-date_range:                    # 月日期范围
-  start: {YYYY-MM-01}          # 月初日期
-  end: {YYYY-MM-DD}            # 月末日期
+date: {YYYY-MM-DD}             # 今天的日期
 tags:                          # 标签列表
   - 月报
   - {项目标签}
