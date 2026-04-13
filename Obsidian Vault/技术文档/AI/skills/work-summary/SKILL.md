@@ -34,49 +34,91 @@ python -c "import os; path=r'<目标路径>'; print('EXISTS: file' if os.path.is
 - 检测目录是否存在
 - 生成周报前检测本周各日报是否存在
 
-### 2. UTF-8 编码写入（临时文件流程）
+### 2. UTF-8 编码写入（分段追加方案）
 
-由于 AI 的 `edit_file` 工具在某些项目环境下默认使用 GBK 编码，且已存在的 UTF-8 文件不能用 GBK 方式处理，**必须使用临时文件流程**确保编码正确：
+由于 AI 的 `edit_file` 工具在某些项目环境下默认使用 GBK 编码，直接写入中文内容可能导致空文件或乱码。**必须使用 Python 命令行分段追加写入**确保编码正确。
 
-#### 统一流程（新建和追加都适用）
+#### 核心原理
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  分段追加写入                                                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  步骤 1：写入 frontmatter + 标题（'w' 模式，覆盖/新建）           │
+│       │                                                         │
+│       ▼                                                         │
+│  步骤 2-N：追加每个工作项（'a' 模式）                             │
+│       │                                                         │
+│       ▼                                                         │
+│  最后：追加反思和统计表（'a' 模式）                               │
+│                                                                 │
+│  每次命令短小，不会超长；编码完全可控                              │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### 统一流程
 
 ```
 步骤 1：如果目标文件已存在，用 read_file 读取原内容（UTF-8）
-步骤 2：AI 合并新旧内容，生成完整文档
-步骤 3：用 edit_file 写入临时文件（如 _temp_daily.md，与目标文件同目录）
-步骤 4：用 Python 将临时文件（GBK）转为目标文件（UTF-8）
+步骤 2：AI 规划要写入的内容分段
+步骤 3：用 Python 命令写入 frontmatter + 标题（'w' 模式）
+步骤 4：用 Python 命令分段追加每个工作项（'a' 模式）
+步骤 5：用 Python 命令追加反思和统计表（'a' 模式）
 ```
 
-#### 步骤 4 的 Python 命令
+#### 写入命令模板
+
+**新建/覆盖写入（'w' 模式）**：
+```bash
+python -c "f=open(r'<目标路径>','w',encoding='utf-8'); f.write('<frontmatter和标题>'); f.close()"
+```
+
+**追加写入（'a' 模式）**：
+```bash
+python -c "f=open(r'<目标路径>','a',encoding='utf-8'); f.write('<工作项内容>'); f.close()"
+```
+
+#### 完整示例
 
 ```bash
-python -c "import os; src=r'<临时文件路径>'; dst=r'<目标文件路径>'; content=open(src,'r',encoding='gbk').read().replace('\r\n','\n'); open(dst,'w',encoding='utf-8',newline='\n').write(content); os.remove(src)"
+# 步骤 1：写入 frontmatter + 标题
+python -c "f=open(r'C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\2026\04\2026-04-13_日报.md','w',encoding='utf-8'); f.write('---\ntitle: 2026-04-13 日报\ndate: 2026-04-13\ntype: daily\ntags:\n  - 日报\nweek: 15\ntotal_hours: 2\n---\n\n# 2026-04-13 日报\n\n## 工作内容\n\n'); f.close()"
+
+# 步骤 2：追加工作项 1
+python -c "f=open(r'C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\2026\04\2026-04-13_日报.md','a',encoding='utf-8'); f.write('### 1. 某个任务\n\n**背景**：...\n\n**解决方案**：...\n\n**预估工时**：1h\n\n---\n\n'); f.close()"
+
+# 步骤 3：追加工作项 2
+python -c "f=open(r'C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\2026\04\2026-04-13_日报.md','a',encoding='utf-8'); f.write('### 2. 另一个任务\n\n**背景**：...\n\n**预估工时**：1h\n\n---\n\n'); f.close()"
+
+# 步骤 4：追加反思和统计
+python -c "f=open(r'C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\2026\04\2026-04-13_日报.md','a',encoding='utf-8'); f.write('## 反思与学习\n\n> [!tip] 经验总结\n> - 经验1\n\n---\n\n## 当日合计\n\n| 项目 | 工时 |\n|------|------|\n| 总计 | 2h |\n'); f.close()"
 ```
 
-> **关键点**：
-> - `replace('\r\n','\n')` 统一换行符，避免 CRLF/LF 混合导致空行
-> - `newline='\n'` 强制使用 LF，确保跨平台一致性
+#### 为什么用分段追加？
 
-**完整示例**：
+| 问题                     | 分段追加如何解决                      |
+| ----------------------- | ------------------------------------ |
+| edit_file 写中文可能乱码   | 直接用 Python open()，显式指定 UTF-8  |
+| 命令行长度限制             | 每段内容短小，不会超长                 |
+| 特殊字符问题              | 避免三引号，用单引号 + \n 处理换行      |
+| 稳定性                   | 已验证可靠，不依赖额外脚本             |
 
+#### 追加更新已有文件
+
+如果目标文件已存在且需要追加内容（而非覆盖）：
+
+1. 先用 `read_file` 读取原内容
+2. 用 Python 命令修改特定部分（如更新 total_hours、插入新工作项）
+3. 示例：
 ```bash
-# 假设临时文件和目标文件路径如下：
-python -c "import os; src=r'C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\2026\03\_temp_daily.md'; dst=r'C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\2026\03\2026-03-30_日报.md'; content=open(src,'r',encoding='gbk').read().replace('\r\n','\n'); open(dst,'w',encoding='utf-8',newline='\n').write(content); os.remove(src)"
+# 读取原内容，替换 total_hours，写回
+python -c "f=open(r'<路径>','r',encoding='utf-8');c=f.read();f.close();c=c.replace('total_hours: 2','total_hours: 3');f=open(r'<路径>','w',encoding='utf-8');f.write(c);f.close()"
+
+# 在指定位置插入新工作项
+python -c "f=open(r'<路径>','r',encoding='utf-8');c=f.read();f.close();c=c.replace('## 反思','### 3. 新工作项\n\n...\n\n---\n\n## 反思');f=open(r'<路径>','w',encoding='utf-8');f.write(c);f.close()"
 ```
-
-#### 为什么用临时文件？
-
-| 问题                | 临时文件方案如何解决                 |
-| ----------------- | -------------------------- |
-| edit_file 默认 GBK  | 临时文件用 GBK 读取，转为 UTF-8 写入目标 |
-| 已存在的 UTF-8 文件会被破坏 | 不直接修改目标文件，而是覆盖写入           |
-| 命令行长度限制           | 内容在文件中，不受命令行长度限制           |
-
-#### 临时文件命名规范
-
-- 固定前缀：`_temp_`
-- 放在目标文件同目录
-- 示例：`_temp_daily.md`、`_temp_weekly.md`
 
 ### 3. 目录创建
 
@@ -93,10 +135,12 @@ New-Item -ItemType Directory -Path "<目录路径>" -Force
 
 1. **先检后写**：写入任何文件前，必须先通过终端命令检测文件是否存在
 2. **已存在文件先读取**：如果目标文件已存在，用 `read_file` 读取原内容后合并
-3. **临时文件流程**：
-   - 第一步：用 `edit_file` 写入临时文件（`_temp_xxx.md`）
-   - 第二步：用 Python 命令将临时文件（GBK）转为目标文件（UTF-8）并删除临时文件
-4. **禁止直接修改已存在的 UTF-8 文件**：必须通过临时文件流程，否则会导致乱码
+3. **分段追加流程**：
+   - 第一步：用 Python 命令写入 frontmatter + 标题（'w' 模式）
+   - 第二步：用 Python 命令分段追加工作项（'a' 模式）
+   - 第三步：用 Python 命令追加反思和统计表（'a' 模式）
+4. **验证写入结果**：最后用 Python 检查文件长度是否 > 0
+5. **禁止直接用 edit_file 写入中文内容**：必须通过 Python 命令行写入，否则可能导致空文件或乱码
 
 ---
 
