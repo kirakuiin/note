@@ -20,14 +20,14 @@
 - [x] 2.1 在 `9-Meta/Skills/` 创建 skill 目录与 `SKILL.md`。**完成**：按用户决策将 `ingest-session` + `ingest-document` 合并为单一 `ingest` skill（5 阶段流程：确定范围 → 写 session → 检测 wiki 价值 → 提案 wiki 更新 → 日志验证），`query-wiki`（4 阶段：确定范围 → 搜索读取 → 综合回答 → 评估归档价值），`lint-wiki`（12 项检查，按 Critical/Warning/Suggestion 分级，仅 frontmatter 默认值可自动修复）。全部 3 个 skill 均通过 skill-creator 完整测试流程（ingest 16/16、query-wiki 14/14、lint-wiki 14/14），均含 obsidian-markdown 语法约束。
 - [x] 2.2 在 `9-Meta/Templates/` 增补模板：`session.md`、`wiki-page.md`、`project.md`、`daily.md`、`MOC.md`、`index.md`、`log.md`（frontmatter 字段对齐 `note-frontmatter` spec）。**完成**：7 个模板全部创建，frontmatter 字段对齐 spec（area/visibility/status/tags/date/topic 等），使用 `{{placeholder}}` 语法，`_index.md` 已更新登记。
 - [x] 2.3 在 `9-Meta/Scripts/maintenance/` 添加 Python 脚本骨架：`scan_frontmatter.py`、`check_links.py`、`check_visibility.py`（标准库实现，PyYAML 可选）。**完成**：3 个脚本全部创建并验证可运行。`scan_frontmatter.py` 扫描 716 个文件正确识别缺失字段，支持 `--fix` 自动补默认值 + `--json` 输出；`check_links.py` 解析 `[[wikilinks]]` 并验证目标存在；`check_visibility.py` 检查公开/私有边界违规和跨区引用。
-- [ ] 2.4 写一份 `Dashboard.md`（vault 根）替代旧的「我的笔记本.md」：含最近 sessions、活跃 projects、待办 lint、知识地图入口
+- [x] 2.4 写一份 `Dashboard.md`（vault 根）替代旧的「我的笔记本.md」：含最近 sessions、活跃 projects、待办 lint、知识地图入口
 
 ## 3. Phase 2 — 内容迁移（公开区，零失链协议）
 
 > **铁律**：本 phase 所有 .md / .canvas 移动**必须**通过 `obsidian move path=<src> to=<dst>` 执行（参见 design D11）。**禁止使用** `git mv` / `mv` / `xcopy` / Explorer 拖拽。每批迁移完成后用 `obsidian unresolved` + `check_links.py` 双重 verify。资产目录（Assets/Excalidraw/Drawings/Resources）**保持原位不动**。
 
-- [ ] 3.1 **[预处理]** 对 1.3 列出的同名冲突文件，先用 `obsidian rename` 在原目录改名（避免迁移后冲突），并验证所有引用仍指向正确文件
-- [ ] 3.2 **[Batch A · 最独立]** 迁移 `英语学习/` → `2-Wiki/英语/`，每文件 `obsidian move`；本批后跑 `obsidian unresolved` + `check_links.py`，git tag `post-batch-A`
+- [x] 3.1 **[预处理]** 对 1.3 列出的同名冲突文件，先用 `obsidian rename` 在原目录改名（避免迁移后冲突），并验证所有引用仍指向正确文件
+- [x] 3.2 **[Batch A · 最独立]** 迁移 `英语学习/` → `2-Wiki/英语/`，每文件 `obsidian move`；本批后跑 `obsidian unresolved` + `check_links.py`，git tag `post-batch-A`
 - [ ] 3.3 **[Batch B]** 迁移 `读书笔记/` → `2-Wiki/<对应领域>/`（设计模式、3D数学、重构等按子目录映射）；本批后双重 verify + tag
 - [ ] 3.4 **[Batch C]** 迁移 `技术文档/` → `2-Wiki/技术/<语言或主题>/`；其中 `技术文档/AI/skills/` 下的"知识型文档"移入 `9-Meta/Skills/<相应 skill>/references/`，运行/规范文档移入 `9-Meta/Skills/<skill>/SKILL.md` 或 `scripts/`；本批后双重 verify + tag
 - [ ] 3.5 **[Batch D]** 拆分 `日常杂谈/`：日记/周报/总结 → `4-Journal/<YYYY>/`，长期生活类（zerotier、网盘等）→ `5-Life/`，GTD/方法论 → `2-Wiki/方法论/`；本批后双重 verify + tag
