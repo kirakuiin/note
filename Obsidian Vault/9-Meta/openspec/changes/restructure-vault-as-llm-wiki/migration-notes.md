@@ -342,6 +342,8 @@ design.md 的 D11 / R2 文本会在下一次 design 修订（或 task 3.10 实�
 | `pre-phase-1` | 2026-04-29 | Phase 0 完成、Phase 1 开始前 |
 | `post-batch-A` | 2026-04-29 | Batch A（英语学习）迁移完成 — commit ff837b0；含 task 2.4 Dashboard.md + 3.1 6 个游戏编程模式 rename + 3.2 112 个英语语法 move + dataview FROM 修正；零失链 |
 | `post-batch-B` | 2026-04-29 | Batch B（读书笔记）迁移完成 — 149 文件 5 子目录全部迁出；含 4 处 dataview FROM 修正（含 1 处 canvas 内）+ 2 个根读书笔记 rename（GTD 去全角冒号、软技能加分隔符）；零失链 |
+| `post-batch-C-low` | 2026-04-29 | Batch C 低风险段（task 3.4 一半）— commit ac552ef + 7b35c87；C-pre 4 rename + C-low 55 文件 `技术文档/*` → `2-Wiki/<域>/<子>/`（含 `计科基础/` 第 7 领域新建 + `计算机.md` rename 为 `计科基础知识.md`）+ C-dataview Unity知识点.md 2 处 FROM 修正；零失链 |
+| `post-batch-C` | 2026-04-29 | Batch C 完整完成（task 3.4 done）— commit 4a261f3；C-skills 12 个外部系统 skill 文件 `技术文档/AI/skills/*` → `9-Meta/Skills/*`（与本 vault 自有 skill 同处共存）+ README.md 内容并入 `_index.md` + `~/.codemaker/skills/<7个>` junctions 重建指向新路径；unresolved 49 → 36（共下降 13） |
 | ... | ... | 每批一个 tag |
 
 ---
