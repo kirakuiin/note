@@ -15,3 +15,4 @@ updated: 2026-04-29
 ## 入口
 
 - [[3-Projects/项目总结/_index|项目总结]]（多个项目复盘文档集合）
+- [[3-Projects/代号α/_index|代号α]]（个人卡牌游戏设计，paused）

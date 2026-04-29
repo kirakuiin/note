@@ -2,7 +2,7 @@
   "types": {
     "aliases": "aliases",
     "cssclasses": "multitext",
-    "tags": "tags",
+    "tags": "multitext",
     "excalidraw-plugin": "text",
     "excalidraw-export-transparent": "checkbox",
     "excalidraw-mask": "checkbox",
@@ -33,6 +33,8 @@
     "rating": "number",
     "weight": "number",
     "play times": "number",
-    "excalidraw-export-internal-links": "checkbox"
+    "excalidraw-export-internal-links": "checkbox",
+    "created": "date",
+    "updated": "date"
   }
 }
