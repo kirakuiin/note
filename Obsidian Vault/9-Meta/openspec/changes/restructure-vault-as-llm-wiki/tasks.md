@@ -3,15 +3,17 @@
 - [x] 1.1 **[迁移前置·阻断项]** 安装/启用 Obsidian 官方 CLI（参见 design D11）：升级 Obsidian 至 1.12.7+ → Settings → General → 启用 Command line interface → **新开一个终端**（已打开的不会读到新 PATH，参见 D11 Windows 陷阱）→ `obsidian version` 返回版本号 → `obsidian help move` 显示 move 子命令。**当前状态：CLI v1.12.7 已就位（路径 `%LOCALAPPDATA%\Programs\Obsidian\Obsidian.com`），后续会话务必新开终端后再执行。**
 - [x] 1.2 **[迁移前置]** 验证零失链关键配置：`obsidian eval code="app.vault.config.alwaysUpdateLinks"` 返回 `true`；记录 `newLinkFormat` / `useMarkdownLinks` 当前值（用于后续迁移参考）。**当前状态：`alwaysUpdateLinks=true`，`newLinkFormat`/`useMarkdownLinks` 未显式设置（即默认 shortest + wikilink），完美适配迁移。Vault 内 markdown 文件总数 699。**
 - [ ] 1.3 **[迁移前置]** 同名冲突扫描：写一次性脚本/命令列出 vault 内所有 .md 同名重复（如 `读书笔记/设计模式/状态模式.md` vs `读书笔记/游戏编程模式/状态模式.md`），输出冲突清单 → 在 design Open Questions 中记录预案（合并/改名）
-- [ ] 1.4 **[迁移前置]** 路径绑定扫描：`grep 'FROM "' *.md` 输出所有 Dataview 路径过滤位置（已知 ≥4 处）；`grep -l '\.canvas$'` 列出所有 canvas 文件（已知 1 个）；汇总到 `9-Meta/openspec/changes/restructure-vault-as-llm-wiki/migration-notes.md`
+- [ ] 1.4 **[迁移前置]** 路径绑定扫描：`grep 'FROM "' *.md` 输出所有 Dataview 路径过滤位置（已知 ≥4 处）；`grep -l '\.canvas$'` 列出所有 canvas 文件（已知 1 个）；汇总到 `9-Meta/openspec/changes/restructure-vault-as-llm-wiki/migration-notes.md`（migration-notes.md 已创建为 living 文档，扫描结果待填入）
 - [ ] 1.5 在 vault 根目录创建新顶级目录骨架：`0-Inbox/`、`1-Sessions/`、`2-Wiki/`、`3-Projects/`、`4-Journal/`、`5-Life/`、`6-Tools/`，每个目录放一个 `_index.md` 占位（含 frontmatter）
 - [ ] 1.6 确认 `9-Meta/` 已存在并放好 `openspec/`；在 `9-Meta/` 下补建 `Skills/`、`Scripts/`、`Templates/` 三个子目录（各放一个 `_index.md` 占位）
 - [ ] 1.7 在 `2-Wiki/` 下按 design D2 创建二级主题目录骨架：`技术/`、`工具/`、`生活/`、`方法论/`、`概念/`，每个放 `_index.md`
 - [ ] 1.8 校验 `.gitignore`（仓库根）确认 `netease/` 已在排除列表，必要时补一条；在 `9-Meta/AGENTS.md` 草稿里写入"红线"段落引用 `vault-structure` spec
 - [ ] 1.9 校对/重写 vault 根 `README.md`：仅保留访客视角的概述、目录速览、私有区说明、入口指引（依据 `agent-schema` spec 的 README/AGENTS 分工要求）
-- [ ] 1.10 编写 `9-Meta/AGENTS.md` 第一版，覆盖 `agent-schema/spec.md` 列出的 10 个必备小节
+- [ ] 1.10 编写 `9-Meta/AGENTS.md` 完整第一版，覆盖 `agent-schema/spec.md` 列出的 10 个必备小节。**已有草稿**：`9-Meta/openspec/changes/restructure-vault-as-llm-wiki/agents-md.draft.md`（前期为冷启动验证而写的 bootstrap 版本，171 行，含接手协议 / 红线 / 强制 skill 路由表 / 仓库结构。task 1.10 执行时直接基于此草稿扩充至 spec 要求的 10 个小节，然后用 `obsidian move` 落到 `9-Meta/AGENTS.md`，并删除草稿）
 - [ ] 1.11 编写 `9-Meta/TAGS.md` 初版词表（基于现有 `Tags/` 目录扫描整理）
-- [ ] 1.12 在 git 打 tag `pre-phase-1`（回滚锚点）
+- [x] 1.12 在 git 打 tag `pre-phase-1`（回滚锚点）。**已打：commit `77646db` + tag `pre-phase-1`**
+
+> **2026-04-29 修订记录**：原 task 1.10a 创建的根目录 bootstrap `AGENTS.md` 已移除——经讨论确认这违反 spec 的"根目录入口文件 = Dashboard.md + README.md"单一真理源原则，且会话切换由用户人工指引足以覆盖冷启动需求（YAGNI）。bootstrap 内容已用 `obsidian move` 迁至 `agents-md.draft.md` 作为 task 1.10 的实施草稿。本次移动同时实战验证了 D11 零失链协议（unresolved baseline 31 → 31，0 新增断链）。
 
 ## 2. Phase 1 — 核心 agent 资产
 
