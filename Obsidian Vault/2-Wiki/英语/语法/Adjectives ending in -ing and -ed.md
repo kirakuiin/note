@@ -16,13 +16,13 @@ grammer_type: adjectives and adverbs
 
 对比以下形容词：
 
-|  |  |
-| ---- | ---- |
-|  | boring |
-|  | interesting |
-| my job is | tiring |
-|  | satisfying |
-|  | depressing |
+|           |             |
+| --------- | ----------- |
+|           | boring      |
+|           | interesting |
+| my job is | tiring      |
+|           | satisfying  |
+|           | depressing  |
 
 **ing**形容词形容的的都是某事本身的性质。
 

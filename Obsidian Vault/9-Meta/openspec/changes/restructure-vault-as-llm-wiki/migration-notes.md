@@ -340,8 +340,8 @@ design.md 的 D11 / R2 文本会在下一次 design 修订（或 task 3.10 实�
 | Tag | 时间 | 说明 |
 |---|---|---|
 | `pre-phase-1` | 2026-04-29 | Phase 0 完成、Phase 1 开始前 |
-| `post-batch-A` | TBD | Batch A（英语学习）迁移完成 |
-| `post-batch-B` | TBD | Batch B（读书笔记）迁移完成 |
+| `post-batch-A` | 2026-04-29 | Batch A（英语学习）迁移完成 — commit ff837b0；含 task 2.4 Dashboard.md + 3.1 6 个游戏编程模式 rename + 3.2 112 个英语语法 move + dataview FROM 修正；零失链 |
+| `post-batch-B` | 2026-04-29 | Batch B（读书笔记）迁移完成 — 149 文件 5 子目录全部迁出；含 4 处 dataview FROM 修正（含 1 处 canvas 内）+ 2 个根读书笔记 rename（GTD 去全角冒号、软技能加分隔符）；零失链 |
 | ... | ... | 每批一个 tag |
 
 ---
