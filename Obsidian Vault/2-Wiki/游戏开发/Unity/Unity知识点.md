@@ -7,7 +7,7 @@ outline: true
 
 ```dataview
 LIST
-FROM "技术文档/Unity"
+FROM "2-Wiki/游戏开发/Unity"
 WHERE !outline and contains(unity_type, "开发")
 ```
 
@@ -94,7 +94,7 @@ WHERE !outline and contains(unity_type, "开发")
 
 ```dataview
 LIST
-FROM "技术文档/Unity"
+FROM "2-Wiki/游戏开发/Unity"
 WHERE !outline and contains(unity_type, "编辑器")
 ```
 
