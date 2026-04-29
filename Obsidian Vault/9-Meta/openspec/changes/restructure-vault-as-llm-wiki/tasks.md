@@ -30,7 +30,7 @@
 - [x] 3.2 **[Batch A · 最独立]** 迁移 `英语学习/` → `2-Wiki/英语/`，每文件 `obsidian move`；本批后跑 `obsidian unresolved` + `check_links.py`，git tag `post-batch-A`
 - [x] 3.3 **[Batch B]** 迁移 `读书笔记/` → `2-Wiki/<对应领域>/`（设计模式、3D数学、重构等按子目录映射）；本批后双重 verify + tag
 - [x] 3.4 **[Batch C]** 迁移 `技术文档/` → `2-Wiki/技术/<语言或主题>/`；其中 `技术文档/AI/skills/` 下的"知识型文档"移入 `9-Meta/Skills/<相应 skill>/references/`，运行/规范文档移入 `9-Meta/Skills/<skill>/SKILL.md` 或 `scripts/`；本批后双重 verify + tag
-- [ ] 3.5 **[Batch D]** 拆分 `日常杂谈/`：日记/周报/总结 → `4-Journal/<YYYY>/`，长期生活类（zerotier、网盘等）→ `5-Life/`，GTD/方法论 → `2-Wiki/方法论/`；本批后双重 verify + tag
+- [x] 3.5 **[Batch D]** 拆分 `日常杂谈/`：日记/周报/总结 → `4-Journal/<YYYY>/`，长期生活类（zerotier、网盘等）→ `5-Life/`，GTD/方法论 → `2-Wiki/方法论/`；本批后双重 verify + tag
 - [ ] 3.6 **[Batch E]** 迁移 `软件食谱/`、`工具用法/` → `6-Tools/`（按 design D3 保持扁平，文件名加类别前缀如 `编辑器-VSCode.md`）；本批后双重 verify + tag
 - [ ] 3.7 **[Batch F]** 迁移 `开发项目/代号α/` → `3-Projects/个人-代号α/`；本批后双重 verify + tag
 - [ ] 3.8 **[Batch G]** 迁移 `Templates/` → `9-Meta/Templates/`；本批后双重 verify + tag
