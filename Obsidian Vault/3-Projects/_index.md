@@ -8,11 +8,10 @@ updated: 2026-04-29
 
 # Projects
 
-进行中的个人项目。每个项目一个子目录，含 `README.md` 描述目标 / 当前 status。
+进行中或已完成的项目相关材料：项目复盘、设计方案、里程碑等。按 `<项目名>/` 子目录组织，或按 `项目总结/` 平铺存放复盘文档。
 
-> 本文件由 OpenSpec change `restructure-vault-as-llm-wiki` task 1.5 创建。
-> 内容会随后续 Phase 2 内容迁移逐步充实。
+> 本文件由 OpenSpec change `restructure-vault-as-llm-wiki` task 3.5 (Batch D) 创建。
 
 ## 入口
 
-（待 Phase 2 迁移内容后补充）
+- [[3-Projects/项目总结/_index|项目总结]]（多个项目复盘文档集合）

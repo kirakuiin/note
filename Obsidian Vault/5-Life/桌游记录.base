@@ -1,6 +1,6 @@
 filters:
   and:
-    - file.inFolder("日常杂谈/杂项/桌游记录")
+    - file.inFolder("5-Life/桌游")
 formulas:
   icon: ' image(note["game image"])'
 properties:

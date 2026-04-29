@@ -50,6 +50,7 @@ aliases:
 | `#速查` | 快速参考（API 签名、命令、配置模板） |
 | `#踩坑` | 踩坑记录、bug 复盘、经验教训 |
 | `#项目` | 项目级笔记（计划、进度、复盘） |
+| `#interview` | 面试经验复盘（含问题、答案、HR 流程、薪资谈判等） |
 
 ### 2.3 状态 tag（与 frontmatter `status` 字段对应）
 
@@ -186,7 +187,7 @@ aliases:
 | `#AI-Skill` | 3 | `#AI与Agent` | 命名风格不统一 |
 | `#AI编程` | 1 | `#AI与Agent` | 合并到领域 tag |
 | `#obsidian` | 2 | `#工具` | 具体工具名不作为独立 tag |
-| `#interview` | 7 | 待定 | 面试相关，暂不纳入白名单；清理时询问用户 |
+| `~~#interview~~` | 7 | ✅ 已转白名单 (§2.2) | 2026-04-29 决定纳入类型 tag，无需清理 |
 | `#OpenSpec` | 8 | 待定 | OpenSpec 工作流 tag，暂不纳入白名单；清理时询问用户 |
 | `#xxx` | 1 | 删除 | 测试 tag，直接删除 |
 | `#frame_tool` | 1 | 红线 `#frame-tool` | snake_case 变体，归入红线 |
