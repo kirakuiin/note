@@ -14,6 +14,8 @@ Obsidian 模板。被 ``obsidian create`` 命令通过 ``template=<name>`` 引�
 
 ## 当前条目
 
+### 通用模板（按 area 类型）
+
 | 模板 | 文件 | 用途 |
 |---|---|---|
 | `session` | [[9-Meta/Templates/session.md]] | 对话/文档沉淀记录（背景→讨论→结论→产出物→后续） |
@@ -23,3 +25,11 @@ Obsidian 模板。被 ``obsidian create`` 命令通过 ``template=<name>`` 引�
 | `MOC` | [[9-Meta/Templates/MOC.md]] | 领域导航页（核心概念/手法/踩坑/速查） |
 | `index` | [[9-Meta/Templates/index.md]] | 目录索引（条目表） |
 | `log` | [[9-Meta/Templates/log.md]] | 变更日志（日期+操作+详情） |
+
+### 领域专属模板（task 3.8 Batch G 迁入）
+
+| 模板 | 文件 | 用途 |
+|---|---|---|
+| `英语语法模板` | [[9-Meta/Templates/英语语法模板]] | 英语语法点笔记格式（用于 `2-Wiki/英语/语法/`） |
+| `设计模式模板` | [[9-Meta/Templates/设计模式模板]] | 设计模式条目格式（用于 `2-Wiki/编程/设计模式/`） |
+| `重构手法模板` | [[9-Meta/Templates/重构手法模板]] | 重构手法条目格式（用于 `2-Wiki/编程/重构/`） |

@@ -361,6 +361,7 @@ design.md 的 D11 / R2 文本会在下一次 design 修订（或 task 3.10 实�
 | `post-batch-D` | 2026-04-29 | Batch D 完成（task 3.5 done）— commit 804ac1e；80 文件从 `日常杂谈/` 拆解到 4 目标：D-1 桌游 65 → `5-Life/桌游/` + `桌游记录.base` 修 `inFolder`；D-2 项目总结 5 → 新建 `3-Projects/项目总结/`；D-3 年度总结 3 → `4-Journal/<YYYY>/` + rename；D-4 网易面试 → `4-Journal/2024/2024-08_网易面试经验.md` + `#interview` tag；D-5/D-6 散件 6 → 各自归位。新增 6 个 _index.md 容器骨架 + TAGS.md 把 `#interview` 从待定转白名单。源 `日常杂谈/` 整目录物理删除。git 80 R + 6 A + 5 M, 0 D+A. unresolved 36 → 36（零失链）|
 | `post-batch-E` | 2026-04-29 | Batch E 完成（task 3.6 done）— commit c236f9e；`工具用法/` 13 文件全部 `obsidian move` 一步 move+rename 到 `6-Tools/<类别>-<工具名>.md` 扁平结构（git 13 R 100% 识别 + 3 M）；`软件食谱/` 实测早已空（无需迁移）；`6-Tools/_index.md` 按 8 类分组登记 13 条 wikilink；unresolved 36 → 36（零失链）。源 `工具用法/` 空壳留待 task 3.12 统一清理。|
 | `post-batch-F` | 2026-04-29 | Batch F 完成（task 3.7 done）— `开发项目/代号α/` 3 文件 `obsidian move` 到 `3-Projects/代号α/`（用户拍板去掉「个人-」前缀）；新建 `3-Projects/代号α/_index.md`（status: paused，tags: game-design/card-game）+ `3-Projects/_index.md` 追加入口；unresolved 36 → 36；源 `开发项目/` 空壳留待 task 3.12。**坑点记录**：`obsidian move` 不会自动创建目标父目录，需先 `obsidian create` 占位文件触发 mkdir；`property:set` 子命令名带冒号（不是 `property`），参数名是 `name=` 不是 `key=`。|
+| `post-batch-G` | 2026-04-29 | Batch G 完成（task 3.8 done）— `Templates/` 3 文件（英语语法模板/设计模式模板/重构手法模板）`obsidian move` 到 `9-Meta/Templates/`，与 task 2.2 创建的 7 个通用模板共存（无文件名冲突）；同步改 `.obsidian/templates.json` 的 `folder` 字段并 `obsidian eval` 热重载；`9-Meta/Templates/_index.md` 拆「通用/领域专属」两节；unresolved 36 → 36；源 `Templates/` 空壳留 task 3.12。|
 | ... | ... | 每批一个 tag |
 
 ---
