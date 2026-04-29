@@ -38,7 +38,7 @@ aliases:
 - [[2-Wiki/游戏开发/_MOC|🎮 游戏开发]]
 - [[2-Wiki/算法与数据结构/_MOC|🧮 算法与数据结构]]
 - [[2-Wiki/AI与Agent/_MOC|🤖 AI 与 Agent]]
-- [[2-Wiki/游戏开发/3D数学/_MOC|🔤 英语]]
+- [[2-Wiki/英语/_MOC|🔤 英语]]
 - [[2-Wiki/方法论/_MOC|🧭 方法论]]
 
 > 新增领域请先开 OpenSpec change 修订 [[9-Meta/AGENTS|AGENTS.md]]，禁止直接加顶级目录。
