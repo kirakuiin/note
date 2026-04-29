@@ -134,3 +134,28 @@ Agents operating on this vault MUST 优先使用 Obsidian 生态对应的专用 skill，而不
 #### Scenario: skill 缺失但仍要执行
 - **WHEN** 上述某个必备 skill 在当前会话中未注册（agent 调用时报错）
 - **THEN** SHALL 提示用户"先 enable / install 该 skill"，不得跳过 skill 直接手写
+
+---
+
+### Requirement: Tag 命名遵循 9-Meta/TAGS.md 词表
+
+Vault 内一切 tag 的使用 SHALL 遵循 `9-Meta/TAGS.md` 中定义的命名规则、白名单、红线清单。`9-Meta/TAGS.md` 是 tag 治理的**单一权威源**，覆盖以下四个方面：
+
+1. **命名规则**：大小写、连字符风格（kebab-case / camelCase 取一）、中英文混用规则、嵌套 tag (`/` 分隔) 的层级约定
+2. **核心白名单**：按学科 / 笔记类型 / 状态分组列出推荐 tag；agent 在打 tag 前 SHALL 先查白名单，能用白名单内的就不要造新 tag
+3. **🔴 红线清单**：仅可在 `netease/` 私有区出现的 tag（如内部项目代号、敏感词），公开区出现 = lint Critical
+4. **历史脏 tag 清理表**：列出已知需要替换 / 删除的 tag 及其目标值，作为持续清理的 backlog
+
+`9-Meta/TAGS.md` SHALL 是一个 **living document**——新增白名单 tag 必须经过用户确认后追加，agent 不得自行扩充白名单。
+
+#### Scenario: agent 准备给笔记打新 tag
+- **WHEN** agent 在创建 / 编辑笔记时考虑加 tag
+- **THEN** SHALL 先 `obsidian read path="9-Meta/TAGS.md"` 查白名单；命中白名单则直接用；未命中 SHALL 停下并向用户确认（"是否新增 #xxx 到白名单？"），不得擅自造 tag
+
+#### Scenario: 公开区写入红线 tag
+- **WHEN** agent 即将在公开区文件写入红线清单中的 tag（如 `#arcolab` `#popo`）
+- **THEN** SHALL 立刻停下并提示用户"红线违反"；这是 D9 公私边界的硬约束
+
+#### Scenario: TAGS.md 缺失
+- **WHEN** `9-Meta/TAGS.md` 尚不存在（如 Phase 0 task 1.11 未完成）
+- **THEN** agent 操作 tag 时 SHALL 显示警告"TAGS.md 未建立，tag 治理处于无序状态"，并优先沿用现有 tag、不引入新 tag

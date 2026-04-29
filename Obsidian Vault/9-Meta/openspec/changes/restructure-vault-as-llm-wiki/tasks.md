@@ -6,7 +6,7 @@
 - [ ] 1.4 **[迁移前置]** 路径绑定扫描：`grep 'FROM "' *.md` 输出所有 Dataview 路径过滤位置（已知 ≥4 处）；`grep -l '\.canvas$'` 列出所有 canvas 文件（已知 1 个）；汇总到 `9-Meta/openspec/changes/restructure-vault-as-llm-wiki/migration-notes.md`（migration-notes.md 已创建为 living 文档，扫描结果待填入）
 - [ ] 1.5 在 vault 根目录创建新顶级目录骨架：`0-Inbox/`、`1-Sessions/`、`2-Wiki/`、`3-Projects/`、`4-Journal/`、`5-Life/`、`6-Tools/`，每个目录放一个 `_index.md` 占位（含 frontmatter）
 - [ ] 1.6 确认 `9-Meta/` 已存在并放好 `openspec/`；在 `9-Meta/` 下补建 `Skills/`、`Scripts/`、`Templates/` 三个子目录（各放一个 `_index.md` 占位）
-- [ ] 1.7 在 `2-Wiki/` 下按 design D2 创建二级主题目录骨架：`技术/`、`工具/`、`生活/`、`方法论/`、`概念/`，每个放 `_index.md`
+- [ ] 1.7 在 `2-Wiki/` 下按 spec `vault-structure` 的"子目录命名约定" requirement 创建二级主题目录骨架（按学科分），初始集 6 个：`编程语言/`、`游戏开发/`、`算法与数据结构/`、`AI与Agent/`、`英语/`、`方法论/`，每个放 `_index.md` + `_MOC.md`。`软件工程/`、`计算机基础/` 等暂不预建，迁移过程中如有内容再开新二级目录
 - [ ] 1.8 校验 `.gitignore`（仓库根）确认 `netease/` 已在排除列表，必要时补一条；在 `9-Meta/AGENTS.md` 草稿里写入"红线"段落引用 `vault-structure` spec
 - [ ] 1.9 校对/重写 vault 根 `README.md`：仅保留访客视角的概述、目录速览、私有区说明、入口指引（依据 `agent-schema` spec 的 README/AGENTS 分工要求）
 - [ ] 1.10 编写 `9-Meta/AGENTS.md` 完整第一版，覆盖 `agent-schema/spec.md` 列出的 10 个必备小节。**已有草稿**：`9-Meta/openspec/changes/restructure-vault-as-llm-wiki/agents-md.draft.md`（前期为冷启动验证而写的 bootstrap 版本，171 行，含接手协议 / 红线 / 强制 skill 路由表 / 仓库结构。task 1.10 执行时直接基于此草稿扩充至 spec 要求的 10 个小节，然后用 `obsidian move` 落到 `9-Meta/AGENTS.md`，并删除草稿）

@@ -14,10 +14,16 @@ The `lint-wiki` workflow SHALL inspect the wiki for the following health issues 
 8. **过时声明 (Stale claims)**：旧 session 的结论被新 session 推翻但 wiki 未同步
 9. **概念缺页**：被频繁裸文本提到但无独立页面的概念（≥3 处）
 10. **超期未访问的活跃项目**：`3-Projects/` 中标 `status: active` 但 `updated` 已 >30 天
+11. **野生 tag (Out-of-vocabulary)**：使用了不在 `9-Meta/TAGS.md` 白名单的 tag（Suggestion 级，列出每个野生 tag 的出现位置 + 推荐替换）
+12. **红线 tag 越界 (Privacy leak via tag)**：公开区文件出现 `9-Meta/TAGS.md` 红线清单中的 tag（Critical 级，与 visibility 跨边界并列为最高级警报）
 
 #### Scenario: 全量 lint
 - **WHEN** 用户请求"巡检 wiki"
-- **THEN** agent SHALL 按上述 10 项检查全量扫描，输出分类报告（每项问题列出受影响文件清单）
+- **THEN** agent SHALL 按上述 12 项检查全量扫描，输出分类报告（每项问题列出受影响文件清单）
+
+#### Scenario: Tag 检查依赖 TAGS.md
+- **WHEN** 跑第 11、12 项检查时 `9-Meta/TAGS.md` 不存在
+- **THEN** SHALL 跳过这两项检查并在报告头部标注"TAGS.md missing — tag governance disabled"，不阻断其他检查项
 
 #### Scenario: 单项 lint
 - **WHEN** 用户请求只检查某一项（如"找出所有断链"）
