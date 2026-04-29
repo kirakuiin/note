@@ -145,6 +145,20 @@ SyntaxError: Unexpected token ',', "...XXX..." is not valid JSON
 - `9-Meta/openspec/changes/restructure-vault-as-llm-wiki/**.md` 共 12 个：全部 UTF-8 ✅（task 1.10 收尾时一键转换）
 - `9-Meta/Scripts/convert_encoding.py`：本节核心工具，长期保留
 
+#### 补丁：`edit` 工具用于 vault 内已存在 .md 的纯文本小修（task 3.6 实战补充）
+
+陷阱 1 强调"不要用 `write` 工具创建含中文 .md"，但**没说 `edit` 工具如何用**。task 3.6 实测：
+
+- `edit` 工具修改**已经是 UTF-8 的 .md** 时，**保持 UTF-8 落盘** ✅（与 `write` 工具行为不同——`write` 是创建新文件、按系统 ANSI；`edit` 是替换字符串、保持原编码）
+- 单次 `edit` 后立即用 `[System.IO.File]::ReadAllBytes` + UTF-8 strict 验证，task 3.6 验证 6-Tools/_index.md 通过
+- 适用场景：修复 `obsidian append` 多次拆分留下的格式问题（标题重复、空行多余）等"纯正文小修，不涉及链接/移动/改名"
+- 仍然**禁止**：用 `edit` 创建新 .md（应走 `obsidian create`）；用 `edit` 改动 wikilink 目标（应走 `obsidian rename` 让 alwaysUpdateLinks 接管）
+
+**判定流程**：
+1. 改动只涉及正文文本？→ 是 → 进入下一步；否（涉及链接/路径）→ 用 obsidian-cli
+2. 目标 .md 已经是 UTF-8（用陷阱 1 速查命令验证）？→ 是 → `edit` 安全；否 → 先 `convert_encoding.py` 转 UTF-8 再 `edit`
+3. `edit` 后立即重验 UTF-8 strict + `obsidian unresolved` 计数不增
+
 ---
 
 ## 2. obsidian CLI 实测命令签名速查
@@ -345,6 +359,7 @@ design.md 的 D11 / R2 文本会在下一次 design 修订（或 task 3.10 实�
 | `post-batch-C-low` | 2026-04-29 | Batch C 低风险段（task 3.4 一半）— commit ac552ef + 7b35c87；C-pre 4 rename + C-low 55 文件 `技术文档/*` → `2-Wiki/<域>/<子>/`（含 `计科基础/` 第 7 领域新建 + `计算机.md` rename 为 `计科基础知识.md`）+ C-dataview Unity知识点.md 2 处 FROM 修正；零失链 |
 | `post-batch-C` | 2026-04-29 | Batch C 完整完成（task 3.4 done）— commit 4a261f3；C-skills 12 个外部系统 skill 文件 `技术文档/AI/skills/*` → `9-Meta/Skills/*`（与本 vault 自有 skill 同处共存）+ README.md 内容并入 `_index.md` + `~/.codemaker/skills/<7个>` junctions 重建指向新路径；unresolved 49 → 36（共下降 13） |
 | `post-batch-D` | 2026-04-29 | Batch D 完成（task 3.5 done）— commit 804ac1e；80 文件从 `日常杂谈/` 拆解到 4 目标：D-1 桌游 65 → `5-Life/桌游/` + `桌游记录.base` 修 `inFolder`；D-2 项目总结 5 → 新建 `3-Projects/项目总结/`；D-3 年度总结 3 → `4-Journal/<YYYY>/` + rename；D-4 网易面试 → `4-Journal/2024/2024-08_网易面试经验.md` + `#interview` tag；D-5/D-6 散件 6 → 各自归位。新增 6 个 _index.md 容器骨架 + TAGS.md 把 `#interview` 从待定转白名单。源 `日常杂谈/` 整目录物理删除。git 80 R + 6 A + 5 M, 0 D+A. unresolved 36 → 36（零失链）|
+| `post-batch-E` | 2026-04-29 | Batch E 完成（task 3.6 done）— `工具用法/` 13 文件全部 `obsidian move` 一步 move+rename 到 `6-Tools/<类别>-<工具名>.md` 扁平结构；`软件食谱/` 实测早已空（无需迁移）；`6-Tools/_index.md` 按 8 类分组登记 13 条 wikilink；unresolved 36 → 36（零失链）。源 `工具用法/` 空壳留待 task 3.12 统一清理。|
 | ... | ... | 每批一个 tag |
 
 ---

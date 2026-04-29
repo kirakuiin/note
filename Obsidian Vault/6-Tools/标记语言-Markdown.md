@@ -379,7 +379,7 @@ $$\begin{vmatrix}a & b\\ c & d \end{vmatrix}=ad-bc$$
 可以在内部链接内指定引用的具体块，使用语法：
 
 > ![example]
-> [[markdown语法#^aaf2cc|块引用]]
+> [[标记语言-Markdown#^aaf2cc|块引用]]
 
 ```markdown
 [[markdown语法#^aaf2cc]]

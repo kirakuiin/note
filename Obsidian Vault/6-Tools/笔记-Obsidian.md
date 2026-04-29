@@ -9,4 +9,4 @@ tags:
 > 在**偏好->文件与链接->忽略文件**里可以进行设置。
 
 > [!hint] Dataview用法
-> 参考[[Dataview用法指南]]。
+> 参考[[Obsidian插件-Dataview]]。
