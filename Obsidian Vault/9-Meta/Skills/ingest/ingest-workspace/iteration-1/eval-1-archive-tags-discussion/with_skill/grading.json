@@ -1,0 +1,10 @@
+{
+  "expectations": [
+    {"text": "Session file created at 1-Sessions/2026/04/2026-04-29-*.md", "passed": true, "evidence": "File: 1-Sessions/2026/04/2026-04-29-TAGS-nested-tag-rules.md"},
+    {"text": "Frontmatter contains area:session, visibility:public, date, topic, tags, wiki_pages_touched", "passed": true, "evidence": "All 6 fields present in frontmatter"},
+    {"text": "Body is 200-800 words with 背景/关键讨论/结论/产出物 sections", "passed": true, "evidence": "5 sections present, ~250 words"},
+    {"text": "关键讨论 uses bullet points, not paragraphs", "passed": true, "evidence": "3 bullet points in 关键讨论"},
+    {"text": "Identified TAGS.md as wiki-worthy and proposed update", "passed": true, "evidence": "wiki_pages_touched: [[9-Meta/TAGS.md]], 产出物 lists the update"},
+    {"text": "Topic reflects nested tag rules discussion, not generic", "passed": true, "evidence": "topic: 'TAGS.md 嵌套 tag 规则修订'"}
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "expectations": [
+    {"text": "Only ran check 1", "passed": false, "evidence": "Without skill, no concept of check isolation"},
+    {"text": "Used obsidian unresolved", "passed": false, "evidence": "Without skill, may not know the command"},
+    {"text": "Listed all broken links", "passed": false, "evidence": "Without skill, no standard enumeration format"},
+    {"text": "Did not waste tokens", "passed": false, "evidence": "Without skill, may run unnecessary checks"}
+  ]
+}

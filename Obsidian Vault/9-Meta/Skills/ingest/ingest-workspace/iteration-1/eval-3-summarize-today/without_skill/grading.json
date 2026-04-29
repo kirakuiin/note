@@ -1,0 +1,9 @@
+{
+  "expectations": [
+    {"text": "Session file created at 1-Sessions/2026/04/2026-04-29-*.md", "passed": false, "evidence": "Without skill, agent doesn't know path convention"},
+    {"text": "Frontmatter contains area:session, visibility:public, date, topic, tags, wiki_pages_touched", "passed": false, "evidence": "Without skill, agent doesn't know required fields"},
+    {"text": "Topic was extracted from content (not just 'work summary')", "passed": false, "evidence": "Without skill, agent may use generic title"},
+    {"text": "All 3 work items captured in 关键讨论", "passed": false, "evidence": "Without skill, no standard structure to ensure coverage"},
+    {"text": "Identified wiki-worthy items (TAGS.md, ingest skill)", "passed": false, "evidence": "Without skill, agent doesn't know wiki detection workflow"}
+  ]
+}

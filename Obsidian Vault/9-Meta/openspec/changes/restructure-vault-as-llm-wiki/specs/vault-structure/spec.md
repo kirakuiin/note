@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-### Requirement: ¶¥¼¶Ä¿Â¼²ÉÓÃ±àºÅ + ĞÔÖÊ·ÖÀà
+### Requirement: é¡¶çº§ç›®å½•é‡‡ç”¨ç¼–å· + æ€§è´¨åˆ†ç±»
 
 The vault SHALL use exactly the following top-level directories at the repository root, with numeric prefixes for ordering and lifecycle-based semantics: `0-Inbox/`, `1-Sessions/`, `2-Wiki/`, `3-Projects/`, `4-Journal/`, `5-Life/`, `6-Tools/`, `9-Meta/`. The numeric prefix uses a single digit followed by a hyphen (`0-`, not `00_`). Numbers `7-` and `8-` are reserved for future expansion.
 
@@ -20,94 +20,96 @@ In addition, the following directories are allowed at the root but are NOT part 
 
 ---
 
-### Requirement: Ã¿¸ö¶¥¼¶Ä¿Â¼³Ğµ£Ã÷È·ÇÒ»¥³âµÄÓïÒå
+### Requirement: æ¯ä¸ªé¡¶çº§ç›®å½•æ‰¿æ‹…æ˜ç¡®ä¸”äº’æ–¥çš„è¯­ä¹‰
 
 Each top-level directory SHALL have a single, well-defined purpose. Content placement MUST follow these semantics:
 
-- `0-Inbox/`£ºÎ´·ÖÀàµÄÁÙÊ±Í¶µİ£¨ÈË¹¤ËÙ¼Ç¡¢´ıÕûÀíÏî£©
-- `1-Sessions/`£º¶Ô»°ÓëÍâ²¿ÎÄµµµÄÔ­Ê¼³Áµí£¨"raw" ²ã£©£¬°´ `YYYY/MM/` ×ÓÄ¿Â¼×éÖ¯
-- `2-Wiki/`£ºLLM Ö÷µ¼Î¬»¤µÄ½á¹¹»¯ÖªÊ¶¿â£¨ÓÀ¾ÃÖªÊ¶¡¢°´Ñ§¿ÆÁìÓò·ÖÀà£©
-- `3-Projects/`£º½øĞĞÖĞµÄ¸öÈËÏîÄ¿£¨ÓĞÄ¿±êµ¼Ïò¡¢×´Ì¬»á±ä»¯£©
-- `4-Journal/`£º¸öÈË¸´ÅÌ£¨Äê¶È×Ü½á¡¢ÏîÄ¿¸´ÅÌ¡¢ÃæÊÔ×¼±¸£©
-- `5-Life/`£ºÉú»îÁìÓòÄÚÈİ£¨ĞËÈ¤¡¢°®ºÃ£¬Èç×ÀÓÎ¡¢½ğÈÚ¡¢¶ÁÎïÊÕ²Ø£©
-- `6-Tools/`£º¹¤¾ßËÙ²é£¨"ÓÃµ½²Å²é¡¢²éÍê¾Í×ß"µÄ²éÑ¯ĞÍ±Ê¼Ç£¬±âÆ½½á¹¹£©
-- `9-Meta/`£º²Ö¿â×ÔÉíµÄÅäÖÃºÍ agent ×Ê²ú£¨`AGENTS.md`¡¢`Skills/`¡¢`Templates/`¡¢`Scripts/`¡¢`openspec/`£©
+- `0-Inbox/`ï¼šæœªåˆ†ç±»çš„ä¸´æ—¶æŠ•é€’ï¼ˆäººå·¥é€Ÿè®°ã€å¾…æ•´ç†é¡¹ï¼‰
+- `1-Sessions/`ï¼šå¯¹è¯ä¸å¤–éƒ¨æ–‡æ¡£çš„åŸå§‹æ²‰æ·€ï¼ˆ"raw" å±‚ï¼‰ï¼ŒæŒ‰ `YYYY/MM/` å­ç›®å½•ç»„ç»‡
+- `2-Wiki/`ï¼šLLM ä¸»å¯¼ç»´æŠ¤çš„ç»“æ„åŒ–çŸ¥è¯†åº“ï¼ˆæ°¸ä¹…çŸ¥è¯†ã€æŒ‰å­¦ç§‘é¢†åŸŸåˆ†ç±»ï¼‰
+- `3-Projects/`ï¼šè¿›è¡Œä¸­çš„ä¸ªäººé¡¹ç›®ï¼ˆæœ‰ç›®æ ‡å¯¼å‘ã€çŠ¶æ€ä¼šå˜åŒ–ï¼‰
+- `4-Journal/`ï¼šä¸ªäººå¤ç›˜ï¼ˆå¹´åº¦æ€»ç»“ã€é¡¹ç›®å¤ç›˜ã€é¢è¯•å‡†å¤‡ï¼‰
+- `5-Life/`ï¼šç”Ÿæ´»é¢†åŸŸå†…å®¹ï¼ˆå…´è¶£ã€çˆ±å¥½ï¼Œå¦‚æ¡Œæ¸¸ã€é‡‘èã€è¯»ç‰©æ”¶è—ï¼‰
+- `6-Tools/`ï¼šå·¥å…·é€ŸæŸ¥ï¼ˆ"ç”¨åˆ°æ‰æŸ¥ã€æŸ¥å®Œå°±èµ°"çš„æŸ¥è¯¢å‹ç¬”è®°ï¼Œæ‰å¹³ç»“æ„ï¼‰
+- `9-Meta/`ï¼šä»“åº“è‡ªèº«çš„é…ç½®å’Œ agent èµ„äº§ï¼ˆ`AGENTS.md`ã€`Skills/`ã€`Templates/`ã€`Scripts/`ã€`openspec/`ï¼‰
 
-#### Scenario: ±Ê¼Ç¹éÎ»¾ö²ß
-- **WHEN** ÓÃ»§»ò agent ´´½¨ĞÂ±Ê¼ÇĞè¾ö¶¨·ÅÔÚÄÄ¸ö¶¥¼¶Ä¿Â¼
-- **THEN** ±ØĞë»ùÓÚ¸Ã±Ê¼ÇµÄ"ĞÔÖÊ/ÉúÃüÖÜÆÚ"Æ¥ÅäÉÏÊö¶¨ÒåÖ®Ò»£¬¶ø·Ç»ùÓÚ"Ö÷Ìâ"
+#### Scenario: ç¬”è®°å½’ä½å†³ç­–
+- **WHEN** ç”¨æˆ·æˆ– agent åˆ›å»ºæ–°ç¬”è®°éœ€å†³å®šæ”¾åœ¨å“ªä¸ªé¡¶çº§ç›®å½•
+- **THEN** å¿…é¡»åŸºäºè¯¥ç¬”è®°çš„"æ€§è´¨/ç”Ÿå‘½å‘¨æœŸ"åŒ¹é…ä¸Šè¿°å®šä¹‰ä¹‹ä¸€ï¼Œè€ŒéåŸºäº"ä¸»é¢˜"
 
-#### Scenario: Ò»¸ö±Ê¼ÇÍ¬Ê±·ûºÏ¶à¸öÄ¿Â¼ÓïÒå
-- **WHEN** Ò»¸ö±Ê¼ÇÍ¬Ê±ºÏÀí¹éÊôÓÚ¶à¸öÄ¿Â¼£¨ÈçÄ³¸öÏîÄ¿Ïà¹ØµÄÖªÊ¶×Ü½á£©
-- **THEN** ÓÅÏÈ°´ÉúÃüÖÜÆÚ¶ÌµÄ¹éÎ»£¨ÏîÄ¿½áÊø»á¹éµµ£¬µ«ÖªÊ¶ÊÇÓÀ¾ÃµÄ£»¹ÊÖªÊ¶Èë `2-Wiki/`£¬²¢ÔÚ `3-Projects/` ÖĞÍ¨¹ı wikilink ÒıÓÃËü£©
+#### Scenario: ä¸€ä¸ªç¬”è®°åŒæ—¶ç¬¦åˆå¤šä¸ªç›®å½•è¯­ä¹‰
+- **WHEN** ä¸€ä¸ªç¬”è®°åŒæ—¶åˆç†å½’å±äºå¤šä¸ªç›®å½•ï¼ˆå¦‚æŸä¸ªé¡¹ç›®ç›¸å…³çš„çŸ¥è¯†æ€»ç»“ï¼‰
+- **THEN** ä¼˜å…ˆæŒ‰ç”Ÿå‘½å‘¨æœŸçŸ­çš„å½’ä½ï¼ˆé¡¹ç›®ç»“æŸä¼šå½’æ¡£ï¼Œä½†çŸ¥è¯†æ˜¯æ°¸ä¹…çš„ï¼›æ•…çŸ¥è¯†å…¥ `2-Wiki/`ï¼Œå¹¶åœ¨ `3-Projects/` ä¸­é€šè¿‡ wikilink å¼•ç”¨å®ƒï¼‰
 
-#### Scenario: `6-Tools/` ÄÚÈİ±âÆ½»¯
-- **WHEN** ÔÚ `6-Tools/` ÏÂ·ÅÖÃ¹¤¾ßËÙ²éÎÄ¼ş
-- **THEN** ÎÄ¼ş SHALL Ö±½ÓÎ»ÓÚ `6-Tools/` ¸ù£¨²»¿ª×ÓÄ¿Â¼£©£¬ÃüÃû²ÉÓÃ `<Àà±ğ>-<¹¤¾ßÃû>.md` ĞÎÊ½£¨Èç `±à¼­Æ÷-VSCode.md`¡¢`°æ±¾¿ØÖÆ-Git.md`£©
+#### Scenario: `6-Tools/` å†…å®¹æ‰å¹³åŒ–
+- **WHEN** åœ¨ `6-Tools/` ä¸‹æ”¾ç½®å·¥å…·é€ŸæŸ¥æ–‡ä»¶
+- **THEN** æ–‡ä»¶ SHALL ç›´æ¥ä½äº `6-Tools/` æ ¹ï¼ˆä¸å¼€å­ç›®å½•ï¼‰ï¼Œå‘½åé‡‡ç”¨ `<ç±»åˆ«>-<å·¥å…·å>.md` å½¢å¼ï¼ˆå¦‚ `ç¼–è¾‘å™¨-VSCode.md`ã€`ç‰ˆæœ¬æ§åˆ¶-Git.md`ï¼‰
 
 ---
 
-### Requirement: ¹«Ë½Ä¿Â¼ÎïÀí¸ôÀë
+### Requirement: å…¬ç§ç›®å½•ç‰©ç†éš”ç¦»
 
 The vault SHALL maintain two physically isolated zones:
 
-- **Public zone** (¹«¿ªÇø)£ºËùÓĞ·Ç `netease/` µÄÄ¿Â¼ºÍÎÄ¼ş£¬Í¨¹ı `git push` Í¬²½µ½¹«Íø²Ö¿â£¨GitHub/Gitee£©
-- **Private zone** (Ë½ÓĞÇø)£º`netease/` Ä¿Â¼¼°ÆäÈ«²¿×ÓÄÚÈİ£¬±ØĞëÔÚ `.gitignore` ÖĞ±»ÅÅ³ı£¬ÓÀ²»½øÈë git index
+- **Public zone** (å…¬å¼€åŒº)ï¼šæ‰€æœ‰é `netease/` çš„ç›®å½•å’Œæ–‡ä»¶ï¼Œé€šè¿‡ `git push` åŒæ­¥åˆ°å…¬ç½‘ä»“åº“ï¼ˆGitHub/Giteeï¼‰
+- **Private zone** (ç§æœ‰åŒº)ï¼š`netease/` ç›®å½•åŠå…¶å…¨éƒ¨å­å†…å®¹ï¼Œå¿…é¡»åœ¨ `.gitignore` ä¸­è¢«æ’é™¤ï¼Œæ°¸ä¸è¿›å…¥ git index
 
 The `.gitignore` MUST contain a pattern that excludes the entire `netease/` directory (and any future top-level private directories explicitly designated).
 
-`netease/` ÄÚ²¿Ó¦²ÉÓÃÓë¹«¿ªÇø¶Ô³ÆµÄ½á¹¹£º`0-Daily/`¡¢`1-Sessions/`¡¢`2-Wiki/`¡¢`3-Projects/`¡¢`4-Reference/`£¬ÆäÖĞ `4-Reference/` ÓÃÓÚ´æ·ÅµÚÈı·½ÎÄµµ¾µÏñ£¨Èç arcolab/popo ÎÄµµ£©¡£
+`netease/` å†…éƒ¨åº”é‡‡ç”¨ä¸å…¬å¼€åŒºå¯¹ç§°çš„ç»“æ„ï¼š`0-Daily/`ã€`1-Sessions/`ã€`2-Wiki/`ã€`3-Projects/`ã€`4-Reference/`ï¼Œå…¶ä¸­ `4-Reference/` ç”¨äºå­˜æ”¾ç¬¬ä¸‰æ–¹æ–‡æ¡£é•œåƒï¼ˆå¦‚ arcolab/popo æ–‡æ¡£ï¼‰ã€‚
 
-#### Scenario: ¹«¿ªÇøÎÄ¼ş±» push Ê±
-- **WHEN** ÔÚ vault ¸ùÄ¿Â¼Ö´ĞĞ `git status` »ò `git add .`
-- **THEN** Õû¸ö `netease/` Ä¿Â¼£¨º¬ËùÓĞ×ÓÎÄ¼ş£©±ØĞë²»³öÏÖÔÚ git ¸ú×Ù·¶Î§ÄÚ
+#### Scenario: å…¬å¼€åŒºæ–‡ä»¶è¢« push æ—¶
+- **WHEN** åœ¨ vault æ ¹ç›®å½•æ‰§è¡Œ `git status` æˆ– `git add .`
+- **THEN** æ•´ä¸ª `netease/` ç›®å½•ï¼ˆå«æ‰€æœ‰å­æ–‡ä»¶ï¼‰å¿…é¡»ä¸å‡ºç°åœ¨ git è·Ÿè¸ªèŒƒå›´å†…
 
-#### Scenario: ¹«¿ªÇø±Ê¼Ç²»µÃÒıÓÃË½ÓĞÄÚÈİ
-- **WHEN** ¹«¿ªÇøµÄÈÎºÎ markdown ÎÄ¼şÊÔÍ¼Í¨¹ı wikilink¡¢embed¡¢»ò frontmatter `source` ×Ö¶ÎÒıÓÃ `netease/` ÏÂµÄÄÚÈİ
-- **THEN** ¸ÃÒıÓÃ SHALL ±»ÊÓÎªÎ¥¹æ£»agent ÔÚĞ´ÈëÇ°±ØĞë¼ì²é²¢¾Ü¾ø´Ë²Ù×÷
+#### Scenario: å…¬å¼€åŒºç¬”è®°ä¸å¾—å¼•ç”¨ç§æœ‰å†…å®¹
+- **WHEN** å…¬å¼€åŒºçš„ä»»ä½• markdown æ–‡ä»¶è¯•å›¾é€šè¿‡ wikilinkã€embedã€æˆ– frontmatter `source` å­—æ®µå¼•ç”¨ `netease/` ä¸‹çš„å†…å®¹
+- **THEN** è¯¥å¼•ç”¨ SHALL è¢«è§†ä¸ºè¿è§„ï¼›agent åœ¨å†™å…¥å‰å¿…é¡»æ£€æŸ¥å¹¶æ‹’ç»æ­¤æ“ä½œ
 
-#### Scenario: Ë½ÓĞÇø¿ÉÒÔÒıÓÃ¹«¿ªÇø
-- **WHEN** `netease/` ÏÂµÄ±Ê¼ÇĞèÒªÒıÓÃ¹«¿ªÇøµÄÖªÊ¶Ò³Ãæ£¨ÀıÈç¹¤×÷ wiki ÒıÓÃÍ¨ÓÃËã·¨±Ê¼Ç£©
-- **THEN** ÔÊĞíÍ¨¹ı wikilink ÒıÓÃ£¬µ«·´Ïò²»ÔÊĞí
+#### Scenario: ç§æœ‰åŒºå¯ä»¥å¼•ç”¨å…¬å¼€åŒº
+- **WHEN** `netease/` ä¸‹çš„ç¬”è®°éœ€è¦å¼•ç”¨å…¬å¼€åŒºçš„çŸ¥è¯†é¡µé¢ï¼ˆä¾‹å¦‚å·¥ä½œ wiki å¼•ç”¨é€šç”¨ç®—æ³•ç¬”è®°ï¼‰
+- **THEN** å…è®¸é€šè¿‡ wikilink å¼•ç”¨ï¼Œä½†åå‘ä¸å…è®¸
 
-#### Scenario: ĞÂÔö¶¥¼¶Ë½ÓĞÄ¿Â¼
-- **WHEN** Î´À´ĞèÒªĞÂÔöÆäËûË½ÓĞÄ¿Â¼£¨·Ç netease£©
-- **THEN** ±ØĞëÏÔÊ½¸üĞÂ±¾ spec Óë `.gitignore`£¬²¢ÔÚ `9-Meta/AGENTS.md` ÖĞ±ê×¢
+#### Scenario: æ–°å¢é¡¶çº§ç§æœ‰ç›®å½•
+- **WHEN** æœªæ¥éœ€è¦æ–°å¢å…¶ä»–ç§æœ‰ç›®å½•ï¼ˆé neteaseï¼‰
+- **THEN** å¿…é¡»æ˜¾å¼æ›´æ–°æœ¬ spec ä¸ `.gitignore`ï¼Œå¹¶åœ¨ `9-Meta/AGENTS.md` ä¸­æ ‡æ³¨
 
 ---
 
-### Requirement: ×ÓÄ¿Â¼ÃüÃûÔ¼¶¨
+### Requirement: å­ç›®å½•å‘½åçº¦å®š
 
-Within `2-Wiki/`, second-level directories SHALL use Chinese names organized by subject domain (e.g., `±à³ÌÓïÑÔ/`, `ÓÎÏ·¿ª·¢/`, `Èí¼ş¹¤³Ì/`, `Ëã·¨ÓëÊı¾İ½á¹¹/`, `AIÓëAgent/`, `¼ÆËã»ú»ù´¡/`, `Ó¢Óï/`, `·½·¨ÂÛ/`).
+Within `2-Wiki/`, second-level directories SHALL use Chinese names organized by subject domain (e.g., `ç¼–ç¨‹è¯­è¨€/`, `æ¸¸æˆå¼€å‘/`, `è½¯ä»¶å·¥ç¨‹/`, `ç®—æ³•ä¸æ•°æ®ç»“æ„/`, `AIä¸Agent/`, `è®¡ç®—æœºåŸºç¡€/`, `è‹±è¯­/`, `æ–¹æ³•è®º/`).
 
 Within `1-Sessions/`, the structure SHALL follow `YYYY/MM/` subdirectories with files named `YYYY-MM-DD-<topic>.md`.
 
 Within `9-Meta/Skills/`, each skill SHALL be a self-contained directory with at minimum a `SKILL.md` entry file. Optional substructure: `references/`, `scripts/`, `templates/`, `assets/`, `tests/`.
 
-#### Scenario: ´´½¨ĞÂ wiki Ö÷Ìâ·ÖÖ§
-- **WHEN** ÔÚ `2-Wiki/` ÏÂ´´½¨ĞÂµÄÁìÓòÄ¿Â¼
-- **THEN** ÃüÃû SHALL ÓÃÖĞÎÄÇÒÄÜ¾«È·ÃèÊö¸ÃÁìÓò£»Í¬Ê±ÔÚ¸ÃÄ¿Â¼ÏÂ´´½¨ `_MOC.md` Èë¿ÚÎÄ¼ş
+#### Scenario: åˆ›å»ºæ–° wiki ä¸»é¢˜åˆ†æ”¯
+- **WHEN** åœ¨ `2-Wiki/` ä¸‹åˆ›å»ºæ–°çš„é¢†åŸŸç›®å½•
+- **THEN** å‘½å SHALL ç”¨ä¸­æ–‡ä¸”èƒ½ç²¾ç¡®æè¿°è¯¥é¢†åŸŸï¼›åŒæ—¶åœ¨è¯¥ç›®å½•ä¸‹åˆ›å»º `_MOC.md` å…¥å£æ–‡ä»¶
 
-#### Scenario: ¹éµµ session
-- **WHEN** ÔÚ `1-Sessions/` ÏÂ±£´æ¶Ô»°¼ÇÂ¼
-- **THEN** Â·¾¶ SHALL ĞÎÈç `1-Sessions/2026/04/2026-04-29-ÖªÊ¶¿â½á¹¹Éè¼Æ.md`
+#### Scenario: å½’æ¡£ session
+- **WHEN** åœ¨ `1-Sessions/` ä¸‹ä¿å­˜å¯¹è¯è®°å½•
+- **THEN** è·¯å¾„ SHALL å½¢å¦‚ `1-Sessions/2026/04/2026-04-29-çŸ¥è¯†åº“ç»“æ„è®¾è®¡.md`
 
 ---
 
-### Requirement: ¸ùÄ¿Â¼Èë¿ÚÎÄ¼ş
+### Requirement: æ ¹ç›®å½•å…¥å£æ–‡ä»¶
 
-The vault root SHALL contain three entry files, each serving a distinct audience:
+The vault SHALL provide three entry files, each serving a distinct audience. Their physical locations differ depending on whether the vault root coincides with the git repository root:
 
-- `Dashboard.md`£º¸øÓÃ»§×Ô¼º¿´µÄĞĞ¶¯ĞÍ¹¤×÷Ì¨£¨´ı°ì¡¢µ±ÈÕÈë¿Ú¡¢ÖªÊ¶µØÍ¼£©
-- `README.md`£º¸ø GitHub ·Ã¿Í¿´µÄ²Ö¿â¼ò½é£¨ÕâÊÇÊ²Ã´²Ö¿â¡¢ÈçºÎä¯ÀÀ¡¢ÈçºÎ¹±Ï×£©
-- ¾ÉµÄ `•0á8 µÚ¶ş´óÄÔ.md` SHALL ±»É¾³ı£¨Æä¹¦ÄÜÓÉ Dashboard.md Ìæ´ú£©
+- `Dashboard.md`ï¼šæ”¾åœ¨ **vault æ ¹**ã€‚ç»™ç”¨æˆ·è‡ªå·±çœ‹çš„è¡ŒåŠ¨å‹å·¥ä½œå°ï¼ˆå¾…åŠã€å½“æ—¥å…¥å£ã€çŸ¥è¯†åœ°å›¾ï¼‰
+- `README.md`ï¼šæ”¾åœ¨ **git ä»“åº“æ ¹**ï¼ˆè¿™æ˜¯ GitHub å®é™…æ¸²æŸ“çš„ä½ç½®ï¼›å¦‚æœä»“åº“æ ¹ = vault æ ¹åˆ™ç­‰ä»·ï¼‰ã€‚ç»™ GitHub è®¿å®¢çœ‹çš„ä»“åº“ç®€ä»‹ï¼ˆè¿™æ˜¯ä»€ä¹ˆä»“åº“ã€å¦‚ä½•æµè§ˆã€å¦‚ä½•è´¡çŒ®ã€ç§æœ‰åŒºè¯´æ˜ï¼‰
+- æ—§çš„ `ğŸ§  ç¬¬äºŒå¤§è„‘.md`ï¼ˆvault æ ¹ï¼‰SHALL è¢«åˆ é™¤ï¼ˆå…¶åŠŸèƒ½ç”± Dashboard.md æ›¿ä»£ï¼‰
 
-`9-Meta/AGENTS.md` ÊÇ agent µÄÈë¿Ú£¨²»ÔÚ¸ùÄ¿Â¼£¬µ«±» Dashboard ºÍ README ÒıÓÃ£¬Ïê¼û agent-schema ¹æ·¶£©¡£
+`9-Meta/AGENTS.md` æ˜¯ agent çš„å…¥å£ï¼ˆä¸åœ¨æ ¹ç›®å½•ï¼Œä½†è¢« Dashboard å’Œ README å¼•ç”¨ï¼Œè¯¦è§ agent-schema è§„èŒƒï¼‰ã€‚
 
-#### Scenario: ÓÃ»§ÔÚ Obsidian ÖĞ´ò¿ª vault
-- **WHEN** ÓÃ»§Ê×´Î/Ã¿Ìì´ò¿ª vault
-- **THEN** Dashboard.md SHALL ÊÇÓÃ»§µÄÊ×Ñ¡Èë¿Ú£¬Ìá¹©µ±ÈÕ²Ù×÷µÄ¿ì½İÁ´½Ó
+> **æ¶æ„è¯´æ˜**ï¼šæœ¬ä»“åº“çš„ git æ ¹ï¼ˆ`note/`ï¼‰ä¸ vault æ ¹ï¼ˆ`note/Obsidian Vault/`ï¼‰**ä¸é‡åˆ**â€”â€”vault æ˜¯ git ä»“åº“çš„å­ç›®å½•ã€‚GitHub æ¸²æŸ“çš„æ˜¯ git æ ¹çš„ README.mdï¼Œæ‰€ä»¥ README.md å¿…é¡»æ”¾ git æ ¹æ‰èƒ½è¢«è®¿å®¢çœ‹åˆ°ï¼›vault æ ¹ä¸é‡å¤ç»´æŠ¤ä¸€ä»½ã€‚å¦‚æœæœªæ¥ä»“åº“ç»“æ„è°ƒæ•´ä¸º git æ ¹ = vault æ ¹ï¼ŒREADME.md ç‰©ç†ä½ç½®è‡ªç„¶åˆä¸€ï¼Œæœ¬ requirement æ–‡æœ¬æ— éœ€æ”¹åŠ¨ã€‚
 
-#### Scenario: GitHub ·Ã¿Í·ÃÎÊ²Ö¿â
-- **WHEN** ¹«ÍøÓÃ»§ÔÚ GitHub ä¯ÀÀ´Ë²Ö¿â
-- **THEN** README.md SHALL ÔÚ²Ö¿âÊ×Ò³Õ¹Ê¾£¬ÓÃÒ»¶Î»°ËµÃ÷²Ö¿â¶¨Î»¡¢ÍÆ¼öÈë¿Ú¡¢Ë½ÓĞÇøËµÃ÷
+#### Scenario: ç”¨æˆ·åœ¨ Obsidian ä¸­æ‰“å¼€ vault
+- **WHEN** ç”¨æˆ·é¦–æ¬¡/æ¯å¤©æ‰“å¼€ vault
+- **THEN** Dashboard.md SHALL æ˜¯ç”¨æˆ·çš„é¦–é€‰å…¥å£ï¼Œæä¾›å½“æ—¥æ“ä½œçš„å¿«æ·é“¾æ¥
+
+#### Scenario: GitHub è®¿å®¢è®¿é—®ä»“åº“
+- **WHEN** å…¬ç½‘ç”¨æˆ·åœ¨ GitHub æµè§ˆæ­¤ä»“åº“
+- **THEN** git ä»“åº“æ ¹çš„ README.md SHALL åœ¨ä»“åº“é¦–é¡µå±•ç¤ºï¼Œç”¨ä¸€æ®µè¯è¯´æ˜ä»“åº“å®šä½ã€æ¨èå…¥å£ã€ç§æœ‰åŒºè¯´æ˜ï¼Œå¹¶æŒ‡å¼•è®¿å®¢å¦‚ä½•è¿›å…¥ vault å­ç›®å½•

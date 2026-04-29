@@ -1,0 +1,9 @@
+{
+  "expectations": [
+    {"text": "Read _index.md first to find candidate pages", "passed": false, "evidence": "Without skill, no structured search entry point"},
+    {"text": "Found the session file", "passed": false, "evidence": "Without skill, may not know session path convention"},
+    {"text": "Answer includes [[wikilink]] citation", "passed": false, "evidence": "Without skill, may use plain text references"},
+    {"text": "Evaluated filing value", "passed": false, "evidence": "Without skill, no filing evaluation step"},
+    {"text": "Did not fabricate content", "passed": false, "evidence": "Without skill, may fill gaps with general knowledge"}
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "eval_id": 1,
+  "eval_name": "knowledge-lookup",
+  "prompt": "wiki 里有没有关于 Python async/await 的内容？我好像之前存过一篇相关的文章。",
+  "assertions": [
+    {"id": "read-index", "description": "Read _index.md first to find candidate pages"},
+    {"id": "found-session", "description": "Found the session file 1-Sessions/2026/04/2026-04-29-python-async-await.md"},
+    {"id": "cited-with-wikilink", "description": "Answer includes [[wikilink]] citation"},
+    {"id": "filing-check", "description": "Evaluated whether answer is worth filing (simple lookup = no)"},
+    {"id": "no-fabrication", "description": "Did not fabricate content not in wiki"}
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "expectations": [
+    {"text": "Session file created at 1-Sessions/2026/04/2026-04-29-python-async-await.md", "passed": true, "evidence": "File: 1-Sessions/2026/04/2026-04-29-python-async-await.md"},
+    {"text": "Frontmatter contains area:session, visibility:public, date, topic, tags (编程语言, from-doc), wiki_pages_touched", "passed": true, "evidence": "All fields present, tags include 编程语言 and from-doc"},
+    {"text": "背景 section notes external document source", "passed": true, "evidence": "背景: '用户粘贴了一篇关于 Python async/await 的技术文章'"},
+    {"text": "Proposed new wiki page under 2-Wiki/编程语言/", "passed": true, "evidence": "wiki_pages_touched: [[2-Wiki/编程语言/Python-async-await]]"},
+    {"text": "Body is 200-800 words, bullet points for key discussion", "passed": true, "evidence": "~200 words, 3 bullet points in 关键讨论"}
+  ]
+}

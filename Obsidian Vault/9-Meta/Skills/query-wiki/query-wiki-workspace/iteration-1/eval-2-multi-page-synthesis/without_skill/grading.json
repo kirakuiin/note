@@ -1,0 +1,9 @@
+{
+  "expectations": [
+    {"text": "Read _index.md to find candidate pages", "passed": false, "evidence": "Without skill, no structured entry point"},
+    {"text": "Read and synthesized >=2 pages", "passed": false, "evidence": "Without skill, may not find both pages"},
+    {"text": "Answer includes [[wikilinks]]", "passed": false, "evidence": "Without skill, no wikilink convention"},
+    {"text": "Suggested filing", "passed": false, "evidence": "Without skill, no filing evaluation"},
+    {"text": "Did not create wiki page directly", "passed": false, "evidence": "Without skill, no ingest handoff concept"}
+  ]
+}

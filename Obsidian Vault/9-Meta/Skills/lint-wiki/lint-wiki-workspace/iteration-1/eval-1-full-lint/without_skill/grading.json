@@ -1,0 +1,10 @@
+{
+  "expectations": [
+    {"text": "Executed all 12 checks", "passed": false, "evidence": "Without skill, no knowledge of 12 check categories"},
+    {"text": "Report ordered by severity", "passed": false, "evidence": "Without skill, no severity ordering convention"},
+    {"text": "Found broken links", "passed": false, "evidence": "Without skill, may not know obsidian unresolved"},
+    {"text": "Each issue includes file path and fix", "passed": false, "evidence": "Without skill, no standard issue format"},
+    {"text": "Did not modify files without confirmation", "passed": false, "evidence": "Without skill, may auto-fix without asking"},
+    {"text": "Report uses wikilinks and callouts", "passed": false, "evidence": "Without skill, no obsidian-markdown convention"}
+  ]
+}

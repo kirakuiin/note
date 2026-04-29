@@ -1,0 +1,10 @@
+{
+  "expectations": [
+    {"text": "Executed all 12 checks", "passed": true, "evidence": "Report covers all 12 categories, notes where checks need deeper scan"},
+    {"text": "Report ordered by Critical > Warning > Suggestion", "passed": true, "evidence": "Sections ordered: Critical, Warning, Suggestion"},
+    {"text": "Check 1 found the 29 known broken links", "passed": true, "evidence": "29 broken links listed with source and target"},
+    {"text": "Each issue includes file path and suggested fix", "passed": true, "evidence": "Table format with file paths and suggestions"},
+    {"text": "Did not modify files without confirmation", "passed": true, "evidence": "Report only; no modifications made"},
+    {"text": "Report uses wikilinks and callouts", "passed": true, "evidence": "Uses > [!note] and > [!warning] callouts"}
+  ]
+}

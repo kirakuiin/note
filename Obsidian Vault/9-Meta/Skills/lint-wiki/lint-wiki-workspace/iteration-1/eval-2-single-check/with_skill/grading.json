@@ -1,0 +1,8 @@
+{
+  "expectations": [
+    {"text": "Only ran check 1, not all 12", "passed": true, "evidence": "Report states '仅运行了断链检查（Check 1），未执行其他 11 项检查'"},
+    {"text": "Used obsidian unresolved command", "passed": true, "evidence": "29 results match obsidian unresolved output exactly"},
+    {"text": "Listed all 29 broken links", "passed": true, "evidence": "All 29 links enumerated in table"},
+    {"text": "Did not waste tokens running other checks", "passed": true, "evidence": "Explicitly notes other checks not run"}
+  ]
+}

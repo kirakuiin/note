@@ -1,0 +1,12 @@
+{
+  "eval_id": 2,
+  "eval_name": "ingest-python-article",
+  "prompt": "我粘贴了一篇关于 Python async/await 的技术文章，帮我消化一下存到 wiki。\n\n文章内容：\n# Python async/await 深入理解\n\nasync/await 是 Python 3.5 引入的异步编程语法。核心概念：\n\n1. coroutine — 用 async def 定义的函数，调用时返回 coroutine 对象而不是立即执行\n2. event loop — 事件循环是异步程序的调度器，负责在 coroutine 之间切换\n3. await — 暂停当前 coroutine，等待另一个 awaitable 完成\n4. Task — 将 coroutine 包装成 Task 后可以被事件循环调度\n\n常见陷阱：\n- 在 async def 里用 time.sleep() 会阻塞整个事件循环，应该用 await asyncio.sleep()\n- 忘记 await 一个 coroutine 不会报错，但协程不会执行（RuntimeWarning）\n- asyncio.create_task() 创建的 task 如果没被引用可能被 GC 回收\n\n最佳实践：\n- 用 asyncio.gather() 并发执行多个 coroutine\n- 用 asyncio.wait_for() 设置超时\n- 第三方库需要支持 async 才能发挥优势（aiohttp, asyncpg 等）",
+  "assertions": [
+    {"id": "correct-path", "description": "Session file created at 1-Sessions/2026/04/2026-04-29-python-async-await.md"},
+    {"id": "valid-frontmatter", "description": "Frontmatter contains area:session, visibility:public, date, topic, tags (编程语言, from-doc), wiki_pages_touched"},
+    {"id": "source-noted", "description": "背景 section notes external document source"},
+    {"id": "wiki-proposed", "description": "Proposed new wiki page under 2-Wiki/编程语言/"},
+    {"id": "concise-body", "description": "Body is 200-800 words, bullet points for key discussion"}
+  ]
+}

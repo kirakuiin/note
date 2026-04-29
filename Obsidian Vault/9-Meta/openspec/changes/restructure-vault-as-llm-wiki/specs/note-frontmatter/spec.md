@@ -1,96 +1,96 @@
 ## ADDED Requirements
 
-### Requirement: È« vault frontmatter ×Ö¶Î¼¯
+### Requirement: å…¨ vault frontmatter å­—æ®µé›†
 
 All markdown files in the vault SHALL adopt a unified frontmatter schema. Fields are categorized as required (per file location) or optional.
 
-**Universal optional fields** (ÈÎºÎÎÄ¼ş¶¼¿ÉÓĞ):
-- `created` ¡ª ISO date, ÎÄ¼ş´´½¨Ê±¼ä
-- `updated` ¡ª ISO date, ×î½üĞŞ¸ÄÊ±¼ä
-- `aliases` ¡ª Êı×é£¬ÎÄ¼ş±ğÃû£¨Obsidian wikilink ½âÎöÊ±Ê¹ÓÃ£©
+**Universal optional fields** (ä»»ä½•æ–‡ä»¶éƒ½å¯æœ‰):
+- `created` â€” ISO date, æ–‡ä»¶åˆ›å»ºæ—¶é—´
+- `updated` â€” ISO date, æœ€è¿‘ä¿®æ”¹æ—¶é—´
+- `aliases` â€” æ•°ç»„ï¼Œæ–‡ä»¶åˆ«åï¼ˆObsidian wikilink è§£ææ—¶ä½¿ç”¨ï¼‰
 
 **Universal required fields**:
-- `area` ¡ª ×Ö·û´®£¬ËùÔÚÉúÃüÖÜÆÚÇø£¬È¡Öµ¼ûÏÂ·½
-- `visibility` ¡ª `public` »ò `private`
+- `area` â€” å­—ç¬¦ä¸²ï¼Œæ‰€åœ¨ç”Ÿå‘½å‘¨æœŸåŒºï¼Œå–å€¼è§ä¸‹æ–¹
+- `visibility` â€” `public` æˆ– `private`
 
-**`area` È¡Öµ¼¯ºÏ**£º
-- `inbox` ¡ª ÔÚ `0-Inbox/`
-- `session` ¡ª ÔÚ `1-Sessions/` »ò `netease/1-Sessions/`
-- `knowledge` ¡ª ÔÚ `2-Wiki/` »ò `netease/2-Wiki/`
-- `project` ¡ª ÔÚ `3-Projects/` »ò `netease/3-Projects/`
-- `journal` ¡ª ÔÚ `4-Journal/` »ò `netease/0-Daily/`
-- `life` ¡ª ÔÚ `5-Life/`
-- `tool` ¡ª ÔÚ `6-Tools/`
-- `meta` ¡ª ÔÚ `9-Meta/`
-- `reference` ¡ª ÔÚ `netease/4-Reference/`£¨µÚÈı·½ÎÄµµ¾µÏñ£©
+**`area` å–å€¼é›†åˆ**ï¼š
+- `inbox` â€” åœ¨ `0-Inbox/`
+- `session` â€” åœ¨ `1-Sessions/` æˆ– `netease/1-Sessions/`
+- `knowledge` â€” åœ¨ `2-Wiki/` æˆ– `netease/2-Wiki/`
+- `project` â€” åœ¨ `3-Projects/` æˆ– `netease/3-Projects/`
+- `journal` â€” åœ¨ `4-Journal/` æˆ– `netease/0-Daily/`
+- `life` â€” åœ¨ `5-Life/`
+- `tool` â€” åœ¨ `6-Tools/`
+- `meta` â€” åœ¨ `9-Meta/`
+- `reference` â€” åœ¨ `netease/4-Reference/`ï¼ˆç¬¬ä¸‰æ–¹æ–‡æ¡£é•œåƒï¼‰
 
-#### Scenario: ´´½¨ĞÂ±Ê¼Ç
-- **WHEN** agent ÔÚ vault ÈÎÒâÄ¿Â¼´´½¨ĞÂ markdown ÎÄ¼ş
-- **THEN** SHALL Ğ´ÈëÖÁÉÙ `area` ºÍ `visibility` ×Ö¶Î£»`area` È¡ÖµÓëËùÔÚÂ·¾¶Ò»ÖÂ
+#### Scenario: åˆ›å»ºæ–°ç¬”è®°
+- **WHEN** agent åœ¨ vault ä»»æ„ç›®å½•åˆ›å»ºæ–° markdown æ–‡ä»¶
+- **THEN** SHALL å†™å…¥è‡³å°‘ `area` å’Œ `visibility` å­—æ®µï¼›`area` å–å€¼ä¸æ‰€åœ¨è·¯å¾„ä¸€è‡´
 
-#### Scenario: ÒÆ¶¯±Ê¼Çµ½ĞÂÇøÓò
-- **WHEN** ±Ê¼Ç´ÓÒ»¸öÇøÓòÒÆ¶¯µ½ÁíÒ»¸öÇøÓò£¨Èç `1-Sessions/` ¡ú `2-Wiki/`£©
-- **THEN** SHALL Í¬²½¸üĞÂ `area` ×Ö¶Î
-
----
-
-### Requirement: ÇøÓò×¨Êô±ØÌî×Ö¶Î
-
-²»Í¬ area ÏÂµÄÎÄ¼ş SHALL ÓĞ¶îÍâµÄ±ØÌî×Ö¶Î£º
-
-- **area: knowledge** (wiki Ò³Ãæ)£º±ØĞëÓĞ `tags`(¡İ1)¡¢`status`(`draft`/`stable`/`stale`/`archived`)
-- **area: session**£º±ØĞëÓĞ `tags`(¡İ1)¡¢`date` (ISO date)¡¢`topic` (¶Ì±êÌâ)£»¿ÉÑ¡ `wiki_pages_touched` (Êı×é)
-- **area: project**£º±ØĞëÓĞ `status`(`active`/`paused`/`done`/`archived`)¡¢`tags`(¡İ1)
-- **area: journal**£º±ØĞëÓĞ `date` (ISO date)£»¿ÉÑ¡ `period` (`daily`/`weekly`/`monthly`/`yearly`)
-- **area: tool**£º±ØĞëÓĞ `category` (×Ö·û´®£¬Èç `±à¼­Æ÷`/`°æ±¾¿ØÖÆ`/`AI` µÈ)
-- **area: meta**£ºÎŞÇ¿ÖÆ¶îÍâ×Ö¶Î£¨meta ÎÄ¼şÄÚ²¿½á¹¹²îÒì´ó£©
-- **area: inbox**¡¢**area: life**¡¢**area: reference**£º½öĞè universal required£¬ÎŞ¶îÍâ±ØÌî
-
-#### Scenario: knowledge ÀàÒ³ÃæÈ± status
-- **WHEN** wiki Ò³ÃæµÄ frontmatter È±ÉÙ `status` ×Ö¶Î
-- **THEN** lint ±ê¼ÇÎª Warning£»agent ´´½¨Ê±Ä¬ÈÏ `status: draft`
-
-#### Scenario: project ÀàÒ³Ãæ status ²»ÔÚºÏ·¨¼¯
-- **WHEN** project ÎÄ¼şµÄ `status` ×Ö¶ÎÖµ²»ÊôÓÚ `active`/`paused`/`done`/`archived`
-- **THEN** lint ±ê¼ÇÎª Warning£¬½¨Òé¸ÄÎªºÏ·¨Öµ
+#### Scenario: ç§»åŠ¨ç¬”è®°åˆ°æ–°åŒºåŸŸ
+- **WHEN** ç¬”è®°ä»ä¸€ä¸ªåŒºåŸŸç§»åŠ¨åˆ°å¦ä¸€ä¸ªåŒºåŸŸï¼ˆå¦‚ `1-Sessions/` â†’ `2-Wiki/`ï¼‰
+- **THEN** SHALL åŒæ­¥æ›´æ–° `area` å­—æ®µ
 
 ---
 
-### Requirement: Tag ´Ê±íÍ³Ò»¹ÜÀí
+### Requirement: åŒºåŸŸä¸“å±å¿…å¡«å­—æ®µ
+
+ä¸åŒ area ä¸‹çš„æ–‡ä»¶ SHALL æœ‰é¢å¤–çš„å¿…å¡«å­—æ®µï¼š
+
+- **area: knowledge** (wiki é¡µé¢)ï¼šå¿…é¡»æœ‰ `tags`(â‰¥1)ã€`status`(`draft`/`stable`/`stale`/`archived`)
+- **area: session**ï¼šå¿…é¡»æœ‰ `tags`(â‰¥1)ã€`date` (ISO date)ã€`topic` (çŸ­æ ‡é¢˜)ï¼›å¯é€‰ `wiki_pages_touched` (æ•°ç»„)
+- **area: project**ï¼šå¿…é¡»æœ‰ `status`(`active`/`paused`/`done`/`archived`)ã€`tags`(â‰¥1)
+- **area: journal**ï¼šå¿…é¡»æœ‰ `date` (ISO date)ï¼›å¯é€‰ `period` (`daily`/`weekly`/`monthly`/`yearly`)
+- **area: tool**ï¼šå¿…é¡»æœ‰ `category` (å­—ç¬¦ä¸²ï¼Œå¦‚ `ç¼–è¾‘å™¨`/`ç‰ˆæœ¬æ§åˆ¶`/`AI` ç­‰)
+- **area: meta**ï¼šæ— å¼ºåˆ¶é¢å¤–å­—æ®µï¼ˆmeta æ–‡ä»¶å†…éƒ¨ç»“æ„å·®å¼‚å¤§ï¼‰
+- **area: inbox**ã€**area: life**ã€**area: reference**ï¼šä»…éœ€ universal requiredï¼Œæ— é¢å¤–å¿…å¡«
+
+#### Scenario: knowledge ç±»é¡µé¢ç¼º status
+- **WHEN** wiki é¡µé¢çš„ frontmatter ç¼ºå°‘ `status` å­—æ®µ
+- **THEN** lint æ ‡è®°ä¸º Warningï¼›agent åˆ›å»ºæ—¶é»˜è®¤ `status: draft`
+
+#### Scenario: project ç±»é¡µé¢ status ä¸åœ¨åˆæ³•é›†
+- **WHEN** project æ–‡ä»¶çš„ `status` å­—æ®µå€¼ä¸å±äº `active`/`paused`/`done`/`archived`
+- **THEN** lint æ ‡è®°ä¸º Warningï¼Œå»ºè®®æ”¹ä¸ºåˆæ³•å€¼
+
+---
+
+### Requirement: Tag è¯è¡¨ç»Ÿä¸€ç®¡ç†
 
 All `tags` values used in frontmatter SHALL come from the controlled vocabulary defined in `9-Meta/TAGS.md`. New tags MUST be added to TAGS.md before being used in any file.
 
 `9-Meta/TAGS.md` SHALL organize tags by dimension:
 
-- **ÁìÓò tag**£º`#±à³ÌÓïÑÔ` `#ÓÎÏ·¿ª·¢` `#Ëã·¨` `#Èí¼ş¹¤³Ì` `#AI` `#Ó¢Óï` `#·½·¨ÂÛ` `#½ğÈÚ` `#×ÀÓÎ` `#¹¤×÷Á÷` ...
-- **ÀàĞÍ tag**£º`#¸ÅÄî` `#ÊÖ·¨` `#ËÙ²é` `#ÏîÄ¿` `#²È¿Ó`
-- **À´Ô´ tag**£º`#from-session` `#from-doc` `#from-book` `#from-conference`
+- **é¢†åŸŸ tag**ï¼š`#ç¼–ç¨‹è¯­è¨€` `#æ¸¸æˆå¼€å‘` `#ç®—æ³•` `#è½¯ä»¶å·¥ç¨‹` `#AI` `#è‹±è¯­` `#æ–¹æ³•è®º` `#é‡‘è` `#æ¡Œæ¸¸` `#å·¥ä½œæµ` ...
+- **ç±»å‹ tag**ï¼š`#æ¦‚å¿µ` `#æ‰‹æ³•` `#é€ŸæŸ¥` `#é¡¹ç›®` `#è¸©å‘`
+- **æ¥æº tag**ï¼š`#from-session` `#from-doc` `#from-book` `#from-conference`
 
-Ã¿¸ö tag ÔÚ TAGS.md ÖĞÓĞ 1-2 ĞĞËµÃ÷¡£
+æ¯ä¸ª tag åœ¨ TAGS.md ä¸­æœ‰ 1-2 è¡Œè¯´æ˜ã€‚
 
-#### Scenario: Ê¹ÓÃ²»ÔÚ´Ê±íµÄ tag
-- **WHEN** agent ÊÔÍ¼¸ø±Ê¼Ç¼ÓÒ»¸ö²»ÔÚ TAGS.md ÖĞµÄ tag
-- **THEN** SHALL ÏÈ½¨Òé°Ñ¸Ã tag ¼ÓÈë TAGS.md£¨Õ÷µÃÓÃ»§Í¬Òâ£©£¬ÔÙĞ´Èë±Ê¼Ç
+#### Scenario: ä½¿ç”¨ä¸åœ¨è¯è¡¨çš„ tag
+- **WHEN** agent è¯•å›¾ç»™ç¬”è®°åŠ ä¸€ä¸ªä¸åœ¨ TAGS.md ä¸­çš„ tag
+- **THEN** SHALL å…ˆå»ºè®®æŠŠè¯¥ tag åŠ å…¥ TAGS.mdï¼ˆå¾å¾—ç”¨æˆ·åŒæ„ï¼‰ï¼Œå†å†™å…¥ç¬”è®°
 
-#### Scenario: ´Ê±íÌõÄ¿·ÏÆú
-- **WHEN** Ä³¸ö tag ¾ö¶¨·ÏÆú
-- **THEN** ±ØĞëÔÚ TAGS.md ±ê¼ÇÎª `[deprecated]` ²¢Ö¸ÏòÌæ´ú tag£»Í¬Ê±ÅÜÒ»´Î batch rename ÇåÀíËùÓĞÏÖ´æÊ¹ÓÃ
+#### Scenario: è¯è¡¨æ¡ç›®åºŸå¼ƒ
+- **WHEN** æŸä¸ª tag å†³å®šåºŸå¼ƒ
+- **THEN** å¿…é¡»åœ¨ TAGS.md æ ‡è®°ä¸º `[deprecated]` å¹¶æŒ‡å‘æ›¿ä»£ tagï¼›åŒæ—¶è·‘ä¸€æ¬¡ batch rename æ¸…ç†æ‰€æœ‰ç°å­˜ä½¿ç”¨
 
 ---
 
-### Requirement: °²È«×Ö¶Î visibility µÄÓ²Ô¼Êø
+### Requirement: å®‰å…¨å­—æ®µ visibility çš„ç¡¬çº¦æŸ
 
 `visibility` field SHALL strictly match the file's physical location:
 
-- ¹«¿ªÇøÂ·¾¶ÏÂµÄËùÓĞÎÄ¼ş ¡ú `visibility: public`
-- `netease/` Â·¾¶ÏÂµÄËùÓĞÎÄ¼ş ¡ú `visibility: private`
+- å…¬å¼€åŒºè·¯å¾„ä¸‹çš„æ‰€æœ‰æ–‡ä»¶ â†’ `visibility: public`
+- `netease/` è·¯å¾„ä¸‹çš„æ‰€æœ‰æ–‡ä»¶ â†’ `visibility: private`
 
-agent ÔÚĞ´ÈëÈÎºÎÎÄ¼şÇ°±ØĞë¸ù¾İÂ·¾¶×Ô¶¯ÉèÖÃ visibility£¬ÇÒÓÀ²»ÔÊĞí public ÎÄ¼ş embed/wikilink µ½ private ÎÄ¼ş¡£
+agent åœ¨å†™å…¥ä»»ä½•æ–‡ä»¶å‰å¿…é¡»æ ¹æ®è·¯å¾„è‡ªåŠ¨è®¾ç½® visibilityï¼Œä¸”æ°¸ä¸å…è®¸ public æ–‡ä»¶ embed/wikilink åˆ° private æ–‡ä»¶ã€‚
 
-#### Scenario: visibility Îó±ê
-- **WHEN** lint ·¢ÏÖÒ»¸öÎÄ¼şµÄ visibility ÓëËùÔÚÂ·¾¶²»Æ¥Åä
-- **THEN** ±ê¼ÇÎª ”9è2 Critical£»ÓÅÏÈ¼¶¸ßÓÚÆäËûËùÓĞ lint ¼ì²éÏî
+#### Scenario: visibility è¯¯æ ‡
+- **WHEN** lint å‘ç°ä¸€ä¸ªæ–‡ä»¶çš„ visibility ä¸æ‰€åœ¨è·¯å¾„ä¸åŒ¹é…
+- **THEN** æ ‡è®°ä¸º ğŸ”´ Criticalï¼›ä¼˜å…ˆçº§é«˜äºå…¶ä»–æ‰€æœ‰ lint æ£€æŸ¥é¡¹
 
-#### Scenario: Agent ¿ç±ß½çĞ´Èë
-- **WHEN** agent ÊÔÍ¼°ÑÒ»¸ö `visibility: private` µÄÄÚÈİĞ´Èë¹«¿ªÇøÂ·¾¶
-- **THEN** SHALL ¾Ü¾øĞ´Èë²¢ÌáÊ¾ÓÃ»§£º"¸ÃÄÚÈİ±ê¼ÇÎª private£¬Ó¦Ğ´Èë netease/ ¶ø·Ç¹«¿ªÇø"
+#### Scenario: Agent è·¨è¾¹ç•Œå†™å…¥
+- **WHEN** agent è¯•å›¾æŠŠä¸€ä¸ª `visibility: private` çš„å†…å®¹å†™å…¥å…¬å¼€åŒºè·¯å¾„
+- **THEN** SHALL æ‹’ç»å†™å…¥å¹¶æç¤ºç”¨æˆ·ï¼š"è¯¥å†…å®¹æ ‡è®°ä¸º privateï¼Œåº”å†™å…¥ netease/ è€Œéå…¬å¼€åŒº"

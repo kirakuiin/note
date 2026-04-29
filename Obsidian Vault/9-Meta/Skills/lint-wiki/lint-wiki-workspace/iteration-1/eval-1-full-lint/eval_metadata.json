@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "eval_name": "full-lint",
+  "prompt": "检查一下 wiki 的健康状态，跑一次全量 lint。",
+  "assertions": [
+    {"id": "ran-all-checks", "description": "Executed all 12 checks (or skipped 11-12 if TAGS.md missing)"},
+    {"id": "severity-ordered", "description": "Report ordered by Critical > Warning > Suggestion"},
+    {"id": "broken-links-found", "description": "Check 1 found the 29 known broken links"},
+    {"id": "file-paths-listed", "description": "Each issue includes file path and suggested fix"},
+    {"id": "no-auto-fix", "description": "Did not modify files without confirmation"},
+    {"id": "obsidian-markdown", "description": "Report uses wikilinks and callouts"}
+  ]
+}

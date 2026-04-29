@@ -1,161 +1,160 @@
 ## ADDED Requirements
 
-### Requirement: AGENTS.md ÊÇ agent µÄµ¥Ò»È¨ÍşÈë¿Ú
+### Requirement: AGENTS.md æ˜¯ agent çš„å•ä¸€æƒå¨å…¥å£
 
 The vault SHALL contain a file at `9-Meta/AGENTS.md` that serves as the single authoritative configuration for any AI agent operating on this vault. Any agent SHOULD read this file at the beginning of a session before performing operations.
 
-#### Scenario: Agent ½ÓÈëĞÂ vault
-- **WHEN** Ò»¸ö agent µÚÒ»´Î²Ù×÷´Ë vault
-- **THEN** SHALL ÓÅÏÈ¶Á `9-Meta/AGENTS.md`£¬ÔÙ¾ö¶¨¾ßÌå²Ù×÷
+#### Scenario: Agent æ¥å…¥æ–° vault
+- **WHEN** ä¸€ä¸ª agent ç¬¬ä¸€æ¬¡æ“ä½œæ­¤ vault
+- **THEN** SHALL ä¼˜å…ˆè¯» `9-Meta/AGENTS.md`ï¼Œå†å†³å®šå…·ä½“æ“ä½œ
 
-#### Scenario: ²Ö¿âÔ¼¶¨±ä¸ü
-- **WHEN** ²Ö¿âµÄÄ¿Â¼½á¹¹¡¢ÃüÃûÔ¼¶¨¡¢tag ´Ê±íµÈ»ù´¡Ô¼¶¨·¢Éú±ä¸ü
-- **THEN** ±ØĞëÍ¬²½¸üĞÂ `9-Meta/AGENTS.md`£¬ÇÒÍ¨¹ı OpenSpec change ¼ÇÂ¼
+#### Scenario: ä»“åº“çº¦å®šå˜æ›´
+- **WHEN** ä»“åº“çš„ç›®å½•ç»“æ„ã€å‘½åçº¦å®šã€tag è¯è¡¨ç­‰åŸºç¡€çº¦å®šå‘ç”Ÿå˜æ›´
+- **THEN** å¿…é¡»åŒæ­¥æ›´æ–° `9-Meta/AGENTS.md`ï¼Œä¸”é€šè¿‡ OpenSpec change è®°å½•
 
 ---
 
-### Requirement: AGENTS.md ÄÚÈİÆõÔ¼
+### Requirement: AGENTS.md å†…å®¹å¥‘çº¦
 
 `9-Meta/AGENTS.md` SHALL contain at minimum the following sections (use markdown headers for structure):
 
-1. **What this vault is**£ºÓÃ 1-2 ¶ÎËµÃ÷²Ö¿â¶¨Î»£¨¸öÈËÖªÊ¶¿â + LLM Wiki Ä£Ê½ + ¹¤×÷Ë½ÓĞÇø£©
-2. **Three-layer architecture**£ºsessions / wiki / meta µÄ¹ØÏµ
-3. **Top-level directories**£ºÃ¿¸ö¶¥¼¶Ä¿Â¼µÄÓïÒå¡¢agent ÊÇ·ñ¿ÉĞ´¡¢ÃüÃûÔ¼¶¨£¨²ÎÕÕ vault-structure spec£©
-4. **Public/private boundary (RED LINE)**£ºÓ²ĞÔ°²È«¹æÔò
-5. **Wiki page conventions**£ºfrontmatter¡¢wikilink¡¢_index/_log/_MOC£¨²ÎÕÕ wiki-conventions spec£©
-6. **Tag vocabulary**£ºÖ¸Ïò `9-Meta/TAGS.md` ´Ê±í
-7. **Naming conventions**£ºsession ÎÄ¼şÃû¡¢ÈÕ±¨¡¢MOC¡¢index¡¢log
-8. **Workflow entry points**£ºÁĞ³öÖ÷Òª skill ¼°ÆäÓÃÍ¾
-9. **Operation protocol**£ºagent ÔÚ×ö¸Ä¶¯Ê±±ØĞë×ñÑ­µÄÁ÷³Ì£¨ÏÈ read index¡¢ÁĞ¸Ä¶¯¡¢È·ÈÏ¡¢Ö´ĞĞ¡¢updateindex/log£©
-10. **What NOT to do**£ºÃ÷È·µÄ½ûÖ¹ÊÂÏî
+1. **What this vault is**ï¼šç”¨ 1-2 æ®µè¯´æ˜ä»“åº“å®šä½ï¼ˆä¸ªäººçŸ¥è¯†åº“ + LLM Wiki æ¨¡å¼ + å·¥ä½œç§æœ‰åŒºï¼‰
+2. **Three-layer architecture**ï¼šsessions / wiki / meta çš„å…³ç³»
+3. **Top-level directories**ï¼šæ¯ä¸ªé¡¶çº§ç›®å½•çš„è¯­ä¹‰ã€agent æ˜¯å¦å¯å†™ã€å‘½åçº¦å®šï¼ˆå‚ç…§ vault-structure specï¼‰
+4. **Public/private boundary (RED LINE)**ï¼šç¡¬æ€§å®‰å…¨è§„åˆ™
+5. **Wiki page conventions**ï¼šfrontmatterã€wikilinkã€_index/_log/_MOCï¼ˆå‚ç…§ wiki-conventions specï¼‰
+6. **Tag vocabulary**ï¼šæŒ‡å‘ `9-Meta/TAGS.md` è¯è¡¨
+7. **Naming conventions**ï¼šsession æ–‡ä»¶åã€æ—¥æŠ¥ã€MOCã€indexã€log
+8. **Workflow entry points**ï¼šåˆ—å‡ºä¸»è¦ skill åŠå…¶ç”¨é€”
+9. **Operation protocol**ï¼šagent åœ¨åšæ”¹åŠ¨æ—¶å¿…é¡»éµå¾ªçš„æµç¨‹ï¼ˆå…ˆ read indexã€åˆ—æ”¹åŠ¨ã€ç¡®è®¤ã€æ‰§è¡Œã€updateindex/logï¼‰
+10. **What NOT to do**ï¼šæ˜ç¡®çš„ç¦æ­¢äº‹é¡¹
 
-#### Scenario: AGENTS.md ÓëÊµ¼Ê spec ²»Ò»ÖÂ
-- **WHEN** lint ·¢ÏÖ `9-Meta/AGENTS.md` ÃèÊöµÄÔ¼¶¨Óë `9-Meta/openspec/specs/` ÖĞÒÑ archive µÄ spec ²»Ò»ÖÂ
-- **THEN** ±ØĞëÔÚ lint ±¨¸æÖĞ±ê¼ÇÎª Critical£¬ÒªÇóÍ¬²½
+#### Scenario: AGENTS.md ä¸å®é™… spec ä¸ä¸€è‡´
+- **WHEN** lint å‘ç° `9-Meta/AGENTS.md` æè¿°çš„çº¦å®šä¸ `9-Meta/openspec/specs/` ä¸­å·² archive çš„ spec ä¸ä¸€è‡´
+- **THEN** å¿…é¡»åœ¨ lint æŠ¥å‘Šä¸­æ ‡è®°ä¸º Criticalï¼Œè¦æ±‚åŒæ­¥
 
-#### Scenario: È±ÉÙ±ØÒªĞ¡½Ú
-- **WHEN** AGENTS.md È±ÉÙÉÏÊöÈÎÒ»±ØÒªĞ¡½Ú
-- **THEN** ±ØĞë²¹È«£»ÕâÊÇÑéÊÕ OpenSpec change ¹Ø±ÕµÄÇ°ÖÃÌõ¼ş
+#### Scenario: ç¼ºå°‘å¿…è¦å°èŠ‚
+- **WHEN** AGENTS.md ç¼ºå°‘ä¸Šè¿°ä»»ä¸€å¿…è¦å°èŠ‚
+- **THEN** å¿…é¡»è¡¥å…¨ï¼›è¿™æ˜¯éªŒæ”¶ OpenSpec change å…³é—­çš„å‰ç½®æ¡ä»¶
 
 ---
 
-### Requirement: AGENTS.md ±ØĞë°üº¬Ã÷È·µÄ½ûÖ¹ÊÂÏî
+### Requirement: AGENTS.md å¿…é¡»åŒ…å«æ˜ç¡®çš„ç¦æ­¢äº‹é¡¹
 
 The "What NOT to do" section in AGENTS.md SHALL explicitly list:
 
-- ²»µÃÈÃ¹«¿ªÇøÈÎºÎÎÄ¼ş wikilink/embed/ÒıÓÃ `netease/` ÄÚÈİ
-- ²»µÃÔÚ¹«¿ªÇø³öÏÖ netease ÏîÄ¿´úºÅ¡¢ÄÚ²¿ÏµÍ³Ãû¡¢Í¬ÊÂÕæÃûµÈÃô¸Ğ´Ê£¨²Î¿¼ sensitive-words ÁĞ±í£©
-- ²»µÃÔÚÓÃ»§Î´È·ÈÏÇ°ÅúÁ¿ĞŞ¸Ä ¡İ5 ¸öÎÄ¼ş
-- ²»µÃÔÚ lint ½×¶ÎÉÃ×ÔĞ´ÈëĞŞ¸´
-- ²»µÃÉ¾³ı agent ²»Àí½âÓÃÍ¾µÄÎÄ¼ş
-- ²»µÃÌø¹ı `_index.md` / `_log.md` µÄ¸üĞÂ
-- ²»µÃÔÚ wiki Çø·ÅÔ­Ê¼¶Ô»°£¨ÄÇÊÇ sessions µÄÖ°Ôğ£©
+- ä¸å¾—è®©å…¬å¼€åŒºä»»ä½•æ–‡ä»¶ wikilink/embed/å¼•ç”¨ `netease/` å†…å®¹ï¼ˆçº¢çº¿åªçœ‹è·¯å¾„è¾¹ç•Œï¼Œä¸ç»´æŠ¤æ•æ„Ÿè¯æ¸…å•ï¼‰
+- ä¸å¾—åœ¨ç”¨æˆ·æœªç¡®è®¤å‰æ‰¹é‡ä¿®æ”¹ â‰¥5 ä¸ªæ–‡ä»¶
+- ä¸å¾—åœ¨ lint é˜¶æ®µæ“…è‡ªå†™å…¥ä¿®å¤
+- ä¸å¾—åˆ é™¤ agent ä¸ç†è§£ç”¨é€”çš„æ–‡ä»¶
+- ä¸å¾—è·³è¿‡ `_index.md` / `_log.md` çš„æ›´æ–°
+- ä¸å¾—åœ¨ wiki åŒºæ”¾åŸå§‹å¯¹è¯ï¼ˆé‚£æ˜¯ sessions çš„èŒè´£ï¼‰
 
-#### Scenario: Agent ÊÔÍ¼Ö´ĞĞ½ûÖ¹²Ù×÷
-- **WHEN** agent ÄÚ²¿¾ö²ß¼´½«´¥·¢ÉÏÊöÈÎÒ»½ûÖ¹²Ù×÷
-- **THEN** SHALL Ö÷¶¯Í£ÏÂ²¢Ñ¯ÎÊÓÃ»§£¬²»µÃ¾²Ä¬Ö´ĞĞ
-
----
-
-### Requirement: README.md Óë AGENTS.md ·Ö¹¤
-
-`README.md` (vault root) MUST ÃæÏò **GitHub ·Ã¿ÍºÍ²Ö¿âÖ÷ÈË±¾ÈË**£¬¶ø²»ÊÇ agent¡£`README.md` SHALL ½ö°üº¬ÒÔÏÂÄÚÈİ£¬ÇÒ²»µÃ¸´Êö `AGENTS.md` µÄÏ¸½ÚÔ¼¶¨£¨±ÜÃâË«ÖØÎ¬»¤£©£º
-
-- ²Ö¿â¼ò½é£¨1-2 ¶Î£©
-- ²Ö¿â½á¹¹×ÜÀÀ£¨¶¥¼¶Ä¿Â¼ÁĞ±í + Ò»¾ä»°ËµÃ÷£©
-- Ë½ÓĞÇøËµÃ÷£¨"netease/ ÊÇ¹¤×÷Ë½ÓĞÄ¿Â¼£¬ÒÑÍ¨¹ı .gitignore ÅÅ³ı"£©
-- ÍÆ¼öÈë¿Ú£¨Dashboard.md / `_index.md`£©
-
-ÈÎºÎÖ»Óë agent ĞĞÎªÓĞ¹ØµÄÔ¼¶¨ MUST Ğ´Èë `AGENTS.md`£¬½ûÖ¹Ğ´Èë `README.md`¡£
-
-#### Scenario: ÊÜÖÚ´íÎ»
-- **WHEN** ÓĞÄÚÈİ¼ÈÊÊºÏ README ÓÖÊÊºÏ AGENTS
-- **THEN** ÓÅÏÈ·Å AGENTS.md£¨agent ÊÜÖÚ¸üĞèÒªÑÏ¸ñÓïÒå£©£¬README Ö»·ÅÃæÏò·Ã¿ÍµÄ¸ÅÊö
+#### Scenario: Agent è¯•å›¾æ‰§è¡Œç¦æ­¢æ“ä½œ
+- **WHEN** agent å†…éƒ¨å†³ç­–å³å°†è§¦å‘ä¸Šè¿°ä»»ä¸€ç¦æ­¢æ“ä½œ
+- **THEN** SHALL ä¸»åŠ¨åœä¸‹å¹¶è¯¢é—®ç”¨æˆ·ï¼Œä¸å¾—é™é»˜æ‰§è¡Œ
 
 ---
 
-### Requirement: ±ØĞëÖ÷¶¯Ê¹ÓÃ Obsidian-aware skills ¶ø²»ÊÇÊÖĞ´ÎÄ¼ş
+### Requirement: README.md ä¸ AGENTS.md åˆ†å·¥
 
-Agents operating on this vault MUST ÓÅÏÈÊ¹ÓÃ Obsidian ÉúÌ¬¶ÔÓ¦µÄ×¨ÓÃ skill£¬¶ø²»ÊÇÖ±½ÓĞ´ÎÄ¼ş / Ö±½Óµ÷Í¨ÓÃÎÄ¼ş API¡£ÕâÌõÒªÇó¸²¸Ç vault ÄÚÒ»ÇĞ `.md` / `.canvas` / `.base` µÄ´´½¨¡¢ĞŞ¸Ä¡¢ÒÆ¶¯¡¢É¾³ı£¬ÒÔ¼°¶Ô frontmatter / wikilink / ÊÓÍ¼µÈ Obsidian ÌØĞÔµÄ²Ù×÷¡£
+`README.md` (vault root) MUST é¢å‘ **GitHub è®¿å®¢å’Œä»“åº“ä¸»äººæœ¬äºº**ï¼Œè€Œä¸æ˜¯ agentã€‚`README.md` SHALL ä»…åŒ…å«ä»¥ä¸‹å†…å®¹ï¼Œä¸”ä¸å¾—å¤è¿° `AGENTS.md` çš„ç»†èŠ‚çº¦å®šï¼ˆé¿å…åŒé‡ç»´æŠ¤ï¼‰ï¼š
 
-Ç¿ÖÆÂ·ÓÉ±í£¨agent ±ØĞë°´ÏÂ±íÑ¡Ôñ¹¤¾ß£©£º
+- ä»“åº“ç®€ä»‹ï¼ˆ1-2 æ®µï¼‰
+- ä»“åº“ç»“æ„æ€»è§ˆï¼ˆé¡¶çº§ç›®å½•åˆ—è¡¨ + ä¸€å¥è¯è¯´æ˜ï¼‰
+- ç§æœ‰åŒºè¯´æ˜ï¼ˆ"netease/ æ˜¯å·¥ä½œç§æœ‰ç›®å½•ï¼Œå·²é€šè¿‡ .gitignore æ’é™¤"ï¼‰
+- æ¨èå…¥å£ï¼ˆDashboard.md / `_index.md`ï¼‰
 
-| ²Ù×÷ÒâÍ¼ | ±ØĞëÊ¹ÓÃ | ²»ÔÊĞí |
+ä»»ä½•åªä¸ agent è¡Œä¸ºæœ‰å…³çš„çº¦å®š MUST å†™å…¥ `AGENTS.md`ï¼Œç¦æ­¢å†™å…¥ `README.md`ã€‚
+
+#### Scenario: å—ä¼—é”™ä½
+- **WHEN** æœ‰å†…å®¹æ—¢é€‚åˆ README åˆé€‚åˆ AGENTS
+- **THEN** ä¼˜å…ˆæ”¾ AGENTS.mdï¼ˆagent å—ä¼—æ›´éœ€è¦ä¸¥æ ¼è¯­ä¹‰ï¼‰ï¼ŒREADME åªæ”¾é¢å‘è®¿å®¢çš„æ¦‚è¿°
+
+---
+
+### Requirement: å¿…é¡»ä¸»åŠ¨ä½¿ç”¨ Obsidian-aware skills è€Œä¸æ˜¯æ‰‹å†™æ–‡ä»¶
+
+Agents operating on this vault MUST ä¼˜å…ˆä½¿ç”¨ Obsidian ç”Ÿæ€å¯¹åº”çš„ä¸“ç”¨ skillï¼Œè€Œä¸æ˜¯ç›´æ¥å†™æ–‡ä»¶ / ç›´æ¥è°ƒé€šç”¨æ–‡ä»¶ APIã€‚è¿™æ¡è¦æ±‚è¦†ç›– vault å†…ä¸€åˆ‡ `.md` / `.canvas` / `.base` çš„åˆ›å»ºã€ä¿®æ”¹ã€ç§»åŠ¨ã€åˆ é™¤ï¼Œä»¥åŠå¯¹ frontmatter / wikilink / è§†å›¾ç­‰ Obsidian ç‰¹æ€§çš„æ“ä½œã€‚
+
+å¼ºåˆ¶è·¯ç”±è¡¨ï¼ˆagent å¿…é¡»æŒ‰ä¸‹è¡¨é€‰æ‹©å·¥å…·ï¼‰ï¼š
+
+| æ“ä½œæ„å›¾ | å¿…é¡»ä½¿ç”¨ | ä¸å…è®¸ |
 |---|---|---|
-| ´´½¨ / ¶ÁÈ¡ / ×·¼Ó / ÒÆ¶¯ / É¾³ı vault ÖĞµÄ `.md`¡¢¶Á daily note¡¢ÉèÖÃ property¡¢É¨¶ÏÁ´ / ¹Â¶ù¡¢²é backlinks | **`obsidian-cli` skill**£¨¼´¹Ù·½ `obsidian` ÃüÁî£© | Ö±½Ó `edit_file` Ğ´ĞÂ .md¡¢`mv` / `xcopy` / `git mv` ÒÆ¶¯ .md¡¢×Ô¼ºÔì frontmatter ×Ö·û´® |
-| Ğ´ Obsidian Flavored Markdown£¨wikilink¡¢embed¡¢callout¡¢frontmatter¡¢tag¡¢Ä£°å£©ÕıÎÄ | **`obsidian-markdown` skill** | Æ¾¼ÇÒäÂÒĞ´ Obsidian Óï·¨ |
-| ´´½¨ / ĞŞ¸Ä `.base` ÎÄ¼ş£¨views¡¢filters¡¢formulas£© | **`obsidian-bases` skill** | ÊÖĞ´ base YAML / JSON |
-| ´´½¨ / ĞŞ¸Ä `.canvas` ÎÄ¼ş | **`json-canvas` skill** | ÊÖĞ´ canvas JSON ½Úµã×ø±ê |
+| åˆ›å»º / è¯»å– / è¿½åŠ  / ç§»åŠ¨ / åˆ é™¤ vault ä¸­çš„ `.md`ã€è¯» daily noteã€è®¾ç½® propertyã€æ‰«æ–­é“¾ / å­¤å„¿ã€æŸ¥ backlinks | **`obsidian-cli` skill**ï¼ˆå³å®˜æ–¹ `obsidian` å‘½ä»¤ï¼‰ | ç›´æ¥ `edit_file` å†™æ–° .mdã€`mv` / `xcopy` / `git mv` ç§»åŠ¨ .mdã€è‡ªå·±é€  frontmatter å­—ç¬¦ä¸² |
+| å†™ Obsidian Flavored Markdownï¼ˆwikilinkã€embedã€calloutã€frontmatterã€tagã€æ¨¡æ¿ï¼‰æ­£æ–‡ | **`obsidian-markdown` skill** | å‡­è®°å¿†ä¹±å†™ Obsidian è¯­æ³• |
+| åˆ›å»º / ä¿®æ”¹ `.base` æ–‡ä»¶ï¼ˆviewsã€filtersã€formulasï¼‰ | **`obsidian-bases` skill** | æ‰‹å†™ base YAML / JSON |
+| åˆ›å»º / ä¿®æ”¹ `.canvas` æ–‡ä»¶ | **`json-canvas` skill** | æ‰‹å†™ canvas JSON èŠ‚ç‚¹åæ ‡ |
 
-²Ù×÷´¥·¢Ë³ĞòÔ¼¶¨£º
+æ“ä½œè§¦å‘é¡ºåºçº¦å®šï¼š
 
-1. agent ½Óµ½Ò»¸öÒâÍ¼£¨Èç"°ÑÕâ´Î¶Ô»°¹éµµÎª session"¡¢"´´½¨Ò»¸öĞÂ wiki Ò³"¡¢"ÒÆ¶¯ÕâÅúÎÄ¼ş"£©
-2. ÏÈ¼ì²éÉÏ±í£¬Ê¶±ğ¸ÃÒâÍ¼¹éÊôµÄ skill£»ÈôÓĞ£¬**ÏÈ `use_skill` ¼ÓÔØËü£¬ÔÙÖ´ĞĞ**
-3. skill ¼ÓÔØºó°´ skill µÄÖ¸Ê¾Ñ¡Ôñ¾ßÌå×ÓÃüÁî£¨Èç `obsidian create` / `obsidian move` / `obsidian property:set` µÈ£©
-4. ½öµ±ÉÏ±íÎ´¸²¸Ç£¨Èç¶ÁÈ¡ vault Íâ²¿µÄ .md¡¢´¿ÎÄ±¾¹¤¾ß½Å±¾µÈ£©²Å»ØÂäµ½Í¨ÓÃÎÄ¼ş¹¤¾ß
+1. agent æ¥åˆ°ä¸€ä¸ªæ„å›¾ï¼ˆå¦‚"æŠŠè¿™æ¬¡å¯¹è¯å½’æ¡£ä¸º session"ã€"åˆ›å»ºä¸€ä¸ªæ–° wiki é¡µ"ã€"ç§»åŠ¨è¿™æ‰¹æ–‡ä»¶"ï¼‰
+2. å…ˆæ£€æŸ¥ä¸Šè¡¨ï¼Œè¯†åˆ«è¯¥æ„å›¾å½’å±çš„ skillï¼›è‹¥æœ‰ï¼Œ**å…ˆ `use_skill` åŠ è½½å®ƒï¼Œå†æ‰§è¡Œ**
+3. skill åŠ è½½åæŒ‰ skill çš„æŒ‡ç¤ºé€‰æ‹©å…·ä½“å­å‘½ä»¤ï¼ˆå¦‚ `obsidian create` / `obsidian move` / `obsidian property:set` ç­‰ï¼‰
+4. ä»…å½“ä¸Šè¡¨æœªè¦†ç›–ï¼ˆå¦‚è¯»å– vault å¤–éƒ¨çš„ .mdã€çº¯æ–‡æœ¬å·¥å…·è„šæœ¬ç­‰ï¼‰æ‰å›è½åˆ°é€šç”¨æ–‡ä»¶å·¥å…·
 
-#### Scenario: ´´½¨ĞÂ wiki Ò³Ãæ
-- **WHEN** agent ÒªÔÚ `2-Wiki/<Ö÷Ìâ>/` ÏÂĞÂ½¨Ò»¸öÒ³Ãæ
-- **THEN** SHALL ÏÈ `use_skill obsidian-markdown`£¨È·ÈÏ frontmatter / wikilink / callout Ğ´·¨£©£¬ÔÙ `use_skill obsidian-cli`£¨ÓÃ `obsidian create path=... template=wiki-page` ÂäµØ£©£¬²»µÃÖ±½Ó `edit_file` Ğ´Èë
+#### Scenario: åˆ›å»ºæ–° wiki é¡µé¢
+- **WHEN** agent è¦åœ¨ `2-Wiki/<ä¸»é¢˜>/` ä¸‹æ–°å»ºä¸€ä¸ªé¡µé¢
+- **THEN** SHALL å…ˆ `use_skill obsidian-markdown`ï¼ˆç¡®è®¤ frontmatter / wikilink / callout å†™æ³•ï¼‰ï¼Œå† `use_skill obsidian-cli`ï¼ˆç”¨ `obsidian create path=... template=wiki-page` è½åœ°ï¼‰ï¼Œä¸å¾—ç›´æ¥ `edit_file` å†™å…¥
 
-#### Scenario: ³ÁµíÒ»´Î¶Ô»°Îª session
-- **WHEN** ingest-session Á÷³Ì¿ªÊ¼
-- **THEN** SHALL ÓÃ `obsidian create` + ÏÖ³ÉµÄ `session.md` Ä£°åÉú³ÉÎÄ¼ş£¬¶ø²»ÊÇÊÖ¹¤Æ´½Ó markdown ×Ö·û´®
+#### Scenario: æ²‰æ·€ä¸€æ¬¡å¯¹è¯ä¸º session
+- **WHEN** ingest-session æµç¨‹å¼€å§‹
+- **THEN** SHALL ç”¨ `obsidian create` + ç°æˆçš„ `session.md` æ¨¡æ¿ç”Ÿæˆæ–‡ä»¶ï¼Œè€Œä¸æ˜¯æ‰‹å·¥æ‹¼æ¥ markdown å­—ç¬¦ä¸²
 
-#### Scenario: ÒÆ¶¯ / ÖØÃüÃû vault ÄÚÎÄ¼ş
-- **WHEN** agent ĞèÒªµ÷ÕûÒ»¸ö»ò¶à¸ö .md / .canvas / .base µÄÂ·¾¶»òÎÄ¼şÃû
-- **THEN** SHALL ×ß `obsidian move` / `obsidian rename`£¨²Î¼û design D11 ÁãÊ§Á´Ğ­Òé£©£¬²»µÃÊ¹ÓÃ `mv` / `xcopy` / `git mv` / `edit_file` ÖØĞ´
+#### Scenario: ç§»åŠ¨ / é‡å‘½å vault å†…æ–‡ä»¶
+- **WHEN** agent éœ€è¦è°ƒæ•´ä¸€ä¸ªæˆ–å¤šä¸ª .md / .canvas / .base çš„è·¯å¾„æˆ–æ–‡ä»¶å
+- **THEN** SHALL èµ° `obsidian move` / `obsidian rename`ï¼ˆå‚è§ design D11 é›¶å¤±é“¾åè®®ï¼‰ï¼Œä¸å¾—ä½¿ç”¨ `mv` / `xcopy` / `git mv` / `edit_file` é‡å†™
 
-#### Scenario: ´´½¨ / ±à¼­ .base »ò .canvas ÎÄ¼ş
-- **WHEN** agent ÒªĞÂ½¨Ò»¸ö base ÊÓÍ¼»ò canvas
-- **THEN** SHALL ÏÈ `use_skill obsidian-bases` »ò `use_skill json-canvas`£¬°´ skill Ö¸ÒıÉú³É½á¹¹»¯ÄÚÈİ£»²»µÃÖ±½ÓÆ´ YAML / JSON ×Ö·û´®
+#### Scenario: åˆ›å»º / ç¼–è¾‘ .base æˆ– .canvas æ–‡ä»¶
+- **WHEN** agent è¦æ–°å»ºä¸€ä¸ª base è§†å›¾æˆ– canvas
+- **THEN** SHALL å…ˆ `use_skill obsidian-bases` æˆ– `use_skill json-canvas`ï¼ŒæŒ‰ skill æŒ‡å¼•ç”Ÿæˆç»“æ„åŒ–å†…å®¹ï¼›ä¸å¾—ç›´æ¥æ‹¼ YAML / JSON å­—ç¬¦ä¸²
 
-#### Scenario: skill ²»¿ÉÓÃ»ò CLI Î´¾ÍĞ÷
-- **WHEN** Obsidian app Î´ÔËĞĞ¡¢`obsidian` ÃüÁî²»ÔÚµ±Ç°ÖÕ¶Ë PATH¡¢»ò¶ÔÓ¦ skill Î´×¢²á
-- **THEN** SHALL Ö÷¶¯Í£ÏÂ²¢ÌáÊ¾ÓÃ»§ÏÈ½â¾öÇ°ÖÃ£¨Æô¶¯ Obsidian / ÖØÆôÖÕ¶Ë / ×¢²á skill£©£¬²»µÃÉÃ×Ô½µ¼¶µ½ `edit_file` / `mv`
+#### Scenario: skill ä¸å¯ç”¨æˆ– CLI æœªå°±ç»ª
+- **WHEN** Obsidian app æœªè¿è¡Œã€`obsidian` å‘½ä»¤ä¸åœ¨å½“å‰ç»ˆç«¯ PATHã€æˆ–å¯¹åº” skill æœªæ³¨å†Œ
+- **THEN** SHALL ä¸»åŠ¨åœä¸‹å¹¶æç¤ºç”¨æˆ·å…ˆè§£å†³å‰ç½®ï¼ˆå¯åŠ¨ Obsidian / é‡å¯ç»ˆç«¯ / æ³¨å†Œ skillï¼‰ï¼Œä¸å¾—æ“…è‡ªé™çº§åˆ° `edit_file` / `mv`
 
 ---
 
-### Requirement: AGENTS.md ±ØĞëÁĞ³öµ±Ç° vault ÊÊÓÃµÄ Obsidian skills Çåµ¥
+### Requirement: AGENTS.md å¿…é¡»åˆ—å‡ºå½“å‰ vault é€‚ç”¨çš„ Obsidian skills æ¸…å•
 
 `9-Meta/AGENTS.md` SHALL contain a "Skills the agent should use" section that explicitly enumerates the Obsidian-aware skills available in this environment, with one-line guidance for each. At minimum this section MUST cover:
 
-- `obsidian-cli`£ºËùÓĞ vault ÎÄ¼ş CRUD / ËÑË÷ / Á´½Ó¼ì²é / property ²Ù×÷µÄÈë¿Ú
-- `obsidian-markdown`£ºĞ´ Obsidian Flavored Markdown ÕıÎÄµÄÓï·¨È¨Íş
-- `obsidian-bases`£º²Ù×÷ `.base` ÎÄ¼ş
-- `json-canvas`£º²Ù×÷ `.canvas` ÎÄ¼ş
+- `obsidian-cli`ï¼šæ‰€æœ‰ vault æ–‡ä»¶ CRUD / æœç´¢ / é“¾æ¥æ£€æŸ¥ / property æ“ä½œçš„å…¥å£
+- `obsidian-markdown`ï¼šå†™ Obsidian Flavored Markdown æ­£æ–‡çš„è¯­æ³•æƒå¨
+- `obsidian-bases`ï¼šæ“ä½œ `.base` æ–‡ä»¶
+- `json-canvas`ï¼šæ“ä½œ `.canvas` æ–‡ä»¶
 
-²¢ÇÒ SHALL ÔÚ "What NOT to do" Çø×·¼ÓÒ»Ìõ£º**½ûÖ¹ÈÆ¹ıÉÏÊö skill Ö±½ÓÓÃÍ¨ÓÃÎÄ¼ş¹¤¾ß²Ù×÷ vault ÄÚ .md / .canvas / .base ÎÄ¼ş**¡£
+å¹¶ä¸” SHALL åœ¨ "What NOT to do" åŒºè¿½åŠ ä¸€æ¡ï¼š**ç¦æ­¢ç»•è¿‡ä¸Šè¿° skill ç›´æ¥ç”¨é€šç”¨æ–‡ä»¶å·¥å…·æ“ä½œ vault å†… .md / .canvas / .base æ–‡ä»¶**ã€‚
 
-#### Scenario: ĞÂ skill ¼ÓÈë»òÏÖÓĞ skill Éı¼¶
-- **WHEN** ÓÃ»§Îª±¾»·¾³ĞÂ×¢²áÁËÒ»¸ö Obsidian Ïà¹ØµÄ skill£¬»òÏÖÓĞ skill ÄÜÁ¦·¢Éú±ä»¯
-- **THEN** AGENTS.md µÄ skills Çåµ¥ SHALL Í¬²½¸üĞÂ£»ÕâÊÇÑéÊÕ OpenSpec change ¹Ø±ÕµÄÇ°ÖÃÌõ¼şÖ®Ò»
+#### Scenario: æ–° skill åŠ å…¥æˆ–ç°æœ‰ skill å‡çº§
+- **WHEN** ç”¨æˆ·ä¸ºæœ¬ç¯å¢ƒæ–°æ³¨å†Œäº†ä¸€ä¸ª Obsidian ç›¸å…³çš„ skillï¼Œæˆ–ç°æœ‰ skill èƒ½åŠ›å‘ç”Ÿå˜åŒ–
+- **THEN** AGENTS.md çš„ skills æ¸…å• SHALL åŒæ­¥æ›´æ–°ï¼›è¿™æ˜¯éªŒæ”¶ OpenSpec change å…³é—­çš„å‰ç½®æ¡ä»¶ä¹‹ä¸€
 
-#### Scenario: skill È±Ê§µ«ÈÔÒªÖ´ĞĞ
-- **WHEN** ÉÏÊöÄ³¸ö±Ø±¸ skill ÔÚµ±Ç°»á»°ÖĞÎ´×¢²á£¨agent µ÷ÓÃÊ±±¨´í£©
-- **THEN** SHALL ÌáÊ¾ÓÃ»§"ÏÈ enable / install ¸Ã skill"£¬²»µÃÌø¹ı skill Ö±½ÓÊÖĞ´
+#### Scenario: skill ç¼ºå¤±ä½†ä»è¦æ‰§è¡Œ
+- **WHEN** ä¸Šè¿°æŸä¸ªå¿…å¤‡ skill åœ¨å½“å‰ä¼šè¯ä¸­æœªæ³¨å†Œï¼ˆagent è°ƒç”¨æ—¶æŠ¥é”™ï¼‰
+- **THEN** SHALL æç¤ºç”¨æˆ·"å…ˆ enable / install è¯¥ skill"ï¼Œä¸å¾—è·³è¿‡ skill ç›´æ¥æ‰‹å†™
 
 ---
 
-### Requirement: Tag ÃüÃû×ñÑ­ 9-Meta/TAGS.md ´Ê±í
+### Requirement: Tag å‘½åéµå¾ª 9-Meta/TAGS.md è¯è¡¨
 
-Vault ÄÚÒ»ÇĞ tag µÄÊ¹ÓÃ SHALL ×ñÑ­ `9-Meta/TAGS.md` ÖĞ¶¨ÒåµÄÃüÃû¹æÔò¡¢°×Ãûµ¥¡¢ºìÏßÇåµ¥¡£`9-Meta/TAGS.md` ÊÇ tag ÖÎÀíµÄ**µ¥Ò»È¨ÍşÔ´**£¬¸²¸ÇÒÔÏÂËÄ¸ö·½Ãæ£º
+Vault å†…ä¸€åˆ‡ tag çš„ä½¿ç”¨ SHALL éµå¾ª `9-Meta/TAGS.md` ä¸­å®šä¹‰çš„å‘½åè§„åˆ™ã€ç™½åå•ã€çº¢çº¿æ¸…å•ã€‚`9-Meta/TAGS.md` æ˜¯ tag æ²»ç†çš„**å•ä¸€æƒå¨æº**ï¼Œè¦†ç›–ä»¥ä¸‹å››ä¸ªæ–¹é¢ï¼š
 
-1. **ÃüÃû¹æÔò**£º´óĞ¡Ğ´¡¢Á¬×Ö·û·ç¸ñ£¨kebab-case / camelCase È¡Ò»£©¡¢ÖĞÓ¢ÎÄ»ìÓÃ¹æÔò¡¢Ç¶Ì× tag (`/` ·Ö¸ô) µÄ²ã¼¶Ô¼¶¨
-2. **ºËĞÄ°×Ãûµ¥**£º°´Ñ§¿Æ / ±Ê¼ÇÀàĞÍ / ×´Ì¬·Ö×éÁĞ³öÍÆ¼ö tag£»agent ÔÚ´ò tag Ç° SHALL ÏÈ²é°×Ãûµ¥£¬ÄÜÓÃ°×Ãûµ¥ÄÚµÄ¾Í²»ÒªÔìĞÂ tag
-3. **”9è2 ºìÏßÇåµ¥**£º½ö¿ÉÔÚ `netease/` Ë½ÓĞÇø³öÏÖµÄ tag£¨ÈçÄÚ²¿ÏîÄ¿´úºÅ¡¢Ãô¸Ğ´Ê£©£¬¹«¿ªÇø³öÏÖ = lint Critical
-4. **ÀúÊ·Ôà tag ÇåÀí±í**£ºÁĞ³öÒÑÖªĞèÒªÌæ»» / É¾³ıµÄ tag ¼°ÆäÄ¿±êÖµ£¬×÷Îª³ÖĞøÇåÀíµÄ backlog
+1. **å‘½åè§„åˆ™**ï¼šå¤§å°å†™ã€è¿å­—ç¬¦é£æ ¼ï¼ˆkebab-case / camelCase å–ä¸€ï¼‰ã€ä¸­è‹±æ–‡æ··ç”¨è§„åˆ™ã€åµŒå¥— tag (`/` åˆ†éš”) çš„å±‚çº§çº¦å®š
+2. **æ ¸å¿ƒç™½åå•**ï¼šæŒ‰å­¦ç§‘ / ç¬”è®°ç±»å‹ / çŠ¶æ€åˆ†ç»„åˆ—å‡ºæ¨è tagï¼›agent åœ¨æ‰“ tag å‰ SHALL å…ˆæŸ¥ç™½åå•ï¼Œèƒ½ç”¨ç™½åå•å†…çš„å°±ä¸è¦é€ æ–° tag
+3. **ğŸ”´ çº¢çº¿æ¸…å•**ï¼šä»…å¯åœ¨ `netease/` ç§æœ‰åŒºå‡ºç°çš„ tagï¼ˆå¦‚å†…éƒ¨é¡¹ç›®ä»£å·ã€æ•æ„Ÿè¯ï¼‰ï¼Œå…¬å¼€åŒºå‡ºç° = lint Critical
+4. **å†å²è„ tag æ¸…ç†è¡¨**ï¼šåˆ—å‡ºå·²çŸ¥éœ€è¦æ›¿æ¢ / åˆ é™¤çš„ tag åŠå…¶ç›®æ ‡å€¼ï¼Œä½œä¸ºæŒç»­æ¸…ç†çš„ backlog
 
-`9-Meta/TAGS.md` SHALL ÊÇÒ»¸ö **living document**¡ª¡ªĞÂÔö°×Ãûµ¥ tag ±ØĞë¾­¹ıÓÃ»§È·ÈÏºó×·¼Ó£¬agent ²»µÃ×ÔĞĞÀ©³ä°×Ãûµ¥¡£
+`9-Meta/TAGS.md` SHALL æ˜¯ä¸€ä¸ª **living document**â€”â€”æ–°å¢ç™½åå• tag å¿…é¡»ç»è¿‡ç”¨æˆ·ç¡®è®¤åè¿½åŠ ï¼Œagent ä¸å¾—è‡ªè¡Œæ‰©å……ç™½åå•ã€‚
 
-#### Scenario: agent ×¼±¸¸ø±Ê¼Ç´òĞÂ tag
-- **WHEN** agent ÔÚ´´½¨ / ±à¼­±Ê¼ÇÊ±¿¼ÂÇ¼Ó tag
-- **THEN** SHALL ÏÈ `obsidian read path="9-Meta/TAGS.md"` ²é°×Ãûµ¥£»ÃüÖĞ°×Ãûµ¥ÔòÖ±½ÓÓÃ£»Î´ÃüÖĞ SHALL Í£ÏÂ²¢ÏòÓÃ»§È·ÈÏ£¨"ÊÇ·ñĞÂÔö #xxx µ½°×Ãûµ¥£¿"£©£¬²»µÃÉÃ×ÔÔì tag
+#### Scenario: agent å‡†å¤‡ç»™ç¬”è®°æ‰“æ–° tag
+- **WHEN** agent åœ¨åˆ›å»º / ç¼–è¾‘ç¬”è®°æ—¶è€ƒè™‘åŠ  tag
+- **THEN** SHALL å…ˆ `obsidian read path="9-Meta/TAGS.md"` æŸ¥ç™½åå•ï¼›å‘½ä¸­ç™½åå•åˆ™ç›´æ¥ç”¨ï¼›æœªå‘½ä¸­ SHALL åœä¸‹å¹¶å‘ç”¨æˆ·ç¡®è®¤ï¼ˆ"æ˜¯å¦æ–°å¢ #xxx åˆ°ç™½åå•ï¼Ÿ"ï¼‰ï¼Œä¸å¾—æ“…è‡ªé€  tag
 
-#### Scenario: ¹«¿ªÇøĞ´ÈëºìÏß tag
-- **WHEN** agent ¼´½«ÔÚ¹«¿ªÇøÎÄ¼şĞ´ÈëºìÏßÇåµ¥ÖĞµÄ tag£¨Èç `#arcolab` `#popo`£©
-- **THEN** SHALL Á¢¿ÌÍ£ÏÂ²¢ÌáÊ¾ÓÃ»§"ºìÏßÎ¥·´"£»ÕâÊÇ D9 ¹«Ë½±ß½çµÄÓ²Ô¼Êø
+#### Scenario: å…¬å¼€åŒºå†™å…¥çº¢çº¿ tag
+- **WHEN** agent å³å°†åœ¨å…¬å¼€åŒºæ–‡ä»¶å†™å…¥çº¢çº¿æ¸…å•ä¸­çš„ tagï¼ˆå¦‚ `#arcolab` `#popo`ï¼‰
+- **THEN** SHALL ç«‹åˆ»åœä¸‹å¹¶æç¤ºç”¨æˆ·"çº¢çº¿è¿å"ï¼›è¿™æ˜¯ D9 å…¬ç§è¾¹ç•Œçš„ç¡¬çº¦æŸ
 
-#### Scenario: TAGS.md È±Ê§
-- **WHEN** `9-Meta/TAGS.md` ÉĞ²»´æÔÚ£¨Èç Phase 0 task 1.11 Î´Íê³É£©
-- **THEN** agent ²Ù×÷ tag Ê± SHALL ÏÔÊ¾¾¯¸æ"TAGS.md Î´½¨Á¢£¬tag ÖÎÀí´¦ÓÚÎŞĞò×´Ì¬"£¬²¢ÓÅÏÈÑØÓÃÏÖÓĞ tag¡¢²»ÒıÈëĞÂ tag
+#### Scenario: TAGS.md ç¼ºå¤±
+- **WHEN** `9-Meta/TAGS.md` å°šä¸å­˜åœ¨ï¼ˆå¦‚ Phase 0 task 1.11 æœªå®Œæˆï¼‰
+- **THEN** agent æ“ä½œ tag æ—¶ SHALL æ˜¾ç¤ºè­¦å‘Š"TAGS.md æœªå»ºç«‹ï¼Œtag æ²»ç†å¤„äºæ— åºçŠ¶æ€"ï¼Œå¹¶ä¼˜å…ˆæ²¿ç”¨ç°æœ‰ tagã€ä¸å¼•å…¥æ–° tag

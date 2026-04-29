@@ -1,0 +1,11 @@
+{
+  "eval_id": 2,
+  "eval_name": "single-check",
+  "prompt": "帮我找出 wiki 里所有的断链。",
+  "assertions": [
+    {"id": "single-check-only", "description": "Only ran check 1 (broken wikilinks), not all 12"},
+    {"id": "used-obsidian-unresolved", "description": "Used obsidian unresolved command"},
+    {"id": "listed-all", "description": "Listed all 29 broken links with source and target"},
+    {"id": "no-other-checks", "description": "Did not waste tokens running other checks"}
+  ]
+}

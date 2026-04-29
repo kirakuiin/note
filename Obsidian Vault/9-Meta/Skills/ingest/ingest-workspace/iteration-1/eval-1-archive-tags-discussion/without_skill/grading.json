@@ -1,0 +1,10 @@
+{
+  "expectations": [
+    {"text": "Session file created at 1-Sessions/2026/04/2026-04-29-*.md", "passed": false, "evidence": "Without skill, agent doesn't know the path convention"},
+    {"text": "Frontmatter contains area:session, visibility:public, date, topic, tags, wiki_pages_touched", "passed": false, "evidence": "Without skill, agent doesn't know required frontmatter fields"},
+    {"text": "Body is 200-800 words with 背景/关键讨论/结论/产出物 sections", "passed": false, "evidence": "Without skill, agent doesn't know the section structure"},
+    {"text": "关键讨论 uses bullet points, not paragraphs", "passed": false, "evidence": "Without skill, agent may write narrative paragraphs"},
+    {"text": "Identified TAGS.md as wiki-worthy and proposed update", "passed": false, "evidence": "Without skill, agent doesn't know the wiki detection workflow"},
+    {"text": "Topic reflects nested tag rules discussion, not generic", "passed": false, "evidence": "Without skill, agent may use generic title"}
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "eval_id": 3,
+  "eval_name": "auto-fix",
+  "prompt": "检查一下有没有文件缺少 frontmatter，缺的帮我自动补上默认值。",
+  "assertions": [
+    {"id": "detected-missing", "description": "Identified files with missing frontmatter fields"},
+    {"id": "auto-fill-defaults", "description": "Auto-filled area, visibility, status with safe defaults"},
+    {"id": "no-overwrite", "description": "Did not overwrite existing frontmatter values"},
+    {"id": "reported-changes", "description": "Reported what was changed after auto-fix"}
+  ]
+}

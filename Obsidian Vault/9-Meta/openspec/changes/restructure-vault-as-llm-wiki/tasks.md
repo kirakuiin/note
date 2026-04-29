@@ -1,72 +1,72 @@
-## 1. Phase 0 ¡ª ¹Ç¼ÜÓë°²È«»ùÏß
+## 1. Phase 0 â€” éª¨æ¶ä¸å®‰å…¨åŸºçº¿
 
-- [x] 1.1 **[Ç¨ÒÆÇ°ÖÃ¡¤×è¶ÏÏî]** °²×°/ÆôÓÃ Obsidian ¹Ù·½ CLI£¨²Î¼û design D11£©£ºÉı¼¶ Obsidian ÖÁ 1.12.7+ ¡ú Settings ¡ú General ¡ú ÆôÓÃ Command line interface ¡ú **ĞÂ¿ªÒ»¸öÖÕ¶Ë**£¨ÒÑ´ò¿ªµÄ²»»á¶Áµ½ĞÂ PATH£¬²Î¼û D11 Windows ÏİÚå£©¡ú `obsidian version` ·µ»Ø°æ±¾ºÅ ¡ú `obsidian help move` ÏÔÊ¾ move ×ÓÃüÁî¡£**µ±Ç°×´Ì¬£ºCLI v1.12.7 ÒÑ¾ÍÎ»£¨Â·¾¶ `%LOCALAPPDATA%\Programs\Obsidian\Obsidian.com`£©£¬ºóĞø»á»°Îñ±ØĞÂ¿ªÖÕ¶ËºóÔÙÖ´ĞĞ¡£**
-- [x] 1.2 **[Ç¨ÒÆÇ°ÖÃ]** ÑéÖ¤ÁãÊ§Á´¹Ø¼üÅäÖÃ£º`obsidian eval code="app.vault.config.alwaysUpdateLinks"` ·µ»Ø `true`£»¼ÇÂ¼ `newLinkFormat` / `useMarkdownLinks` µ±Ç°Öµ£¨ÓÃÓÚºóĞøÇ¨ÒÆ²Î¿¼£©¡£**µ±Ç°×´Ì¬£º`alwaysUpdateLinks=true`£¬`newLinkFormat`/`useMarkdownLinks` Î´ÏÔÊ½ÉèÖÃ£¨¼´Ä¬ÈÏ shortest + wikilink£©£¬ÍêÃÀÊÊÅäÇ¨ÒÆ¡£Vault ÄÚ markdown ÎÄ¼ş×ÜÊı 699¡£**
-- [ ] 1.3 **[Ç¨ÒÆÇ°ÖÃ]** Í¬Ãû³åÍ»É¨Ãè£ºĞ´Ò»´ÎĞÔ½Å±¾/ÃüÁîÁĞ³ö vault ÄÚËùÓĞ .md Í¬ÃûÖØ¸´£¨Èç `¶ÁÊé±Ê¼Ç/Éè¼ÆÄ£Ê½/×´Ì¬Ä£Ê½.md` vs `¶ÁÊé±Ê¼Ç/ÓÎÏ·±à³ÌÄ£Ê½/×´Ì¬Ä£Ê½.md`£©£¬Êä³ö³åÍ»Çåµ¥ ¡ú ÔÚ design Open Questions ÖĞ¼ÇÂ¼Ô¤°¸£¨ºÏ²¢/¸ÄÃû£©
-- [ ] 1.4 **[Ç¨ÒÆÇ°ÖÃ]** Â·¾¶°ó¶¨É¨Ãè£º`grep 'FROM "' *.md` Êä³öËùÓĞ Dataview Â·¾¶¹ıÂËÎ»ÖÃ£¨ÒÑÖª ¡İ4 ´¦£©£»`grep -l '\.canvas$'` ÁĞ³öËùÓĞ canvas ÎÄ¼ş£¨ÒÑÖª 1 ¸ö£©£»»ã×Üµ½ `9-Meta/openspec/changes/restructure-vault-as-llm-wiki/migration-notes.md`£¨migration-notes.md ÒÑ´´½¨Îª living ÎÄµµ£¬É¨Ãè½á¹û´ıÌîÈë£©
-- [ ] 1.5 ÔÚ vault ¸ùÄ¿Â¼´´½¨ĞÂ¶¥¼¶Ä¿Â¼¹Ç¼Ü£º`0-Inbox/`¡¢`1-Sessions/`¡¢`2-Wiki/`¡¢`3-Projects/`¡¢`4-Journal/`¡¢`5-Life/`¡¢`6-Tools/`£¬Ã¿¸öÄ¿Â¼·ÅÒ»¸ö `_index.md` Õ¼Î»£¨º¬ frontmatter£©
-- [ ] 1.6 È·ÈÏ `9-Meta/` ÒÑ´æÔÚ²¢·ÅºÃ `openspec/`£»ÔÚ `9-Meta/` ÏÂ²¹½¨ `Skills/`¡¢`Scripts/`¡¢`Templates/` Èı¸ö×ÓÄ¿Â¼£¨¸÷·ÅÒ»¸ö `_index.md` Õ¼Î»£©
-- [ ] 1.7 ÔÚ `2-Wiki/` ÏÂ°´ spec `vault-structure` µÄ"×ÓÄ¿Â¼ÃüÃûÔ¼¶¨" requirement ´´½¨¶ş¼¶Ö÷ÌâÄ¿Â¼¹Ç¼Ü£¨°´Ñ§¿Æ·Ö£©£¬³õÊ¼¼¯ 6 ¸ö£º`±à³ÌÓïÑÔ/`¡¢`ÓÎÏ·¿ª·¢/`¡¢`Ëã·¨ÓëÊı¾İ½á¹¹/`¡¢`AIÓëAgent/`¡¢`Ó¢Óï/`¡¢`·½·¨ÂÛ/`£¬Ã¿¸ö·Å `_index.md` + `_MOC.md`¡£`Èí¼ş¹¤³Ì/`¡¢`¼ÆËã»ú»ù´¡/` µÈÔİ²»Ô¤½¨£¬Ç¨ÒÆ¹ı³ÌÖĞÈçÓĞÄÚÈİÔÙ¿ªĞÂ¶ş¼¶Ä¿Â¼
-- [ ] 1.8 Ğ£Ñé `.gitignore`£¨²Ö¿â¸ù£©È·ÈÏ `netease/` ÒÑÔÚÅÅ³ıÁĞ±í£¬±ØÒªÊ±²¹Ò»Ìõ£»ÔÚ `9-Meta/AGENTS.md` ²İ¸åÀïĞ´Èë"ºìÏß"¶ÎÂäÒıÓÃ `vault-structure` spec
-- [ ] 1.9 Ğ£¶Ô/ÖØĞ´ vault ¸ù `README.md`£º½ö±£Áô·Ã¿ÍÊÓ½ÇµÄ¸ÅÊö¡¢Ä¿Â¼ËÙÀÀ¡¢Ë½ÓĞÇøËµÃ÷¡¢Èë¿ÚÖ¸Òı£¨ÒÀ¾İ `agent-schema` spec µÄ README/AGENTS ·Ö¹¤ÒªÇó£©
-- [ ] 1.10 ±àĞ´ `9-Meta/AGENTS.md` ÍêÕûµÚÒ»°æ£¬¸²¸Ç `agent-schema/spec.md` ÁĞ³öµÄ 10 ¸ö±Ø±¸Ğ¡½Ú¡£**ÒÑÓĞ²İ¸å**£º`9-Meta/openspec/changes/restructure-vault-as-llm-wiki/agents-md.draft.md`£¨Ç°ÆÚÎªÀäÆô¶¯ÑéÖ¤¶øĞ´µÄ bootstrap °æ±¾£¬171 ĞĞ£¬º¬½ÓÊÖĞ­Òé / ºìÏß / Ç¿ÖÆ skill Â·ÓÉ±í / ²Ö¿â½á¹¹¡£task 1.10 Ö´ĞĞÊ±Ö±½Ó»ùÓÚ´Ë²İ¸åÀ©³äÖÁ spec ÒªÇóµÄ 10 ¸öĞ¡½Ú£¬È»ºóÓÃ `obsidian move` Âäµ½ `9-Meta/AGENTS.md`£¬²¢É¾³ı²İ¸å£©
-- [ ] 1.11 ±àĞ´ `9-Meta/TAGS.md` ³õ°æ´Ê±í£¨»ùÓÚÏÖÓĞ `Tags/` Ä¿Â¼É¨ÃèÕûÀí£©
-- [x] 1.12 ÔÚ git ´ò tag `pre-phase-1`£¨»Ø¹öÃªµã£©¡£**ÒÑ´ò£ºcommit `77646db` + tag `pre-phase-1`**
+- [x] 1.1 **[è¿ç§»å‰ç½®Â·é˜»æ–­é¡¹]** å®‰è£…/å¯ç”¨ Obsidian å®˜æ–¹ CLIï¼ˆå‚è§ design D11ï¼‰ï¼šå‡çº§ Obsidian è‡³ 1.12.7+ â†’ Settings â†’ General â†’ å¯ç”¨ Command line interface â†’ **æ–°å¼€ä¸€ä¸ªç»ˆç«¯**ï¼ˆå·²æ‰“å¼€çš„ä¸ä¼šè¯»åˆ°æ–° PATHï¼Œå‚è§ D11 Windows é™·é˜±ï¼‰â†’ `obsidian version` è¿”å›ç‰ˆæœ¬å· â†’ `obsidian help move` æ˜¾ç¤º move å­å‘½ä»¤ã€‚**å½“å‰çŠ¶æ€ï¼šCLI v1.12.7 å·²å°±ä½ï¼ˆè·¯å¾„ `%LOCALAPPDATA%\Programs\Obsidian\Obsidian.com`ï¼‰ï¼Œåç»­ä¼šè¯åŠ¡å¿…æ–°å¼€ç»ˆç«¯åå†æ‰§è¡Œã€‚**
+- [x] 1.2 **[è¿ç§»å‰ç½®]** éªŒè¯é›¶å¤±é“¾å…³é”®é…ç½®ï¼š`obsidian eval code="app.vault.config.alwaysUpdateLinks"` è¿”å› `true`ï¼›è®°å½• `newLinkFormat` / `useMarkdownLinks` å½“å‰å€¼ï¼ˆç”¨äºåç»­è¿ç§»å‚è€ƒï¼‰ã€‚**å½“å‰çŠ¶æ€ï¼š`alwaysUpdateLinks=true`ï¼Œ`newLinkFormat`/`useMarkdownLinks` æœªæ˜¾å¼è®¾ç½®ï¼ˆå³é»˜è®¤ shortest + wikilinkï¼‰ï¼Œå®Œç¾é€‚é…è¿ç§»ã€‚Vault å†… markdown æ–‡ä»¶æ€»æ•° 699ã€‚**
+- [x] 1.3 **[è¿ç§»å‰ç½®]** åŒåå†²çªæ‰«æï¼šå†™ä¸€æ¬¡æ€§è„šæœ¬/å‘½ä»¤åˆ—å‡º vault å†…æ‰€æœ‰ .md åŒåé‡å¤ï¼ˆå¦‚ `è¯»ä¹¦ç¬”è®°/è®¾è®¡æ¨¡å¼/çŠ¶æ€æ¨¡å¼.md` vs `è¯»ä¹¦ç¬”è®°/æ¸¸æˆç¼–ç¨‹æ¨¡å¼/çŠ¶æ€æ¨¡å¼.md`ï¼‰ï¼Œè¾“å‡ºå†²çªæ¸…å• â†’ åœ¨ design Open Questions ä¸­è®°å½•é¢„æ¡ˆï¼ˆåˆå¹¶/æ”¹åï¼‰ã€‚**å®Œæˆï¼š9 ä¸ª basename å‘½ä¸­ã€30 æ–‡ä»¶ï¼Œå…¶ä¸­çœŸå†²çª 6 ä¸ªï¼ˆå…¨åœ¨ `è¯»ä¹¦ç¬”è®°/æ¸¸æˆç¼–ç¨‹æ¨¡å¼/`ï¼‰ï¼Œå…¶ä½™ 24 ä¸ªä¸º SKILL.md/spec.md/README.md çš„ä¼ªå†²çªã€‚é¢„æ¡ˆè§ migration-notes.md Â§4.1ï¼Œtask 3.1 å®æ–½ã€‚**
+- [x] 1.4 **[è¿ç§»å‰ç½®]** è·¯å¾„ç»‘å®šæ‰«æï¼š`grep 'FROM "' *.md` è¾“å‡ºæ‰€æœ‰ Dataview è·¯å¾„è¿‡æ»¤ä½ç½®ï¼ˆå·²çŸ¥ â‰¥4 å¤„ï¼‰ï¼›`grep -l '\.canvas$'` åˆ—å‡ºæ‰€æœ‰ canvas æ–‡ä»¶ï¼ˆå·²çŸ¥ 1 ä¸ªï¼‰ï¼›æ±‡æ€»åˆ° `9-Meta/openspec/changes/restructure-vault-as-llm-wiki/migration-notes.md`ï¼ˆmigration-notes.md å·²åˆ›å»ºä¸º living æ–‡æ¡£ï¼Œæ‰«æç»“æœå¾…å¡«å…¥ï¼‰ã€‚**å®Œæˆï¼šå®æµ‹ Dataview FROM 6 å¤„ï¼ˆdesign ä½ä¼° 2 å¤„ï¼‰ã€canvas 5 ä¸ªï¼ˆdesign ä½ä¼° 4 ä¸ªï¼‰ã€base 3 ä¸ªå« 1 å¤„è·¯å¾„ç»‘å®šï¼ˆdesign è¯¯åˆ¤ä¸ºæ— ï¼‰ã€‚è¯¦è§ migration-notes.md Â§4.2ï¼Œtask 3.10 å¾…æŒ‰è¡¨é€æ¡ä¿®æ­£ã€‚**
+- [x] 1.5 åœ¨ vault æ ¹ç›®å½•åˆ›å»ºæ–°é¡¶çº§ç›®å½•éª¨æ¶ï¼š`0-Inbox/`ã€`1-Sessions/`ã€`2-Wiki/`ã€`3-Projects/`ã€`4-Journal/`ã€`5-Life/`ã€`6-Tools/`ï¼Œæ¯ä¸ªç›®å½•æ”¾ä¸€ä¸ª `_index.md` å ä½ï¼ˆå« frontmatterï¼‰ã€‚**å®Œæˆï¼š7 ä¸ªç›®å½• + 7 ä¸ª `_index.md` å…¨éƒ¨ç”¨ `obsidian create` è½ç›˜ã€‚`2-Wiki/_index.md` æŒ‰ wiki-conventions Â§_index.md spec å†™ä¸ºå†…å®¹ç›®å½•å…¥å£ï¼ˆå·²åˆ— 6 ä¸ªé¢†åŸŸ wikilinkï¼‰ï¼›å…¶ä»– 6 ä¸ª _index.md ä¸ºå ä½+`area`+`visibility:public`+`status:draft` æ¡†æ¶ã€‚**
+- [x] 1.6 ç¡®è®¤ `9-Meta/` å·²å­˜åœ¨å¹¶æ”¾å¥½ `openspec/`ï¼›åœ¨ `9-Meta/` ä¸‹è¡¥å»º `Skills/`ã€`Scripts/`ã€`Templates/` ä¸‰ä¸ªå­ç›®å½•ï¼ˆå„æ”¾ä¸€ä¸ª `_index.md` å ä½ï¼‰ã€‚**å®Œæˆï¼š3 ä¸ªç›®å½• + 3 ä¸ª `_index.md`ï¼Œfrontmatter ç»Ÿä¸€ area=meta / visibility=public / status=draftã€‚**
+- [x] 1.7 åœ¨ `2-Wiki/` ä¸‹æŒ‰ spec `vault-structure` çš„"å­ç›®å½•å‘½åçº¦å®š" requirement åˆ›å»ºäºŒçº§ä¸»é¢˜ç›®å½•éª¨æ¶ï¼ˆæŒ‰å­¦ç§‘åˆ†ï¼‰ï¼Œåˆå§‹é›† 6 ä¸ªï¼š`ç¼–ç¨‹è¯­è¨€/`ã€`æ¸¸æˆå¼€å‘/`ã€`ç®—æ³•ä¸æ•°æ®ç»“æ„/`ã€`AIä¸Agent/`ã€`è‹±è¯­/`ã€`æ–¹æ³•è®º/`ï¼Œæ¯ä¸ªæ”¾ `_index.md` + `_MOC.md`ã€‚`è½¯ä»¶å·¥ç¨‹/`ã€`è®¡ç®—æœºåŸºç¡€/` ç­‰æš‚ä¸é¢„å»ºï¼Œè¿ç§»è¿‡ç¨‹ä¸­å¦‚æœ‰å†…å®¹å†å¼€æ–°äºŒçº§ç›®å½•ã€‚**å®Œæˆï¼š6 é¢†åŸŸ Ã— 2 æ–‡ä»¶ = 12 ä¸ª .md å…¨éƒ¨è½ç›˜ï¼Œfrontmatter å« `tags: [<é¢†åŸŸ>]` + area=knowledge + visibility=public + status=draftã€‚MOC å«ä¸»é¢˜åˆ†ç»„ / å­¦ä¹ è·¯å¾„å ä½ + åŒå‘ wikilink åˆ°åŒçº§ _index ä¸ 2-Wiki/_indexã€‚`obsidian unresolved` éªŒè¯ï¼š22 ä¸ªæ–° .md è½ç›˜åæœªå¼•å…¥æ–°æ–­é“¾ï¼ˆbaseline 31 â†’ å½“å‰ 29ï¼Œéƒ¨åˆ†è€æ–­é“¾åè¢«è‡ªç„¶è§£æï¼‰ã€‚**
+- [x] 1.8 æ ¡éªŒ `.gitignore`ï¼ˆä»“åº“æ ¹ï¼‰ç¡®è®¤ `netease/` å·²åœ¨æ’é™¤åˆ—è¡¨ï¼Œå¿…è¦æ—¶è¡¥ä¸€æ¡ï¼›åœ¨ `9-Meta/AGENTS.md` è‰ç¨¿é‡Œå†™å…¥"çº¢çº¿"æ®µè½å¼•ç”¨ `vault-structure` specã€‚**å®Œæˆï¼šå®æµ‹ vault æ˜¯ git ä»“åº“ `c:\Users\wangzhuowei\note\` çš„å­ç›®å½•ï¼Œä»“åº“æ ¹ `.gitignore` å·²æ­£ç¡®å« `Obsidian Vault/netease/` æ’é™¤ï¼ˆç”šè‡³å†—ä½™ä¸¤æ¡ï¼‰âœ“ æ— éœ€è¡¥ï¼›`agents-md.draft.md` å·²å«å®Œæ•´ 5 æ¡çº¢çº¿æ®µï¼Œæœ¬æ¬¡ç”¨ `obsidian append` åœ¨æ–‡æœ«è¿½åŠ ã€ŒğŸ“ çº¢çº¿è§„åˆ™çš„ spec å‡ºå¤„ã€è¡¥æ³¨ï¼ŒæŠŠ 5 æ¡çº¢çº¿æ˜¾å¼æº¯æºåˆ° `vault-structure` / `agent-schema` ä¸¤ä¸ª spec çš„å…·ä½“ Requirement / Scenarioï¼Œä¾› task 1.10 ç»ˆç¨¿è¿ç§»å¼•ç”¨ã€‚**
+- [x] 1.9 æ ¡å¯¹/é‡å†™ ~~vault æ ¹~~ **git ä»“åº“æ ¹** `README.md`ï¼šä»…ä¿ç•™è®¿å®¢è§†è§’çš„æ¦‚è¿°ã€ç›®å½•é€Ÿè§ˆã€ç§æœ‰åŒºè¯´æ˜ã€å…¥å£æŒ‡å¼•ï¼ˆä¾æ® `agent-schema` spec çš„ README/AGENTS åˆ†å·¥è¦æ±‚ï¼‰ã€‚**å®Œæˆï¼šå®æµ‹å‘ç° vaultï¼ˆ`Obsidian Vault/`ï¼‰æ˜¯ git ä»“åº“ï¼ˆ`c:\Users\wangzhuowei\note\`ï¼‰çš„å­ç›®å½•ï¼ŒGitHub æ¸²æŸ“çš„æ˜¯ä»“åº“æ ¹çš„ README.md è€Œé vault æ ¹çš„ï¼ŒåŸ spec çš„"vault æ ¹ README.md"æè¿°å­˜åœ¨ç‰©ç†ä½ç½®æ¼æ´ã€‚æœ¬æ¬¡å†³ç­–ï¼ˆç”¨æˆ·ç¡®è®¤æ–¹æ¡ˆ Aï¼‰ï¼šâ‘  é‡å†™ä»“åº“æ ¹ README.mdï¼ˆä»"è®°å½•ç¬”è®°"ä¸¤å­—æ‰©ä¸ºå®Œæ•´è®¿å®¢æŒ‡å¼•ï¼Œå« LLM Wiki æ¨¡å¼ä»‹ç»ã€é¡¶çº§ç›®å½•é€Ÿè§ˆã€ç§æœ‰åŒºè¯´æ˜ã€å…¥å£æŒ‡å¼•ã€OpenSpec å·¥ä½œæµçº¦å®šï¼‰ï¼›â‘¡ åŒæ­¥ä¿®è®¢ `vault-structure` spec Â§"æ ¹ç›®å½•å…¥å£æ–‡ä»¶"ï¼ŒæŠŠ README.md çš„ä½ç½®è¯´æ˜ä»"vault æ ¹"æ”¹ä¸º"git ä»“åº“æ ¹ï¼ˆGitHub å®é™…æ¸²æŸ“ä½ç½®ï¼‰"ï¼Œå¹¶åŠ æ¶æ„è¯´æ˜æ®µï¼›â‘¢ vault æ ¹**ä¸**é‡å¤å»º README.mdã€‚**
+- [x] 1.10 ç¼–å†™ `9-Meta/AGENTS.md` å®Œæ•´ç¬¬ä¸€ç‰ˆï¼Œè¦†ç›– `agent-schema/spec.md` åˆ—å‡ºçš„ 10 ä¸ªå¿…å¤‡å°èŠ‚ã€‚**å®Œæˆ**ï¼šâ‘  ç”±äºåŸ `agents-md.draft.md` åœ¨å†™å°±æ—¶è¢« `write` å·¥å…·æŒ‰ GBK è½ç›˜ + åç»­ `obsidian append` å åŠ  UTF-8 å·²å½»åº•ä¹±ç ï¼Œæœ¬æ¬¡å†³ç­–æ”¾å¼ƒæ‰©å†™ draftï¼Œç›´æ¥åŸºäº `agent-schema` spec çš„ 10 èŠ‚ç¡¬çº¦æŸ + ç”¨æˆ·æ‹æ¿ï¼ˆå®Œæ•´è‡ªåŒ…å«ã€ä¸å¼•ç”¨ OpenSpec specã€åˆ—å…¨éƒ¨å®é™… skillã€çº¢çº¿åªçœ‹è·¯å¾„è¾¹ç•Œï¼‰é‡å†™ `9-Meta/AGENTS.md` ç»ˆç¨¿ï¼ˆ320 è¡Œ / 15369 å­—èŠ‚ / UTF-8 æ—  BOMï¼Œå«å¼ºåˆ¶ skill è·¯ç”±è¡¨ + skill ç¼ºå¤±è¡Œä¸ºï¼‰ã€‚â‘¡ åŒæ­¥ä¿®è®¢ `agent-schema/spec.md` Â§"AGENTS.md å¿…é¡»åŒ…å«æ˜ç¡®çš„ç¦æ­¢äº‹é¡¹"ï¼Œåˆ é™¤"netease é¡¹ç›®ä»£å· / å†…éƒ¨ç³»ç»Ÿå / åŒäº‹çœŸåç­‰æ•æ„Ÿè¯"æ¡æ¬¾ï¼ˆçº¢çº¿é™çº§ä¸ºå•ä¸€è·¯å¾„è¾¹ç•Œï¼‰ã€‚â‘¢ `agents-md.draft.md` å·²ç”¨ `obsidian delete` åˆ é™¤å¹¶æ–°å»ºä¸ºä¸€è¡Œ superseded-pointer æŒ‡å‘ç»ˆç¨¿ã€‚â‘£ **é¡ºæ‰‹è¡¥æ•‘**ï¼šå‘ç° `9-Meta/openspec/` ä¸‹ 12 ä¸ª .md ä¸­ 11 ä¸ªè¢« `write` å·¥å…·æŒ‰ GBK è½ç›˜ï¼Œå…¨éƒ¨ç”¨ `9-Meta/Scripts/convert_encoding.py` ä¸€é”®è½¬ UTF-8ï¼ˆç”¨æˆ·æä¾›çš„å·¥å…·ï¼‰ã€‚â‘¤ **æ²‰æ·€ç»™ç»§ä»» agent**ï¼š`migration-notes.md` Â§1 æ–°å¢"ç¼–ç é™·é˜±"å°èŠ‚ï¼Œè¯¦è¿°ä¸‰ä¸ªè¿ç¯å‘ï¼ˆ`write` å·¥å…·æŒ‰ ANSI è½ç›˜ / `obsidian content=` é•¿å­—ç¬¦ä¸²æ’ JSON è§£æ / PowerShell stdout è½¬ç ï¼‰åŠç»•å¼€æ–¹æ¡ˆï¼Œå«é€ŸæŸ¥è¡¨ã€‚è½åœ°å·¥è‰ºï¼š`write` ä¸´æ—¶æ–‡ä»¶ â†’ `convert_encoding.py` â†’ PowerShell `WriteAllBytes` byte-perfect æ‹·è´è‡³ vaultã€‚
+- [x] 1.11 ç¼–å†™ `9-Meta/TAGS.md` åˆç‰ˆè¯è¡¨ï¼ˆåŸºäº `obsidian tags` å…¨é‡æ‰«æ 100 ä¸ª tag æ•´ç†ï¼‰ã€‚**å®Œæˆ**ï¼šâ‘  ä¾¦å¯Ÿâ€”â€”`obsidian tags sort=count counts` å…¨é‡æ‹‰å– + é«˜é¢‘ tag è¯­ä¹‰ç¡®è®¤ï¼ˆ`#reference` 200 æ¬¡ = æ³›æ ‡è®°ï¼Œ`#language` 111 æ¬¡ = è‹±è¯­è¯­æ³•ï¼‰ï¼›â‘¡ ç”¨æˆ·å†³ç­–â€”â€”kebab-case + ä¸­æ–‡é¢†åŸŸ tagã€ç²¾ç®€æœ€å°æœ‰æ•ˆé›†ï¼ˆ20 ä¸ªç™½åå• tagï¼‰ã€ä¿ç•™çº¢çº¿æ¸…å•ç”¨äºåç»­æ¸…ç†ï¼›â‘¢ è½åœ°â€”â€”`obsidian create` å ä½ â†’ `write` ä¸´æ—¶æ–‡ä»¶ â†’ `convert_encoding.py` è½¬ UTF-8 â†’ PS `WriteAllBytes` byte-copy è¦†å†™ â†’ UTF-8 strict éªŒè¯é€šè¿‡ â†’ `obsidian unresolved` 29 æ¡ baseline ä¸å˜ã€‚TAGS.md å« 6 èŠ‚ï¼šå‘½åè§„åˆ™ / æ ¸å¿ƒç™½åå•ï¼ˆ6 é¢†åŸŸ + 5 ç±»å‹ + 4 çŠ¶æ€ + 4 æ¥æº + 1 å·¥å…·ï¼‰/ çº¢çº¿æ¸…å•ï¼ˆ4 ç±» + åµŒå¥—å‰ç¼€åŒ¹é…ï¼‰/ å†å²è„ tag æ¸…ç†è¡¨ï¼ˆ35 æ¡ï¼‰/ æ–°å¢æµç¨‹ / ç»´æŠ¤è®°å½•ã€‚`#interview`(7) å’Œ `#OpenSpec`(8) æ ‡è®°ä¸ºå¾…å®šï¼Œç•™ç»™ Phase 3 å¤„ç†ã€‚
+- [x] 1.12 åœ¨ git æ‰“ tag `pre-phase-1`ï¼ˆå›æ»šé”šç‚¹ï¼‰ã€‚**å·²æ‰“ï¼šcommit `77646db` + tag `pre-phase-1`**
 
-> **2026-04-29 ĞŞ¶©¼ÇÂ¼**£ºÔ­ task 1.10a ´´½¨µÄ¸ùÄ¿Â¼ bootstrap `AGENTS.md` ÒÑÒÆ³ı¡ª¡ª¾­ÌÖÂÛÈ·ÈÏÕâÎ¥·´ spec µÄ"¸ùÄ¿Â¼Èë¿ÚÎÄ¼ş = Dashboard.md + README.md"µ¥Ò»ÕæÀíÔ´Ô­Ôò£¬ÇÒ»á»°ÇĞ»»ÓÉÓÃ»§ÈË¹¤Ö¸Òı×ãÒÔ¸²¸ÇÀäÆô¶¯ĞèÇó£¨YAGNI£©¡£bootstrap ÄÚÈİÒÑÓÃ `obsidian move` Ç¨ÖÁ `agents-md.draft.md` ×÷Îª task 1.10 µÄÊµÊ©²İ¸å¡£±¾´ÎÒÆ¶¯Í¬Ê±ÊµÕ½ÑéÖ¤ÁË D11 ÁãÊ§Á´Ğ­Òé£¨unresolved baseline 31 ¡ú 31£¬0 ĞÂÔö¶ÏÁ´£©¡£
+> **2026-04-29 ä¿®è®¢è®°å½•**ï¼šåŸ task 1.10a åˆ›å»ºçš„æ ¹ç›®å½• bootstrap `AGENTS.md` å·²ç§»é™¤â€”â€”ç»è®¨è®ºç¡®è®¤è¿™è¿å spec çš„"æ ¹ç›®å½•å…¥å£æ–‡ä»¶ = Dashboard.md + README.md"å•ä¸€çœŸç†æºåŸåˆ™ï¼Œä¸”ä¼šè¯åˆ‡æ¢ç”±ç”¨æˆ·äººå·¥æŒ‡å¼•è¶³ä»¥è¦†ç›–å†·å¯åŠ¨éœ€æ±‚ï¼ˆYAGNIï¼‰ã€‚bootstrap å†…å®¹å·²ç”¨ `obsidian move` è¿è‡³ `agents-md.draft.md` ä½œä¸º task 1.10 çš„å®æ–½è‰ç¨¿ã€‚æœ¬æ¬¡ç§»åŠ¨åŒæ—¶å®æˆ˜éªŒè¯äº† D11 é›¶å¤±é“¾åè®®ï¼ˆunresolved baseline 31 â†’ 31ï¼Œ0 æ–°å¢æ–­é“¾ï¼‰ã€‚
 
-## 2. Phase 1 ¡ª ºËĞÄ agent ×Ê²ú
+## 2. Phase 1 â€” æ ¸å¿ƒ agent èµ„äº§
 
-- [ ] 2.1 ÔÚ `9-Meta/Skills/` ´´½¨ 4 ¸öĞÂ skill Ä¿Â¼Óë `SKILL.md`£º`ingest-session`¡¢`ingest-document`¡¢`query-wiki`¡¢`lint-wiki`£¨ÄÚÈİ×ñÑ­¶ÔÓ¦ spec£©
-- [ ] 2.2 ÔÚ `9-Meta/Templates/` Ôö²¹Ä£°å£º`session.md`¡¢`wiki-page.md`¡¢`project.md`¡¢`daily.md`¡¢`MOC.md`¡¢`index.md`¡¢`log.md`£¨frontmatter ×Ö¶Î¶ÔÆë `note-frontmatter` spec£©
-- [ ] 2.3 ÔÚ `9-Meta/Scripts/maintenance/` Ìí¼Ó Python ½Å±¾¹Ç¼Ü£º`scan_frontmatter.py`¡¢`check_links.py`¡¢`check_visibility.py`£¨±ê×¼¿âÊµÏÖ£¬PyYAML ¿ÉÑ¡£©
-- [ ] 2.4 Ğ´Ò»·İ `Dashboard.md`£¨vault ¸ù£©Ìæ´ú¾ÉµÄ¡¸ÎÒµÄ±Ê¼Ç±¾.md¡¹£ºº¬×î½ü sessions¡¢»îÔ¾ projects¡¢´ı°ì lint¡¢ÖªÊ¶µØÍ¼Èë¿Ú
+- [x] 2.1 åœ¨ `9-Meta/Skills/` åˆ›å»º skill ç›®å½•ä¸ `SKILL.md`ã€‚**å®Œæˆ**ï¼šæŒ‰ç”¨æˆ·å†³ç­–å°† `ingest-session` + `ingest-document` åˆå¹¶ä¸ºå•ä¸€ `ingest` skillï¼ˆ5 é˜¶æ®µæµç¨‹ï¼šç¡®å®šèŒƒå›´ â†’ å†™ session â†’ æ£€æµ‹ wiki ä»·å€¼ â†’ ææ¡ˆ wiki æ›´æ–° â†’ æ—¥å¿—éªŒè¯ï¼‰ï¼Œ`query-wiki`ï¼ˆ4 é˜¶æ®µï¼šç¡®å®šèŒƒå›´ â†’ æœç´¢è¯»å– â†’ ç»¼åˆå›ç­” â†’ è¯„ä¼°å½’æ¡£ä»·å€¼ï¼‰ï¼Œ`lint-wiki`ï¼ˆ12 é¡¹æ£€æŸ¥ï¼ŒæŒ‰ Critical/Warning/Suggestion åˆ†çº§ï¼Œä»… frontmatter é»˜è®¤å€¼å¯è‡ªåŠ¨ä¿®å¤ï¼‰ã€‚å…¨éƒ¨ 3 ä¸ª skill å‡é€šè¿‡ skill-creator å®Œæ•´æµ‹è¯•æµç¨‹ï¼ˆingest 16/16ã€query-wiki 14/14ã€lint-wiki 14/14ï¼‰ï¼Œå‡å« obsidian-markdown è¯­æ³•çº¦æŸã€‚
+- [x] 2.2 åœ¨ `9-Meta/Templates/` å¢è¡¥æ¨¡æ¿ï¼š`session.md`ã€`wiki-page.md`ã€`project.md`ã€`daily.md`ã€`MOC.md`ã€`index.md`ã€`log.md`ï¼ˆfrontmatter å­—æ®µå¯¹é½ `note-frontmatter` specï¼‰ã€‚**å®Œæˆ**ï¼š7 ä¸ªæ¨¡æ¿å…¨éƒ¨åˆ›å»ºï¼Œfrontmatter å­—æ®µå¯¹é½ specï¼ˆarea/visibility/status/tags/date/topic ç­‰ï¼‰ï¼Œä½¿ç”¨ `{{placeholder}}` è¯­æ³•ï¼Œ`_index.md` å·²æ›´æ–°ç™»è®°ã€‚
+- [x] 2.3 åœ¨ `9-Meta/Scripts/maintenance/` æ·»åŠ  Python è„šæœ¬éª¨æ¶ï¼š`scan_frontmatter.py`ã€`check_links.py`ã€`check_visibility.py`ï¼ˆæ ‡å‡†åº“å®ç°ï¼ŒPyYAML å¯é€‰ï¼‰ã€‚**å®Œæˆ**ï¼š3 ä¸ªè„šæœ¬å…¨éƒ¨åˆ›å»ºå¹¶éªŒè¯å¯è¿è¡Œã€‚`scan_frontmatter.py` æ‰«æ 716 ä¸ªæ–‡ä»¶æ­£ç¡®è¯†åˆ«ç¼ºå¤±å­—æ®µï¼Œæ”¯æŒ `--fix` è‡ªåŠ¨è¡¥é»˜è®¤å€¼ + `--json` è¾“å‡ºï¼›`check_links.py` è§£æ `[[wikilinks]]` å¹¶éªŒè¯ç›®æ ‡å­˜åœ¨ï¼›`check_visibility.py` æ£€æŸ¥å…¬å¼€/ç§æœ‰è¾¹ç•Œè¿è§„å’Œè·¨åŒºå¼•ç”¨ã€‚
+- [ ] 2.4 å†™ä¸€ä»½ `Dashboard.md`ï¼ˆvault æ ¹ï¼‰æ›¿ä»£æ—§çš„ã€Œæˆ‘çš„ç¬”è®°æœ¬.mdã€ï¼šå«æœ€è¿‘ sessionsã€æ´»è·ƒ projectsã€å¾…åŠ lintã€çŸ¥è¯†åœ°å›¾å…¥å£
 
-## 3. Phase 2 ¡ª ÄÚÈİÇ¨ÒÆ£¨¹«¿ªÇø£¬ÁãÊ§Á´Ğ­Òé£©
+## 3. Phase 2 â€” å†…å®¹è¿ç§»ï¼ˆå…¬å¼€åŒºï¼Œé›¶å¤±é“¾åè®®ï¼‰
 
-> **ÌúÂÉ**£º±¾ phase ËùÓĞ .md / .canvas ÒÆ¶¯**±ØĞë**Í¨¹ı `obsidian move path=<src> to=<dst>` Ö´ĞĞ£¨²Î¼û design D11£©¡£**½ûÖ¹Ê¹ÓÃ** `git mv` / `mv` / `xcopy` / Explorer ÍÏ×§¡£Ã¿ÅúÇ¨ÒÆÍê³ÉºóÓÃ `obsidian unresolved` + `check_links.py` Ë«ÖØ verify¡£×Ê²úÄ¿Â¼£¨Assets/Excalidraw/Drawings/Resources£©**±£³ÖÔ­Î»²»¶¯**¡£
+> **é“å¾‹**ï¼šæœ¬ phase æ‰€æœ‰ .md / .canvas ç§»åŠ¨**å¿…é¡»**é€šè¿‡ `obsidian move path=<src> to=<dst>` æ‰§è¡Œï¼ˆå‚è§ design D11ï¼‰ã€‚**ç¦æ­¢ä½¿ç”¨** `git mv` / `mv` / `xcopy` / Explorer æ‹–æ‹½ã€‚æ¯æ‰¹è¿ç§»å®Œæˆåç”¨ `obsidian unresolved` + `check_links.py` åŒé‡ verifyã€‚èµ„äº§ç›®å½•ï¼ˆAssets/Excalidraw/Drawings/Resourcesï¼‰**ä¿æŒåŸä½ä¸åŠ¨**ã€‚
 
-- [ ] 3.1 **[Ô¤´¦Àí]** ¶Ô 1.3 ÁĞ³öµÄÍ¬Ãû³åÍ»ÎÄ¼ş£¬ÏÈÓÃ `obsidian rename` ÔÚÔ­Ä¿Â¼¸ÄÃû£¨±ÜÃâÇ¨ÒÆºó³åÍ»£©£¬²¢ÑéÖ¤ËùÓĞÒıÓÃÈÔÖ¸ÏòÕıÈ·ÎÄ¼ş
-- [ ] 3.2 **[Batch A ¡¤ ×î¶ÀÁ¢]** Ç¨ÒÆ `Ó¢ÓïÑ§Ï°/` ¡ú `2-Wiki/Ó¢Óï/`£¬Ã¿ÎÄ¼ş `obsidian move`£»±¾ÅúºóÅÜ `obsidian unresolved` + `check_links.py`£¬git tag `post-batch-A`
-- [ ] 3.3 **[Batch B]** Ç¨ÒÆ `¶ÁÊé±Ê¼Ç/` ¡ú `2-Wiki/<¶ÔÓ¦ÁìÓò>/`£¨Éè¼ÆÄ£Ê½¡¢3DÊıÑ§¡¢ÖØ¹¹µÈ°´×ÓÄ¿Â¼Ó³Éä£©£»±¾ÅúºóË«ÖØ verify + tag
-- [ ] 3.4 **[Batch C]** Ç¨ÒÆ `¼¼ÊõÎÄµµ/` ¡ú `2-Wiki/¼¼Êõ/<ÓïÑÔ»òÖ÷Ìâ>/`£»ÆäÖĞ `¼¼ÊõÎÄµµ/AI/skills/` ÏÂµÄ"ÖªÊ¶ĞÍÎÄµµ"ÒÆÈë `9-Meta/Skills/<ÏàÓ¦ skill>/references/`£¬ÔËĞĞ/¹æ·¶ÎÄµµÒÆÈë `9-Meta/Skills/<skill>/SKILL.md` »ò `scripts/`£»±¾ÅúºóË«ÖØ verify + tag
-- [ ] 3.5 **[Batch D]** ²ğ·Ö `ÈÕ³£ÔÓÌ¸/`£ºÈÕ¼Ç/ÖÜ±¨/×Ü½á ¡ú `4-Journal/<YYYY>/`£¬³¤ÆÚÉú»îÀà£¨zerotier¡¢ÍøÅÌµÈ£©¡ú `5-Life/`£¬GTD/·½·¨ÂÛ ¡ú `2-Wiki/·½·¨ÂÛ/`£»±¾ÅúºóË«ÖØ verify + tag
-- [ ] 3.6 **[Batch E]** Ç¨ÒÆ `Èí¼şÊ³Æ×/`¡¢`¹¤¾ßÓÃ·¨/` ¡ú `6-Tools/`£¨°´ design D3 ±£³Ö±âÆ½£¬ÎÄ¼şÃû¼ÓÀà±ğÇ°×ºÈç `±à¼­Æ÷-VSCode.md`£©£»±¾ÅúºóË«ÖØ verify + tag
-- [ ] 3.7 **[Batch F]** Ç¨ÒÆ `¿ª·¢ÏîÄ¿/´úºÅ¦Á/` ¡ú `3-Projects/¸öÈË-´úºÅ¦Á/`£»±¾ÅúºóË«ÖØ verify + tag
-- [ ] 3.8 **[Batch G]** Ç¨ÒÆ `Templates/` ¡ú `9-Meta/Templates/`£»±¾ÅúºóË«ÖØ verify + tag
-- [ ] 3.9 **[×Ê²úÄ¿Â¼¾ö²ß]** `Assets/`¡¢`Drawings/`¡¢`Resources/`¡¢`Excalidraw/` **²»¶¯**£»ÔÚ `9-Meta/AGENTS.md` ÏÔÊ½±ê×¢"ÀúÊ·±âÆ½×Ê²úÄ¿Â¼£¬ĞÂ×Ê²ú×ß `2-Wiki/<Ö÷Ìâ>/_assets/`"
-- [ ] 3.10 **[Dataview/Canvas ĞŞÕı]** °´ 1.4 Çåµ¥ÖğÌõÊÖ¹¤ĞŞÕı£º
-  - 4 ´¦ Dataview `FROM "..."` Â·¾¶
-  - `ÈÕ³£ÔÓÌ¸/ÎÒµÄGTDÊµ¼ù±Ê¼Ç.canvas` ÄÚ²¿½Úµã£¨ÊÖ¹¤ verify wikilink ÊÇ·ñÈÔ½âÎöÕıÈ·£¬±ØÒªÊ±ÔÚ Obsidian ÄÚ´ò¿ªÖØ±£´æ£©
-- [ ] 3.11 ÀÏ `0-ÎÒµÄ±Ê¼Ç±¾.md` ÄÚÈİ²¢ÈëĞÂ `Dashboard.md` ºóÓÃ `obsidian delete file="0-ÎÒµÄ±Ê¼Ç±¾"`
-- [ ] 3.12 ÑéÖ¤¾ÉµÄ 11 ¸ö¶¥¼¶Ä¿Â¼ÒÑÎª¿Õ£¬ÓÃ `obsidian eval code="app.vault.adapter.rmdir(...)"` »òÎÄ¼ş¹ÜÀíÆ÷É¾³ı¿ÕÄ¿Â¼£¨´ËÊ±²»»áÔÙ²úÉúÊ§Á´£©
-- [ ] 3.13 **[Phase 2 ×ÜÑéÊÕ]** `obsidian unresolved` È«Á¿·µ»Ø ¡Ü ¾É»ùÏßÖµ£»`check_links.py` ²ĞÓà¶ÏÁ´Çåµ¥ ¡Ü 5 ÌõÇÒÈ«²¿ÎªÒÑÖªÀıÍâ£»git log È« phase ¿´µ½µÄÓ¦ÊÇ R£¨rename£©¶ø·Ç´óÁ¿ D+A
+- [ ] 3.1 **[é¢„å¤„ç†]** å¯¹ 1.3 åˆ—å‡ºçš„åŒåå†²çªæ–‡ä»¶ï¼Œå…ˆç”¨ `obsidian rename` åœ¨åŸç›®å½•æ”¹åï¼ˆé¿å…è¿ç§»åå†²çªï¼‰ï¼Œå¹¶éªŒè¯æ‰€æœ‰å¼•ç”¨ä»æŒ‡å‘æ­£ç¡®æ–‡ä»¶
+- [ ] 3.2 **[Batch A Â· æœ€ç‹¬ç«‹]** è¿ç§» `è‹±è¯­å­¦ä¹ /` â†’ `2-Wiki/è‹±è¯­/`ï¼Œæ¯æ–‡ä»¶ `obsidian move`ï¼›æœ¬æ‰¹åè·‘ `obsidian unresolved` + `check_links.py`ï¼Œgit tag `post-batch-A`
+- [ ] 3.3 **[Batch B]** è¿ç§» `è¯»ä¹¦ç¬”è®°/` â†’ `2-Wiki/<å¯¹åº”é¢†åŸŸ>/`ï¼ˆè®¾è®¡æ¨¡å¼ã€3Dæ•°å­¦ã€é‡æ„ç­‰æŒ‰å­ç›®å½•æ˜ å°„ï¼‰ï¼›æœ¬æ‰¹ååŒé‡ verify + tag
+- [ ] 3.4 **[Batch C]** è¿ç§» `æŠ€æœ¯æ–‡æ¡£/` â†’ `2-Wiki/æŠ€æœ¯/<è¯­è¨€æˆ–ä¸»é¢˜>/`ï¼›å…¶ä¸­ `æŠ€æœ¯æ–‡æ¡£/AI/skills/` ä¸‹çš„"çŸ¥è¯†å‹æ–‡æ¡£"ç§»å…¥ `9-Meta/Skills/<ç›¸åº” skill>/references/`ï¼Œè¿è¡Œ/è§„èŒƒæ–‡æ¡£ç§»å…¥ `9-Meta/Skills/<skill>/SKILL.md` æˆ– `scripts/`ï¼›æœ¬æ‰¹ååŒé‡ verify + tag
+- [ ] 3.5 **[Batch D]** æ‹†åˆ† `æ—¥å¸¸æ‚è°ˆ/`ï¼šæ—¥è®°/å‘¨æŠ¥/æ€»ç»“ â†’ `4-Journal/<YYYY>/`ï¼Œé•¿æœŸç”Ÿæ´»ç±»ï¼ˆzerotierã€ç½‘ç›˜ç­‰ï¼‰â†’ `5-Life/`ï¼ŒGTD/æ–¹æ³•è®º â†’ `2-Wiki/æ–¹æ³•è®º/`ï¼›æœ¬æ‰¹ååŒé‡ verify + tag
+- [ ] 3.6 **[Batch E]** è¿ç§» `è½¯ä»¶é£Ÿè°±/`ã€`å·¥å…·ç”¨æ³•/` â†’ `6-Tools/`ï¼ˆæŒ‰ design D3 ä¿æŒæ‰å¹³ï¼Œæ–‡ä»¶ååŠ ç±»åˆ«å‰ç¼€å¦‚ `ç¼–è¾‘å™¨-VSCode.md`ï¼‰ï¼›æœ¬æ‰¹ååŒé‡ verify + tag
+- [ ] 3.7 **[Batch F]** è¿ç§» `å¼€å‘é¡¹ç›®/ä»£å·Î±/` â†’ `3-Projects/ä¸ªäºº-ä»£å·Î±/`ï¼›æœ¬æ‰¹ååŒé‡ verify + tag
+- [ ] 3.8 **[Batch G]** è¿ç§» `Templates/` â†’ `9-Meta/Templates/`ï¼›æœ¬æ‰¹ååŒé‡ verify + tag
+- [ ] 3.9 **[èµ„äº§ç›®å½•å†³ç­–]** `Assets/`ã€`Drawings/`ã€`Resources/`ã€`Excalidraw/` **ä¸åŠ¨**ï¼›åœ¨ `9-Meta/AGENTS.md` æ˜¾å¼æ ‡æ³¨"å†å²æ‰å¹³èµ„äº§ç›®å½•ï¼Œæ–°èµ„äº§èµ° `2-Wiki/<ä¸»é¢˜>/_assets/`"
+- [ ] 3.10 **[Dataview/Canvas ä¿®æ­£]** æŒ‰ 1.4 æ¸…å•é€æ¡æ‰‹å·¥ä¿®æ­£ï¼š
+  - 4 å¤„ Dataview `FROM "..."` è·¯å¾„
+  - `æ—¥å¸¸æ‚è°ˆ/æˆ‘çš„GTDå®è·µç¬”è®°.canvas` å†…éƒ¨èŠ‚ç‚¹ï¼ˆæ‰‹å·¥ verify wikilink æ˜¯å¦ä»è§£ææ­£ç¡®ï¼Œå¿…è¦æ—¶åœ¨ Obsidian å†…æ‰“å¼€é‡ä¿å­˜ï¼‰
+- [ ] 3.11 è€ `0-æˆ‘çš„ç¬”è®°æœ¬.md` å†…å®¹å¹¶å…¥æ–° `Dashboard.md` åç”¨ `obsidian delete file="0-æˆ‘çš„ç¬”è®°æœ¬"`
+- [ ] 3.12 éªŒè¯æ—§çš„ 11 ä¸ªé¡¶çº§ç›®å½•å·²ä¸ºç©ºï¼Œç”¨ `obsidian eval code="app.vault.adapter.rmdir(...)"` æˆ–æ–‡ä»¶ç®¡ç†å™¨åˆ é™¤ç©ºç›®å½•ï¼ˆæ­¤æ—¶ä¸ä¼šå†äº§ç”Ÿå¤±é“¾ï¼‰
+- [ ] 3.13 **[Phase 2 æ€»éªŒæ”¶]** `obsidian unresolved` å…¨é‡è¿”å› â‰¤ æ—§åŸºçº¿å€¼ï¼›`check_links.py` æ®‹ä½™æ–­é“¾æ¸…å• â‰¤ 5 æ¡ä¸”å…¨éƒ¨ä¸ºå·²çŸ¥ä¾‹å¤–ï¼›git log å…¨ phase çœ‹åˆ°çš„åº”æ˜¯ Rï¼ˆrenameï¼‰è€Œéå¤§é‡ D+A
 
-## 4. Phase 3 ¡ª Frontmatter ¹æ·¶»¯
+## 4. Phase 3 â€” Frontmatter è§„èŒƒåŒ–
 
-- [ ] 4.1 ÔÚËùÓĞÇ¨ÒÆºóµÄ `.md` ÉÏÅÜ `scan_frontmatter.py`£¬Êä³ö"È±×Ö¶Î / ×Ö¶ÎÖµ·Ç·¨"Çåµ¥
-- [ ] 4.2 °´ `note-frontmatter/spec.md` ÅúÁ¿²¹Æë±ØÌî×Ö¶Î£º`tags`¡¢`area`¡¢`visibility`¡¢`status`£¬Ã¿Åú ¡Ü30 ¸öÎÄ¼ş¡¢Ã¿Åú³ÊÏÖ diff ºóÓÉÓÃ»§È·ÈÏ
-- [ ] 4.3 ÅÜ `check_visibility.py` ÑéÖ¤¹«¿ªÇøÎŞ `visibility: private`¡¢ÎŞÒıÓÃµ½ `netease/`£»ºìÏßÎÊÌâÖ±½Ó×è¶ÏºóĞø²½Öè
-- [ ] 4.4 ÌîĞ´ `4-Journal/`¡¢`3-Projects/` µÄÁìÓò×¨Êô×Ö¶Î£¨Èç `project: status/start/end`£©
+- [ ] 4.1 åœ¨æ‰€æœ‰è¿ç§»åçš„ `.md` ä¸Šè·‘ `scan_frontmatter.py`ï¼Œè¾“å‡º"ç¼ºå­—æ®µ / å­—æ®µå€¼éæ³•"æ¸…å•
+- [ ] 4.2 æŒ‰ `note-frontmatter/spec.md` æ‰¹é‡è¡¥é½å¿…å¡«å­—æ®µï¼š`tags`ã€`area`ã€`visibility`ã€`status`ï¼Œæ¯æ‰¹ â‰¤30 ä¸ªæ–‡ä»¶ã€æ¯æ‰¹å‘ˆç° diff åç”±ç”¨æˆ·ç¡®è®¤
+- [ ] 4.3 è·‘ `check_visibility.py` éªŒè¯å…¬å¼€åŒºæ—  `visibility: private`ã€æ— å¼•ç”¨åˆ° `netease/`ï¼›çº¢çº¿é—®é¢˜ç›´æ¥é˜»æ–­åç»­æ­¥éª¤
+- [ ] 4.4 å¡«å†™ `4-Journal/`ã€`3-Projects/` çš„é¢†åŸŸä¸“å±å­—æ®µï¼ˆå¦‚ `project: status/start/end`ï¼‰
 
-## 5. Phase 4 ¡ª Ê×´ÎÍêÕû Lint ÓëÊÕÎ²
+## 5. Phase 4 â€” é¦–æ¬¡å®Œæ•´ Lint ä¸æ”¶å°¾
 
-- [ ] 5.1 Ö´ĞĞ `lint-wiki` È«Á¿Ñ²¼ì£¬°´ `wiki-lint/spec.md` µÄ 10 Ïî¼ì²éÊä³ö±¨¸æ
-- [ ] 5.2 ĞŞ¸´ Critical/Warning Ïî£¨ÒşË½/¶ÏÁ´/index Æ¯ÒÆ£©£»Suggestion Ïî×ÃÇé´¦Àí
-- [ ] 5.3 ÔÚ `2-Wiki/_log.md` ×·¼ÓÊ×Ìõ `migration` ¼ÇÂ¼£¬Á´»Ø±¾ OpenSpec change
-- [ ] 5.4 ÔÚÃ¿¸ö¶¥¼¶Ä¿Â¼µÄ `_index.md` ÖĞ²¹È«ÒÑÇ¨ÈëÌõÄ¿
-- [ ] 5.5 ¸üĞÂ `Dashboard.md` µÄ"ÖªÊ¶µØÍ¼"Èë¿Ú£¬È·±£´ÓÊ×Ò³Á½Ìø¿É´ïÈÎÒâÖ÷Ìâ MOC
+- [ ] 5.1 æ‰§è¡Œ `lint-wiki` å…¨é‡å·¡æ£€ï¼ŒæŒ‰ `wiki-lint/spec.md` çš„ 10 é¡¹æ£€æŸ¥è¾“å‡ºæŠ¥å‘Š
+- [ ] 5.2 ä¿®å¤ Critical/Warning é¡¹ï¼ˆéšç§/æ–­é“¾/index æ¼‚ç§»ï¼‰ï¼›Suggestion é¡¹é…Œæƒ…å¤„ç†
+- [ ] 5.3 åœ¨ `2-Wiki/_log.md` è¿½åŠ é¦–æ¡ `migration` è®°å½•ï¼Œé“¾å›æœ¬ OpenSpec change
+- [ ] 5.4 åœ¨æ¯ä¸ªé¡¶çº§ç›®å½•çš„ `_index.md` ä¸­è¡¥å…¨å·²è¿å…¥æ¡ç›®
+- [ ] 5.5 æ›´æ–° `Dashboard.md` çš„"çŸ¥è¯†åœ°å›¾"å…¥å£ï¼Œç¡®ä¿ä»é¦–é¡µä¸¤è·³å¯è¾¾ä»»æ„ä¸»é¢˜ MOC
 
-## 6. netease Ë½ÓĞÇø¶ÔÆë£¨½öÔ¼¶¨£¬²»¶¯ÏÖÓĞÄÚÈİ£©
+## 6. netease ç§æœ‰åŒºå¯¹é½ï¼ˆä»…çº¦å®šï¼Œä¸åŠ¨ç°æœ‰å†…å®¹ï¼‰
 
-- [ ] 6.1 ÔÚ `netease/` ÏÂĞÂ½¨¿Õ¹Ç¼Ü `1-Sessions/`¡¢`2-Wiki/`¡¢`3-Projects/`¡¢`4-Reference/`£¬¸÷·Å `_index.md`£¨²»Ç¨ÒÆÒÑÓĞÄÚÈİ£©
-- [ ] 6.2 ÔÚ `netease/AGENTS.md` Ğ´Ò»·İË½ÓĞÇø×¨Êô schema£ºÃ÷È·ÔÊĞíµÄ tag¡¢Ãô¸Ğ´ÊÇåµ¥¡¢Óë¹«¿ªÇøµÄÒıÓÃ±ß½ç
-- [ ] 6.3 ¹«¿ªÇø `9-Meta/AGENTS.md` ÏÔÊ½ÉùÃ÷£ºË½ÓĞÇøÓµÓĞ¶ÀÁ¢ AGENTS.md£¬agent ¿çÈë `netease/` Ê±±ØĞëÇĞ»»ÉÏÏÂÎÄ
+- [ ] 6.1 åœ¨ `netease/` ä¸‹æ–°å»ºç©ºéª¨æ¶ `1-Sessions/`ã€`2-Wiki/`ã€`3-Projects/`ã€`4-Reference/`ï¼Œå„æ”¾ `_index.md`ï¼ˆä¸è¿ç§»å·²æœ‰å†…å®¹ï¼‰
+- [ ] 6.2 åœ¨ `netease/AGENTS.md` å†™ä¸€ä»½ç§æœ‰åŒºä¸“å± schemaï¼šæ˜ç¡®å…è®¸çš„ tagã€æ•æ„Ÿè¯æ¸…å•ã€ä¸å…¬å¼€åŒºçš„å¼•ç”¨è¾¹ç•Œ
+- [ ] 6.3 å…¬å¼€åŒº `9-Meta/AGENTS.md` æ˜¾å¼å£°æ˜ï¼šç§æœ‰åŒºæ‹¥æœ‰ç‹¬ç«‹ AGENTS.mdï¼Œagent è·¨å…¥ `netease/` æ—¶å¿…é¡»åˆ‡æ¢ä¸Šä¸‹æ–‡
 
-## 7. ÑéÊÕ
+## 7. éªŒæ”¶
 
-- [ ] 7.1 `openspec validate restructure-vault-as-llm-wiki --strict` Í¨¹ı
-- [ ] 7.2 `lint-wiki` È«Á¿±¨¸æÎŞ Critical
-- [ ] 7.3 `check_visibility.py` ±¨¸æ 0 ´¦¿ç±ß½çÒıÓÃ
-- [ ] 7.4 ÓÃ»§ÈË¹¤Ñ²¼ì `Dashboard.md` ¡ú ÈÎÒâÖ÷Ìâ MOC ¡ú ÈÎÒâ wiki Ò³ µÄµ¼º½Ë³³©
-- [ ] 7.5 ×¼±¸ archive£ºÔÚ `_log.md` Ğ´Ã÷ "±¾ change ¼´½«¹éµµ"£¬È·ÈÏ main specs Í¬²½²ßÂÔ
+- [ ] 7.1 `openspec validate restructure-vault-as-llm-wiki --strict` é€šè¿‡
+- [ ] 7.2 `lint-wiki` å…¨é‡æŠ¥å‘Šæ—  Critical
+- [ ] 7.3 `check_visibility.py` æŠ¥å‘Š 0 å¤„è·¨è¾¹ç•Œå¼•ç”¨
+- [ ] 7.4 ç”¨æˆ·äººå·¥å·¡æ£€ `Dashboard.md` â†’ ä»»æ„ä¸»é¢˜ MOC â†’ ä»»æ„ wiki é¡µ çš„å¯¼èˆªé¡ºç•…
+- [ ] 7.5 å‡†å¤‡ archiveï¼šåœ¨ `_log.md` å†™æ˜ "æœ¬ change å³å°†å½’æ¡£"ï¼Œç¡®è®¤ main specs åŒæ­¥ç­–ç•¥

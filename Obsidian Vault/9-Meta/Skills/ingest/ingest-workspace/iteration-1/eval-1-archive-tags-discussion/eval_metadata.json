@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "eval_name": "archive-tags-discussion",
+  "prompt": "帮我把刚才关于 TAGS.md 嵌套 tag 规则的讨论归档一下。我们讨论了嵌套 tag 是应该完全禁止还是允许自由组合，最后决定采用'顶层约束 + 嵌套自由组合'的方案，并更新了 TAGS.md 的 §1 命名规则、§3.5 红线清单、§4 脏 tag 清理表。",
+  "assertions": [
+    {"id": "correct-path", "description": "Session file created at 1-Sessions/2026/04/2026-04-29-*.md"},
+    {"id": "valid-frontmatter", "description": "Frontmatter contains area:session, visibility:public, date, topic, tags, wiki_pages_touched"},
+    {"id": "concise-body", "description": "Body is 200-800 words with 背景/关键讨论/结论/产出物 sections"},
+    {"id": "bullet-points", "description": "关键讨论 uses bullet points, not paragraphs"},
+    {"id": "wiki-detection", "description": "Identified TAGS.md as wiki-worthy and proposed update"},
+    {"id": "correct-topic", "description": "Topic reflects nested tag rules discussion, not generic"}
+  ]
+}

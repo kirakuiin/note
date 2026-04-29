@@ -1,100 +1,100 @@
 ## ADDED Requirements
 
-### Requirement: Wiki Ò³Ãæ frontmatter ±ØÌî×Ö¶Î
+### Requirement: Wiki é¡µé¢ frontmatter å¿…å¡«å­—æ®µ
 
 Every markdown file under `2-Wiki/` (both public `2-Wiki/` and private `netease/2-Wiki/`) SHALL have a YAML frontmatter block at the top with at minimum the following fields:
 
-- `tags`£ºÊı×é£¬ÖÁÉÙ°üº¬ 1 ¸öÁìÓò tag£¨È¡×Ô `9-Meta/TAGS.md` ´Ê±í£©
-- `area`£º¹Ì¶¨×Ö·û´® `knowledge`
-- `visibility`£º`public` »ò `private`£¬±ØĞëÓëËùÔÚÇøÓòÆ¥Åä
-- `status`£º`draft` / `stable` / `stale` / `archived` Ö®Ò»
+- `tags`ï¼šæ•°ç»„ï¼Œè‡³å°‘åŒ…å« 1 ä¸ªé¢†åŸŸ tagï¼ˆå–è‡ª `9-Meta/TAGS.md` è¯è¡¨ï¼‰
+- `area`ï¼šå›ºå®šå­—ç¬¦ä¸² `knowledge`
+- `visibility`ï¼š`public` æˆ– `private`ï¼Œå¿…é¡»ä¸æ‰€åœ¨åŒºåŸŸåŒ¹é…
+- `status`ï¼š`draft` / `stable` / `stale` / `archived` ä¹‹ä¸€
 
-¿ÉÑ¡×Ö¶Î£º`source`£¨À´Ô´ session ÎÄ¼şÂ·¾¶»òÍâ²¿ÊéÃû/ÎÄµµÃû£©¡¢`updated`£¨×î½üĞŞ¸ÄÈÕÆÚ£¬ISO ¸ñÊ½£©¡¢`created`£¨´´½¨ÈÕÆÚ£©¡£
+å¯é€‰å­—æ®µï¼š`source`ï¼ˆæ¥æº session æ–‡ä»¶è·¯å¾„æˆ–å¤–éƒ¨ä¹¦å/æ–‡æ¡£åï¼‰ã€`updated`ï¼ˆæœ€è¿‘ä¿®æ”¹æ—¥æœŸï¼ŒISO æ ¼å¼ï¼‰ã€`created`ï¼ˆåˆ›å»ºæ—¥æœŸï¼‰ã€‚
 
-#### Scenario: ´´½¨ĞÂ wiki Ò³ÃæÈ±ÉÙ±ØÌî×Ö¶Î
-- **WHEN** agent ÊÔÍ¼ÔÚ `2-Wiki/` ÏÂ´´½¨ĞÂ markdown ÎÄ¼ş£¬µ« frontmatter È±ÉÙ±ØÌî×Ö¶Î
-- **THEN** ±ØĞëÔÚĞ´ÈëÇ°²¹È«ËùÓĞ±ØÌî×Ö¶Î£»È±ÉÙ visibility Ê±¸ù¾İËùÔÚÂ·¾¶×Ô¶¯ÅĞ¶¨£¨¹«¿ªÇø = public£¬netease/2-Wiki = private£©
+#### Scenario: åˆ›å»ºæ–° wiki é¡µé¢ç¼ºå°‘å¿…å¡«å­—æ®µ
+- **WHEN** agent è¯•å›¾åœ¨ `2-Wiki/` ä¸‹åˆ›å»ºæ–° markdown æ–‡ä»¶ï¼Œä½† frontmatter ç¼ºå°‘å¿…å¡«å­—æ®µ
+- **THEN** å¿…é¡»åœ¨å†™å…¥å‰è¡¥å…¨æ‰€æœ‰å¿…å¡«å­—æ®µï¼›ç¼ºå°‘ visibility æ—¶æ ¹æ®æ‰€åœ¨è·¯å¾„è‡ªåŠ¨åˆ¤å®šï¼ˆå…¬å¼€åŒº = publicï¼Œnetease/2-Wiki = privateï¼‰
 
-#### Scenario: visibility ÓëËùÔÚÇøÓò²»Æ¥Åä
-- **WHEN** lint-wiki ¹¤×÷Á÷É¨Ãè·¢ÏÖÄ³¸ö¹«¿ªÇø wiki Ò³ÃæµÄ frontmatter `visibility: private`£¬»ò netease ÇøÒ³ÃæµÄ `visibility: public`
-- **THEN** ±ØĞëÔÚ lint ±¨¸æÖĞ±ê¼ÇÎª°²È«·çÏÕ£¬Á¢¿ÌÌáÊ¾ÓÃ»§ÈË¹¤È·ÈÏ
-
----
-
-### Requirement: ÓÅÏÈÊ¹ÓÃ wikilink ¶ø·ÇÂãÎÄ±¾
-
-Pages under `2-Wiki/` SHALL prefer wikilinks `[[Ò³ÃæÃû]]` over plain-text references when mentioning concepts that have their own wiki page. Each non-MOC page SHOULD have at least one outgoing wikilink (or an explicit reason in frontmatter for being a "leaf" page).
-
-#### Scenario: Ìáµ½Ò»¸öÓĞ¶ÀÁ¢Ò³ÃæµÄ¸ÅÄî
-- **WHEN** wiki Ò³ÃæÕıÎÄÌáµ½Ò»¸öÔÚ `2-Wiki/` ÖĞÒÑÓĞ¶ÀÁ¢Ò³ÃæµÄ¸ÅÄî
-- **THEN** SHALL ÓÃ `[[Ò³ÃæÃû]]` ĞÎÊ½ÒıÓÃ£¬¶ø²»ÊÇÂãÎÄ±¾
-
-#### Scenario: ¸ÅÄî±»Æµ·±Ìáµ½µ«ÎŞ¶ÀÁ¢Ò³Ãæ
-- **WHEN** lint ·¢ÏÖÄ³¸ÅÄîÔÚ ¡İ3 ¸ö wiki Ò³ÃæÖĞÒÔÂãÎÄ±¾³öÏÖÇÒÎŞ¶ÀÁ¢Ò³Ãæ
-- **THEN** ±ØĞëÔÚ lint ±¨¸æÖĞ±ê¼ÇÎª"½¨ÒéĞÂÔöÒ³Ãæ"£¬µÈ´ıÓÃ»§¾ö¶¨ÊÇ·ñ´´½¨
-
-#### Scenario: ¿ç±ß½çÒıÓÃ³¢ÊÔ
-- **WHEN** ¹«¿ªÇø wiki Ò³ÃæÊÔÍ¼ wikilink µ½ `netease/` Â·¾¶
-- **THEN** SHALL ¾Ü¾øĞ´Èë£¬ÌáÊ¾ÕâÎ¥·´¹«Ë½±ß½ç
+#### Scenario: visibility ä¸æ‰€åœ¨åŒºåŸŸä¸åŒ¹é…
+- **WHEN** lint-wiki å·¥ä½œæµæ‰«æå‘ç°æŸä¸ªå…¬å¼€åŒº wiki é¡µé¢çš„ frontmatter `visibility: private`ï¼Œæˆ– netease åŒºé¡µé¢çš„ `visibility: public`
+- **THEN** å¿…é¡»åœ¨ lint æŠ¥å‘Šä¸­æ ‡è®°ä¸ºå®‰å…¨é£é™©ï¼Œç«‹åˆ»æç¤ºç”¨æˆ·äººå·¥ç¡®è®¤
 
 ---
 
-### Requirement: È«¾ÖË÷ÒıÎÄ¼ş `_index.md`
+### Requirement: ä¼˜å…ˆä½¿ç”¨ wikilink è€Œéè£¸æ–‡æœ¬
+
+Pages under `2-Wiki/` SHALL prefer wikilinks `[[é¡µé¢å]]` over plain-text references when mentioning concepts that have their own wiki page. Each non-MOC page SHOULD have at least one outgoing wikilink (or an explicit reason in frontmatter for being a "leaf" page).
+
+#### Scenario: æåˆ°ä¸€ä¸ªæœ‰ç‹¬ç«‹é¡µé¢çš„æ¦‚å¿µ
+- **WHEN** wiki é¡µé¢æ­£æ–‡æåˆ°ä¸€ä¸ªåœ¨ `2-Wiki/` ä¸­å·²æœ‰ç‹¬ç«‹é¡µé¢çš„æ¦‚å¿µ
+- **THEN** SHALL ç”¨ `[[é¡µé¢å]]` å½¢å¼å¼•ç”¨ï¼Œè€Œä¸æ˜¯è£¸æ–‡æœ¬
+
+#### Scenario: æ¦‚å¿µè¢«é¢‘ç¹æåˆ°ä½†æ— ç‹¬ç«‹é¡µé¢
+- **WHEN** lint å‘ç°æŸæ¦‚å¿µåœ¨ â‰¥3 ä¸ª wiki é¡µé¢ä¸­ä»¥è£¸æ–‡æœ¬å‡ºç°ä¸”æ— ç‹¬ç«‹é¡µé¢
+- **THEN** å¿…é¡»åœ¨ lint æŠ¥å‘Šä¸­æ ‡è®°ä¸º"å»ºè®®æ–°å¢é¡µé¢"ï¼Œç­‰å¾…ç”¨æˆ·å†³å®šæ˜¯å¦åˆ›å»º
+
+#### Scenario: è·¨è¾¹ç•Œå¼•ç”¨å°è¯•
+- **WHEN** å…¬å¼€åŒº wiki é¡µé¢è¯•å›¾ wikilink åˆ° `netease/` è·¯å¾„
+- **THEN** SHALL æ‹’ç»å†™å…¥ï¼Œæç¤ºè¿™è¿åå…¬ç§è¾¹ç•Œ
+
+---
+
+### Requirement: å…¨å±€ç´¢å¼•æ–‡ä»¶ `_index.md`
 
 `2-Wiki/_index.md` SHALL be maintained as a content-oriented catalog. Format:
 
-- °´ÁìÓò×ÓÄ¿Â¼·ÖÀà×éÖ¯
-- Ã¿¸öÒ³ÃæÒ»ĞĞ£º`[[Ò³ÃæÃû]] ¡ª Ò»¾ä»°ÕªÒª (tags: ..., status: ...)`
-- ÓÉ agent ÔÚÃ¿´Î ingest ºó×Ô¶¯¸üĞÂ
+- æŒ‰é¢†åŸŸå­ç›®å½•åˆ†ç±»ç»„ç»‡
+- æ¯ä¸ªé¡µé¢ä¸€è¡Œï¼š`[[é¡µé¢å]] â€” ä¸€å¥è¯æ‘˜è¦ (tags: ..., status: ...)`
+- ç”± agent åœ¨æ¯æ¬¡ ingest åè‡ªåŠ¨æ›´æ–°
 
-netease ÄÚ²¿¶ÀÁ¢Î¬»¤ `netease/2-Wiki/_index.md`£¬Óë¹«¿ªÇø index ²»»¥Í¨¡£
+netease å†…éƒ¨ç‹¬ç«‹ç»´æŠ¤ `netease/2-Wiki/_index.md`ï¼Œä¸å…¬å¼€åŒº index ä¸äº’é€šã€‚
 
-#### Scenario: ĞÂÔö wiki Ò³Ãæ
-- **WHEN** agent ´´½¨Ò»¸öĞÂµÄ wiki Ò³Ãæ
-- **THEN** SHALL ÔÚÍ¬ÇøÓò `_index.md` ÖĞÌí¼Ó¸ÃÒ³ÃæµÄÌõÄ¿
+#### Scenario: æ–°å¢ wiki é¡µé¢
+- **WHEN** agent åˆ›å»ºä¸€ä¸ªæ–°çš„ wiki é¡µé¢
+- **THEN** SHALL åœ¨åŒåŒºåŸŸ `_index.md` ä¸­æ·»åŠ è¯¥é¡µé¢çš„æ¡ç›®
 
-#### Scenario: É¾³ı»òºÏ²¢ wiki Ò³Ãæ
-- **WHEN** agent É¾³ı»òºÏ²¢ wiki Ò³Ãæ
-- **THEN** SHALL ´Ó `_index.md` ÒÆ³ı¶ÔÓ¦ÌõÄ¿£»Í¬Ê±¼ì²éÊÇ·ñÓĞÆäËûÒ³Ãæ wikilink Ö¸Ïò±»É¾Ò³Ãæ£¬±ØÒªÊ±ĞŞ¸´»òÔÚ `_log.md` ±ê¼Ç´ıĞŞ
+#### Scenario: åˆ é™¤æˆ–åˆå¹¶ wiki é¡µé¢
+- **WHEN** agent åˆ é™¤æˆ–åˆå¹¶ wiki é¡µé¢
+- **THEN** SHALL ä» `_index.md` ç§»é™¤å¯¹åº”æ¡ç›®ï¼›åŒæ—¶æ£€æŸ¥æ˜¯å¦æœ‰å…¶ä»–é¡µé¢ wikilink æŒ‡å‘è¢«åˆ é¡µé¢ï¼Œå¿…è¦æ—¶ä¿®å¤æˆ–åœ¨ `_log.md` æ ‡è®°å¾…ä¿®
 
-#### Scenario: ²éÑ¯Ê± `_index.md` ÊÇÊ×ÒªÈë¿Ú
-- **WHEN** query-wiki ¹¤×÷Á÷½Óµ½²éÑ¯ÇëÇó
-- **THEN** SHALL ÏÈ¶Á `_index.md` ÕÒºòÑ¡Ò³Ãæ£¬ÔÙ¶Á¾ßÌåÒ³ÃæÕıÎÄ
+#### Scenario: æŸ¥è¯¢æ—¶ `_index.md` æ˜¯é¦–è¦å…¥å£
+- **WHEN** query-wiki å·¥ä½œæµæ¥åˆ°æŸ¥è¯¢è¯·æ±‚
+- **THEN** SHALL å…ˆè¯» `_index.md` æ‰¾å€™é€‰é¡µé¢ï¼Œå†è¯»å…·ä½“é¡µé¢æ­£æ–‡
 
 ---
 
-### Requirement: ²Ù×÷ÈÕÖ¾ `_log.md`
+### Requirement: æ“ä½œæ—¥å¿— `_log.md`
 
 `2-Wiki/_log.md` SHALL be an append-only chronological record of agent operations on the wiki. Format:
 
-- Ã¿Ìõ¼ÇÂ¼ĞÎÈç `## [YYYY-MM-DD] <operation> | <subject>`£¬ÀıÈç `## [2026-04-29] ingest-session | ÖªÊ¶¿â½á¹¹Éè¼Æ`
-- ¼ÇÂ¼ÏÂ·½¿É°üº¬¼ò¶ÌÃèÊö£¨Ó°ÏìµÄÒ³ÃæÁĞ±í¡¢¾ö²ßÕªÒª£©
-- Ò»ÖÂÇ°×ºÈÃ `grep "^## \[" _log.md | tail -N` ¿É½âÎö
+- æ¯æ¡è®°å½•å½¢å¦‚ `## [YYYY-MM-DD] <operation> | <subject>`ï¼Œä¾‹å¦‚ `## [2026-04-29] ingest-session | çŸ¥è¯†åº“ç»“æ„è®¾è®¡`
+- è®°å½•ä¸‹æ–¹å¯åŒ…å«ç®€çŸ­æè¿°ï¼ˆå½±å“çš„é¡µé¢åˆ—è¡¨ã€å†³ç­–æ‘˜è¦ï¼‰
+- ä¸€è‡´å‰ç¼€è®© `grep "^## \[" _log.md | tail -N` å¯è§£æ
 
-#### Scenario: Agent Íê³ÉÒ»´Î wiki ĞŞ¸Ä
-- **WHEN** agent ÔÚ wiki ÖĞÍê³É ingest / lint / restructure µÈ²Ù×÷
-- **THEN** SHALL ÔÚ `_log.md` Ä©Î²×·¼ÓÒ»ĞĞ `## [YYYY-MM-DD] <operation> | <subject>`£¬²¢ÁĞ³öÊÜÓ°ÏìµÄÒ³Ãæ
+#### Scenario: Agent å®Œæˆä¸€æ¬¡ wiki ä¿®æ”¹
+- **WHEN** agent åœ¨ wiki ä¸­å®Œæˆ ingest / lint / restructure ç­‰æ“ä½œ
+- **THEN** SHALL åœ¨ `_log.md` æœ«å°¾è¿½åŠ ä¸€è¡Œ `## [YYYY-MM-DD] <operation> | <subject>`ï¼Œå¹¶åˆ—å‡ºå—å½±å“çš„é¡µé¢
 
-#### Scenario: Agent ¼ì²é×î½üµÄ wiki »î¶¯
-- **WHEN** agent ÏëÁË½â×î½ü N ´Î wiki ¸Ä¶¯
-- **THEN** SHALL Í¨¹ı grep `_log.md` ¶ø²»ÊÇÉ¨ÃèÃ¿¸öÒ³Ãæ
+#### Scenario: Agent æ£€æŸ¥æœ€è¿‘çš„ wiki æ´»åŠ¨
+- **WHEN** agent æƒ³äº†è§£æœ€è¿‘ N æ¬¡ wiki æ”¹åŠ¨
+- **THEN** SHALL é€šè¿‡ grep `_log.md` è€Œä¸æ˜¯æ‰«ææ¯ä¸ªé¡µé¢
 
 ---
 
-### Requirement: Ã¿¸öÁìÓòÄ¿Â¼Ìá¹© `_MOC.md` Èë¿Ú
+### Requirement: æ¯ä¸ªé¢†åŸŸç›®å½•æä¾› `_MOC.md` å…¥å£
 
-Ã¿¸ö `2-Wiki/<ÁìÓò>/` ×ÓÄ¿Â¼ SHALL °üº¬Ò»¸ö `_MOC.md` ÎÄ¼ş£¬×÷Îª¸ÃÁìÓòµÄµ¼º½µØÍ¼¡£MOC ÄÚÈİ°üº¬£º
+æ¯ä¸ª `2-Wiki/<é¢†åŸŸ>/` å­ç›®å½• SHALL åŒ…å«ä¸€ä¸ª `_MOC.md` æ–‡ä»¶ï¼Œä½œä¸ºè¯¥é¢†åŸŸçš„å¯¼èˆªåœ°å›¾ã€‚MOC å†…å®¹åŒ…å«ï¼š
 
-- ¸ÃÁìÓòº­¸ÇµÄºËĞÄÖ÷Ìâ·Ö×é
-- ¹Ø¼üÒ³ÃæµÄ wikilink£¨°´ÖØÒª³Ì¶È»òÑ§Ï°Â·¾¶ÅÅĞò£©
-- ÍÆ¼öµÄÈëÃÅ/ÉîÈëÔÄ¶ÁÂ·¾¶
+- è¯¥é¢†åŸŸæ¶µç›–çš„æ ¸å¿ƒä¸»é¢˜åˆ†ç»„
+- å…³é”®é¡µé¢çš„ wikilinkï¼ˆæŒ‰é‡è¦ç¨‹åº¦æˆ–å­¦ä¹ è·¯å¾„æ’åºï¼‰
+- æ¨èçš„å…¥é—¨/æ·±å…¥é˜…è¯»è·¯å¾„
 
-`_MOC.md` ÊÇÉÙÊıÔÊĞí"¸ß³ö¶È£¨ºÜ¶à outlink£©µ«µÍÈë¶È£¨ÉÙ inlink£©"µÄºÏ·¨Ò³ÃæÀàĞÍ£¬lint Ê±²»Ëã¹Â¶ù¡£
+`_MOC.md` æ˜¯å°‘æ•°å…è®¸"é«˜å‡ºåº¦ï¼ˆå¾ˆå¤š outlinkï¼‰ä½†ä½å…¥åº¦ï¼ˆå°‘ inlinkï¼‰"çš„åˆæ³•é¡µé¢ç±»å‹ï¼Œlint æ—¶ä¸ç®—å­¤å„¿ã€‚
 
-#### Scenario: ĞÂÔöÁìÓò×ÓÄ¿Â¼
-- **WHEN** ÔÚ `2-Wiki/` ÏÂĞÂÔöÁìÓò×ÓÄ¿Â¼
-- **THEN** SHALL Í¬Ê±´´½¨¸ÃÄ¿Â¼µÄ `_MOC.md`£¬ÇÒÔÚ `_index.md` ÖĞĞÂÔö¸ÃÁìÓò·ÖÀà
+#### Scenario: æ–°å¢é¢†åŸŸå­ç›®å½•
+- **WHEN** åœ¨ `2-Wiki/` ä¸‹æ–°å¢é¢†åŸŸå­ç›®å½•
+- **THEN** SHALL åŒæ—¶åˆ›å»ºè¯¥ç›®å½•çš„ `_MOC.md`ï¼Œä¸”åœ¨ `_index.md` ä¸­æ–°å¢è¯¥é¢†åŸŸåˆ†ç±»
 
-#### Scenario: ÓÃ»§´Ó¶¥²ã½øÈëÄ³ÁìÓò
-- **WHEN** ÓÃ»§Í¨¹ı Dashboard »ò `_index.md` ½øÈëÄ³ÁìÓò
-- **THEN** Èë¿Ú SHALL ÊÇ¸ÃÁìÓòµÄ `_MOC.md`£¬¶ø²»ÊÇÄ³¸ö¾ßÌåÒ³Ãæ
+#### Scenario: ç”¨æˆ·ä»é¡¶å±‚è¿›å…¥æŸé¢†åŸŸ
+- **WHEN** ç”¨æˆ·é€šè¿‡ Dashboard æˆ– `_index.md` è¿›å…¥æŸé¢†åŸŸ
+- **THEN** å…¥å£ SHALL æ˜¯è¯¥é¢†åŸŸçš„ `_MOC.md`ï¼Œè€Œä¸æ˜¯æŸä¸ªå…·ä½“é¡µé¢

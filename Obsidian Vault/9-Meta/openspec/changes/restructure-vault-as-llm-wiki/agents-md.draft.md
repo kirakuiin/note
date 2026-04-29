@@ -1,148 +1,17 @@
 ---
-note_type: agents-bootstrap
+note_type: agents-superseded-pointer
 visibility: public
-status: bootstrap
+status: archived
+created: 2026-04-29
+updated: 2026-04-29
 ---
 
-# AGENTS.md ¡ª Vault Bootstrap
+# agents-md.draft.mdï¼ˆå·²åºŸå¼ƒï¼‰
 
-> **Èç¹ûÄãÊÇÒ»¸ö AI agent**£¬¿´µ½±¾ÎÄ¼ş**±Ø¶Á**¡£ÕâÊÇÄã½ÓÊÖÕâ¸ö Obsidian vault Ö®Ç°ĞèÒªÖªµÀµÄÈ«²¿¡£
+> **æœ¬æ–‡ä»¶å·²è¢« task 1.10 ç»ˆç¨¿æ›¿ä»£ã€‚**
 >
-> **Èç¹ûÄãÊÇÈË**£¬²Î¼û `README.md`¡£
-
----
-
-## 7²2„1‚5 ²Ö¿âÕıÔÚÖØ¹¹ÖĞ£¨OpenSpec ½øĞĞÊ±£©
-
-±¾ vault µ±Ç°ÕıÔÚÍ¨¹ı **OpenSpec Á÷³Ì**½øĞĞ½á¹¹ĞÔÖØ¹¹£¬Ä¿±êÊÇ°ÑËü´Ó"°´ÄÚÈİÀ´Ô´·ÖÀàµÄ´«Í³ Obsidian ÖªÊ¶¿â"Éı¼¶Îª **Karpathy LLM Wiki Ä£Ê½**µÄ¡¢agent ¿É³ÖĞøÎ¬»¤µÄ¸öÈËÖªÊ¶¿â¡£
-
-| Ïî | Öµ |
-|---|---|
-| »îÔ¾ change | `restructure-vault-as-llm-wiki` |
-| change Ä¿Â¼ | `9-Meta/openspec/changes/restructure-vault-as-llm-wiki/` |
-| µ±Ç°½×¶Î | Phase 0£¨»·¾³¾ÍĞ÷£¬µÈ´ı¿ª¹¤£© |
-| ÈÎÎñ½ø¶È | ¼û `tasks.md` |
-
-**ÈÎºÎ¶Ô vault µÄ¸Ä¶¯**¶¼Ó¦µ±Í¨¹ıÕâ¸ö change ÍÆ½ø£¬**²»ÒªÈÆ¹ı OpenSpec Á÷³Ì**¡£
-
----
-
-## •02 ½ÓÊÖĞ­Òé£¨°´Ë³ĞòÖ´ĞĞ£©
-
-### Step 1 ¡ª ÑéÖ¤»·¾³
-
-ĞÂ»á»°¿ªÊ¼µÄµÚÒ»¼şÊÂ£º
-
-```bash
-obsidian version          # ±ØĞë·µ»Ø 1.12.7+
-openspec list             # ´íÎóÊ± cd 9-Meta && openspec list
-```
-
-Èç¹û `obsidian` ÃüÁîÕÒ²»µ½£º²Î¼û `9-Meta/openspec/changes/restructure-vault-as-llm-wiki/migration-notes.md` µÚ 1 ½Ú"Windows PATH ÏİÚå"¡£
-
-### Step 2 ¡ª ¶Á¶®ÕıÔÚ×öÊ²Ã´
-
-°´Ë³Ğò¶ÁÒÔÏÂÎÄ¼ş£º
-
-1. `9-Meta/openspec/changes/restructure-vault-as-llm-wiki/proposal.md` ¡ª¡ª **ÎªÊ²Ã´**×ö
-2. `9-Meta/openspec/changes/restructure-vault-as-llm-wiki/design.md` ¡ª¡ª **ÔõÃ´**×ö£¨11 ¸ö¾ö²ß + 5 ½×¶Î¼Æ»® + ÁãÊ§Á´Ğ­Òé£©
-3. `9-Meta/openspec/changes/restructure-vault-as-llm-wiki/specs/agent-schema/spec.md` ¡ª¡ª **agent ±ØĞë×ñÊØµÄÓ²Ô¼Êø**£¨Ç¿ÖÆ skill Â·ÓÉ±í / ½ûÖ¹ÊÂÏî£©
-4. `9-Meta/openspec/changes/restructure-vault-as-llm-wiki/migration-notes.md` ¡ª¡ª **Êµ²âÃüÁîÇ©ÃûËÙ²é**£¨²»ÒªÆ¾¼ÇÒä²ÂÃüÁî£©
-5. `9-Meta/openspec/changes/restructure-vault-as-llm-wiki/tasks.md` ¡ª¡ª **ÏÂÒ»²½×öÊ²Ã´**£¨ÕÒ×î½üÒ»¸öÎ´¹´Ñ¡Ïî£©
-
-### Step 3 ¡ª ¼ÓÔØÕıÈ·µÄ skill
-
-| µ±Ç°Òª×öµÄÊÂ | use_skill |
-|---|---|
-| ¼ÌĞøÍÆ½ø task | `openspec-apply-change` |
-| ¾ö¶¨ÏÂÒ»¸ö task Ë³Ğò / ²ğ·Ö | `openspec-continue-change` |
-| Ğ´ĞÂÒ³ÃæÕıÎÄ£¨OFM Óï·¨£© | `obsidian-markdown` |
-| ²Ù×÷ vault ÎÄ¼ş£¨CRUD/move/property£© | `obsidian-cli` |
-| ²Ù×÷ .base | `obsidian-bases` |
-| ²Ù×÷ .canvas | `json-canvas` |
-| ²»È·¶¨ | `openspec-onboard` |
-
-### Step 4 ¡ª Ö´ĞĞ
-
-°´ task ÍÆ½ø£¬Ã¿Íê³ÉÒ»¸ö¹´µôÒ»¸ö¡£ÈÎºÎ ¡İ5 ÎÄ¼şµÄÅúÁ¿²Ù×÷±ØĞëÏÈÁĞ¼Æ»®ÈÃÓÃ»§È·ÈÏ¡£
-
----
-
-## ”9è2 ºìÏß£¨¹«Ë½±ß½ç£¬¾ø¶Ô²»ÄÜÆÆ£©
-
-1. **`netease/` ÊÇ¹¤×÷Ë½ÓĞÄ¿Â¼**£¬ÒÑÔÚ²Ö¿â¸ù `.gitignore` ÖĞÅÅ³ı¡£ÕâÊÇÎïÀí¸ôÀë£¬²»¿ÉÔ½½ç¡£
-2. **¹«¿ªÇøÈÎºÎÎÄ¼ş²»µÃ wikilink / embed / ÒıÓÃ `netease/` ÄÚÈİ**¡£
-3. **¹«¿ªÇø²»µÃ³öÏÖ netease ÏîÄ¿´úºÅ¡¢ÄÚ²¿ÏµÍ³Ãû¡¢Í¬ÊÂÕæÃûµÈÃô¸Ğ´Ê**¡£
-4. Ã¿´Î´´½¨ / ĞŞ¸Ä¹«¿ªÇø .md ºó£¬agent Ó¦×Ô¼ì `visibility` frontmatter ÊÇ·ñÎª `public`£¬ÇÒÕıÎÄ²»º¬¿ç±ß½çÒıÓÃ¡£
-5. Èç¹û agent ·¢ÏÖ×Ô¼º¼´½«ÆÆ»µÉÏÊöÈÎÒ»Ìõ£¬**Á¢¿ÌÍ£ÏÂ²¢¸æËßÓÃ»§**£¬²»µÃ¾²Ä¬¼ÌĞø¡£
-
----
-
-## •0•0 Ç¿ÖÆ skill Â·ÓÉ±í£¨¸²¸ÇÒ»ÇĞ vault ÄÚÎÄ¼ş²Ù×÷£©
-
-| ²Ù×÷ÒâÍ¼ | ±ØĞëÓÃ | ½ûÖ¹ |
-|---|---|---|
-| .md µÄ CRUD / ÒÆ¶¯ / ¸ÄÃû / property ²Ù×÷ / Á´½ÓÑ²¼ì | **`obsidian-cli` skill**£¨¼´ `obsidian` ÃüÁî£© | Ö±½Ó `edit_file` Ğ´ĞÂ .md / `mv` / `git mv` / `xcopy` / Explorer ÍÏ×§ |
-| Ğ´ Obsidian Flavored Markdown ÕıÎÄ£¨wikilink / embed / callout / frontmatter / tag£© | **`obsidian-markdown` skill** | Æ¾¼ÇÒäÂÒĞ´ Obsidian Óï·¨ |
-| ´´½¨ / ĞŞ¸Ä `.base` ÎÄ¼ş | **`obsidian-bases` skill** | ÊÖĞ´ base YAML/JSON |
-| ´´½¨ / ĞŞ¸Ä `.canvas` ÎÄ¼ş | **`json-canvas` skill** | ÊÖĞ´ canvas JSON |
-
-**ÎªÊ²Ã´Ç¿ÖÆ£¿**
-
-- vault ÉèÁË `alwaysUpdateLinks: true`¡£**Ö»ÓĞ×ß `obsidian` CLI µÄ move/rename**²ÅÄÜ´¥·¢ Obsidian ×ÔÉíµÄÁ´½Ó×Ô¶¯¸üĞÂ»úÖÆ£»ÈÎºÎÍâ²¿ `mv` ¶¼»áÈÆ¹ıËü£¬Ôì³É¾²Ä¬Ê§Á´¡£
-- Ïê¼û `9-Meta/openspec/changes/restructure-vault-as-llm-wiki/design.md` µÄ **D11 ÁãÊ§Á´Ğ­Òé**¡£
-
----
-
-## •07 What NOT to do£¨Ã÷Áî½ûÖ¹£©
-
-- ²»µÃÈÆ¹ıÉÏÊö skill Ö±½ÓÓÃÍ¨ÓÃÎÄ¼ş¹¤¾ß²Ù×÷ vault ÄÚ .md / .canvas / .base
-- ²»µÃÈÃ¹«¿ªÇø wikilink / embed / ÒıÓÃ `netease/` ÄÚÈİ
-- ²»µÃÔÚÓÃ»§Î´È·ÈÏÇ°ÅúÁ¿ĞŞ¸Ä ¡İ5 ¸öÎÄ¼ş
-- ²»µÃÉ¾³ı agent ×Ô¼ºÒ²²»Àí½âÓÃÍ¾µÄÎÄ¼ş
-- ²»µÃÔÚ wiki Çø·ÅÔ­Ê¼¶Ô»°£¨ÄÇÊÇ `1-Sessions/` µÄÖ°Ôğ£¬ÖØ¹¹Íê³ÉºóÆôÓÃ£©
-- ²»µÃ°Ñ OpenSpec ¹¤×÷Çø´Ó `9-Meta/openspec/` ÒÆµ½¸ùÄ¿Â¼
-- ²»µÃÌø¹ı±¾ÎÄ¼ş Step 1¡«4 µÄ½ÓÊÖĞ­ÒéÖ±½Ó¶¯ÊÖ
-
----
-
-## ”9İ9 ²Ö¿â½á¹¹£¨µ±Ç°ÊÇ¹ı¶ÉÌ¬£©
-
-**¾É½á¹¹**£¨ÈÔÊÇÖ÷Ìå£¬Ç¨ÒÆÖĞ£©£º
-```
-¶ÁÊé±Ê¼Ç/  ¼¼ÊõÎÄµµ/  ÈÕ³£ÔÓÌ¸/  Èí¼şÊ³Æ×/  Ó¢ÓïÑ§Ï°/
-¿ª·¢ÏîÄ¿/  ¹¤¾ßÓÃ·¨/  Templates/  Tags/
-Assets/  Drawings/  Excalidraw/  Resources/
-0-ÎÒµÄ±Ê¼Ç±¾.md  •0á8 µÚ¶ş´óÄÔ.md  README.md
-```
-
-**Ä¿±ê½á¹¹**£¨Phase 0 ºó»á¿ªÊ¼½¨Á¢£©£º
-```
-0-Inbox/      ÁÙÊ±ÊÕ¼ş
-1-Sessions/   Ô­Ê¼¶Ô»°/ÎÄµµ¹éµµ£¨°´ YYYY/MM/£©
-2-Wiki/       LLM Î¬»¤µÄÖªÊ¶¿â£¨´ø _index/_log/_MOC£©
-3-Projects/   ÏîÄ¿¹¤×÷Çø
-4-Journal/    ÈÕ¼Ç/ÖÜ±¨/ÔÂ±¨
-5-Life/       Éú»î³¤ÆÚĞÅÏ¢
-6-Tools/      ¹¤¾ßËÙ²é£¨±âÆ½£©
-9-Meta/       ²Ö¿âÔªĞÅÏ¢
-  ©À©¤©¤ openspec/         ±¾´ÎÖØ¹¹µÄ spec ¹¤×÷Çø
-  ©À©¤©¤ Skills/           agent skill£¨×Ô°üº¬£©
-  ©À©¤©¤ Templates/        ±Ê¼ÇÄ£°å
-  ©À©¤©¤ Scripts/          Î¬»¤½Å±¾
-  ©À©¤©¤ AGENTS.md         ÍêÕû agent Ô¼¶¨£¨Phase 0 task 1.10 ´´½¨£©
-  ©¸©¤©¤ TAGS.md           tag ´Ê±í£¨Phase 0 task 1.11 ´´½¨£©
-
-netease/       ”9è2 Ë½ÓĞ¹¤×÷Çø£¨ÎïÀí¸ôÀë£¬¶ÀÁ¢ AGENTS.md£©
-Assets/ Excalidraw/ Drawings/ Resources/    ×Ê²úÄ¿Â¼£¨Ç¨ÒÆÖĞ±£³ÖÔ­Î»£©
-```
-
----
-
-## ”9ã4 ±¾ÎÄ¼şµÄ×´Ì¬
-
-ÕâÊÇ **bootstrap °æ±¾**¡ª¡ªÄ¿µÄÊÇÈÃ agent ÄÜÔÚÖØ¹¹Íê³ÉÇ°**°²È«µØ½ÓÊÖ¹¤×÷**¡£
-
-ÍêÕûµÄ `9-Meta/AGENTS.md`£¨°´ `agent-schema/spec.md` µÄ 10 ¸ö±Ø±¸Ğ¡½ÚĞ´£©½«ÔÚ Phase 0 task 1.10 ´´½¨¡£ÍêÕû°æÉÏÏßºó£¬±¾ÎÄ¼ş»á¼ò»¯ÎªÒ»¾ä»°Ö¸Õë ¡ú ÍêÕû°æ¡£
-
-×îºó¸üĞÂ£º2026-04-29 by restructure-vault-as-llm-wiki / Phase 0 / pre-phase-1
+> å½“å‰æƒå¨ï¼š[[9-Meta/AGENTS|9-Meta/AGENTS.md]]
+>
+> å†å²èƒŒæ™¯ï¼šæœ¬æ–‡ä»¶åŸæ˜¯ OpenSpec change `restructure-vault-as-llm-wiki` Phase 0 æ—©æœŸå†™å°±çš„ agent å…¥å£è‰ç¨¿ï¼ˆtask 1.10 å¤‡æ³¨é‡Œæ‰€è¯´çš„"draft"ï¼‰ã€‚ç”±äº `write` å·¥å…·åœ¨ Windows ä¸­æ–‡ç³»ç»Ÿä¸‹é»˜è®¤æŒ‰ GBK ç¼–ç è½ç›˜ï¼ŒåŸæ–‡ä»¶å…¨æ–‡ä¹±ç ä¸å¯è¯»ã€‚task 1.10 è½åœ°æ—¶ç›´æ¥åŸºäº `agent-schema/spec.md` çš„ 10 èŠ‚å¼ºåˆ¶ç»“æ„ + ç”¨æˆ·å†³ç­–ï¼ˆå®Œæ•´è‡ªåŒ…å«ã€ä¸å¼•ç”¨ specã€åˆ—å…¨éƒ¨ skillã€çº¢çº¿åªçœ‹è·¯å¾„è¾¹ç•Œï¼‰é‡å†™ï¼ŒUTF-8 è½ç›˜åˆ° `9-Meta/AGENTS.md`ï¼Œæœ¬è‰ç¨¿ç•™ä½œ OpenSpec change çš„è¿‡ç¨‹è®°å½•ã€‚
+>
+> change archive åæœ¬æ–‡ä»¶éš change ç›®å½•ä¸€å¹¶å½’å…¥ `9-Meta/openspec/changes/archive/`ï¼Œæ— éœ€å†ç»´æŠ¤ã€‚
