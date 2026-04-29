@@ -11,9 +11,9 @@ excalidraw-plugin: parsed
 
 ## Text Elements
 ## Element Links
-Kdcd7XF3: [[Excalidraw/cropped_hhkb.md]]
+Kdcd7XF3: [[cropped_hhkb]]
 
-rb4V7PQ3: [[Excalidraw/cropped_hhkb.md]]
+rb4V7PQ3: [[cropped_hhkb]]
 
 ## Embedded Files
 8d32da488d3db66a6c0c945c8d5bd0e04010ad93: [[cropped_hhkb]]

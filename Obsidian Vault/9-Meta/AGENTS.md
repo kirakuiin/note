@@ -60,7 +60,13 @@ aliases:
 | `6-Tools/` | tool | 工具速查（"用到才查、查完就走"） | 是 | **扁平结构**，文件名 `<类别>-<工具名>.md`（如 `编辑器-VSCode.md`） |
 | `9-Meta/` | meta | 仓库元层（本文件 / Skills / Templates / Scripts / openspec） | 用户主导 | — |
 
-**还允许的根级目录**（不在编号体系内）：`Assets/` `Excalidraw/`（Obsidian 插件管理的附件）、`netease/`（私有区）、根级仪表盘 `Dashboard.md`。
+**还允许的根级目录**（不在编号体系内）：`netease/`（私有区）、根级仪表盘 `Dashboard.md`、CLI 自动维护的 `openspec/`（OpenSpec 工作目录，非笔记内容）。
+
+**资产存储约定**（task 3.9 落定）：
+- `9-Meta/Assets/` — Obsidian 默认附件目录（粘贴/拖拽图片自动写入此处，由 `attachmentFolderPath` 配置指向）
+- `9-Meta/Excalidraw/` — Excalidraw 插件画图存储（由插件 `folder` `templateFilePath` `scriptFolderPath` `fontAssetsPath` 4 个字段配置指向）
+- 不再使用根级 `Assets/` / `Excalidraw/` / `Drawings/` / `Resources/` 旧目录
+- 修改任一资产路径配置时必须同步改 `.obsidian/app.json` (`attachmentFolderPath`) 和 `.obsidian/plugins/obsidian-excalidraw-plugin/data.json`
 
 **新建顶级目录**必须先开 OpenSpec change 修订本文件，禁止擅自添加。
 
