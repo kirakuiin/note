@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: adjectives and adverbs
+visibility: public
+area: knowledge
+status: archived
 ---
 **still**表示情况没有发生变化。通常位于句子中间([[Word order2. Adverbs with the verb|词序]])。
 

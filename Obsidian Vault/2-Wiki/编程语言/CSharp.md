@@ -1,9 +1,10 @@
 ---
 tags:
-  - interview
-  - csharp
+  - 编程语言
+visibility: public
+area: knowledge
+status: archived
 ---
-
 #  C#的编译过程
 
 1. 汇编器编译，将源代码编译成中间语言（IL）；

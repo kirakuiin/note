@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: pronouns and determiners
+visibility: public
+area: knowledge
+status: archived
 ---
 **much, little**用于修饰不可数名词。**many few**用于修饰可数名词复数，**a lot of / lots of / plenty of**既可以用于可数名词复数，也可以用于不可数名词。
 

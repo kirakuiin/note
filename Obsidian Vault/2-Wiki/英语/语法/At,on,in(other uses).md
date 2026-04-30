@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: prepositions
+visibility: public
+area: knowledge
+status: archived
 ---
 **in**可以用来表达处于某种自然环境之中。
 

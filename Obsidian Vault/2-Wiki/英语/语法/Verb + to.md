@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: -ing and to
+visibility: public
+area: knowledge
+status: archived
 ---
 在这些动词后面，可以用不定式(**to**)，否定形式为**not to**：
 **offer decide hope deserve promise agree plan manage afford threaten refuse arrange fail forget learn dare seem appear tend pretend claim

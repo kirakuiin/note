@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: relative clauses
+visibility: public
+area: knowledge
+status: archived
 ---
 关系从句有两种类型，一种是告诉我们讲话者所说的是哪一个人或事，什么类型的人或事，参考[[Relative Clauses (whose, where)]]和[[Relative clauses (who, whom, that, which)]]；另一种则是我们已经知道讲话者说的是什么了，从句给我们提供了关于它的额外信息。
 

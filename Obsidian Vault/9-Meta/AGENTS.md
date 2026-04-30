@@ -9,7 +9,6 @@ aliases:
   - Agent Bootstrap
   - AI Agent 入口
 ---
-
 # AGENTS.md — AI Agent 操作此 Vault 的权威约定
 
 > **如果你是一个 AI agent**：本文件是你操作此 Obsidian vault 之前**唯一**必须读完的入口。
@@ -99,6 +98,22 @@ aliases:
 | 不确定文件该归公开区还是 netease | 停下并问用户，不得猜 |
 
 > **不需要维护敏感词清单**——只看路径边界即可。如果一个引用解析不到 netease 之外的位置，该引用就是合法的。
+
+### 私有区独立 AGENTS.md
+
+`netease/` 拥有**独立的** [[netease/AGENTS|netease/AGENTS.md]]，覆盖私有区专属约定（私有 tag 词表、`confidentiality` 字段、私有区目录结构、私有区禁止事项等）。
+
+**强制切换规则**：
+
+| 当前操作目标路径 | 必须遵循 | 必须读 |
+|---|---|---|
+| 不在 `netease/` 子树下（vault 任何其它位置） | 本文件（`9-Meta/AGENTS.md`） | 本文件 |
+| 在 `netease/` 子树下（含 `netease/0-Daily/` `netease/work/` 等任何子目录） | `netease/AGENTS.md` | **`netease/AGENTS.md`**（首选）+ 本文件（继承部分） |
+
+- 同一会话内**跨入** `netease/` 时，agent 必须显式重新读 `netease/AGENTS.md` 并切换到私有区约定（不得沿用本文件的 tag 词表 / 目录命名假设）
+- 同一会话内**跨出** `netease/`（回到公开区）时，必须切回本文件
+- 同一会话内**同时**操作公开区与私有区时，**分别报告改动清单**（不得混在一起报告，避免审计混淆）
+- `netease/AGENTS.md` 与本文件的 skill 路由表（§8）和操作协议（§9）**完全继承一致**——只有 tag 词表 / 目录结构 / 红线方向有差异
 
 ---
 

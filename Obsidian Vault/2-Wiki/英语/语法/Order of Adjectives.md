@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: adjectives and adverbs
+visibility: public
+area: knowledge
+status: archived
 ---
 有时我们会一起使用多个形容词，此时**new/large**等提供关于年龄，尺寸等事实信息的形容词要位于**nice/beautiful**等代表某人观点的形容词之后。
 

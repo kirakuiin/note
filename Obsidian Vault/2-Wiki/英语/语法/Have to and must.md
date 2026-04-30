@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: modals
+visibility: public
+area: knowledge
+status: archived
 ---
 I **have to** do something 的意思我有必要这样做，我有责任这样做。
 

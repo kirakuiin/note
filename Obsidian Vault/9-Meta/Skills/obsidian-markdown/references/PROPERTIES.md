@@ -1,3 +1,7 @@
+---
+visibility: public
+area: meta
+---
 # Properties (Frontmatter) Reference
 
 Properties use YAML frontmatter at the start of a note:

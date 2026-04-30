@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: pronouns and determiners
+visibility: public
+area: knowledge
+status: archived
 ---
 **a (friend) of mine/yours/his/hers/ours/theirs'** = 我（朋友们）中的一个，含义类似于**one of my/your/... (friends)**。
 

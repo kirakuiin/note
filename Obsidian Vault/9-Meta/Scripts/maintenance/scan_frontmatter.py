@@ -53,11 +53,28 @@ AREA_PATH_MAP = {
 
 SAFE_DEFAULTS = {
     "area": None,  # must be inferred
-    "visibility": "public",
-    "status": "draft",
-    "tags": [],
+    "visibility": None,  # must be inferred from path (public vs private)
+    "status": "archived",  # user decision: all migrated notes are archived
+    "tags": [],  # will be inferred from path
     "date": None,  # must be provided
     "topic": "",
+}
+
+# Path prefix -> default tags (must be in TAGS.md whitelist)
+PATH_TAG_MAP = {
+    "2-Wiki/编程语言": ["编程语言"],
+    "2-Wiki/游戏开发": ["游戏开发"],
+    "2-Wiki/算法与数据结构": ["算法与数据结构"],
+    "2-Wiki/AI与Agent": ["AI与Agent"],
+    "2-Wiki/英语": ["英语"],
+    "2-Wiki/方法论": ["方法论"],
+    "2-Wiki/计科基础": ["编程语言"],  # fallback: 计科基础不在白名单，归入编程语言
+    "1-Sessions": ["from-session"],
+    "3-Projects": ["项目"],
+    "4-Journal": ["from-session"],  # fallback: journal 不在白名单
+    "5-Life": ["方法论"],  # fallback: life 不在白名单
+    "6-Tools": ["工具"],
+    "0-Inbox": ["速查"],  # fallback
 }
 
 
@@ -140,8 +157,9 @@ def scan_vault(vault_root: Path) -> list[dict]:
     return issues
 
 
-def auto_fix(issues: list[dict], vault_root: Path) -> list[dict]:
-    """Auto-fill missing frontmatter with safe defaults. Returns list of fixes applied."""
+def auto_fix(issues: list[dict], vault_root: Path, only_fields: list[str] | None = None) -> list[dict]:
+    """Auto-fill missing frontmatter with safe defaults. Returns list of fixes applied.
+    If only_fields is provided, only fix those fields (skip others)."""
     fixes = []
     for issue in issues:
         file_path = vault_root / issue["file"]
@@ -149,7 +167,23 @@ def auto_fix(issues: list[dict], vault_root: Path) -> list[dict]:
         fm, body = parse_frontmatter(text)
 
         for field in issue["missing"]:
+            if only_fields and field not in only_fields:
+                continue
             default = SAFE_DEFAULTS.get(field)
+            if field == "area":
+                # Infer area from path
+                default = infer_area(file_path, vault_root)
+            elif field == "visibility":
+                # Infer visibility from path: netease/ -> private, else public
+                default = "private" if issue["file"].startswith("netease") else "public"
+            elif field == "tags":
+                # Infer tags from path prefix
+                rel = issue["file"].replace("\\", "/")
+                default = []
+                for prefix, tags in PATH_TAG_MAP.items():
+                    if rel.startswith(prefix):
+                        default = list(tags)
+                        break
             if default is not None:
                 fm[field] = default
                 fixes.append({"file": issue["file"], "field": field, "value": default})
@@ -164,7 +198,7 @@ def auto_fix(issues: list[dict], vault_root: Path) -> list[dict]:
             else:
                 fm_lines.append(f"{k}: {v}")
         fm_lines.append("---")
-        new_text = "\n".join(fm_lines) + "\n" + body
+        new_text = "\n".join(fm_lines) + body
         file_path.write_text(new_text, encoding="utf-8")
 
     return fixes
@@ -174,6 +208,7 @@ def main():
     parser = argparse.ArgumentParser(description="Scan vault for missing frontmatter")
     parser.add_argument("--vault", type=str, default=str(VAULT_ROOT), help="Vault root path")
     parser.add_argument("--fix", action="store_true", help="Auto-fill missing fields with safe defaults")
+    parser.add_argument("--fields", type=str, default=None, help="Comma-separated list of fields to fix (e.g. 'area,visibility'). If omitted, fix all.")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
     args = parser.parse_args()
 
@@ -185,7 +220,8 @@ def main():
     issues = scan_vault(vault_root)
 
     if args.fix:
-        fixes = auto_fix(issues, vault_root)
+        only_fields = args.fields.split(",") if args.fields else None
+        fixes = auto_fix(issues, vault_root, only_fields=only_fields)
         if args.json:
             print(json.dumps({"fixed": len(fixes), "details": fixes}, ensure_ascii=False, indent=2))
         else:

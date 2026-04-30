@@ -1,14 +1,9 @@
 ---
 name: ingest
 description: >
-  Ingest a conversation or document into the vault. Creates a session file in
-  1-Sessions/YYYY/MM/ and optionally extracts knowledge into 2-Wiki/ pages.
-  Use this skill whenever the user asks to archive, summarize, ingest, or
-  capture a conversation, chat, document, article, or meeting. Also use when
-  the user says "save this", "record this", "write this up", "make a note of
-  this", or similar capture intents.
+visibility: public
+area: meta
 ---
-
 # Ingest Skill
 
 Turn a conversation or document into a structured session record, and

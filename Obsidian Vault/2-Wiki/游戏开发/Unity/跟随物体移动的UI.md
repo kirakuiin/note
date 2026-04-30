@@ -1,8 +1,10 @@
 ---
 tags:
-  - reference
-unity_type:
-  - 开发
+  - 游戏开发
+unity_type: 
+visibility: public
+area: knowledge
+status: archived
 ---
 以下方案均在`LateUpdate`中执行，确保物体的位置更新完毕后在进行显示。如果有其他相关位置计算的逻辑也在`LateUpdate`中，请在**Project Settings->Script Execution Order**中安排好执行顺序，确保以下逻辑位于最后执行。
 # 方案一

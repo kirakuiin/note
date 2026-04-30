@@ -5,7 +5,6 @@ status: draft
 created: 2026-04-29
 updated: 2026-04-29
 ---
-
 # Inbox
 
 未分类的临时投递（人工速记、待整理项）。定期由 agent 清空到对应目的地。

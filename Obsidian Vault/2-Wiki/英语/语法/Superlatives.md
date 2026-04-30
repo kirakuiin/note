@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: adjectives and adverbs
+visibility: public
+area: knowledge
+status: archived
 ---
 最高级形态以**est**结尾或使用**most**修饰，一般来说短单词用**est**，长单词用**most**。规则和[[Comparison|比较级]]相同。
 

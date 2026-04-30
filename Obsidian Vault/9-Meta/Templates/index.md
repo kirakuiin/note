@@ -5,7 +5,6 @@ status: stable
 created: {{date}}
 updated: {{date}}
 ---
-
 # {{directory_name}}
 
 {{description}}

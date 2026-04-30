@@ -1,5 +1,8 @@
-## ADDED Requirements
+# wiki-query Specification
 
+## Purpose
+TBD - created by archiving change restructure-vault-as-llm-wiki. Update Purpose after archive.
+## Requirements
 ### Requirement: 查询 Wiki 的标准流程
 
 When a user issues a query that the agent should answer from the wiki, the agent SHALL follow this protocol:
@@ -23,7 +26,6 @@ When a user issues a query that the agent should answer from the wiki, the agent
 - **THEN** agent SHALL 明确告知"wiki 中没有相关页面"，并询问是否要发起 ingest 流程把答案沉淀进 wiki
 
 ---
-
 ### Requirement: 高价值答案反哺为新 wiki 页面
 
 After answering a query, the agent SHALL evaluate whether the answer itself has persistent value (e.g., a comparison table, a synthesis across multiple sources, a newly discovered connection). If yes, the agent SHALL ask the user whether to file the answer back as a new wiki page.
@@ -62,3 +64,4 @@ When the user asks a query, the agent SHALL determine the query's visibility sco
 #### Scenario: 不确定边界
 - **WHEN** 查询的归属区域不明确
 - **THEN** agent SHALL 主动询问"这个问题的答案要存到公开区还是工作区？"，不要默默选择
+

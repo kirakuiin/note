@@ -1,8 +1,10 @@
 ---
 tags:
-  - reference
-  - obsidian
+  - 工具/Dataview
 source-link: https://blacksmithgu.github.io/obsidian-dataview/
+visibility: public
+area: tool
+category: Obsidian插件
 ---
 # 如何使用
 

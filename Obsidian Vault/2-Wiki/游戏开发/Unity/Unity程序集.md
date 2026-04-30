@@ -1,10 +1,11 @@
 ---
-unity_type:
-  - 编辑器
+unity_type: 
 tags:
-  - reference
+  - 游戏开发
+visibility: public
+area: knowledge
+status: archived
 ---
-
 程序集是Unity中用于组织代码的手段，通过将不同模块的代码分别放置到各个程序集中，可以有效增加代码的编译速度，减少依赖性。
 
 默认情况下Unity将所有脚本编译到*预定义程序集*中，也就是`Assembly-CSharp.dll`，这种模式的主要问题在于每当你修改任意一个文件，整个程序集就要重新编译，非常浪费时间。

@@ -1,7 +1,6 @@
 ---
 tags:
-  - programming
-  - python
+  - 编程语言
 area: knowledge
 visibility: public
 status: draft

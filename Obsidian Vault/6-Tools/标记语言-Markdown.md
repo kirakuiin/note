@@ -1,7 +1,9 @@
 ---
 tags:
-  - reference
-  - markdown
+  - 工具/Markdown
+visibility: public
+area: tool
+category: 标记语言
 ---
 # 基础语法
 

@@ -5,10 +5,7 @@ status: stable
 created: {{date}}
 updated: {{date}}
 tags:
-  - {{domain_tag}}
-  - 概念
 ---
-
 # {{domain_name}} MOC
 
 > Map of Content — {{domain_name}} 领域的导航页。

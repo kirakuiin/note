@@ -1,7 +1,9 @@
 ---
 tags:
-  - reference
-  - python
+  - 编程语言
+visibility: public
+area: knowledge
+status: archived
 ---
 在工作的场景中，偶尔会遇到这种情况，想要给某些函数加上日志，但是又不想要让这种业务无关的逻辑加入到代码之中，有没有办法两全其美呢？python提供了一种语法结构装饰器，专门用来解决这种类型的问题。
 # 装饰器是什么

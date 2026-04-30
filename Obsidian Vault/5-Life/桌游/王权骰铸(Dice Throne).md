@@ -1,14 +1,13 @@
 ---
 time: 10分钟每人
 players: 2-6
-categories:
-  - 竞争
-  - 美式
-  - 骰驱
-  - 卡牌
+categories: 
 rating: 50
-desc:
+desc: 
 game image: Assets/Images/桌游记录/dice_throne.webp
 play times: 3
 weight: 43
+visibility: public
+area: all
 ---
+

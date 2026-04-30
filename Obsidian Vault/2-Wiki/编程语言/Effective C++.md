@@ -1,7 +1,9 @@
 ---
 tags:
-  - reference
-  - cpp
+  - 编程语言
+visibility: public
+area: knowledge
+status: archived
 ---
 # 习惯C++
 

@@ -1,7 +1,9 @@
 ---
 tags:
-  - reference
-  - obsidian
+  - 工具/Obsidian
+visibility: public
+area: tool
+category: 笔记
 ---
 # 小技巧
 

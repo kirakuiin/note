@@ -1,9 +1,10 @@
 ---
 tags:
-  - interview
-  - unity
+  - 游戏开发
+visibility: public
+area: knowledge
+status: archived
 ---
-
 # Unity UI中粒子特效渲染层级如何控制？
 
 - 使用Sorting Layer，在Renderer组件中可以设置这个属性来控制渲染顺序。

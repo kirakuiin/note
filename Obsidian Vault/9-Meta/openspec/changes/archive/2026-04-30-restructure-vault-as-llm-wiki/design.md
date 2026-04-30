@@ -1,3 +1,8 @@
+---
+visibility: public
+area: meta
+---
+
 ## Context
 
 Vault 当前是按"内容来源（读书笔记/技术文档/日常杂谈/...）"组织的传统 Obsidian 知识库，约 500 个 markdown 文件分布在 11 个顶级目录中，几乎没有 frontmatter，缺少 agent 可消费的元数据和导航。

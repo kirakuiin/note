@@ -1,9 +1,11 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: phrasal verbs
+visibility: public
+area: knowledge
+status: archived
 ---
-
 **down** 有越来越少的含义。
 
 **slow down** = 越来越慢。

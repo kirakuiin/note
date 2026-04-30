@@ -3,9 +3,7 @@ area: knowledge
 visibility: public
 status: stable
 tags:
-  - ai
-  - knowledge-management
-  - reference
+  - AI与Agent
 source: external
 ---
 A pattern for building personal knowledge bases using LLMs.

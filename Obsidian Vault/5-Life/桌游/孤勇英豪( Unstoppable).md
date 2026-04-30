@@ -1,14 +1,13 @@
 ---
 time: 30分钟每人
 players: 1-2
-categories:
-  - 美式
-  - 卡牌
-  - 构筑
-  - solo
+categories: 
 rating: 85
 weight: 50
 play times: 1
-desc:
+desc: 
 game image: Assets/Images/桌游记录/unstoppable.webp
+visibility: public
+area: all
 ---
+

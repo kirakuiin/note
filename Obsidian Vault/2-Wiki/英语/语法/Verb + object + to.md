@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: -ing and to
+visibility: public
+area: knowledge
+status: archived
 ---
 以下的词可以使用**verb + to**或者**verb + object + to**。
 

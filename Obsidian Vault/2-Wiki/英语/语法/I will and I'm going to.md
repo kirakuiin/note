@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: future
+visibility: public
+area: knowledge
+status: archived
 ---
 当谈论未来的事时，[[Going to|I'm going to]]含有计划在之前就已经决定了，不是临时起意。
 

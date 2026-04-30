@@ -1,7 +1,9 @@
 ---
 tags:
-  - svn
-  - reference
+  - 工具/SVN
+visibility: public
+area: tool
+category: 版本控制
 ---
 SVN是SubVersion的简写，是一个版本管理控制系统，主要用于解决以下问题：
 - 追踪文件的变更历史；

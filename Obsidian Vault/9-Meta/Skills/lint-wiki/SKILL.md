@@ -1,17 +1,9 @@
 ---
 name: lint-wiki
 description: >
-  Inspect the vault wiki for health issues and produce a structured report.
-  Checks broken wikilinks, orphan pages, missing frontmatter, visibility
-  mismatches, cross-boundary references, index drift, duplicate topics,
-  stale claims, missing concepts, stale projects, wild tags, and redline
-  tag leaks. Use this skill whenever the user says "lint", "check wiki
-  health", "inspect vault", "audit", "find broken links", "validate
-  frontmatter", or "run wiki checks". Also use after bulk operations
-  (>=10 file changes), after directory restructuring, and before
-  archiving an OpenSpec change.
+visibility: public
+area: meta
 ---
-
 # Lint-Wiki Skill
 
 Inspect the vault for 12 categories of health issues and produce a

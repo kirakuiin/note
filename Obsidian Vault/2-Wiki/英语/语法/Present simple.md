@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: present and past
+visibility: public
+area: knowledge
+status: archived
 ---
 > [!example]
 > The earth goes round the sun.

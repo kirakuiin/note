@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: adjectives and adverbs
+visibility: public
+area: knowledge
+status: archived
 ---
 **quite/pretty/rather/fairly** 后可以加形容词或副词，意为*相当*。它的含义要大于*有点*(a little)，小于*非常*(very)。
 

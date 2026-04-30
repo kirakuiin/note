@@ -10,7 +10,6 @@ aliases:
   - 方法论 MOC
   - 方法论 地图
 ---
-
 # 方法论 — Map of Content
 
 > 本文件由 OpenSpec change `restructure-vault-as-llm-wiki` task 1.7 创建。

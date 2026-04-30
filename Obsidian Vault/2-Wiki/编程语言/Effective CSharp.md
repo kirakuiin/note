@@ -1,7 +1,9 @@
 ---
 tags:
-  - reference
-  - csharp
+  - 编程语言
+visibility: public
+area: knowledge
+status: archived
 ---
 # 编程习惯
 
@@ -57,7 +59,7 @@ tags:
 > - `String.Format()`必须要对生成的字符串进行验证，编译器不会验证参数和格式字符串里的参数是否匹配。并且阅读代码的人很难将参数一一对应到格式字符串里，导致其可读性交较差。
 
 > [!hint]
-> [[C Sharp 知识点#格式化字符串|内插字符串基本格式化方法]]
+> [[CSharp#格式化字符串|内插字符串基本格式化方法]]
 
 ## 5. 使用FormattableString取代专门为特定区域而写的字符串
 

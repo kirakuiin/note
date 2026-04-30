@@ -10,7 +10,6 @@ aliases:
   - 编程语言 MOC
   - 编程语言 地图
 ---
-
 # 编程语言 — Map of Content
 
 > 本文件由 OpenSpec change `restructure-vault-as-llm-wiki` task 1.7 创建。

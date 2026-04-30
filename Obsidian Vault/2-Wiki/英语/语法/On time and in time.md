@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: prepositions
+visibility: public
+area: knowledge
+status: archived
 ---
 **on time** = 准时，代表某事在计划的时刻发生。
 

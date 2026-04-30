@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: prepositions
+visibility: public
+area: knowledge
+status: archived
 ---
 **talk / speak to somebody**
 

@@ -1,3 +1,7 @@
+---
+visibility: public
+area: meta
+---
 # Embeds Reference
 
 ## Embed Notes

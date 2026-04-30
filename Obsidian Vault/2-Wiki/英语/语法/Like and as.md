@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: conjunctions and prepositions
+visibility: public
+area: knowledge
+status: archived
 ---
 **like**作为介词含有类似于，和某事相同的含义。后面一般会跟随名词性成分。
 

@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: -ing and to
+visibility: public
+area: knowledge
+status: archived
 ---
 有一些表达后的动词需要为**ing**形式。
 

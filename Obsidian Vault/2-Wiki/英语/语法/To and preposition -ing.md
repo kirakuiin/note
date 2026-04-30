@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: -ing and to
+visibility: public
+area: knowledge
+status: archived
 ---
 **I'm afraid to do sth** = 我不想做某事因为它有危险或者有个坏结果。用这个句式时这个事是我们有意去做的，可以选择做或不做。
 

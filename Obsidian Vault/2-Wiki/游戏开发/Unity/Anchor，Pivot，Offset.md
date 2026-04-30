@@ -1,8 +1,10 @@
 ---
 tags:
-  - reference
-unity_type:
-  - 编辑器
+  - 游戏开发
+unity_type: 
+visibility: public
+area: knowledge
+status: archived
 ---
 这几个概念在UI中经常出现，它们反应的是子节点如何在父结点中定位自身，下面分别阐述这几个概念。
 

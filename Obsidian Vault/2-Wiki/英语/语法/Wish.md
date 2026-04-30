@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: if and wish
+visibility: public
+area: knowledge
+status: archived
 ---
 **wish somebody something** = 希望某人如何。如果是希望某事发生要用**hope**。
 

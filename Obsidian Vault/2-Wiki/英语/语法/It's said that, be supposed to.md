@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: passive
+visibility: public
+area: knowledge
+status: archived
 ---
 句型**It is said that**的被动语态为：**Is said to**。
 

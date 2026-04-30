@@ -11,6 +11,9 @@ properties:
 views:
   - type: table
     name: Table
+    filters:
+      and:
+        - '!file.hasTag("桌游")'
     order:
       - formula.icon
       - file.name

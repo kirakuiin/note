@@ -1,3 +1,11 @@
+---
+visibility: public
+area: tool
+category: AI
+tags:
+  - 工具/ClaudeCode
+  - AI与Agent
+---
 # 接入方式
 
 ## moonshot桥接

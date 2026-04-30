@@ -4,7 +4,10 @@ visibility: public
 status: archived
 created: 2026-04-29
 updated: 2026-04-29
+area: meta
 ---
+
+
 
 # agents-md.draft.md（已废弃）
 

@@ -5,9 +5,7 @@ status: active
 created: {{date}}
 updated: {{date}}
 tags:
-  - 项目
 ---
-
 # {{project_name}}
 
 ## 目标

@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: phrasal verbs
+visibility: public
+area: knowledge
+status: archived
 ---
 **on off** 用于灯光，机械的开关。
 

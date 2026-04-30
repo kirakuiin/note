@@ -1,3 +1,11 @@
+---
+visibility: public
+area: tool
+category: AI
+tags:
+  - 工具/Cursor
+  - AI与Agent
+---
 # 基本功能
 
 1. Tab智能代码补全。

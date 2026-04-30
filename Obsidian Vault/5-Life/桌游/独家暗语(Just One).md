@@ -1,14 +1,13 @@
 ---
 time: 10分钟每人
 players: 3-7
-categories:
-  - 线索
-  - 合作
-  - 聚会
-  - 推理
+categories: 
 rating: 55
-desc:
+desc: 
 game image: Assets/Images/桌游记录/just_one.webp
 play times: 2
 weight: 15
+visibility: public
+area: all
 ---
+

@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: -ing and to
+visibility: public
+area: knowledge
+status: archived
 ---
 **Be/get used to sth** = 习惯于某事。
 

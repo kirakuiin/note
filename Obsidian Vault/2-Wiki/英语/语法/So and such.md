@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: adjectives and adverbs
+visibility: public
+area: knowledge
+status: archived
 ---
 **so**和**such**都有着加强含义的功能，**so**后是形容词和副词，**such**后接名词。
 

@@ -5,7 +5,6 @@ status: stable
 created: 2026-04-29
 updated: 2026-04-29
 ---
-
 # Skills
 
 Agent 可调用的 skill 集合。每个 skill 是一个子目录，至少含 `SKILL.md`。详见 [[9-Meta/openspec/specs/agent-schema/spec|agent-schema spec]]。

@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: present perfect and past
+visibility: public
+area: knowledge
+status: archived
 ---
 > [!example]
 > We had been playing tennis for about half an hour when it started to rain heavily.

@@ -1,9 +1,11 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: prepositions
+visibility: public
+area: knowledge
+status: archived
 ---
-
 **in**代表位于某个对象之中。
 
 > [!example]

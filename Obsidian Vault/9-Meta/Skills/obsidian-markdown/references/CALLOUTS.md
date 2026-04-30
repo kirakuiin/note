@@ -1,3 +1,7 @@
+---
+visibility: public
+area: meta
+---
 # Callouts Reference
 
 ## Basic Callout

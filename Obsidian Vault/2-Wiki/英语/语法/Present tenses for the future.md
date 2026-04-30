@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: future
+visibility: public
+area: knowledge
+status: archived
 ---
 有两个现在时态都可以用来表示将来发生的事。
 

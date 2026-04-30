@@ -3,7 +3,10 @@ note_type: migration-notes
 change: restructure-vault-as-llm-wiki
 visibility: public
 status: living
+area: meta
 ---
+
+
 
 # Migration Notes — restructure-vault-as-llm-wiki
 

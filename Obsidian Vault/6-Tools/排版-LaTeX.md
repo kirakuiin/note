@@ -1,8 +1,10 @@
 ---
 tags:
-  - reference
+  - 工具/LaTeX
+visibility: public
+area: tool
+category: 排版
 ---
-
 # 常用结构标记
 
 ## 多行结构

@@ -1,8 +1,7 @@
 ---
 tags:
-  - lan
-  - zerotier
-  - win32
+visibility: public
+area: all
 ---
 利用带有公网ip的云服务器+zerotier实现高速的局域网互联功能。
 

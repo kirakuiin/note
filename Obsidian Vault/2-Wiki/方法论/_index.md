@@ -7,7 +7,6 @@ status: draft
 created: 2026-04-29
 updated: 2026-04-29
 ---
-
 # 方法论 — 索引
 
 GTD、笔记法、知识管理、思维框架（如 OpenSpec、第二大脑）
@@ -17,4 +16,7 @@ GTD、笔记法、知识管理、思维框架（如 OpenSpec、第二大脑）
 
 ## 页面列表
 
-（Phase 2 迁入后由 agent 维护，每行格式：`[[页面名]] — 一句话摘要 (tags: ..., status: ...)`）
+- [[GTD - The Art of Stress-Free Productivity]] — GTD 方法论读书笔记 (tags: 方法论, status: archived)
+- [[小狗钱钱]] — 理财启蒙读书笔记 (tags: 方法论, status: archived)
+- [[软技能 - 代码之外的生存指南]] — 程序员软技能读书笔记 (tags: 方法论, status: archived)
+- [[金字塔书写理论]] — 金字塔原理写作法 (tags: 方法论, status: archived)

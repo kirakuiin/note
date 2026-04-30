@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: conjunctions and prepositions
+visibility: public
+area: knowledge
+status: archived
 ---
 **for** + 时间段的含义是描述某事发生了多久。
 

@@ -1,7 +1,9 @@
 ---
 tags:
-  - godot
-  - plugin
+  - 游戏开发
+visibility: public
+area: knowledge
+status: archived
 ---
 # Aseprite Wizard
 

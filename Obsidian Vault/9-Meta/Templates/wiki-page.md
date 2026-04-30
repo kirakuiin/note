@@ -5,12 +5,8 @@ status: draft
 created: {{date}}
 updated: {{date}}
 tags:
-  - {{domain_tag}}
-  - {{type_tag}}
-aliases:
-  - {{alias}}
+aliases: 
 ---
-
 # {{title}}
 
 ## 概述

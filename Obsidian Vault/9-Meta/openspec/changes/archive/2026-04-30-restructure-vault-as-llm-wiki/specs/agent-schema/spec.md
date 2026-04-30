@@ -1,3 +1,8 @@
+---
+visibility: public
+area: meta
+---
+
 ## ADDED Requirements
 
 ### Requirement: AGENTS.md 是 agent 的单一权威入口

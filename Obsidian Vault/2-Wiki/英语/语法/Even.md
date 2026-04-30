@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: adjectives and adverbs
+visibility: public
+area: knowledge
+status: archived
 ---
 **even**用来表达某事不常见或者令人惊讶的含义。当它和动词一起用时遵循[[Word order2. Adverbs with the verb|词序]]。
 

@@ -1,11 +1,12 @@
 ---
 tags:
-  - reference
-  - csharp
+  - 工具/NUnit
+  - 编程语言
 unity_type:
-  - 开发
+visibility: public
+area: tool
+category: 测试
 ---
-
 # 常用属性
 
 - [TestFixture] : 将一个类标记为测试类。

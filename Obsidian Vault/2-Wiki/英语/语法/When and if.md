@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: future
+visibility: public
+area: knowledge
+status: archived
 ---
 > [!example]
 > I'll phone you when I get home.

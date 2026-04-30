@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: pronouns and determiners
+visibility: public
+area: knowledge
+status: archived
 ---
 **all** 不等于 **everybody/everyone**。**all**对人使用一般为**all of us / all of you / all of them**。
 

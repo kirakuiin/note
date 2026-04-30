@@ -1,3 +1,7 @@
+---
+visibility: public
+area: meta
+---
 # Skill Benchmark: query-wiki
 
 **Model**: <model-name>

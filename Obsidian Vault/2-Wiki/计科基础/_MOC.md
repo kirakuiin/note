@@ -2,7 +2,7 @@
 area: knowledge
 visibility: public
 tags:
-  - 计科基础
+  - 编程语言
 status: draft
 created: 2026-04-29
 updated: 2026-04-29
@@ -10,7 +10,6 @@ aliases:
   - 计科基础 MOC
   - 计科基础 地图
 ---
-
 # 计科基础 — Map of Content
 
 > 本文件由 OpenSpec change `restructure-vault-as-llm-wiki` task 3.4 (Batch C) 创建。

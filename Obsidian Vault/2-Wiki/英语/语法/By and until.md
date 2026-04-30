@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: conjunctions and prepositions
+visibility: public
+area: knowledge
+status: archived
 ---
 **by** = not later than，意味不晚于。
 

@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: relative clauses
+visibility: public
+area: knowledge
+status: archived
 ---
 从句是句子的一部分，一个关系从句告诉我们说话者在说哪个人或事。
 

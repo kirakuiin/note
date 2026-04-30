@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: -ing and to
+visibility: public
+area: knowledge
+status: archived
 ---
 下面这些例子中**To + ...** 代表了某事的目的，为什么某人做某事，拥有某物，需要某物，或者某事为何存在等等。
 

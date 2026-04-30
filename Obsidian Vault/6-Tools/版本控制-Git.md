@@ -1,7 +1,9 @@
 ---
 tags:
-  - reference
-  - git
+  - 工具/Git
+visibility: public
+area: tool
+category: 版本控制
 ---
 # 小技巧
 

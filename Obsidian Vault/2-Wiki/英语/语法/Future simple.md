@@ -1,9 +1,11 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: future
-aliases:
-  - Will and shall
+aliases: 
+visibility: public
+area: knowledge
+status: archived
 ---
 > [!example]
 > I will go and shut the door.

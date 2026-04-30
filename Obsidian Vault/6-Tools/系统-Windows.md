@@ -1,7 +1,9 @@
 ---
 tags:
-  - reference
-  - windows
+  - 工具/Windows
+visibility: public
+area: tool
+category: 系统
 ---
 # 小技巧
 

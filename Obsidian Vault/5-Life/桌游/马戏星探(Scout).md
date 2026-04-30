@@ -1,14 +1,13 @@
 ---
 time: 20分钟
 players: 2-5
-categories:
-  - 卡牌
-  - 竞争
-  - 构筑
-  - 聚会
+categories: 
 rating: 65
-desc:
+desc: 
 game image: Assets/Images/桌游记录/scout.webp
 play times: 10
 weight: 25
+visibility: public
+area: all
 ---
+

@@ -1,3 +1,8 @@
+---
+visibility: public
+area: meta
+---
+
 4222B4
 7C63D4
 5E41C2

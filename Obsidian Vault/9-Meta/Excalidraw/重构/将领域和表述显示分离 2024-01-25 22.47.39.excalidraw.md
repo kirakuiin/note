@@ -1,9 +1,11 @@
 ---
-
 excalidraw-plugin: parsed
 tags: [excalidraw]
-
+visibility: public
+area: meta
 ---
+
+
 ==⚠  Switch to EXCALIDRAW VIEW in the MORE OPTIONS menu of this document. ⚠==
 
 

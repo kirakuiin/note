@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: adjectives and adverbs
+visibility: public
+area: knowledge
+status: archived
 ---
 很多形容词以**ing**和**ed**结尾，它们之间的意思有一定的区别。以**bored**和**boring**举例，某人感觉**bored**因为某事**boring**。
 

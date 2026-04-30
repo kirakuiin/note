@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: present perfect and past
+visibility: public
+area: knowledge
+status: archived
 ---
 我们使用 **for，since** 来说某事发生多久了，其中：
 

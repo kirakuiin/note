@@ -2,14 +2,11 @@
 area: session
 visibility: public
 date: 2026-04-29
-topic: "TAGS.md 嵌套 tag 规则修订"
+topic: TAGS.md 嵌套 tag 规则修订
 tags:
-  - 方法论
-  - OpenSpec
-wiki_pages_touched:
-  - "[[9-Meta/TAGS.md]]"
+  - from-session
+wiki_pages_touched: 
 ---
-
 ## 背景
 
 TAGS.md 初版将嵌套 tag 规则设为"仅白名单中明确列出的嵌套路径合法"，但白名单实际未列任何嵌套路径，造成事实上的"禁止嵌套 tag"。用户指出这过于严格。

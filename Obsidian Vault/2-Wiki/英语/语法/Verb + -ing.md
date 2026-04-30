@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: -ing and to
+visibility: public
+area: knowledge
+status: archived
 ---
 有些动词后面动词要使用ing形式 **(verb + (not) + -ing)**，如：
 **enjoy mind suggest stop postpone admit avoid imagine finish consider deny risk fancy**

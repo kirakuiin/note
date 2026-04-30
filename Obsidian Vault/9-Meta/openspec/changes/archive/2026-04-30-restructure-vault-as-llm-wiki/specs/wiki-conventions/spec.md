@@ -1,3 +1,8 @@
+---
+visibility: public
+area: meta
+---
+
 ## ADDED Requirements
 
 ### Requirement: Wiki 页面 frontmatter 必填字段

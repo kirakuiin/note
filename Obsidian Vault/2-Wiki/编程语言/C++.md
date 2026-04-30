@@ -1,9 +1,10 @@
 ---
 tags:
-  - interview
-  - cpp
+  - 编程语言
+visibility: public
+area: knowledge
+status: archived
 ---
-
 #  c++编译过程
 
 1. 预处理；

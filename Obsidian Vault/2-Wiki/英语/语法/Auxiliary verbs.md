@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: auxiliary verb
+visibility: public
+area: knowledge
+status: archived
 ---
 助动词是指协助主动词完成语法时态功能的词，也就是给主动词提供**时间信息**的词。
 

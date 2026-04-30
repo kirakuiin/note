@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: if and wish
+visibility: public
+area: knowledge
+status: archived
 ---
 当某事和现在的事实相反；或我们想象某事未来不会发生，或者没想到它要发生，或使用**If** + past。表达的含义是关于现在的。
 

@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: modals
+visibility: public
+area: knowledge
+status: archived
 ---
 **would / wouldn't**表达了我们想象的某种场景或行动，它不是真实的。
 

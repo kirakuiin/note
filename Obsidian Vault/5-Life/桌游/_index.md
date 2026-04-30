@@ -3,15 +3,77 @@ area: life
 visibility: public
 status: draft
 created: 2026-04-29
-updated: 2026-04-29
+updated: 2026-04-30
 tags:
   - 桌游
 ---
-
 # 桌游
 
-桌游开局复盘记录集合。Phase 2 (task 3.5 Batch D) 从 `日常杂谈/杂项/桌游记录/` 迁入。
+桌游记录。
 
-> 本文件由 OpenSpec change `restructure-vault-as-llm-wiki` task 3.5 创建。
+## 页面目录
 
-参见同级 ``5-Life/桌游记录.base`` （在 Obsidian 中以表格视图展示，不可 wikilink）。
+- [[7连翻(Flip 7)]] —  (tags: 桌游, status: draft)
+- [[七大奇迹(7 Wonders)]] —  (tags: 桌游, status: draft)
+- [[乌诺(UNO)]] —  (tags: 桌游, status: draft)
+- [[先王之冠( The Old King's Crown)]] —  (tags: 桌游, status: draft)
+- [[六华(Rikka)]] —  (tags: 桌游, status: draft)
+- [[农场主(Agricola)]] —  (tags: 桌游, status: draft)
+- [[冠军挑战者(Challengers)]] —  (tags: 桌游, status: draft)
+- [[勃艮第城堡( The Castles of Burgundy)]] —  (tags: 桌游, status: draft)
+- [[卡卡颂(Carcassonne)]] —  (tags: 桌游, status: draft)
+- [[卡坦岛(Catan)]] —  (tags: 桌游, status: draft)
+- [[卡坦岛-新能源(Catan-New Energies)]] —  (tags: 桌游, status: draft)
+- [[卡波(CABO)]] —  (tags: 桌游, status: draft)
+- [[印加宝藏(Incan Gold)]] —  (tags: 桌游, status: draft)
+- [[只言片语(Dixit)]] —  (tags: 桌游, status: draft)
+- [[城堡嘉年华(Castle Combo)]] —  (tags: 桌游, status: draft)
+- [[大西部铁路-埃尔帕索(Great Western Trail-Elpaso)]] —  (tags: 桌游, status: draft)
+- [[天合小队(sky team)]] —  (tags: 桌游, status: draft)
+- [[奶酪世家(Fromage)]] —  (tags: 桌游, status: draft)
+- [[孤勇英豪( Unstoppable)]] —  (tags: 桌游, status: draft)
+- [[工业革命-伯明翰(Brass-Birminghan)]] —  (tags: 桌游, status: draft)
+- [[幽港迷城(Gloomhaven)]] —  (tags: 桌游, status: draft)
+- [[庸医(The Quacks of Quedlinburg)]] —  (tags: 桌游, status: draft)
+- [[忍者之夜]] —  (tags: 桌游, status: draft)
+- [[情书(Love Letter)]] —  (tags: 桌游, status: draft)
+- [[拉斯维加斯(Las Vegas Royale)]] —  (tags: 桌游, status: draft)
+- [[方舟动物园(Ark Nova)]] —  (tags: 桌游, status: draft)
+- [[时序迷局(Take Time)]] —  (tags: 桌游, status: draft)
+- [[星空觅迹(SETI)]] —  (tags: 桌游, status: draft)
+- [[柯尔特快车(Colt Express)]] —  (tags: 桌游, status: draft)
+- [[森森不息(Forest Shuffle)]] —  (tags: 桌游, status: draft)
+- [[永恒牌(Eternal Decks)]] —  (tags: 桌游, status: draft)
+- [[污痕圣杯-破灭之王(Tainted Grail- Kings of Ruin)]] —  (tags: 桌游, status: draft)
+- [[沙丘帝国(Dune Imperium)]] —  (tags: 桌游, status: draft)
+- [[沙丘帝国-起义(Dune Imperium-Uprising)]] —  (tags: 桌游, status: draft)
+- [[波多黎各(Puerto Rico)]] —  (tags: 桌游, status: draft)
+- [[灵迹岛(Spirit Island)]] —  (tags: 桌游, status: draft)
+- [[炸弹克星(Bomb Busters)]] —  (tags: 桌游, status: draft)
+- [[爆炸猫咪(Exploding Kittens)]] —  (tags: 桌游, status: draft)
+- [[爆珠发明(Gizmos)]] —  (tags: 桌游, status: draft)
+- [[牛头王(Take 5)]] —  (tags: 桌游, status: draft)
+- [[独家暗语(Just One)]] —  (tags: 桌游, status: draft)
+- [[王冠之心(Heart of Crown)]] —  (tags: 桌游, status: draft)
+- [[王权骰铸(Dice Throne)]] —  (tags: 桌游, status: draft)
+- [[环中物语(Things in Rings)]] —  (tags: 桌游, status: draft)
+- [[现代艺术]] —  (tags: 桌游, status: draft)
+- [[璀璨宝石-宝可梦(Splendor-Pokemon)]] —  (tags: 桌游, status: draft)
+- [[瘟疫危机-传承版(Pandemic Legacy)]] —  (tags: 桌游, status: draft)
+- [[矮人矿坑(Saboteur)]] —  (tags: 桌游, status: draft)
+- [[纸牌帮(The Gang)]] —  (tags: 桌游, status: draft)
+- [[自然和弦(Harmonies)]] —  (tags: 桌游, status: draft)
+- [[花火(Hanabi)]] —  (tags: 桌游, status: draft)
+- [[荣耀之城(Citadels)]] —  (tags: 桌游, status: draft)
+- [[行动代号(Codenames)]] —  (tags: 桌游, status: draft)
+- [[诡镇奇谈-卡牌版(Arkham Horror The Card Game)]] —  (tags: 桌游, status: draft)
+- [[透视(Perspectives)]] —  (tags: 桌游, status: draft)
+- [[重塑火星(Terraforming Mars)]] —  (tags: 桌游, status: draft)
+- [[马尼拉(Manila)]] —  (tags: 桌游, status: draft)
+- [[马戏星探(Scout)]] —  (tags: 桌游, status: draft)
+- [[骆驼大赛(Camel Up)]] —  (tags: 桌游, status: draft)
+- [[骰子街(Machi Koro)]] —  (tags: 桌游, status: draft)
+- [[骰子街2(Machi Koro 2)]] —  (tags: 桌游, status: draft)
+- [[魔戒-命运同盟( The Lord of the Rings - Fate of the Fellowship)]] —  (tags: 桌游, status: draft)
+- [[魔戒同盟(The Lord of the Rings-The Fellowship of the Ring)]] —  (tags: 桌游, status: draft)
+- [[魔法运动员(Magical Athlete)]] —  (tags: 桌游, status: draft)

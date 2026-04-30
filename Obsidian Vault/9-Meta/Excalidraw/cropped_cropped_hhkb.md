@@ -1,12 +1,14 @@
 ---
-
 excalidraw-mask: true
 excalidraw-export-dark: false
 excalidraw-export-padding: 0
 excalidraw-export-transparent: true
 excalidraw-plugin: parsed
-
+visibility: public
+area: meta
 ---
+
+
 # Excalidraw Data
 
 ## Text Elements

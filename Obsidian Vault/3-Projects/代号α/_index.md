@@ -5,8 +5,7 @@ status: paused
 created: 2026-04-29
 updated: 2026-04-29
 tags:
-  - game-design
-  - card-game
+  - 项目
 ---
 # 代号α
 

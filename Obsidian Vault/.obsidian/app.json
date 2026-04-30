@@ -1,11 +1,4 @@
 {
-  "accentColor": "",
-  "theme": "obsidian",
-  "cssTheme": "Obsidian Nord",
-  "baseFontSize": 25,
-  "enabledCssSnippets": [
-    "kanban"
-  ],
   "promptDelete": false,
   "vimMode": true,
   "alwaysUpdateLinks": true,

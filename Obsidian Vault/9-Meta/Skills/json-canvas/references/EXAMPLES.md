@@ -1,3 +1,7 @@
+---
+visibility: public
+area: meta
+---
 # JSON Canvas Complete Examples
 
 ## Simple Canvas with Text and Connections

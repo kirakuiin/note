@@ -2,12 +2,10 @@
 area: session
 visibility: public
 date: {{date}}
-topic: "{{topic}}"
+topic: {{topic}}
 tags:
-  - {{tag}}
 wiki_pages_touched: []
 ---
-
 # {{topic}}
 
 ## 背景

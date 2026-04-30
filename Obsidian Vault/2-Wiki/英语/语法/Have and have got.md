@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: present perfect and past
+visibility: public
+area: knowledge
+status: archived
 ---
 have 和 have got 意味着有 **所有权，关系，疾病**等等，这两个在表达这个意思时可以相互替换，并且不能使用进行时态。
 

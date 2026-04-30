@@ -1,3 +1,8 @@
+---
+visibility: public
+area: meta
+---
+
 /*
 With This Script it is possible to make boolean Operations on Shapes. 
 The style of the resulting shape will be the style of the highest ranking Element that was used. 

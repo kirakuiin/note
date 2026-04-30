@@ -1,5 +1,8 @@
-## ADDED Requirements
+# session-ingestion Specification
 
+## Purpose
+TBD - created by archiving change restructure-vault-as-llm-wiki. Update Purpose after archive.
+## Requirements
 ### Requirement: Session 文件命名与位置
 
 Each ingested session (a meaningful conversation or document) SHALL be persisted as a markdown file under `1-Sessions/YYYY/MM/YYYY-MM-DD-<topic>.md`. `<topic>` is a kebab-case 或中文短语，能够独立表达本次内容主题（如 `知识库结构设计`、`debug-skill-loader`）。
@@ -15,7 +18,6 @@ netease 工作侧的 session 同样存放于 `netease/1-Sessions/YYYY/MM/`，结
 - **THEN** agent SHALL 基于对话内容自动提炼一个 5-15 字的主题，并在写入前呈现给用户确认
 
 ---
-
 ### Requirement: Session 文件内容结构
 
 Each session file SHALL contain at minimum:
@@ -75,3 +77,4 @@ H2 [YYYY-MM-DD] ingest-session | <topic>
 #### Scenario: ingest 失败或中途取消
 - **WHEN** ingest 流程在执行 wiki 修改前被取消
 - **THEN** session 文件 SHALL 仍然保留（已沉淀的原始素材不丢），但 `_log.md` 不追加记录；`wiki_pages_touched` 字段为空
+

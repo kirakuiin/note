@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: prepositions
+visibility: public
+area: knowledge
+status: archived
 ---
 当我们表达移动的目的地时，比如参加活动，去哪里做某事等等。此时介词用**to**。
 

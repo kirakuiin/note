@@ -5,7 +5,6 @@ date: {{date}}
 tags:
   - {{tag}}
 ---
-
 # {{date}} {{weekday}}
 
 ## 今日

@@ -1,3 +1,8 @@
+---
+visibility: public
+area: meta
+---
+
 /*
 
 This script splits an ellipse at any point where a line intersects it. If no lines are selected, it will use every line that intersects the ellipse. Otherwise, it will only use the selected lines. If there is no intersecting line, the ellipse will be converted into a line object. 

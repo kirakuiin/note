@@ -2,14 +2,10 @@
 area: session
 visibility: public
 date: 2026-04-29
-topic: "Python async/await 深入理解"
+topic: Python async/await 深入理解
 tags:
-  - 编程语言
-  - from-doc
-wiki_pages_touched:
-  - "[[2-Wiki/编程语言/Python-async-await]]"
+wiki_pages_touched: 
 ---
-
 ## 背景
 
 用户粘贴了一篇关于 Python async/await 的技术文章，要求消化后存入 wiki。

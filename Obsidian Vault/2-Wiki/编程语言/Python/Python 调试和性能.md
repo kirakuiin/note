@@ -1,7 +1,9 @@
 ---
 tags:
-  - reference
-  - python
+  - 编程语言
+visibility: public
+area: knowledge
+status: archived
 ---
 # 常见调试工具
 

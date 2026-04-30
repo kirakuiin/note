@@ -10,7 +10,6 @@ aliases:
   - 工作台
   - 我的笔记本
 ---
-
 # Dashboard
 
 > 这是我自己的**行动型工作台**。
@@ -32,7 +31,7 @@ aliases:
 
 ## 知识地图
 
-按学科领域分类的 6 个主题 MOC（每个 MOC 是该领域的"知识地图入口"，从这里两跳可达任意 wiki 页）：
+按学科领域分类的 7 个主题 MOC（每个 MOC 是该领域的"知识地图入口"，从这里两跳可达任意 wiki 页）：
 
 - [[2-Wiki/编程语言/_MOC|💻 编程语言]]
 - [[2-Wiki/游戏开发/_MOC|🎮 游戏开发]]
@@ -40,6 +39,7 @@ aliases:
 - [[2-Wiki/AI与Agent/_MOC|🤖 AI 与 Agent]]
 - [[2-Wiki/英语/_MOC|🔤 英语]]
 - [[2-Wiki/方法论/_MOC|🧭 方法论]]
+- [[2-Wiki/计科基础/_MOC|🏗️ 计科基础]]
 
 > 新增领域请先开 OpenSpec change 修订 [[9-Meta/AGENTS|AGENTS.md]]，禁止直接加顶级目录。
 
@@ -82,7 +82,7 @@ SORT file.mtime DESC
 
 - [ ] **月度 wiki lint 巡检**：跑 `lint-wiki` skill，处理 Critical/Warning 级问题（参见 [[9-Meta/Skills/lint-wiki/SKILL]]）
 - [ ] **Tag 词表同步**：新 wiki 页面引入了未登记 tag 时，更新 [[9-Meta/TAGS|TAGS.md]]
-- [ ] **断链清零**：`obsidian unresolved` 应保持基线值（迁移期可能有暂时升高，迁移完毕需归零）
+- [ ] **断链清零**：`obsidian unresolved` 应保持 ≤33（公开区基线，不含 netease 私有区内部断链和模板占位符）
 - [ ] **OpenSpec change 归档**：完成的 change 及时跑 `/opsx:archive` 入历史
 - [ ] **`0-Inbox/` 清理**：投递项分流到对应区（wiki / sessions / projects / tools）
 - [ ] **Sessions 价值评估**：高价值 session 用 `ingest` skill 提炼成 wiki 页面
@@ -130,5 +130,5 @@ LIMIT 8
 
 ---
 
-> 本文件由 OpenSpec change `restructure-vault-as-llm-wiki` task 2.4 创建；
-> 旧的 `🧠 第二大脑.md` 将在 task 3.11 删除（功能已迁入此处）。
+> 本文件由 OpenSpec change `restructure-vault-as-llm-wiki` task 2.4 创建，task 5.5 更新（2026-04-30）；
+> 旧的 `🧠 第二大脑.md` 已在 task 3.11 删除（功能已迁入此处）。

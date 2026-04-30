@@ -5,7 +5,6 @@ status: stable
 created: 2026-04-29
 updated: 2026-04-29
 ---
-
 # Templates
 
 Obsidian 模板。被 ``obsidian create`` 命令通过 ``template=<name>`` 引用。包含 ``session.md`` / ``wiki-page.md`` / ``project.md`` / ``daily.md`` / ``MOC.md`` / ``index.md`` / ``log.md``。

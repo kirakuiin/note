@@ -1,3 +1,8 @@
+---
+visibility: public
+area: meta
+---
+
 ## ADDED Requirements
 
 ### Requirement: 顶级目录采用编号 + 性质分类

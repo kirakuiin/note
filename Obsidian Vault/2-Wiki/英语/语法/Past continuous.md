@@ -1,9 +1,11 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: present and past
+visibility: public
+area: knowledge
+status: archived
 ---
-
 > [!example]
 > This time last year I was living in Beijing.
 > What were you doing at 10 o'clock last night?

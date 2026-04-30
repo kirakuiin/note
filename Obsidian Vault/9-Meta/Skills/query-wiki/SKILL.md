@@ -1,16 +1,9 @@
 ---
 name: query-wiki
 description: >
-  Answer questions by searching and synthesizing the vault wiki. Reads
-  _index.md to find candidate pages, drills into relevant content, and
-  produces cited answers. Use this skill whenever the user asks a
-  knowledge question that might be answered by the wiki — "what do I
-  know about X", "have I studied Y", "compare A and B", "what's the
-  best practice for Z", or any question where the answer likely lives
-  in 2-Wiki/ or 1-Sessions/. Also use when the user says "search my
-  notes", "check my wiki", "look up", "find in vault".
+visibility: public
+area: meta
 ---
-
 # Query-Wiki Skill
 
 Answer questions from the vault wiki with citations, and identify when

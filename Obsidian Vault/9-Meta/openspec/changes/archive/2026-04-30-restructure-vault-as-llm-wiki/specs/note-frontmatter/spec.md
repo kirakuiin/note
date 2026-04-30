@@ -1,3 +1,8 @@
+---
+visibility: public
+area: meta
+---
+
 ## ADDED Requirements
 
 ### Requirement: 全 vault frontmatter 字段集

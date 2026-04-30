@@ -1,7 +1,10 @@
 ---
 tags:
-  - reference
+  - 游戏开发
 outline: true
+visibility: public
+area: knowledge
+status: archived
 ---
 # Unity开发
 

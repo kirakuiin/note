@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: modals
+visibility: public
+area: knowledge
+status: archived
 ---
 **needn't**表示做某事不是必要的（如果你想的话你可以做）。
 

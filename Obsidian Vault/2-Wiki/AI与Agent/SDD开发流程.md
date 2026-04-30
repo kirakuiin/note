@@ -1,14 +1,11 @@
 ---
-aliases:
-  - SDD开发流程
-  - Spec Driven Development 流程
+aliases: 
 tags:
-  - AI
-  - SDD
-  - 开发流程
-  - 方法论
+  - AI与Agent
+visibility: public
+area: knowledge
+status: archived
 ---
-
 # SDD 开发流程
 
 > [!abstract] 核心结论

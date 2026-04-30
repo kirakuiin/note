@@ -1,7 +1,9 @@
 ---
 tags:
-  - reference
-  - emacs
+  - 工具/Emacs
+visibility: public
+area: tool
+category: 编辑器
 ---
 > [!question] c-c++ layer clangd后端无法识别标准库
 > 这个问题是由于**cmake**生成的**compile_commands.json**中是不包含标准库的路径的，即不包含`-I/.../include/c++/v1`，因此需要在**CmakeLists.txt**中使用`INCLUDE_DIRECTORIES`命令手动将标准库路径包含在其中。

@@ -1,3 +1,8 @@
+---
+visibility: public
+area: meta
+---
+
 ## Why
 
 当前 vault 是按"内容来源"组织的传统 Obsidian 知识库（`读书笔记/`、`技术文档/`、`日常杂谈/` 等 11 个顶级目录），存在三个核心问题：(1) 几乎所有笔记的 frontmatter `tags` 字段为空，导致 agent 无法基于元数据检索；(2) `日常杂谈/` 沦为杂物筐，6 种性质迥异的内容混杂；(3) 完全没有给 agent 用的 schema/导航/工作流约定，agent 每次都要从零理解仓库。

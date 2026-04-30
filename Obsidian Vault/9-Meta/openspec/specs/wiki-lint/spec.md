@@ -1,5 +1,8 @@
-## ADDED Requirements
+# wiki-lint Specification
 
+## Purpose
+TBD - created by archiving change restructure-vault-as-llm-wiki. Update Purpose after archive.
+## Requirements
 ### Requirement: Wiki Lint 检查项
 
 The `lint-wiki` workflow SHALL inspect the wiki for the following health issues and produce a structured report:
@@ -30,7 +33,6 @@ The `lint-wiki` workflow SHALL inspect the wiki for the following health issues 
 - **THEN** agent SHALL 只跑该项检查，不浪费 token 跑全项
 
 ---
-
 ### Requirement: Lint 报告格式
 
 The lint report SHALL be structured markdown, organized by severity:
@@ -82,3 +84,4 @@ Lint workflow SHALL be read-only at the analysis phase. Modifications happen onl
 #### Scenario: 发现明显问题
 - **WHEN** lint 发现一个明显应该修复的问题（如缺 frontmatter）
 - **THEN** SHALL 在报告中给出建议修复内容，但不立即写入；等用户确认
+

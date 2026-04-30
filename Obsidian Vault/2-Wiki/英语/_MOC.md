@@ -10,7 +10,6 @@ aliases:
   - 英语 MOC
   - 英语 地图
 ---
-
 # 英语 — Map of Content
 
 > 本文件由 OpenSpec change `restructure-vault-as-llm-wiki` task 1.7 创建。

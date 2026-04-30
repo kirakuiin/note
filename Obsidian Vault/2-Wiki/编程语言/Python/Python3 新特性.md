@@ -1,9 +1,10 @@
 ---
 tags:
-  - reference
-  - python
+  - 编程语言
+visibility: public
+area: knowledge
+status: archived
 ---
-
 python3相比于python2带来了大量优化和改变，这里记录下个人觉得有趣或者比较重要的点。
 
 # 基本差异

@@ -1,7 +1,9 @@
 ---
 tags:
-  - reference
-  - shader
+  - 游戏开发
+visibility: public
+area: knowledge
+status: archived
 ---
 # 长宽匹配
 

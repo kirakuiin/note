@@ -1,7 +1,10 @@
 ---
 tags:
-  - language
+  - 英语
 grammer_type: present perfect and past
+visibility: public
+area: knowledge
+status: archived
 ---
 使用这个短语来表示：“我过去经常做某事，但现在不做了”。
 

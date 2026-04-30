@@ -1,7 +1,9 @@
 ---
 tags:
-  - vscode
-  - reference
+  - 工具/VSCode
+visibility: public
+area: tool
+category: 编辑器
 ---
 # 小技巧
 

@@ -7,7 +7,6 @@ status: draft
 created: 2026-04-29
 updated: 2026-04-29
 ---
-
 # Wiki — 全局索引
 
 LLM 主导维护的结构化知识库。本索引按领域子目录分类，每个页面一行：
@@ -29,4 +28,16 @@ LLM 主导维护的结构化知识库。本索引按领域子目录分类，每�
 
 ## 索引
 
-（Phase 2 内容迁移后由 agent 维护）
+各领域页面目录详见对应 `_index.md`：
+
+| 领域 | 页面数 | 入口 |
+|------|--------|------|
+| 编程语言 | ~100 | [[2-Wiki/编程语言/_index\|编程语言/_index]] |
+| 游戏开发 | ~60 | [[2-Wiki/游戏开发/_index\|游戏开发/_index]] |
+| 算法与数据结构 | 21 | [[2-Wiki/算法与数据结构/_index\|算法与数据结构/_index]] |
+| AI与Agent | 3 | [[2-Wiki/AI与Agent/_index\|AI与Agent/_index]] |
+| 英语 | ~110 | [[2-Wiki/英语/_index\|英语/_index]] |
+| 方法论 | 4 | [[2-Wiki/方法论/_index\|方法论/_index]] |
+| 计科基础 | 1 | [[2-Wiki/计科基础/_index\|计科基础/_index]] |
+
+> 本索引由 task 5.4 补全（2026-04-30）。后续 agent 每次 ingest 时同步更新对应领域 `_index.md`。

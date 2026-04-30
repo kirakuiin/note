@@ -8,7 +8,6 @@ aliases:
   - Tag 词表
   - Tag Vocabulary
 ---
-
 # TAGS.md — Tag 词表
 
 > 本文件是 vault 内 tag 治理的**单一权威源**。所有 `tags` 字段的取值必须来自本文件的白名单。

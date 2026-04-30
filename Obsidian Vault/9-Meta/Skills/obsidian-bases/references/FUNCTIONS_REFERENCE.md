@@ -1,3 +1,7 @@
+---
+visibility: public
+area: meta
+---
 # Functions Reference
 
 ## Global Functions
