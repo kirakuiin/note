@@ -18,3 +18,12 @@ updated: 2026-04-29
 ## 页面列表
 
 （Phase 2 迁入后由 agent 维护，每行格式：`[[页面名]] — 一句话摘要 (tags: ..., status: ...)`）
+
+### Python
+
+- [[Python/Python 导入问题]] — Python import 机制踩坑
+- [[Python/Python 编译过程和对象]] — Python 执行模型笔记
+- [[Python/Python 装饰器]] — 装饰器原理与用法
+- [[Python/Python 调试和性能]] — 调试 / profiling 工具笔记
+- [[Python/Python3 新特性]] — Python 3.x 各版本新特性
+- [[Python/Python 散点笔记]] — venv / Pycharm / requirements 等小知识点（task 3.11 从 `记录灵感/` 收编）

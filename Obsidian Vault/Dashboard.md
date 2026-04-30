@@ -25,7 +25,7 @@ aliases:
 | [[9-Meta/AGENTS\|AGENTS.md]] | Agent 操作约定（首次接触此 vault 必读） |
 | [[2-Wiki/_index\|🗺️ 知识地图]] | 全部 wiki 领域索引 |
 | [[0-Inbox/_index\|📥 收件箱]] | 未分类临时投递（请定期清理） |
-| [[LLM wiki]] | 本 vault 的 LLM Wiki 模式说明 |
+| [[LLM个人知识库模式]] | 本 vault 的 LLM Wiki 模式说明 |
 | [[9-Meta/TAGS\|TAGS.md]] | tag 词表（打标签前查阅） |
 
 ---

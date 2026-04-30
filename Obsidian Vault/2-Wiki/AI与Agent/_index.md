@@ -18,3 +18,5 @@ LLM 原理、prompt engineering、agent 工作流、本仓库的 LLM Wiki 模式
 ## 页面列表
 
 （Phase 2 迁入后由 agent 维护，每行格式：`[[页面名]] — 一句话摘要 (tags: ..., status: ...)`）
+
+- [[LLM个人知识库模式]] — 用 LLM 构建个人知识库的设计模式
