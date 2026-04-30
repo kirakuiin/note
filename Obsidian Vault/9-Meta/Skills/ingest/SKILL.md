@@ -23,7 +23,7 @@ Do NOT trigger on: casual "remember this" (too vague), single-line facts
 
 ### Phase 1: Determine scope
 
-1. **Ask public or private**: "Save to public vault or netease/ private area?"
+1. **Ask public or private**: "Save to public vault or Netease/ private area?"
    Default to public unless the content references work projects, internal
    systems, or sensitive data.
 2. **Ask for topic**: If the user hasn't provided one, propose a 5-15 word
@@ -34,7 +34,7 @@ Do NOT trigger on: casual "remember this" (too vague), single-line facts
 ### Phase 2: Write the session file
 
 Create the file at `<vault>/1-Sessions/YYYY/MM/YYYY-MM-DD-<topic>.md`
-(or `netease/1-Sessions/...` for private).
+(or `Netease/1-Sessions/...` for private).
 
 Use `obsidian create` with the `session` template if available, otherwise
 construct the file manually. Keep it concise — 200-800 words.
@@ -104,13 +104,13 @@ If nothing qualifies, skip to Phase 5 with `wiki_pages_touched: []`.
      `2-Wiki/<domain>/` matching the appropriate TAGS.md domain tag
    - Updates: `obsidian append` or `obsidian read` + edit + write back
    - Update `_index.md` in the affected wiki directory
-   - Append to `2-Wiki/_log.md` (or netease equivalent)
+   - Append to `2-Wiki/_log.md` (or Netease equivalent)
 4. **Backfill**: Update the session file's `wiki_pages_touched` with
    wikilinks to all affected pages.
 
 ### Phase 5: Log and verify
 
-1. Append to `2-Wiki/_log.md` (or netease equivalent):
+1. Append to `2-Wiki/_log.md` (or Netease equivalent):
    ```markdown
    ## [YYYY-MM-DD] ingest | <topic>
    - session: [[1-Sessions/YYYY/MM/YYYY-MM-DD-<topic>]]
@@ -127,7 +127,7 @@ If nothing qualifies, skip to Phase 5 with `wiki_pages_touched: []`.
   itself can be created without confirmation (it's just a record), but
   wiki modifications must be approved.
 - **Respect the public/private boundary.** Private content goes to
-  `netease/1-Sessions/`, public to `1-Sessions/`. Never cross-reference
+  `Netease/1-Sessions/`, public to `1-Sessions/`. Never cross-reference
   between them.
 - **Tags must come from `9-Meta/TAGS.md`.** Read the tag vocabulary before
   assigning tags. If a needed tag isn't in the whitelist, ask the user

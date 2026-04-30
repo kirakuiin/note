@@ -79,7 +79,7 @@ aliases:
 
 ## 3. 红线清单
 
-> 以下 tag **仅可在 `netease/` 私有区出现**。公开区（`netease/` 子树外的任何文件）出现以下任一 tag = lint **Critical**。
+> 以下 tag **仅可在 `Netease/` 私有区出现**。公开区（`Netease/` 子树外的任何文件）出现以下任一 tag = lint **Critical**。
 
 ### 3.1 项目/产品代号
 

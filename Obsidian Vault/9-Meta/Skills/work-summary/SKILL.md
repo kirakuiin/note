@@ -89,16 +89,16 @@ python -c "f=open(r'<目标路径>','a',encoding='utf-8'); f.write('<工作项�
 
 ```bash
 # 步骤 1：写入 frontmatter + 标题
-python -c "f=open(r'C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\2026\04\2026-04-13_日报.md','w',encoding='utf-8'); f.write('---\ntitle: 2026-04-13 日报\ndate: 2026-04-13\ntype: daily\ntags:\n  - 日报\nweek: 15\ntotal_hours: 2\n---\n\n# 2026-04-13 日报\n\n## 工作内容\n\n'); f.close()"
+python -c "f=open(r'C:\Users\wangzhuowei\note\Obsidian Vault\Netease\0-Daily\2026\04\2026-04-13_日报.md','w',encoding='utf-8'); f.write('---\ntitle: 2026-04-13 日报\ndate: 2026-04-13\ntype: daily\ntags:\n  - 日报\nweek: 15\ntotal_hours: 2\n---\n\n# 2026-04-13 日报\n\n## 工作内容\n\n'); f.close()"
 
 # 步骤 2：追加工作项 1
-python -c "f=open(r'C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\2026\04\2026-04-13_日报.md','a',encoding='utf-8'); f.write('### 1. 某个任务\n\n**背景**：...\n\n**解决方案**：...\n\n**预估工时**：1h\n\n---\n\n'); f.close()"
+python -c "f=open(r'C:\Users\wangzhuowei\note\Obsidian Vault\Netease\0-Daily\2026\04\2026-04-13_日报.md','a',encoding='utf-8'); f.write('### 1. 某个任务\n\n**背景**：...\n\n**解决方案**：...\n\n**预估工时**：1h\n\n---\n\n'); f.close()"
 
 # 步骤 3：追加工作项 2
-python -c "f=open(r'C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\2026\04\2026-04-13_日报.md','a',encoding='utf-8'); f.write('### 2. 另一个任务\n\n**背景**：...\n\n**预估工时**：1h\n\n---\n\n'); f.close()"
+python -c "f=open(r'C:\Users\wangzhuowei\note\Obsidian Vault\Netease\0-Daily\2026\04\2026-04-13_日报.md','a',encoding='utf-8'); f.write('### 2. 另一个任务\n\n**背景**：...\n\n**预估工时**：1h\n\n---\n\n'); f.close()"
 
 # 步骤 4：追加反思和统计
-python -c "f=open(r'C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\2026\04\2026-04-13_日报.md','a',encoding='utf-8'); f.write('## 反思与学习\n\n> [!tip] 经验总结\n> - 经验1\n\n---\n\n## 当日合计\n\n| 项目 | 工时 |\n|------|------|\n| 总计 | 2h |\n'); f.close()"
+python -c "f=open(r'C:\Users\wangzhuowei\note\Obsidian Vault\Netease\0-Daily\2026\04\2026-04-13_日报.md','a',encoding='utf-8'); f.write('## 反思与学习\n\n> [!tip] 经验总结\n> - 经验1\n\n---\n\n## 当日合计\n\n| 项目 | 工时 |\n|------|------|\n| 总计 | 2h |\n'); f.close()"
 ```
 
 #### 为什么用分段追加？
@@ -173,7 +173,7 @@ New-Item -ItemType Directory -Path "<目录路径>" -Force
 
 ## 存储路径与目录结构
 
-基础路径：`C:\Users\wangzhuowei\note\Obsidian Vault\netease\daily\`
+基础路径：`C:\Users\wangzhuowei\note\Obsidian Vault\Netease\0-Daily\`
 
 按 `年/月` 组织子目录：
 ```
@@ -194,7 +194,7 @@ daily\
 | 日报  | `{YYYY-MM-DD}_日报.md` | `2026-03-26_日报.md` |
 | 周报  | `{YYYY}_第{W}周_周报.md` | `2026_第13周_周报.md`  |
 | 月报  | `{YYYY}_{MM}_月报.md`  | `2026_03_月报.md`    |
-| 年报  | `{YYYY}_年度总结.md`      | `2026_年度总结.md`      |
+| 年报  | `{YYYY}_年度总结.md`     | `2026_年度总结.md`     |
 
 其中周数使用 ISO 周编号。
 
@@ -227,7 +227,6 @@ date: {YYYY-MM-DD}            # 日期
 type: daily                    # 文档类型（固定值）
 tags:                          # 标签列表
   - 日报
-  - {项目标签}
 week: {W}                      # ISO 周数（1-53）
 total_hours: {N}               # 当日总工时
 ---
@@ -266,7 +265,6 @@ week: {W}                      # ISO 周数（1-53）
 date: {YYYY-MM-DD}             # 今天的日期
 tags:                          # 标签列表
   - 周报
-  - {项目标签}
 total_hours: {N}               # 本周总工时
 ---
 ```
@@ -303,7 +301,6 @@ month: {MM}                    # 月份（01-12）
 date: {YYYY-MM-DD}             # 今天的日期
 tags:                          # 标签列表
   - 月报
-  - {项目标签}
 total_hours: {N}               # 本月总工时
 ---
 ```
@@ -337,7 +334,6 @@ date_range:                    # 年日期范围（支持跨自然年）
   end: {YYYY-MM-DD}            # 结束日期
 tags:                          # 标签列表
   - 年报
-  - {项目标签}
 ---
 ```
 

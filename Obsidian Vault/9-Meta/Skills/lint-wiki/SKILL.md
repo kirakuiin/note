@@ -46,10 +46,10 @@ descriptions. Do NOT modify any files during this phase.
 
 **Check 4: Visibility mismatch**
 - Public area files (`2-Wiki/`, `1-Sessions/`, etc.) with `visibility: private`
-- `netease/` files with `visibility: public`
+- `Netease/` files with `visibility: public`
 
 **Check 5: Cross-boundary references**
-- Public area files containing wikilinks to `netease/` paths
+- Public area files containing wikilinks to `Netease/` paths
 - This is a Critical security issue
 
 **Check 6: Index drift**
@@ -94,10 +94,10 @@ Structure the report by severity:
 <Issues that pose security or privacy risks>
 
 ### Check 5: Cross-boundary references
-- `public-file.md` links to `netease/secret.md` → remove or move reference
+- `public-file.md` links to `Netease/secret.md` → remove or move reference
 
 ### Check 12: Redline tag leaks
-- `2-Wiki/game-dev.md` uses `#arcolab` → remove or move file to netease/
+- `2-Wiki/game-dev.md` uses `#arcolab` → remove or move file to Netease/
 
 ## 🟠 Warning
 <Issues that break navigation or data integrity>
@@ -181,7 +181,7 @@ If the user requests, save the report to:
 - **Use Obsidian Flavored Markdown** for the report and any filed
   content. Wikilinks, callouts, and proper frontmatter throughout.
 - **Respect public/private boundary.** When checking cross-boundary
-  references, treat any wikilink to `netease/` from public area as
+  references, treat any wikilink to `Netease/` from public area as
   Critical.
 - **TAGS.md is the authority for checks 11-12.** If TAGS.md is missing,
   skip those checks and note it in the report header.

@@ -27,7 +27,7 @@ answers are worth filing back as permanent wiki pages.
 **Do NOT trigger on:**
 - Procedural questions ("how do I open this file")
 - Current-state questions ("what's the weather")
-- Questions clearly about netease work (those go to netease side)
+- Questions clearly about Netease work (those go to Netease side)
 - Questions the user clearly intends to answer from the web, not the vault
 
 ## Workflow
@@ -37,10 +37,10 @@ answers are worth filing back as permanent wiki pages.
 1. **Classify the query**:
    - **Public domain** (general knowledge, learning, personal): search only
      `2-Wiki/` and `1-Sessions/` public side
-   - **Work domain** (netease projects, internal systems): search both
-     `netease/2-Wiki/`, `netease/1-Sessions/`, and public side
+   - **Work domain** (Netease projects, internal systems): search both
+     `Netease/2-Wiki/`, `Netease/1-Sessions/`, and public side
    - **Unclear**: ask the user "Should I search public wiki only, or
-     include netease work notes?"
+     include Netease work notes?"
 
 2. **If the query is ambiguous**, ask one clarifying question before
    searching. Don't spend more than one exchange on clarification.
@@ -48,7 +48,7 @@ answers are worth filing back as permanent wiki pages.
 ### Phase 2: Search and read
 
 1. **Read `_index.md` first.** Start with `2-Wiki/_index.md` (and
-   `netease/2-Wiki/_index.md` if work domain). Scan for pages matching
+   `Netease/2-Wiki/_index.md` if work domain). Scan for pages matching
    the query by title, tag, or description.
 
 2. **Identify candidate pages.** Pick up to 5 most relevant pages based
@@ -128,7 +128,7 @@ search `1-Sessions/` for topic matches in filenames and frontmatter.
 ## Important constraints
 
 - **Respect public/private boundary.** Public queries must not read
-  netease/ files. If a public query accidentally touches work topics,
+  Netease/ files. If a public query accidentally touches work topics,
   stop and ask.
 - **Cite with wikilinks.** Every claim from the wiki must have a
   `[[wikilink]]` so the user can verify.

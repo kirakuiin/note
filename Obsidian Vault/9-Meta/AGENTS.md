@@ -24,7 +24,7 @@ aliases:
 
 - **Vault 用途**：日常知识沉淀、对话归档、项目跟踪、生活记录
 - **LLM Wiki 模式**：和传统 RAG 不同，agent **增量地构建并维护一个持久化、互链的 markdown wiki**——知识被一次编译、长期维护，不是每次查询都重新推导。详见 vault 根的 `[[LLM wiki]]`
-- **公私分区**：`netease/` 是工作私有区，已通过仓库根 `.gitignore` 物理隔离，永不进入 git 跟踪范围
+- **公私分区**：`Netease/` 是工作私有区，已通过仓库根 `.gitignore` 物理隔离，永不进入 git 跟踪范围
 
 仓库 git 根是 `c:\Users\wangzhuowei\note\`，**vault 是其下 `Obsidian Vault/` 子目录**——所有 git 命令必须在仓库根执行。
 
@@ -59,7 +59,7 @@ aliases:
 | `6-Tools/` | tool | 工具速查（"用到才查、查完就走"） | 是 | **扁平结构**，文件名 `<类别>-<工具名>.md`（如 `编辑器-VSCode.md`） |
 | `9-Meta/` | meta | 仓库元层（本文件 / Skills / Templates / Scripts / openspec） | 用户主导 | — |
 
-**还允许的根级目录**（不在编号体系内）：`netease/`（私有区）、根级仪表盘 `Dashboard.md`、CLI 自动维护的 `openspec/`（OpenSpec 工作目录，非笔记内容）。
+**还允许的根级目录**（不在编号体系内）：`Netease/`（私有区）、根级仪表盘 `Dashboard.md`、CLI 自动维护的 `openspec/`（OpenSpec 工作目录，非笔记内容）。
 
 **资产存储约定**（task 3.9 落定）：
 - `9-Meta/Assets/` — Obsidian 默认附件目录（粘贴/拖拽图片自动写入此处，由 `attachmentFolderPath` 配置指向）
@@ -80,40 +80,40 @@ aliases:
 
 **红线只有一条**：
 
-> **公开区任何文件不得 wikilink、embed、或 frontmatter 字段引用 `netease/` 路径下的内容。反向（`netease/` 引用公开区）允许。**
+> **公开区任何文件不得 wikilink、embed、或 frontmatter 字段引用 `Netease/` 路径下的内容。反向（`Netease/` 引用公开区）允许。**
 
 ### 物理保障
 
-- `netease/` 在仓库根 `.gitignore` 中已被排除，不会进入 git 跟踪
-- 任何"公开区文件"指：**不在 `netease/` 子树下**的文件
-- 检查方式：写完文件后 `obsidian unresolved` 不应新增指向 `netease/` 的链接
+- `Netease/` 在仓库根 `.gitignore` 中已被排除，不会进入 git 跟踪
+- 任何"公开区文件"指：**不在 `Netease/` 子树下**的文件
+- 检查方式：写完文件后 `obsidian unresolved` 不应新增指向 `Netease/` 的链接
 
 ### Agent 行为守则
 
 | 场景 | 必须做 |
 |---|---|
-| 创建公开区 .md | frontmatter `visibility: public`；正文不出现 `netease/...` 路径或对应 wikilink |
-| 创建 netease/ 内 .md | frontmatter `visibility: private`；可自由引用公开区 |
+| 创建公开区 .md | frontmatter `visibility: public`；正文不出现 `Netease/...` 路径或对应 wikilink |
+| 创建 Netease/ 内 .md | frontmatter `visibility: private`；可自由引用公开区 |
 | 即将破坏红线 | **立刻停下并告诉用户**，不得静默继续 |
-| 不确定文件该归公开区还是 netease | 停下并问用户，不得猜 |
+| 不确定文件该归公开区还是 Netease | 停下并问用户，不得猜 |
 
-> **不需要维护敏感词清单**——只看路径边界即可。如果一个引用解析不到 netease 之外的位置，该引用就是合法的。
+> **不需要维护敏感词清单**——只看路径边界即可。如果一个引用解析不到 Netease 之外的位置，该引用就是合法的。
 
 ### 私有区独立 AGENTS.md
 
-`netease/` 拥有**独立的** [[netease/AGENTS|netease/AGENTS.md]]，覆盖私有区专属约定（私有 tag 词表、`confidentiality` 字段、私有区目录结构、私有区禁止事项等）。
+`Netease/` 拥有**独立的** [[Netease/AGENTS|Netease/AGENTS.md]]，覆盖私有区专属约定（私有 tag 词表、`confidentiality` 字段、私有区目录结构、私有区禁止事项等）。
 
 **强制切换规则**：
 
 | 当前操作目标路径 | 必须遵循 | 必须读 |
 |---|---|---|
-| 不在 `netease/` 子树下（vault 任何其它位置） | 本文件（`9-Meta/AGENTS.md`） | 本文件 |
-| 在 `netease/` 子树下（含 `netease/0-Daily/` `netease/work/` 等任何子目录） | `netease/AGENTS.md` | **`netease/AGENTS.md`**（首选）+ 本文件（继承部分） |
+| 不在 `Netease/` 子树下（vault 任何其它位置） | 本文件（`9-Meta/AGENTS.md`） | 本文件 |
+| 在 `Netease/` 子树下（含 `Netease/0-Daily/` `Netease/work/` 等任何子目录） | `Netease/AGENTS.md` | **`Netease/AGENTS.md`**（首选）+ 本文件（继承部分） |
 
-- 同一会话内**跨入** `netease/` 时，agent 必须显式重新读 `netease/AGENTS.md` 并切换到私有区约定（不得沿用本文件的 tag 词表 / 目录命名假设）
-- 同一会话内**跨出** `netease/`（回到公开区）时，必须切回本文件
+- 同一会话内**跨入** `Netease/` 时，agent 必须显式重新读 `Netease/AGENTS.md` 并切换到私有区约定（不得沿用本文件的 tag 词表 / 目录命名假设）
+- 同一会话内**跨出** `Netease/`（回到公开区）时，必须切回本文件
 - 同一会话内**同时**操作公开区与私有区时，**分别报告改动清单**（不得混在一起报告，避免审计混淆）
-- `netease/AGENTS.md` 与本文件的 skill 路由表（§8）和操作协议（§9）**完全继承一致**——只有 tag 词表 / 目录结构 / 红线方向有差异
+- `Netease/AGENTS.md` 与本文件的 skill 路由表（§8）和操作协议（§9）**完全继承一致**——只有 tag 词表 / 目录结构 / 红线方向有差异
 
 ---
 
@@ -133,7 +133,7 @@ aliases:
 | `tool` (`6-Tools/`) | + `category` | — |
 | `inbox`/`life`/`meta` | 仅需 area+visibility | — |
 
-**`visibility` 必须严格匹配路径**：公开区路径 → `public`；`netease/` 路径 → `private`。Agent 在写文件前根据路径自动设值，且永不允许 public 文件 embed/wikilink 到 private 文件。
+**`visibility` 必须严格匹配路径**：公开区路径 → `public`；`Netease/` 路径 → `private`。Agent 在写文件前根据路径自动设值，且永不允许 public 文件 embed/wikilink 到 private 文件。
 
 **`status` 取值**（knowledge 类）：`draft` / `stable` / `stale` / `archived`。新建默认 `draft`。
 
@@ -141,7 +141,7 @@ aliases:
 
 - `2-Wiki/` 下页面在提到一个有独立 wiki 页面的概念时 SHALL 用 `[[页面名]]` 而非裸文本
 - 每个非 MOC 页面 SHOULD 有至少 1 个出链
-- 跨边界引用尝试（公开区 → netease）→ 拒绝写入并停下问用户
+- 跨边界引用尝试（公开区 → Netease）→ 拒绝写入并停下问用户
 
 ### 5.3 `_index.md` / `_MOC.md` / `_log.md`
 
@@ -152,7 +152,7 @@ aliases:
 - `2-Wiki/_index.md`：全局领域索引（指向各 `<领域>/_MOC.md`）
 - `2-Wiki/_log.md`：append-only 操作日志，每条 `## [YYYY-MM-DD] <operation> | <subject>`，agent ingest 后追加一条
 
-netease 区独立维护 `netease/2-Wiki/_index.md` / `_log.md`，与公开区完全不互通。
+Netease 区独立维护 `Netease/2-Wiki/_index.md` / `_log.md`，与公开区完全不互通。
 
 ---
 
@@ -174,7 +174,7 @@ netease 区独立维护 `netease/2-Wiki/_index.md` / `_log.md`，与公开区完
 |---|---|---|
 | Session 文件名 | `1-Sessions/YYYY/MM/YYYY-MM-DD-<topic>.md`，topic 是 kebab-case 或中文短语 | `1-Sessions/2026/04/2026-04-29-知识库结构设计.md` |
 | 同日多次 session | 添加序号后缀 | `...-知识库结构设计-2.md` |
-| 日报 | `netease/0-Daily/YYYY/MM/YYYY-MM-DD_日报.md` | — |
+| 日报 | `Netease/0-Daily/YYYY/MM/YYYY-MM-DD_日报.md` | — |
 | Wiki 领域子目录 | 中文学科名 | `编程语言/` `游戏开发/` `算法与数据结构/` `AI与Agent/` `英语/` `方法论/` |
 | Wiki 页面 | 中文短名，能独立表达概念 | `单例模式.md` `状态机.md` |
 | 同名页面冲突 | 加领域后缀消歧 | `单例模式（游戏编程模式）.md` |
@@ -199,27 +199,17 @@ netease 区独立维护 `netease/2-Wiki/_index.md` / `_log.md`，与公开区完
 | `obsidian-bases` | 创建 / 修改 `.base` 文件（views、filters、formulas） |
 | `json-canvas` | 创建 / 修改 `.canvas` 文件 |
 
-### 8.2 OpenSpec 工作流（仓库结构性变更）
-
-| Skill | 必须用于 |
-|---|---|
-| `openspec-explore` | 想清楚某个变更前的探索讨论 |
-| `openspec-propose` / `openspec-new-change` | 开新 change |
-| `openspec-continue-change` / `openspec-apply-change` | 推进现有 change |
-| `openspec-verify-change` / `openspec-archive-change` | 验收 + 归档 |
-| `openspec-research` / `openspec-review` | change 工作期内的调研与代码审查 |
-
-### 8.3 内容生产 / 工具
+### 8.2 内容生产 / 工具
 
 | Skill | 必须用于 |
 |---|---|
 | `defuddle` | 网页内容抽取（替代 WebFetch，省 token） |
 | `work-summary` | 把对话总结为日报 / 周报 / 月报 / 年报 |
 | `karpathy-guidelines` (coding-guideline) | 代码编写 / 审查时的反"过度设计"行为约束 |
-| `mh-code-guide` | 梦幻西游客户端代码开发（仅 netease 工作侧使用） |
+| `mh-code-guide` | 梦幻西游客户端代码开发（仅 Netease 工作侧使用） |
 | `skill-creator` | 创建 / 修改 / 评测 skill 自身 |
 
-### 8.4 强制路由表（覆盖一切 vault 内文件操作）
+### 8.3 强制路由表（覆盖一切 vault 内文件操作）
 
 | 操作意图 | 必须用 | 禁止 |
 |---|---|---|
@@ -234,7 +224,7 @@ netease 区独立维护 `netease/2-Wiki/_index.md` / `_log.md`，与公开区完
 - `obsidian create` 走标准模板渲染、frontmatter 自动补、target 路径合法性校验，比手写更安全
 - 路径同名解析、wikilink 短格式渲染都依赖 Obsidian 内部状态，外部工具无法等价替代
 
-### 8.5 Skill 缺失时的行为
+### 8.4 Skill 缺失时的行为
 
 - 该 skill 在当前会话未注册（`use_skill` 报错）→ **停下并提示用户先 enable / install**，不得跳过 skill 直接手写
 - `obsidian` 命令找不到（PATH 未刷新）→ **重开终端**或用全路径 `%LOCALAPPDATA%\Programs\Obsidian\Obsidian.com`，不得降级到 `edit` 写 .md
@@ -275,7 +265,7 @@ obsidian unresolved       # 记一下基线断链数（修改后回比，确保�
 |---|---|
 | < 5 个文件、纯新增 | 直接执行 → 报告结果 |
 | >= 5 个文件，或涉及移动/改名/删除 | **先列完整文件清单 + 每个文件改动摘要** → 等用户确认 → 执行 |
-| 涉及红线（公开区引用 netease） | **立刻停下问用户**，不得自己决策 |
+| 涉及红线（公开区引用 Netease） | **立刻停下问用户**，不得自己决策 |
 
 ### Step 5 — 留痕
 
@@ -312,7 +302,7 @@ obsidian unresolved       # 记一下基线断链数（修改后回比，确保�
 
 ## 10. What NOT to do（明令禁止）
 
-- **不得** 让公开区任何文件 wikilink / embed / frontmatter 引用 `netease/` 路径下内容
+- **不得** 让公开区任何文件 wikilink / embed / frontmatter 引用 `Netease/` 路径下内容
 - **不得** 绕过第 8 节路由表，用通用文件工具直接操作 vault 内 `.md` / `.canvas` / `.base`
 - **不得** 在用户未确认前批量修改 ≥5 个文件
 - **不得** 在 lint 阶段擅自写入修复（lint 只产报告，修复必须经用户确认）
@@ -331,7 +321,7 @@ obsidian unresolved       # 记一下基线断链数（修改后回比，确保�
 |---|---|
 | Vault 路径 | `c:\Users\wangzhuowei\note\Obsidian Vault\` |
 | Git 仓库根 | `c:\Users\wangzhuowei\note\`（vault 是其子目录） |
-| `.gitignore` 私有区排除 | `Obsidian Vault/netease/` ✓ |
+| `.gitignore` 私有区排除 | `Obsidian Vault/Netease/` ✓ |
 | Obsidian CLI 版本要求 | >= 1.12.7 |
 | `alwaysUpdateLinks` 设置 | `true` |
 | 顶级目录骨架 | 已建（task 1.5/1.6/1.7） |
