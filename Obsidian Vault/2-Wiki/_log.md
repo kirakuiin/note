@@ -150,3 +150,35 @@ tags:
 
 **主 specs 自此成为 vault 内 OpenSpec 体系的权威源**。后续修订必须新开 change 通过 ADDED/MODIFIED/REMOVED 增量。
 
+
+---
+
+## [2026-04-30] convention | `## 相关` 必须是文件最末节
+
+**Change:** 新增 `9-Meta/AGENTS.md` §5.4 + `capture` skill §Link maintenance
+
+**理由：** 反向链接维护依赖 `obsidian append`（只能加到文件尾）；若 `## 相关` 在末节，append 一行 wikilink 即等价于在 Related 列表加一条；否则必须 fallback 到脆弱的 `obsidian eval` 拼串。
+
+**全库抽查结果：**
+- 私有区 `Netease/2-Wiki/梦幻西游客户端/` 20/20 全部合规（顺手修了 `confirm_box回调语义反直觉.md` 的截断，见私有 _log）
+- 公开区 `2-Wiki/` 317 页中 44 页不合规（14%，历史债）
+
+**待办：** 公开区 44 页不在本次 scope 内修；留给未来的 wiki-lint skill 或 cleanup change 批量处理。合规检测脚本可参考：
+
+```powershell
+Get-ChildItem -Recurse '2-Wiki' -Filter *.md | Where-Object { $_.Name -notmatch '^_' } | ForEach-Object {
+  $h2s = Get-Content $_.FullName -Encoding UTF8 | Where-Object { $_ -match '^## ' }
+  $last = $h2s | Select-Object -Last 1
+  if ($h2s.Count -gt 0 -and $last -notmatch '^## (相关|Related|See also)') { $_.FullName }
+}
+```
+
+---
+
+## [2026-04-30] skill-update | obsidian-cli skill 补 Windows path + 批处理 troubleshooting
+
+**Change:** `~/.codemaker/skills/obsidian-cli/SKILL.md` 新增 §File targeting 子节 "Path separators (Windows)" 与 "Shell pitfalls: batch loops through CLI wrappers"。
+
+**理由：** `capture` skill iteration-3 批量清理 24 页 `created/updated` 时踩坑——cmd 嵌 PowerShell 再调 CLI 导致反斜杠转义丢失，`property:remove` 静默失败。用独立 `.ps1` 脚本 + `.Replace('\\\\', '/')` 才正常工作。这条 lesson 应该沉淀给未来所有 CLI 批处理调用者。
+
+**Scope：** skill 源文件（codemaker-user）更新，不涉及 vault 内文件。

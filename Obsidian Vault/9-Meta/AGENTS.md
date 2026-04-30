@@ -38,7 +38,7 @@ aliases:
 |---|---|---|---|
 | **Raw** 原始层 | `1-Sessions/` | 对话、外部文档的原文沉淀（不可变） | agent ingest 时写 |
 | **Wiki** 知识层 | `2-Wiki/` | 结构化、互链、长期维护的知识页面 | agent 主导，用户审核 |
-| **Meta** 元层 | `9-Meta/` | 仓库自身配置（本文件、Skills、Templates、openspec） | 用户与 agent 共同维护 |
+| **Meta** 元层 | `9-Meta/` | 仓库自身配置（本文件、Skills、Templates） | 用户与 agent 共同维护 |
 
 其余顶级目录（`0-Inbox` `3-Projects` `4-Journal` `5-Life` `6-Tools`）按其它生命周期维度组织，详见下一节。
 
@@ -57,7 +57,7 @@ aliases:
 | `4-Journal/` | journal | 个人复盘（年度/项目/面试） | 仅按用户请求 | `YYYY/` 子目录 |
 | `5-Life/` | life | 生活兴趣（桌游、金融、读物） | 仅按用户请求 | 自由 |
 | `6-Tools/` | tool | 工具速查（"用到才查、查完就走"） | 是 | **扁平结构**，文件名 `<类别>-<工具名>.md`（如 `编辑器-VSCode.md`） |
-| `9-Meta/` | meta | 仓库元层（本文件 / Skills / Templates / Scripts / openspec） | 用户主导 | — |
+| `9-Meta/` | meta | 仓库元层（本文件 / Skills / Templates / Scripts） | 用户主导 | — |
 
 **还允许的根级目录**（不在编号体系内）：`Netease/`（私有区）、根级仪表盘 `Dashboard.md`、CLI 自动维护的 `openspec/`（OpenSpec 工作目录，非笔记内容）。
 
@@ -153,6 +153,22 @@ aliases:
 - `2-Wiki/_log.md`：append-only 操作日志，每条 `## [YYYY-MM-DD] <operation> | <subject>`，agent ingest 后追加一条
 
 Netease 区独立维护 `Netease/2-Wiki/_index.md` / `_log.md`，与公开区完全不互通。
+
+### 5.4 `## 相关` 必须是文件最末节
+
+所有 wiki 页面（`_index.md` / `_MOC.md` / `_log.md` 除外）SHALL 把
+`## 相关`（Related）section 放在**文件的最末尾**，其后不再有任何
+标题或正文内容。理由是操作层面的：
+
+- 反向链接维护依赖 **`obsidian append`** 在文件尾加一行 `- [[新页]]`
+- 只有 `## 相关` 在末节时，这一操作才等价于"在 Related 列表里加一条"
+- 否则必须 fallback 到 `obsidian eval` + `app.vault.modify` 拼串，脆弱
+
+Agent 在创建新页时：
+
+- 必须把 `## 相关` 放最末，其后禁止再开新 section
+- 发现旧页 `## 相关` 不在末节时，SHOULD 在本次改动范围内顺手挪到末节（±1 hop 内，不递归全库）
+- Append 反向链接前 SHALL 先 `read` 一次目标页确认 `## 相关` 确实是末节；若不是，退回 `eval` 方案
 
 ---
 
@@ -253,7 +269,7 @@ obsidian unresolved       # 记一下基线断链数（修改后回比，确保�
 3. 目标 `2-Wiki/<领域>/_MOC.md`（要操作哪个领域）
 4. 目标 `2-Wiki/<领域>/_index.md`（看现有页面）
 5. `9-Meta/TAGS.md`（要打 tag 时）
-6. 当前活跃的 OpenSpec change（`9-Meta/openspec/changes/<name>/`，仅当处在 change 工作期内）
+6. 当前活跃的 OpenSpec change（`openspec/changes/<name>/`，仅当处在 change 工作期内）
 
 ### Step 3 — 加载 skill
 
@@ -309,7 +325,6 @@ obsidian unresolved       # 记一下基线断链数（修改后回比，确保�
 - **不得** 删除 agent 自己也不理解用途的文件
 - **不得** 跳过 `_index.md` / `_log.md` 的同步更新
 - **不得** 在 `2-Wiki/` 区放原始对话（那是 `1-Sessions/` 的职责）
-- **不得** 把 OpenSpec 工作区从 `9-Meta/openspec/` 移到根目录
 - **不得** 在不验证 `obsidian version` 的情况下开始操作（会撞 PATH 陷阱或 Obsidian 未启动陷阱）
 - **不得** 静默忽略红线违反或确认协议失败 —— 任何疑问都必须停下问用户
 

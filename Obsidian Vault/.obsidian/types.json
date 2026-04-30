@@ -2,7 +2,7 @@
   "types": {
     "aliases": "aliases",
     "cssclasses": "multitext",
-    "tags": "multitext",
+    "tags": "tags",
     "excalidraw-plugin": "text",
     "excalidraw-export-transparent": "checkbox",
     "excalidraw-mask": "checkbox",
