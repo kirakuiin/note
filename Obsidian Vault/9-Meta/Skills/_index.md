@@ -23,6 +23,7 @@ Agent 可调用的 skill 集合。每个 skill 是一个子目录，至少含 `S
 | `capture` | [[9-Meta/Skills/capture/SKILL.md]] | 显式触发下采集单条开发经验/踩坑/短 insight 到 wiki；优先追加，必要时新建 |
 | `query-wiki` | [[9-Meta/Skills/query-wiki/SKILL.md]] | 搜索 wiki 回答问题，综合多页内容，识别归档价值 |
 | `lint-wiki` | [[9-Meta/Skills/lint-wiki/SKILL.md]] | 12 项 wiki 健康检查，按 Critical/Warning/Suggestion 分级报告 |
+| `dev-assist` | [[9-Meta/Skills/dev-assist/SKILL.md]] | 编码任务开始时主动 ripgrep 探测 wiki，命中即注入相关页面快照供 agent 参考 |
 
 `capture` 与 `ingest` 的分界：`ingest` 处理**整段对话/长文档**并产出 session 文件；`capture` 处理**单条结论/经验**直接落到 wiki 页，通过 `OBSIDIAN_VAULT` 定位 vault，可跨 cwd 触发。
 

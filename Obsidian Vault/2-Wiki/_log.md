@@ -182,3 +182,56 @@ Get-ChildItem -Recurse '2-Wiki' -Filter *.md | Where-Object { $_.Name -notmatch 
 **理由：** `capture` skill iteration-3 批量清理 24 页 `created/updated` 时踩坑——cmd 嵌 PowerShell 再调 CLI 导致反斜杠转义丢失，`property:remove` 静默失败。用独立 `.ps1` 脚本 + `.Replace('\\\\', '/')` 才正常工作。这条 lesson 应该沉淀给未来所有 CLI 批处理调用者。
 
 **Scope：** skill 源文件（codemaker-user）更新，不涉及 vault 内文件。
+
+---
+
+## [2026-05-06] resolution | openspec divergence 已消除
+
+**Refers to:** 本文件 [2026-04-30] archive 条目末段 "关于根目录 `openspec/` 重复"（line 146-149），其描述当时为 "根级重复 `openspec/` 现仍含旧的 restructure-vault-as-llm-wiki/（未归档）和空 specs/，与 `9-Meta/openspec/` 状态完全分叉"。
+
+**现状：** commit `9b53e29` 后，`9-Meta/openspec/` 已删除，vault 根级 `openspec/` 成为唯一一份。divergence 不复存在。
+
+**验证：**
+- `9-Meta/openspec/` 不存在 ✅
+- 根级 `openspec/` 含 `changes/`、`specs/`、`config.yaml`，是当前唯一权威源 ✅
+
+**注：** 按 §AGENTS append-only 守则，原 [2026-04-30] 条目正文不改写，本条作为后续 resolution 单独追加。
+
+---
+
+## [2026-05-06] new-skill | dev-assist 上线
+
+**Change:** 新增 skill `9-Meta/Skills/dev-assist/`，包含 `SKILL.md` + `references/trigger-keywords.md` + `references/domain-mapping.md`，已注册到 `9-Meta/Skills/_index.md` Vault 自有 skill 表。
+
+**目标：** 让 agent 在编码/调试任务**开始时**主动 ripgrep 探测 wiki，命中即注入相关页面快照——补 [[capture]]（显式触发沉淀单条经验）与 [[query-wiki]]（用户主动问知识题）之间的空白：编码现场的**主动**检索。
+
+**架构：** 两层。Phase 1 fast probe 用 ripgrep（带 `--no-ignore-vcs` 跨公私边界）按 trigger-keywords 提取规则即席提取 token，零命中静默退出；Phase 2 深查复用 query-wiki 模式（读最深 `_index.md` → 选候选 → 按 cwd domain 加权排序）注入 top 3 候选页快照。
+
+**关键设计：**
+- **trigger-keywords.md 零维护**：基于正则提取规则而非词表，wiki 增长不需要更新该文件
+- **domain-mapping.md 低频维护**：只在接新项目时 +1 行，skill 主动提示加行
+- **公私边界**：检索可读全库，写入仍受 AGENTS.md §红线约束（公开区文件不得 wikilink `Netease/` 路径）
+
+**前置依赖：** 装了 ripgrep（`winget install BurntSushi.ripgrep.MSVC`），PATH 可能需重启 shell 后生效。
+
+**Self-review 总结：** 走两轮冷读 + 第三轮验收，第一轮挖出 9 项（C-1 红线违反 + C-6 ripgrep 未装 + 7 项 W），第二轮挖出 3 项（W-14/15/17）。全部修复后第三轮 0 critical。
+
+**实战副产物（值得未来通过 capture 沉淀到 [[obsidian-cli]] wiki 页）：**
+- `obsidian eval` 不接受 top-level await，必须包 `(async () => ...)()` IIFE
+- `app.vault.modify(f, txt.replace(marker, newRow + marker))` 模式可用，但 newRow 的前置换行/分隔要正确，否则会与上一行拼接
+- 通过 cmd 调用 `obsidian append content="..."` 时，反斜杠转义会被多层 shell 吞——复杂内容应改用 `obsidian eval` + `app.vault.modify` 而非 append（已实战印证）
+
+
+---
+
+## [2026-05-06] convention | AGENTS.md §8.3.1 新增：纯文本替换可绕过 cli
+
+**Change:** AGENTS.md §8.3 强制路由表后插入子节 §8.3.1，明确收窄 obsidian-cli 强制范围。同时在 obsidian-cli skill 增补 §Append vs eval、§Eval scripting gotchas、§Shell escape pitfalls 三个新段。
+
+**触发：** 今天上架 dev-assist 期间反复踩 obsidian append/eval 的 cmd 多层 shell 转义陷阱（反引号变 ``\\\\` ``），用户提议放宽守则——纯文本替换不涉及链接时允许 edit 工具直连。
+
+**新边界：** 4 条同时满足才能绕 cli（纯字符串替换 + 不动 frontmatter 语义 + 不文件 CRUD + 不影响链接图结构）。本次修订自身也是该规则的 dogfooding：用 obsidian eval 写规则时被反斜杠吃，改用 edit 工具二次修复，unresolved 全程持平 185。
+
+**沉淀文件：**
+- 9-Meta/AGENTS.md §8.3.1（新规则）
+- 9-Meta/Skills/obsidian-cli/SKILL.md §Append vs eval / §Eval gotchas / §Shell escape（CLI 知识扩展）
