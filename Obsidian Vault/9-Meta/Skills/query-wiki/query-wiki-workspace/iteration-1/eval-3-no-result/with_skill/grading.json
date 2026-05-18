@@ -1,8 +1,0 @@
-{
-  "expectations": [
-    {"text": "Read _index.md to search", "passed": true, "evidence": "Checked _index.md and 编程语言/ directory"},
-    {"text": "Clearly stated wiki has no Rust content", "passed": true, "evidence": "'Wiki 中没有相关内容'"},
-    {"text": "Did not fabricate Rust knowledge", "passed": true, "evidence": "Only reports what's in vault; no Rust facts added"},
-    {"text": "Asked if user wants to research and file", "passed": true, "evidence": "'要我帮你研究 Rust 并把答案沉淀到 wiki 吗？'"}
-  ]
-}

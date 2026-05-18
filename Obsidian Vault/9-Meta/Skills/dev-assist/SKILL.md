@@ -1,17 +1,13 @@
 ---
 name: dev-assist
 description: >
-  Proactively retrieve relevant wiki knowledge while the user is coding,
-  debugging, or refactoring — without waiting for an explicit query. Triggers
-  on any coding/debugging/refactoring task in Cursor or Claude Code, even
-  if the user does not ask "have I solved this before?". The skill runs a
-  cheap ripgrep probe first; if nothing matches, it exits silently and does
-  not pollute context. If the probe hits, it surfaces up to 3 wiki pages
-  as inline references the agent can use to inform its work. Prefer this
-  skill over `query-wiki` when the user is in the middle of writing code,
-  not asking a knowledge question. Always use this skill when the user
-  starts a coding task, even on small refactors — the probe cost is near
-  zero and the upside is large.
+  MANDATORY first step for ANY coding task. Invoke BEFORE writing, debugging,
+  refactoring, or reviewing code — even trivial changes. Runs a single cheap
+  ripgrep probe against the user's Obsidian wiki; exits silently on miss, so
+  false triggers cost near zero. TRIGGER: user asks to write code, fix a bug,
+  refactor, review code, implement a feature, or any task that will touch
+  source files. Do NOT skip this skill to "save time" — the probe is faster
+  than reading one file.
 visibility: public
 area: meta
 ---
@@ -59,6 +55,19 @@ ripgrep). The cost of a false trigger is one ripgrep call; the cost of
 missing a relevant lesson is a repeated mistake. We bias toward the cheap
 side.
 
+## Vault location
+
+The wiki lives in an Obsidian vault whose path is given by the
+`OBSIDIAN_VAULT` environment variable. Read it at the start of each invocation:
+
+- Windows: `%OBSIDIAN_VAULT%`
+- macOS/Linux: `$OBSIDIAN_VAULT`
+
+If the variable is unset, stop and ask the user to configure it (e.g.,
+`setx OBSIDIAN_VAULT "c:\\path\\to\\vault"` on Windows). Do not guess a path.
+
+All vault-relative paths in this skill resolve against that root.
+
 ## Workflow
 
 The skill has two layers: a **fast probe** that decides whether to engage,
@@ -66,26 +75,51 @@ and a **deep search** that runs only when the probe hits.
 
 ### Phase 1: Probe (fast path, terminates ~90% of invocations)
 
-1. **Extract probe tokens** from the current task description, the cwd,
-   and any open files. See `references/trigger-keywords.md` for the
-   extraction rules — the rules are intentionally regex-based so they
-   adapt automatically as the wiki grows; you do not maintain a
-   keyword list.
+0. **Resolve vault root and construct absolute search paths.** Read
+   `OBSIDIAN_VAULT` env var, then build absolute paths for the two
+   wiki roots: `$OBSIDIAN_VAULT/Netease/2-Wiki` and
+   `$OBSIDIAN_VAULT/2-Wiki`.
+
+   **Hard rule — search target is the vault, never the project:**
+   - ❌ Do NOT Glob, Grep, or ripgrep the current project directory
+   - ❌ Do NOT explore cwd files to "understand the codebase first"
+   - ❌ Do NOT run `ls`, `tree`, or any filesystem listing in cwd
+   - ✅ The ONE AND ONLY search target is the Obsidian vault
+   - ✅ Token extraction below reads from the task description string,
+     the cwd path string, and the open-file path strings — it does
+     NOT mean opening or reading those files
+
+   If the vault roots don't exist on disk (e.g., `2-Wiki` is missing),
+   search whichever exists. If neither exists, output
+   `> dev-assist: vault wiki 根目录不存在，已跳过` and stop.
+
+1. **Extract probe tokens** from the current task description, the cwd
+   path string, and any open file path strings. See
+   `references/trigger-keywords.md` for the extraction rules — the
+   rules are intentionally regex-based so they adapt automatically as
+   the wiki grows; you do not maintain a keyword list.
 
    **Cap at 8 tokens.** If extraction produces more, keep the top 8 by
    strength (rule 1 > rule 2 > rule 3) and earliness in the task
    description. Token count blowup makes ripgrep slow and dilutes
    relevance.
 
-2. **Run ripgrep** against both wiki roots in one pass:
+2. **Run ripgrep** against both wiki roots in one pass, using the
+   absolute paths from step 0:
 
    ```bash
    rg -i -l --type md --no-ignore-vcs \
+     --glob '!_log.md' --glob '!_MOC.md' --glob '!_index.md' \
      -e "<token1>" -e "<token2>" ... \
-     "Netease/2-Wiki" "2-Wiki"
+     "$OBSIDIAN_VAULT/Netease/2-Wiki" "$OBSIDIAN_VAULT/2-Wiki"
    ```
 
    Notes:
+   - `--glob '!_log.md' --glob '!_MOC.md' --glob '!_index.md'` excludes
+     meta files from probe results. These files aggregate keywords from
+     their subtrees and produce false hits in almost every probe. They
+     are NOT knowledge pages. `_index.md` is still read in Phase 2 for
+     subtree navigation — excluding it here does not affect that step.
    - `--no-ignore-vcs` is required because `Netease/` is in `.gitignore`
      but is a valid search target (private wiki content can inform any
      coding task — see "Write-side red line" below)
@@ -129,9 +163,19 @@ and a **deep search** that runs only when the probe hits.
    names, not from the mapping). This is **only** used for ranking —
    we do not exclude any region from search.
 
-3. **Pick top 3 candidates** by combined score
-   (probe-token-match-count + domain-weight). Read each candidate's full
-   content (or first 50 lines if >200 lines).
+3. **Pick top 3 candidates** by combined score. Scoring per candidate:
+
+   | Signal | Weight | Rationale |
+   |---|---|---|
+   | **Filename contains token** | +3 per token | Page title matching a probe token is the strongest relevance signal (e.g., token `confirm_box` → file `confirm_box回调语义反直觉.md`) |
+   | **Content contains token** | +1 per token | Body mention — weaker because common terms appear in many pages |
+   | **Domain weight** | +2 | cwd matches domain-mapping entry (see step 2) |
+
+   **Tie-breaking**: among equal scores, prefer pages under `踩坑集/`
+   (pitfall pages are actionable), then shorter filenames (more focused).
+
+   Read each top-3 candidate's full content (or first 50 lines if
+   >200 lines).
 
 4. **Synthesize a one-line relevance note** per candidate explaining why
    the page matters to the current task.
@@ -195,6 +239,11 @@ If the probe runs in a cwd that doesn't match any entry in
 
 ## Constraints
 
+- **Search target is the vault, never the local project.** Do not Glob,
+  Grep, `ls`, or ripgrep the current working directory. The probe's one
+  ripgrep call targets `$OBSIDIAN_VAULT` only. Exploring the project
+  directory before or alongside the vault search defeats the purpose of
+  a cheap probe and pollutes context with irrelevant local results.
 - **Probe must be cheap.** One ripgrep call, no Obsidian roundtrip in
   Phase 1. If the probe needs >1 second, redesign the token extraction.
 - **Output must be terminating.** Do not enter a loop of "found nothing,
@@ -258,7 +307,7 @@ real-world hit/miss is a candidate lesson.)
 
 ## 相关
 
-- [[query-wiki]] — 用户主动问问题时用
-- [[capture]] — 沉淀新经验回 wiki
-- [[obsidian-cli]] — append domain-mapping 行的 CLI 用法
+- [[9-Meta/Skills/query-wiki/SKILL|query-wiki]] — 用户主动问问题时用
+- [[9-Meta/Skills/capture/SKILL|capture]] — 沉淀新经验回 wiki
+- [[9-Meta/Skills/obsidian-cli/SKILL|obsidian-cli]] — append domain-mapping 行的 CLI 用法
 - [[9-Meta/AGENTS]] — 红线政策权威源

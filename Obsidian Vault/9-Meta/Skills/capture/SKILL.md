@@ -30,7 +30,7 @@ This skill is a lightweight counterpart to `ingest`:
 **Trigger only on explicit user intent.** The user must say something like:
 
 - "这个记一下" / "记到 wiki" / "归档这条"
-- "把 X 追加到 [[Y]]"
+- "把 X 追加到 `Y`"
 - "capture this" / "save this lesson" / "log this gotcha"
 
 **Do NOT trigger** when:

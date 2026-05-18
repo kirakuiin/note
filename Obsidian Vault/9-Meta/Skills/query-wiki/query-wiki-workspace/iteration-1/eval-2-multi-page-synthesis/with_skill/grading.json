@@ -1,9 +1,0 @@
-{
-  "expectations": [
-    {"text": "Read _index.md to find candidate pages", "passed": true, "evidence": "Found TAGS.md and note-frontmatter spec"},
-    {"text": "Read and synthesized >=2 pages", "passed": true, "evidence": "Synthesized TAGS.md + note-frontmatter spec"},
-    {"text": "Answer includes [[wikilinks]] for all referenced pages", "passed": true, "evidence": "Two wikilinks in reference section"},
-    {"text": "Suggested filing the synthesis as a new wiki page", "passed": true, "evidence": "Asks '要我走 ingest 流程存下来吗？'"},
-    {"text": "Did not create wiki page directly; suggested ingest handoff", "passed": true, "evidence": "Only suggests, does not create"}
-  ]
-}

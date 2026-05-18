@@ -158,6 +158,22 @@ obsidian eval code="(async () => {
   Trash the sandbox via
   `(async () => { await app.fileManager.trashFile(app.vault.getAbstractFileByPath('eval-sandbox.md')); })()`.
 
+- **Do NOT stuff a multi-hundred-line markdown document into
+  `eval code="..."`.** The CLI packages the `code=` value as JSON
+  before sending it to Obsidian. When the content contains heavy
+  nesting (backticks inside template literals, escaped backslashes,
+  mixed quote levels), cmd.exe / PowerShell escape layers can corrupt
+  the string so the resulting payload is **no longer valid JSON**.
+
+  Symptom: **Obsidian pops a modal with a JSON parse error** (while
+  the terminal may appear to have continued without visible error —
+  the failure happens in the Obsidian process, not the CLI). Follow-up
+  `obsidian read` reports `File not found`.
+
+  Use the filesystem-write path (see Shell escape pitfalls §0) for
+  new files, and reserve `eval` for targeted edits on existing files
+  whose transform logic stays under ~30 lines of JS.
+
 ### Shell escape pitfalls (cmd → CLI content=)
 
 When invoking `obsidian append content="..."` or

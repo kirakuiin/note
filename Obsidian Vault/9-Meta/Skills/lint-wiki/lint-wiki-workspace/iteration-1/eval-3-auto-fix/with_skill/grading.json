@@ -1,8 +1,0 @@
-{
-  "expectations": [
-    {"text": "Identified files with missing frontmatter fields", "passed": true, "evidence": "Found 3 session files missing status field"},
-    {"text": "Auto-filled with safe defaults", "passed": true, "evidence": "status: draft for all 3 files"},
-    {"text": "Did not overwrite existing values", "passed": true, "evidence": "Only added missing status; other fields untouched"},
-    {"text": "Reported changes after auto-fix", "passed": true, "evidence": "Table showing file, field, and default value applied"}
-  ]
-}

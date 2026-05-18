@@ -1,9 +1,0 @@
-{
-  "expectations": [
-    {"text": "Session file created at 1-Sessions/2026/04/2026-04-29-*.md", "passed": true, "evidence": "File: 1-Sessions/2026/04/2026-04-29-work-summary.md"},
-    {"text": "Frontmatter contains area:session, visibility:public, date, topic, tags, wiki_pages_touched", "passed": true, "evidence": "All 6 fields present"},
-    {"text": "Topic was extracted from content (not just 'work summary')", "passed": true, "evidence": "topic: 'Vault 重构 Day 3：TAGS.md 编写与编码修复'"},
-    {"text": "All 3 work items captured in 关键讨论", "passed": true, "evidence": "3 bullet points covering TAGS.md, encoding fix, ingest skill design"},
-    {"text": "Identified wiki-worthy items (TAGS.md, ingest skill)", "passed": true, "evidence": "wiki_pages_touched: [[9-Meta/TAGS.md]], 产出物 lists both items"}
-  ]
-}

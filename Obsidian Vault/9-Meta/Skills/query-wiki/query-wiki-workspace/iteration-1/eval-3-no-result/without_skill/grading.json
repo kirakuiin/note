@@ -1,8 +1,0 @@
-{
-  "expectations": [
-    {"text": "Read _index.md to search", "passed": false, "evidence": "Without skill, no structured search"},
-    {"text": "Clearly stated wiki has no Rust content", "passed": false, "evidence": "Without skill, may fabricate or search incorrectly"},
-    {"text": "Did not fabricate Rust knowledge", "passed": false, "evidence": "Without skill, may fill gaps with general knowledge"},
-    {"text": "Asked if user wants to research and file", "passed": false, "evidence": "Without skill, no filing workflow"}
-  ]
-}

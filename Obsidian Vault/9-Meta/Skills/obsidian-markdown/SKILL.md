@@ -132,6 +132,14 @@ $$
 
 ## Diagrams (Mermaid)
 
+**Convention**: Prefer Mermaid for any diagrammatic content that it can
+express ¡ª flowcharts, sequence diagrams, state diagrams, class diagrams,
+ER diagrams, Gantt charts, timelines, mindmaps. Obsidian renders Mermaid
+natively; it's more maintainable than ASCII art and composes cleanly
+with dark/light themes. Only fall back to ASCII / fixed-width text when
+the layout is inherently grid-like (board games, fixed tables, memory
+layouts) or Mermaid genuinely can't express the relationship.
+
 ````markdown
 ```mermaid
 graph TD

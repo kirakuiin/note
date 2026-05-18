@@ -1,6 +1,6 @@
 ---
 name: query-wiki
-description: >
+description: ""
 visibility: public
 area: meta
 ---

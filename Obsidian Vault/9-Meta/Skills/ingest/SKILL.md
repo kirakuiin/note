@@ -19,6 +19,22 @@ optionally extract lasting knowledge into wiki pages.
 Do NOT trigger on: casual "remember this" (too vague), single-line facts
 (better as direct wiki edits), or when the user is actively mid-discussion.
 
+## Vault location
+
+The wiki lives in an Obsidian vault whose path is given by the
+`OBSIDIAN_VAULT` environment variable. Read it at the start of each invocation:
+
+- Windows: `%OBSIDIAN_VAULT%`
+- macOS/Linux: `$OBSIDIAN_VAULT`
+
+If the variable is unset, stop and ask the user to configure it (e.g.,
+`setx OBSIDIAN_VAULT "c:\\path\\to\\vault"` on Windows). Do not guess a
+path, and do not fall back to the current working directory — this skill
+is often invoked from an unrelated project directory.
+
+All vault-relative paths in this skill (e.g., `<vault>/1-Sessions/...`,
+`2-Wiki/...`, `Netease/1-Sessions/...`) resolve against that root.
+
 ## Workflow
 
 ### Phase 1: Determine scope
@@ -96,8 +112,8 @@ If nothing qualifies, skip to Phase 5 with `wiki_pages_touched: []`.
 ### Phase 4: Propose and execute wiki updates
 
 1. **List proposed changes**: "I found X items worth saving to wiki:
-   - New page: [[概念名]] — <one-line description>
-   - Update: [[已有页面]] — <what to add>"
+   - New page: `概念名` — <one-line description>
+   - Update: `已有页面` — <what to add>"
 2. **Wait for user confirmation**. User can accept all, pick some, or reject.
 3. **Execute confirmed changes**:
    - New pages: `obsidian create` with `wiki-page` template, write to

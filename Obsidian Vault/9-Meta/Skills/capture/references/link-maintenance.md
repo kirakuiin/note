@@ -36,7 +36,7 @@ for cross-references**. Add and remove wikilinks here, not in the body
 prose.
 
 Exceptions:
-- Wikilinks used in-line in body prose (e.g., "详见 [[X]]" in a table) are
+- Wikilinks used in-line in body prose (e.g., "详见 `X`" in a table) are
   kept; they don't need a duplicate in `## 相关`.
 - `_index.md` and `_MOC.md` have their own structure; see below.
 

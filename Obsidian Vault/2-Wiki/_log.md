@@ -15,7 +15,7 @@ tags:
 
 ## [2026-04-30] migration | restructure-vault-as-llm-wiki Phase 4 收尾
 
-**Change:** [[9-Meta/openspec/changes/archive/2026-04-30-restructure-vault-as-llm-wiki/proposal|restructure-vault-as-llm-wiki]]
+**Change:** [[openspec/changes/archive/2026-04-30-restructure-vault-as-llm-wiki/proposal|restructure-vault-as-llm-wiki]]
 
 **操作摘要：**
 - 5.2 修复 4 处公开区断链（`5-Life/桌游/_index` 新建、`agent-schema/spec` 路径修正、`C Sharp 知识点`→`CSharp`、`Move Method`→`搬移函数`）
@@ -38,7 +38,7 @@ tags:
 
 ## [2026-04-29] migration | restructure-vault-as-llm-wiki Phase 0-3 完成
 
-**Change:** [[9-Meta/openspec/changes/archive/2026-04-30-restructure-vault-as-llm-wiki/proposal|restructure-vault-as-llm-wiki]]
+**Change:** [[openspec/changes/archive/2026-04-30-restructure-vault-as-llm-wiki/proposal|restructure-vault-as-llm-wiki]]
 
 **操作摘要：**
 - Phase 0: 骨架搭建（7 顶级目录 + 6 领域子目录 + AGENTS.md + TAGS.md + README.md）
@@ -54,7 +54,7 @@ tags:
 
 ## [2026-04-30] migration | restructure-vault-as-llm-wiki Phase 6 + 验收完成（即将归档）
 
-**Change:** [[9-Meta/openspec/changes/archive/2026-04-30-restructure-vault-as-llm-wiki/proposal|restructure-vault-as-llm-wiki]]
+**Change:** [[openspec/changes/archive/2026-04-30-restructure-vault-as-llm-wiki/proposal|restructure-vault-as-llm-wiki]]
 
 **操作摘要：**
 - Phase 6 私有区对齐（task 6.1/6.2/6.3）：netease/ 下新建 4 个空骨架目录（`1-Sessions/` `2-Wiki/` `3-Projects/` `4-Reference/`，含 `_index.md`，历史 `daily/` `work/` 不动）；落地 `netease/AGENTS.md` 私有区专属 schema（10 节、10322 bytes UTF-8）；公开区 `9-Meta/AGENTS.md` §4 追加"私有区独立 AGENTS.md"子节 + 强制切换规则表
@@ -76,7 +76,7 @@ tags:
 
 ## [2026-04-30] verify-followup | 6-Tools frontmatter 规范化（W1 收尾）
 
-**Change:** [[9-Meta/openspec/changes/archive/2026-04-30-restructure-vault-as-llm-wiki/proposal|restructure-vault-as-llm-wiki]] 验收报告 W1 修复
+**Change:** [[openspec/changes/archive/2026-04-30-restructure-vault-as-llm-wiki/proposal|restructure-vault-as-llm-wiki]] 验收报告 W1 修复
 
 **操作摘要：**
 - `/opsx:verify` 报出 WARNING W1：13 个 `6-Tools/*.md` frontmatter 全部为 `area: all`（非法值）+ 空 `tags:` + 缺 `category` 字段，违反 `note-frontmatter` spec 三条要求
@@ -117,7 +117,7 @@ tags:
 
 ## [2026-04-30] archive | restructure-vault-as-llm-wiki 归档完成
 
-**Change:** [[9-Meta/openspec/changes/archive/2026-04-30-restructure-vault-as-llm-wiki/proposal|restructure-vault-as-llm-wiki]] → archived
+**Change:** [[openspec/changes/archive/2026-04-30-restructure-vault-as-llm-wiki/proposal|restructure-vault-as-llm-wiki]] → archived
 
 **操作摘要：**
 - `openspec archive restructure-vault-as-llm-wiki -y` 一键归档（非 manual mv）
@@ -203,7 +203,7 @@ Get-ChildItem -Recurse '2-Wiki' -Filter *.md | Where-Object { $_.Name -notmatch 
 
 **Change:** 新增 skill `9-Meta/Skills/dev-assist/`，包含 `SKILL.md` + `references/trigger-keywords.md` + `references/domain-mapping.md`，已注册到 `9-Meta/Skills/_index.md` Vault 自有 skill 表。
 
-**目标：** 让 agent 在编码/调试任务**开始时**主动 ripgrep 探测 wiki，命中即注入相关页面快照——补 [[capture]]（显式触发沉淀单条经验）与 [[query-wiki]]（用户主动问知识题）之间的空白：编码现场的**主动**检索。
+**目标：** 让 agent 在编码/调试任务**开始时**主动 ripgrep 探测 wiki，命中即注入相关页面快照——补 [[9-Meta/Skills/capture/SKILL|capture]]（显式触发沉淀单条经验）与 [[9-Meta/Skills/query-wiki/SKILL|query-wiki]]（用户主动问知识题）之间的空白：编码现场的**主动**检索。
 
 **架构：** 两层。Phase 1 fast probe 用 ripgrep（带 `--no-ignore-vcs` 跨公私边界）按 trigger-keywords 提取规则即席提取 token，零命中静默退出；Phase 2 深查复用 query-wiki 模式（读最深 `_index.md` → 选候选 → 按 cwd domain 加权排序）注入 top 3 候选页快照。
 
@@ -216,7 +216,7 @@ Get-ChildItem -Recurse '2-Wiki' -Filter *.md | Where-Object { $_.Name -notmatch 
 
 **Self-review 总结：** 走两轮冷读 + 第三轮验收，第一轮挖出 9 项（C-1 红线违反 + C-6 ripgrep 未装 + 7 项 W），第二轮挖出 3 项（W-14/15/17）。全部修复后第三轮 0 critical。
 
-**实战副产物（值得未来通过 capture 沉淀到 [[obsidian-cli]] wiki 页）：**
+**实战副产物（值得未来通过 capture 沉淀到 [[9-Meta/Skills/obsidian-cli/SKILL|obsidian-cli]] wiki 页）：**
 - `obsidian eval` 不接受 top-level await，必须包 `(async () => ...)()` IIFE
 - `app.vault.modify(f, txt.replace(marker, newRow + marker))` 模式可用，但 newRow 的前置换行/分隔要正确，否则会与上一行拼接
 - 通过 cmd 调用 `obsidian append content="..."` 时，反斜杠转义会被多层 shell 吞——复杂内容应改用 `obsidian eval` + `app.vault.modify` 而非 append（已实战印证）

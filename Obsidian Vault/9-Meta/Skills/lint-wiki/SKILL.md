@@ -6,184 +6,179 @@ area: meta
 ---
 # Lint-Wiki Skill
 
-Inspect the vault for 12 categories of health issues and produce a
-structured report ordered by severity. Fixes happen only after user
-confirmation.
+Inspect the vault for health issues, produce a severity-ordered report,
+fix only after user confirmation.
 
 ## When to use this skill
 
-**Explicit triggers:**
-- "lint the wiki", "check wiki health", "inspect vault"
-- "find broken links", "validate frontmatter"
-- "audit wiki", "run wiki checks"
+**Explicit:** "lint the wiki", "check wiki health", "find broken links",
+"validate frontmatter", "audit vault".
 
-**Auto-trigger on:**
-- After any operation affecting >=10 files (ingest, migration, restructure)
-- After directory restructuring or file moves
-- Before archiving an OpenSpec change
-- Monthly health check (if >30 days since last lint)
+**Auto-trigger:** after any operation affecting >=10 vault files, after
+restructuring/file moves, before archiving an OpenSpec change, or if
+>30 days since last lint.
+
+## Vault location
+
+Vault root comes from the `OBSIDIAN_VAULT` env var (Windows:
+`%OBSIDIAN_VAULT%`, Unix: `$OBSIDIAN_VAULT`). If unset, stop and ask the
+user to set it (e.g., `setx OBSIDIAN_VAULT "c:\\path\\to\\vault"`). Do
+not guess, do not fall back to pwd. All paths in this skill resolve
+against that root.
+
+## Region routing
+
+The vault has two regions with distinct rules:
+
+| Region | Path | Authority | Tag vocab | visibility |
+|---|---|---|---|---|
+| Public | not under `Netease/` | `9-Meta/AGENTS.md` | `9-Meta/TAGS.md` | `public` |
+| Private | under `Netease/` | `Netease/AGENTS.md` | private vocab in `Netease/AGENTS.md` §4 | `private` |
+
+Before scanning, read **both** AGENTS.md files (if `Netease/` exists)
+so each file is checked against its own vocab. Report region-tagged
+issues separately — never merge public + private rows
+(AGENTS.md §4 audit rule).
 
 ## Workflow
 
-### Phase 1: Run all checks
+### Phase 1: Run all checks (read-only)
 
-Execute all 12 checks. For each, collect affected files and issue
-descriptions. Do NOT modify any files during this phase.
+#### 🔴 Critical (security/privacy)
 
-**Check 1: Broken wikilinks**
-- Run `obsidian unresolved` to get all broken links
-- For each broken link, note the source file and the target that doesn't exist
+| # | Check | Detection |
+|---|---|---|
+| C1 | Cross-boundary references | Public file wikilinks/embeds/frontmatter pointing to a `Netease/` path |
+| C2 | Redline tag leak | Public file has any tag in TAGS.md §3 — match literal entries (§3.1–§3.4 + §3.5 explicit nested paths) AND prefix patterns (`#sdc/*`, `#Arcolab/*`, `#frame-tool/*`, `#战斗/*`, `#战斗系统/*`, `#模块/*`, `#文档/*`) |
+| C3 | Visibility mismatch | `visibility` field disagrees with path region (Netease/ → must be `private`; else `public`) |
 
-**Check 2: Orphan pages**
-- List all .md files excluding `_index.md`, `_MOC.md`, `_log.md`
-- For each, check if any other file wikilinks to it (use `obsidian backlinks`)
-- Pages with zero backlinks are orphans
+#### 🟠 Warning (data integrity)
 
-**Check 3: Missing frontmatter**
-- Scan each .md file for required fields: `area`, `visibility`
-- Knowledge pages (under `2-Wiki/`) additionally require: `tags`, `status`
-- Session pages (under `1-Sessions/`) additionally require: `tags`, `date`, `topic`
+| # | Check | Detection |
+|---|---|---|
+| W1 | Broken wikilinks | `obsidian unresolved` |
+| W2 | Missing frontmatter | Per-area requirements from AGENTS.md §5.1: knowledge (`tags`>=1, `status`), session (`tags`>=1, `date`, `topic`), project (`status`, `tags`>=1), journal (`date`), tool (`category`); private files additionally need `confidentiality` per Netease/AGENTS.md |
+| W3 | `## 相关` not last section | Any non-MOC/index/log page where `## 相关` exists with content or another heading after it (breaks the back-ref `obsidian append` protocol — AGENTS.md §5.4) |
+| W4 | Index drift | Page in `2-Wiki/<domain>/` not listed in domain `_index.md`, or `_index.md` lists a nonexistent page |
+| W5 | `_index.md` entry format | Lines must match `[[Page]] — 一句话摘要 (tags: ..., status: ...)` shape (AGENTS.md §5.3) |
+| W6 | Unknown top-level dir | Any vault root entry not in AGENTS.md §3 whitelist + allowed extras (`Netease/`, `Dashboard.md`, `openspec/`) — new top-level dirs require an OpenSpec change |
+| W7 | Naming violations | Session: `1-Sessions/YYYY/MM/YYYY-MM-DD-<topic>.md` (or `-N` suffix for same-day repeats); `6-Tools/`: flat `<类别>-<工具名>.md`; reserved fixed names: `_MOC.md` / `_index.md` / `_log.md` |
+| W8 | Session structure | `1-Sessions/` files missing any of `## 背景` / `## 关键讨论` / `## 结论` / `## 产出物` (AGENTS.md §9 Step 6) |
+| W9 | `wiki_pages_touched` validity | Each entry in a session's `wiki_pages_touched` must resolve to an existing wiki page |
 
-**Check 4: Visibility mismatch**
-- Public area files (`2-Wiki/`, `1-Sessions/`, etc.) with `visibility: private`
-- `Netease/` files with `visibility: public`
+#### 🟡 Suggestion (quality)
 
-**Check 5: Cross-boundary references**
-- Public area files containing wikilinks to `Netease/` paths
-- This is a Critical security issue
-
-**Check 6: Index drift**
-- Pages in `2-Wiki/<domain>/` not listed in that domain's `_index.md`
-- Pages listed in `_index.md` that no longer exist
-
-**Check 7: Duplicate topics**
-- Compare titles and content of pages within the same domain
-- Flag pairs with >70% title similarity or overlapping content
-
-**Check 8: Stale claims**
-- Compare conclusions in old session files against current wiki pages
-- Flag where a session's conclusion contradicts current wiki content
-
-**Check 9: Missing concepts**
-- Scan wiki pages for terms mentioned >=3 times across files that lack
-  their own page
-- Flag as "concept missing a page"
-
-**Check 10: Stale projects**
-- Check `3-Projects/` for pages with `status: active` but `updated` >30 days ago
-
-**Check 11: Wild tags (out-of-vocabulary)**
-- Scan all frontmatter `tags` fields
-- Flag any tag not in `9-Meta/TAGS.md` whitelist
-- For each wild tag, suggest the closest whitelist match
-- If `TAGS.md` doesn't exist, skip this check and note "TAGS.md missing"
-
-**Check 12: Redline tag leaks (Critical)**
-- Scan public area files for any tag listed in TAGS.md §3 redline
-- This is a Critical privacy issue
-- If `TAGS.md` doesn't exist, skip this check
+| # | Check | Detection |
+|---|---|---|
+| S1 | Orphan pages | Non-MOC/index/log pages with zero `obsidian backlinks` |
+| S2 | Wild tag | Tag not in the region's whitelist. **Always look up TAGS.md §4 cleanup table first** — if there's a mapped target, suggest it; only fall back to "closest match" when no §4 entry exists. Also enforce TAGS.md §1: nested tag's top-level segment must be in the whitelist |
+| S3 | Stale project | `3-Projects/` files with `status: active` and `updated` >30d ago (fallback: filesystem mtime if `updated` field is missing) |
+| S4 | Duplicate topics | Same-domain pages with strongly overlapping titles or near-identical first paragraphs (flag only — never auto-merge) |
 
 ### Phase 2: Produce the report
 
-Structure the report by severity:
-
 ```markdown
 # Wiki Lint Report — YYYY-MM-DD
+- Region(s) scanned: public + private (or just one)
+- Broken-link baseline: <prev N> → current <N> (delta <±N>)
+- Last lint: <date or "never">
 
 ## 🔴 Critical
-<Issues that pose security or privacy risks>
+### [public] C1 Cross-boundary references
+- `path` — issue → suggested fix
 
-### Check 5: Cross-boundary references
-- `public-file.md` links to `Netease/secret.md` → remove or move reference
-
-### Check 12: Redline tag leaks
-- `2-Wiki/game-dev.md` uses `#arcolab` → remove or move file to Netease/
+### [private] C2 ...
 
 ## 🟠 Warning
-<Issues that break navigation or data integrity>
-
-### Check 1: Broken wikilinks (N found)
-- `file-a.md` → `[[missing-page]]` (target not found)
-
-### Check 3: Missing frontmatter (N found)
-- `file-b.md`: missing `tags`, `status`
-
-### Check 6: Index drift (N found)
-- `2-Wiki/AI/new-page.md` not in `_index.md`
+### [public] W3 ...
 
 ## 🟡 Suggestion
-<Issues that affect quality but not function>
-
-### Check 2: Orphan pages (N found)
-- `orphan-page.md` has no incoming links
-
-### Check 7: Duplicate topics
-- `page-a.md` and `page-b.md` cover similar ground
-
-...
+### [public] S2 ...
 ```
 
-Each issue line must include: file path, problem description, and
-suggested fix.
+Each line: file path, problem, suggested fix. Public and private rows
+go under separate sub-headings.
 
-### Phase 3: Wait for user confirmation
+### Phase 3: Confirmation
 
-Present the report and ask: "哪些需要修复？可以回复'全部修复'、'只修 Critical'、或指定具体条目。"
+Present the report. Ask:
+"哪些需要修复？可回复 '全部'、'只修 Critical'、或具体条目号。"
 
-**Exception — auto-fix allowed without confirmation:**
-- Adding missing frontmatter with default values:
-  - `area`: infer from file path
-  - `visibility: public` (for public area files)
-  - `status: draft` (for new pages)
-  - `tags: []` (empty, user fills later)
-- These are safe defaults that don't change content semantics.
+**Auto-fix without asking** — only if all true:
+1. Issue is W2 (missing frontmatter)
+2. Fix is field **addition**, never a value change
+3. Default values: `area` inferred from path; `visibility` = `private`
+   if path under `Netease/` else `public`; `status: draft` (knowledge);
+   `tags: []` (user fills later)
+
+All other fixes require explicit confirmation, including any value
+change, file move, or content edit.
 
 ### Phase 4: Execute fixes
 
-For each confirmed fix:
-1. Use `obsidian-cli` for all file modifications
-2. After each batch of fixes, run `obsidian unresolved` to verify no
-   new broken links were introduced
-3. Append to `2-Wiki/_log.md`:
+**Frontmatter changes** SHALL go through `obsidian property:set` /
+`property:remove`, never raw `edit`/`write`. AGENTS.md §8.3.1 puts
+frontmatter outside the edit-tool exception (even for auto-fixes).
+
+**Content / file ops** (move, rename, create, delete, body edits
+involving wikilinks) SHALL go through `obsidian-cli`. Obsidian's
+link auto-update (`alwaysUpdateLinks: true`) only fires through the cli.
+
+After each fix batch:
+1. Run `obsidian unresolved total`; verify count is ≤ baseline.
+2. If a Critical fix was applied, re-run C1+C2+C3 to confirm closure.
+3. Refuse to write any fix that would create a public→private wikilink.
+
+### Phase 5: Log + persist baseline (mandatory)
+
+1. Append to `2-Wiki/_log.md` (or `Netease/2-Wiki/_log.md` for private):
    ```markdown
-   ## [YYYY-MM-DD] lint-fix | <summary>
-   - fixed: <N> issues across <M> files
+   ## [YYYY-MM-DD] lint | <one-line summary>
+   - critical: <N> | warning: <N> | suggestion: <N>
+   - fixed: <N> across <M> files
+   - unresolved delta: <±N>
    ```
-
-### Phase 5: Archive report (optional)
-
-If the user requests, save the report to:
-`1-Sessions/YYYY/MM/YYYY-MM-DD-lint-report.md`
+2. Save the full report to
+   `1-Sessions/YYYY/MM/YYYY-MM-DD-lint-report.md`
+   (or `Netease/1-Sessions/...` for private). Always — the next lint
+   diffs against this baseline.
 
 ## Check reference
 
 | # | Check | Severity | Auto-fix? |
-|---|-------|----------|-----------|
-| 1 | Broken wikilinks | Warning | No |
-| 2 | Orphan pages | Suggestion | No |
-| 3 | Missing frontmatter | Warning | Yes (defaults only) |
-| 4 | Visibility mismatch | Critical | No |
-| 5 | Cross-boundary refs | Critical | No |
-| 6 | Index drift | Warning | No |
-| 7 | Duplicate topics | Suggestion | No |
-| 8 | Stale claims | Suggestion | No |
-| 9 | Missing concepts | Suggestion | No |
-| 10 | Stale projects | Suggestion | No |
-| 11 | Wild tags | Suggestion | No |
-| 12 | Redline tag leaks | Critical | No |
+|---|---|---|---|
+| C1 | Cross-boundary refs | Critical | No |
+| C2 | Redline tag leak (incl. §3.5 prefixes) | Critical | No |
+| C3 | Visibility mismatch | Critical | No |
+| W1 | Broken wikilinks | Warning | No |
+| W2 | Missing frontmatter | Warning | Yes (defaults only, via cli) |
+| W3 | `## 相关` not last section | Warning | No |
+| W4 | Index drift | Warning | No |
+| W5 | `_index.md` entry format | Warning | No |
+| W6 | Unknown top-level dir | Warning | No |
+| W7 | Naming violations | Warning | No |
+| W8 | Session structure | Warning | No |
+| W9 | `wiki_pages_touched` validity | Warning | No |
+| S1 | Orphan pages | Suggestion | No |
+| S2 | Wild tag (consult TAGS.md §4 first) | Suggestion | No |
+| S3 | Stale project | Suggestion | No |
+| S4 | Duplicate topics | Suggestion | No |
 
 ## Important constraints
 
-- **Read-only until confirmed.** Phase 1-2 must not modify any files
-  (except `_log.md` append for lint execution record).
-- **Use obsidian-cli for all fixes.** Never use `mv`, `write`, or
-  direct file tools for vault files.
-- **Use Obsidian Flavored Markdown** for the report and any filed
-  content. Wikilinks, callouts, and proper frontmatter throughout.
-- **Respect public/private boundary.** When checking cross-boundary
-  references, treat any wikilink to `Netease/` from public area as
-  Critical.
-- **TAGS.md is the authority for checks 11-12.** If TAGS.md is missing,
-  skip those checks and note it in the report header.
-- **Verify after fixes.** Run `obsidian unresolved` after each batch
-  of modifications.
+- **Read-only until confirmed.** Phase 1-2 modify nothing; `_log.md`
+  append happens only in Phase 5.
+- **Region authority.** Public files follow `9-Meta/AGENTS.md` +
+  `9-Meta/TAGS.md`; private files follow `Netease/AGENTS.md` + its
+  internal vocab. Mixing the two is a bug.
+- **Frontmatter via cli.** Even auto-fixes use `obsidian property:set`,
+  not raw edits.
+- **Cli for vault file ops.** No `mv`, `write`, `xcopy` for
+  `.md`/`.base`/`.canvas`.
+- **TAGS.md §4 cleanup table is authoritative for wild-tag renames.**
+  Don't invent "closest match" when an exact target exists.
+- **Boundary scope.** C1, C2, C3 are Critical. Refuse to write a fix
+  that would create or preserve a public→private link.
+- **Out of scope (route to a future `deep-audit` skill):** stale-claim
+  detection across sessions/wiki, missing-concept inference, deep
+  semantic dedup. Lint stays mechanical.

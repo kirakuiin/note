@@ -1,8 +1,0 @@
-{
-  "expectations": [
-    {"text": "Identified missing frontmatter", "passed": false, "evidence": "Without skill, no knowledge of required fields"},
-    {"text": "Auto-filled safe defaults", "passed": false, "evidence": "Without skill, no default value policy"},
-    {"text": "Did not overwrite existing values", "passed": false, "evidence": "Without skill, may overwrite"},
-    {"text": "Reported changes", "passed": false, "evidence": "Without skill, no reporting convention"}
-  ]
-}

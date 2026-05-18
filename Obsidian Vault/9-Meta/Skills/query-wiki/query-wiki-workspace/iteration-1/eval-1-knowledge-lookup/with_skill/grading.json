@@ -1,9 +1,0 @@
-{
-  "expectations": [
-    {"text": "Read _index.md first to find candidate pages", "passed": true, "evidence": "Checked _index.md and found session file"},
-    {"text": "Found the session file 1-Sessions/2026/04/2026-04-29-python-async-await.md", "passed": true, "evidence": "Answer references the session file with correct path"},
-    {"text": "Answer includes [[wikilink]] citation", "passed": true, "evidence": "[[1-Sessions/2026/04/2026-04-29-python-async-await]]"},
-    {"text": "Evaluated whether answer is worth filing (simple lookup = no)", "passed": true, "evidence": "States '简单查找，不需要额外归档'"},
-    {"text": "Did not fabricate content not in wiki", "passed": true, "evidence": "Content matches session file; no extra Python knowledge added"}
-  ]
-}

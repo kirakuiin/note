@@ -1,9 +1,0 @@
-{
-  "expectations": [
-    {"text": "Session file created at 1-Sessions/2026/04/2026-04-29-python-async-await.md", "passed": false, "evidence": "Without skill, agent doesn't know path convention"},
-    {"text": "Frontmatter contains area:session, visibility:public, date, topic, tags (编程语言, from-doc), wiki_pages_touched", "passed": false, "evidence": "Without skill, agent doesn't know required fields"},
-    {"text": "背景 section notes external document source", "passed": false, "evidence": "Without skill, agent may skip session file entirely and write directly to wiki"},
-    {"text": "Proposed new wiki page under 2-Wiki/编程语言/", "passed": false, "evidence": "Without skill, agent doesn't know the session→wiki workflow"},
-    {"text": "Body is 200-800 words, bullet points for key discussion", "passed": false, "evidence": "Without skill, no standard structure"}
-  ]
-}
