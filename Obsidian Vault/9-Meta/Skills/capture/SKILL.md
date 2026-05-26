@@ -140,6 +140,12 @@ Before showing the draft, run these checks:
 5. **Stay close to the user's wording.** Especially for short gotchas,
    resist the urge to add "usage advice" the user didn't give. Quote
    their framing; only generalize if they explicitly asked you to.
+6. **关键词前置（提升 dev-assist 命中率）。** 新建页面时，标题后
+   第一段必须用用户描述需求时会使用的**自然语言关键词**写明适用
+   场景，并补充同义词/口语表达。文件名也应包含高频需求关键词而
+   非纯技术术语。原因：dev-assist 的 ripgrep 探针从任务描述提取
+   token 做全文匹配，文件名命中权重 +3，正文 +1。页面前部的自然
+   语言需求词汇直接决定未来能否被探针命中。
 
 Present the draft to the user. Ask: "这个方案看着对吗？确认我就落盘。"
 
