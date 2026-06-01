@@ -33,12 +33,12 @@ Agent 可调用的 skill 集合。每个 skill 是一个子目录，至少含 `S
 
 ### 来自 [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills)
 
-| Skill | 文件 | 用途 |
-|---|---|---|
-| `defuddle` | [[9-Meta/Skills/defuddle/SKILL.md]] | 用 Defuddle CLI 从网页提取干净 markdown，去除导航/广告，节省 token |
-| `json-canvas` | [[9-Meta/Skills/json-canvas/SKILL.md]] | 创建/编辑 JSON Canvas 文件（`.canvas`），支持节点/边/分组 |
-| `obsidian-bases` | [[9-Meta/Skills/obsidian-bases/SKILL.md]] | 创建/编辑 Obsidian Bases 文件（`.base`），数据库式视图 |
-| `obsidian-cli` | [[9-Meta/Skills/obsidian-cli/SKILL.md]] | 通过 Obsidian CLI 与 vault 交互（读/写/搜索/插件调试） |
+| Skill               | 文件                                           | 用途                                                         |
+| ------------------- | -------------------------------------------- | ---------------------------------------------------------- |
+| `defuddle`          | [[9-Meta/Skills/defuddle/SKILL.md]]          | 用 Defuddle CLI 从网页提取干净 markdown，去除导航/广告，节省 token           |
+| `json-canvas`       | [[9-Meta/Skills/json-canvas/SKILL.md]]       | 创建/编辑 JSON Canvas 文件（`.canvas`），支持节点/边/分组                  |
+| `obsidian-bases`    | [[9-Meta/Skills/obsidian-bases/SKILL.md]]    | 创建/编辑 Obsidian Bases 文件（`.base`），数据库式视图                    |
+| `obsidian-cli`      | [[9-Meta/Skills/obsidian-cli/SKILL.md]]      | 通过 Obsidian CLI 与 vault 交互（读/写/搜索/插件调试）                    |
 | `obsidian-markdown` | [[9-Meta/Skills/obsidian-markdown/SKILL.md]] | Obsidian 风格 markdown（wikilinks/embeds/callouts/properties） |
 
 ### 自定义
@@ -49,6 +49,7 @@ Agent 可调用的 skill 集合。每个 skill 是一个子目录，至少含 `S
 | ------------------ | ------------------------------------------- | --------------------------- |
 | `coding-guideline` | [[9-Meta/Skills/coding-guideline/SKILL.md]] | Karpathy 编码守则，减少 LLM 编码常见错误 |
 | `work-summary`     | [[9-Meta/Skills/work-summary/SKILL.md]]     | 把 AI 交互内容总结为日报/周报/月报/年报     |
+| `markitdown`       | [[9-Meta/Skills/markitdown/SKILL.md]]       | 将部分ai无法识别的格式转为md格式          |
 
 ## 安装新 obsidian-skills
 
