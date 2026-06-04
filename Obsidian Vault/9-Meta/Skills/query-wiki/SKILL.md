@@ -1,6 +1,6 @@
 ---
 name: query-wiki
-description: ""
+description: Use when answering from or searching the user's Obsidian wiki.
 visibility: public
 area: meta
 ---
