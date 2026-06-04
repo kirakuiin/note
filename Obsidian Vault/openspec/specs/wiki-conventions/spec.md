@@ -67,19 +67,25 @@ netease 内部独立维护 `netease/2-Wiki/_index.md`，与公开区 index 不�
 
 ### Requirement: 操作日志 `_log.md`
 
-`2-Wiki/_log.md` SHALL be an append-only chronological record of agent operations on the wiki. Format:
+`2-Wiki/_log.md` SHALL be an append-only sparse chronological record of
+structural agent operations on the wiki. It is not a full activity stream.
+Format:
 
 - 每条记录形如 `## [YYYY-MM-DD] <operation> | <subject>`，例如 `## [2026-04-29] ingest-session | 知识库结构设计`
-- 记录下方可包含简短描述（影响的页面列表、决策摘要）
+- 记录下方可包含 1-3 行简短描述（影响的页面列表、决策摘要）
 - 一致前缀让 `grep "^## \[" _log.md | tail -N` 可解析
 
-#### Scenario: Agent 完成一次 wiki 修改
-- **WHEN** agent 在 wiki 中完成 ingest / lint / restructure 等操作
+#### Scenario: Agent 完成结构性 wiki 修改
+- **WHEN** agent 在 wiki 中完成 session ingest、capture 新建页面、批量重构、移动/改名/删除、跨页 lint-fix、公私边界处理、AGENTS / skill / OpenSpec 规则变更
 - **THEN** SHALL 在 `_log.md` 末尾追加一行 `## [YYYY-MM-DD] <operation> | <subject>`，并列出受影响的页面
+
+#### Scenario: Agent 完成低风险局部修改
+- **WHEN** agent 只做错别字、措辞润色、格式清理、单页小段落补充、单个链接微调、只读 lint 报告
+- **THEN** SHALL NOT append to `_log.md`
 
 #### Scenario: Agent 检查最近的 wiki 活动
 - **WHEN** agent 想了解最近 N 次 wiki 改动
-- **THEN** SHALL 通过 grep `_log.md` 而不是扫描每个页面
+- **THEN** SHALL 通过 grep `_log.md` 了解最近 N 次结构性改动；低风险局部修改不保证出现在 `_log.md`
 
 ---
 

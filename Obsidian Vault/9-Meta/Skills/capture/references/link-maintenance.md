@@ -86,9 +86,12 @@ Out of scope for `capture`. Rename/move is `obsidian-cli`'s job with
 `alwaysUpdateLinks: true` handling the heavy lifting. If the user asks
 for rename/move, exit this skill and use `obsidian-cli` directly.
 
-## `_log.md` format
+## `_log.md` sparse format
 
-Append one block per capture invocation:
+Do not append one block per capture invocation. `_log.md` is a sparse
+structural-change log. Append only when the capture creates a wiki page,
+updates multiple pages, changes reciprocal link structure meaningfully, or
+touches boundary/rule/schema-sensitive content.
 
 ```markdown
 ## [YYYY-MM-DD] capture | <short subject — what was captured>
@@ -96,7 +99,9 @@ Append one block per capture invocation:
 - updated back-refs: [[page-a]], [[page-b]]
 ```
 
-If no back-references were touched, omit the second line.
+Keep entries to 1-3 lines. If no back-references were touched, omit the
+second line. If the capture only adds a small fact to one existing page,
+skip `_log.md` entirely.
 
 `_log.md` lives in the **region root** (`<region>/_log.md`, where
 `<region>` is `2-Wiki/` or `Netease/2-Wiki/`). Do not write `_log.md`
@@ -151,7 +156,8 @@ Edits made:
    ```markdown
    - [[genInsFromUI传空parent会挂到root]] — parent=None 时 Handle 会静默挂到 root
    ```
-4. **Append** to `Netease/2-Wiki/_log.md`:
+4. **Append** to `Netease/2-Wiki/_log.md` because this creates a new
+   wiki page and updates a back-reference:
    ```markdown
    ## [2026-04-30] capture | genInsFromUI 静默挂 root 的坑
    - target: [[genInsFromUI传空parent会挂到root]]
@@ -169,9 +175,6 @@ Edits made:
    to the table, rewrite with `obsidian create ... overwrite`.
 2. No new wikilinks introduced → `## 相关` unchanged.
 3. `_index.md` unchanged (summary still accurate).
-4. **Append** to `Netease/2-Wiki/_log.md`:
-   ```markdown
-   ## [2026-04-30] capture | log.critical 日志级别补充
-   - target: [[Python编码规范#6-日志输出]]
-   ```
+4. Skip `_log.md`: this is a small single-page addition with no new page,
+   no reciprocal link update, and no schema/boundary impact.
 5. Verify.

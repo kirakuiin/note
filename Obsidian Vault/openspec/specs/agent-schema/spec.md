@@ -49,7 +49,7 @@ The "What NOT to do" section in AGENTS.md SHALL explicitly list:
 - 不得在用户未确认前批量修改 ≥5 个文件
 - 不得在 lint 阶段擅自写入修复
 - 不得删除 agent 不理解用途的文件
-- 不得跳过 `_index.md` / `_log.md` 的更新
+- 不得跳过 `_index.md` 更新；`_log.md` 按稀疏结构性日志规则更新
 - 不得在 wiki 区放原始对话（那是 sessions 的职责）
 
 #### Scenario: Agent 试图执行禁止操作

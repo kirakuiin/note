@@ -51,7 +51,7 @@ After persisting a session file (if one is needed), the agent SHALL evaluate whe
 1. **检测**：基于 session 内容，识别需要新建/更新的 wiki 页面
 2. **呈现**：把改动列表（新建 X 页、更新 Y 页）呈现给用户
 3. **确认**：等待用户确认（默认全部接受、或勾选）
-4. **执行**：按 `capture` 的轻量写入规则修改 wiki 页面、`_index.md`、`_log.md`
+4. **执行**：按 `capture` 的轻量写入规则修改 wiki 页面、`_index.md`，并仅在满足稀疏日志条件时更新 `_log.md`
 5. **回填**：如果存在 session 文件，在 frontmatter `wiki_pages_touched` 字段填入所有受影响页面
 
 #### Scenario: 一次 session 涉及多个 wiki 页面
@@ -70,7 +70,7 @@ After persisting a session file (if one is needed), the agent SHALL evaluate whe
 
 ### Requirement: Ingest 操作必须留痕
 
-每次 ingest-session 完成后 SHALL 在 `2-Wiki/_log.md`（或 netease 区的 log）末尾追加一条记录。普通单条 capture 走 capture 日志格式。ingest-session 格式如下（注意：示例中的 `H2` 表示 markdown 二级标题 `##`，此处避免被解析器误吞）：
+每次 ingest-session 创建 session、创建 wiki 页面、或更新多个 wiki 页面后 SHALL 在 `2-Wiki/_log.md`（或 netease 区的 log）末尾追加一条紧凑记录。小型单页 capture 不强制写 `_log.md`。ingest-session 格式如下（注意：示例中的 `H2` 表示 markdown 二级标题 `##`，此处避免被解析器误吞）：
 
 ```text
 H2 [YYYY-MM-DD] ingest-session | <topic>

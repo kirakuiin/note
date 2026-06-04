@@ -140,19 +140,21 @@ After each fix batch:
 2. If a Critical fix was applied, re-run C1+C2+C3 to confirm closure.
 3. Refuse to write any fix that would create a public→private wikilink.
 
-### Phase 5: Log + persist baseline (mandatory)
+### Phase 5: Persist baseline + sparse log
 
-1. Append to `2-Wiki/_log.md` (or `Netease/2-Wiki/_log.md` for private):
+1. Save the full report to
+   `1-Sessions/YYYY/MM/YYYY-MM-DD-lint-report.md`
+   (or `Netease/1-Sessions/...` for private). Always — the next lint
+   diffs against this baseline.
+2. Append to `2-Wiki/_log.md` (or `Netease/2-Wiki/_log.md` for private)
+   only if confirmed fixes made a structural or cross-page change:
    ```markdown
-   ## [YYYY-MM-DD] lint | <one-line summary>
+   ## [YYYY-MM-DD] lint-fix | <one-line summary>
    - critical: <N> | warning: <N> | suggestion: <N>
    - fixed: <N> across <M> files
    - unresolved delta: <±N>
    ```
-2. Save the full report to
-   `1-Sessions/YYYY/MM/YYYY-MM-DD-lint-report.md`
-   (or `Netease/1-Sessions/...` for private). Always — the next lint
-   diffs against this baseline.
+   Do not log read-only lint reports or tiny single-file cleanup fixes.
 
 ## Check reference
 
@@ -177,8 +179,8 @@ After each fix batch:
 
 ## Important constraints
 
-- **Read-only until confirmed.** Phase 1-2 modify nothing; `_log.md`
-  append happens only in Phase 5.
+- **Read-only until confirmed.** Phase 1-2 modify nothing. `_log.md`
+  append in Phase 5 is sparse and only follows confirmed structural fixes.
 - **Region authority.** Public files follow `9-Meta/AGENTS.md` +
   `9-Meta/TAGS.md`; private files follow `Netease/AGENTS.md` + its
   internal vocab. Mixing the two is a bug.

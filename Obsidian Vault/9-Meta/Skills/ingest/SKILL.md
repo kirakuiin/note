@@ -139,20 +139,24 @@ write nothing.
    - update `_index.md` only for newly created pages
    - add reciprocal backlinks only for strong relationships or explicit
      user request
-   - update `_log.md` in the target region
+   - update `_log.md` in the target region only when the ingest creates
+     a session, creates wiki pages, or updates multiple existing pages
    - run `obsidian unresolved`
 4. **Backfill when a session exists**: Update the session file's
    `wiki_pages_touched` with wikilinks to all affected pages.
 
 ### Phase 5: Log and verify
 
-1. If a session was created, append a compact batch entry to `2-Wiki/_log.md`
-   (or Netease equivalent):
+1. If a session was created, or the ingest touched multiple wiki pages,
+   append a compact batch entry to `2-Wiki/_log.md` (or Netease
+   equivalent):
    ```markdown
    ## [YYYY-MM-DD] ingest | <topic>
    - session: [[1-Sessions/YYYY/MM/YYYY-MM-DD-<topic>]]
    - touched: [[page1]], [[page2]]
    ```
+   Skip `_log.md` for small direct captures that only append one fact to
+   one existing page.
 2. Run `obsidian unresolved` to verify no broken links were introduced.
 3. Report summary to user: "Session saved. X wiki pages created/updated." If
    no session was created, report only the wiki pages created/updated.

@@ -52,7 +52,7 @@ The lint report SHALL be structured markdown, organized by severity:
 
 #### Scenario: 用户确认修复
 - **WHEN** 用户对报告中的某些项说"这些都修了吧"
-- **THEN** agent SHALL 按确认范围执行修复，并在 `_log.md` 追加 `## [YYYY-MM-DD] lint-fix | ...`
+- **THEN** agent SHALL 按确认范围执行修复；只有当修复跨页、改变索引/链接结构、或属于 schema/边界修复时，才在 `_log.md` 追加 `## [YYYY-MM-DD] lint-fix | ...`
 
 ---
 
@@ -80,7 +80,7 @@ Lint workflow SHALL be read-only at the analysis phase. Modifications happen onl
 
 - 默认行为：分析 → 报告 → 等待
 - 即使是"明显的"修复（如补 frontmatter 默认值），也不得自动写入
-- 唯一例外：`_log.md` 自身的追加（记录 lint 已执行）允许自动
+- 只读 lint 报告不得写 `_log.md`；`_log.md` 只记录确认后的结构性 lint-fix
 
 #### Scenario: 发现明显问题
 - **WHEN** lint 发现一个明显应该修复的问题（如缺 frontmatter）
