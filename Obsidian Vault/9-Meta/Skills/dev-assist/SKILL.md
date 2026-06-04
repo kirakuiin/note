@@ -89,26 +89,31 @@ and a **deep search** that runs only when the probe hits.
    search whichever exists. If neither exists, output
    `> dev-assist: vault wiki 根目录不存在，已跳过` and stop.
 
-1. **Extract probe tokens** from the current task description, the cwd
-   path string, and any open file path strings. See
-   `references/trigger-keywords.md` for the extraction rules — the
-   rules are intentionally regex-based so they adapt automatically as
-   the wiki grows; you do not maintain a keyword list.
-
-   **Cap at 8 tokens.** If extraction produces more, keep the top 8 by
-   strength (rule 1 > rule 2 > rule 3) and earliness in the task
-   description. Token count blowup makes ripgrep slow and dilutes
-   relevance.
-
-2. **Run ripgrep** against both wiki roots in one pass, using the
-   absolute paths from step 0:
+1. **Run the probe script.** Do not hand-roll token extraction or the
+   ripgrep command. Use the bundled script so miss fixes stay centralized:
 
    ```bash
-   rg -i -l --type md --no-ignore-vcs \
-     --glob '!_log.md' --glob '!_index.md' \
-     -e "<token1>" -e "<token2>" ... \
-     "$OBSIDIAN_VAULT/Netease/2-Wiki" "$OBSIDIAN_VAULT/2-Wiki"
+   python "$OBSIDIAN_VAULT/9-Meta/Skills/dev-assist/scripts/dev_assist_probe.py" \
+     --task "<current user task text>" \
+     --cwd "<current cwd path string>" \
+     --open-file "<open file path string, repeat as needed>"
    ```
+
+   The script extracts up to 8 tokens from the task description, cwd
+   path string, and open-file path strings, then runs one ripgrep pass
+   against the wiki roots. See `references/trigger-keywords.md` for the
+   exact extraction rules and regression notes.
+
+2. **Interpret the JSON result.** The script returns:
+
+   - `status`: `hits`, `no_hits`, `no_tokens`, `no_roots`, `no_vault_env`,
+     `rg_not_found`, or `rg_error`
+   - `tokens`: the exact probe tokens used
+   - `hits`: slash-normalized markdown file paths when `status == "hits"`
+
+   If `status` is `rg_not_found`, try installing/restarting `rg` only if the
+   user's task can wait; otherwise report the skip. Do not silently fall back
+   to searching the project directory.
 
    Notes:
    - `--glob '!_log.md' --glob '!_index.md'` excludes
@@ -116,18 +121,12 @@ and a **deep search** that runs only when the probe hits.
      their subtrees and produce false hits in almost every probe. They
      are NOT knowledge pages. `_index.md` is still read in Phase 2 for
      subtree navigation — excluding it here does not affect that step.
-   - `--no-ignore-vcs` is required because `Netease/` is in `.gitignore`
+   - The script passes `--no-ignore-vcs` because `Netease/` is in `.gitignore`
      but is a valid search target (private wiki content can inform any
      coding task — see "Write-side red line" below)
-   - `-l` returns only filenames; we count hits, we don't read content yet
-   - Quote tokens that contain Chinese or special chars
-   - **Windows binary path**: `rg` may not be on `PATH` after winget install;
-     full path is typically `%LOCALAPPDATA%\Microsoft\WinGet\Packages\BurntSushi.ripgrep.MSVC_*\ripgrep-*\rg.exe`.
-     If `rg` fails as a bare command, try the full path or restart the shell.
-   - **Path output normalize**: ripgrep on Windows returns paths with mixed
-     separators (e.g., `Netease/2-Wiki\梦幻西游客户端\xxx.md`). Before
-     passing to `obsidian-cli` `path=` parameter, **convert all `\` to `/`**
-     (obsidian-cli only accepts forward slashes — see `obsidian-cli` skill).
+   - The script captures ripgrep output as UTF-8 and normalizes `\` to `/`.
+   - The script still excludes `_index.md` in Phase 1; do not add index-page
+     navigation rescue unless the skill is explicitly updated to do so.
 
 3. **Decide:**
    - **0 hits** → output one line: `> dev-assist: wiki 中无相关条目，已跳过` and stop
@@ -178,6 +177,10 @@ and a **deep search** that runs only when the probe hits.
 
    Read each top-3 candidate's full content (or first 50 lines if
    >200 lines).
+
+   **Windows encoding rule:** when reading wiki files with PowerShell, force
+   UTF-8 (`Get-Content -Encoding UTF8`). If output is mojibake, rerun with
+   UTF-8 before deciding the page or index is irrelevant.
 
 4. **Synthesize a one-line relevance note** per candidate explaining why
    the page matters to the current task.
@@ -311,11 +314,13 @@ matches mapping pattern `D:/workspace/.*/mhimage/`
 - `references/domain-mapping.md` — cwd path patterns → wiki subdirectory
   mappings for Phase 2 ranking. Append-only; updated only when the user
   starts working in a new project.
+- `scripts/dev_assist_probe.py` — deterministic Phase 1 probe used instead
+  of ad hoc agent token extraction and ripgrep construction.
 
 ## Lessons (append-only)
 
-(Empty — populated as the skill is used in real coding tasks; each
-real-world hit/miss is a candidate lesson.)
+> [!note] L-1 (2026-06-04 · miss)
+> Task: `搜打撤模式下，战斗外法术施放要走 infosdc 里面的法术白名单`; missed: `战斗外师门法术使用链路`; cause: probe searched exact task terms and did not bridge `施放/施法/释放/使用`, plus Windows mojibake hid an index clue; action: centralize Phase 1 in `scripts/dev_assist_probe.py`, add spell-action synonym expansion with contextual `使用` tokens, require UTF-8 reads, and add page aliases.
 
 > [!important] 维护守则
 > 本节插入新 lesson 时**不要用 `obsidian append`** —— append 落到文件
