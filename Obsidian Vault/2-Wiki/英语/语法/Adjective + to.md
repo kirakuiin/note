@@ -4,7 +4,6 @@ tags:
 grammer_type: -ing and to
 visibility: public
 area: knowledge
-status: archived
 ---
 **Adjective + to + ...** 有两种结构：
 

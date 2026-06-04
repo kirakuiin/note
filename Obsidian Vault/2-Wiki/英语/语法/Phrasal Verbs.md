@@ -4,7 +4,6 @@ tags:
 grammer_type: phrasal verbs
 visibility: public
 area: knowledge
-status: archived
 ---
 我们经常在动词后跟随以下单词：
 

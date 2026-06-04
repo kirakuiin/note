@@ -1,9 +1,6 @@
 ---
 note_type: agents-superseded-pointer
 visibility: public
-status: archived
-created: 2026-04-29
-updated: 2026-04-29
 area: meta
 ---
 

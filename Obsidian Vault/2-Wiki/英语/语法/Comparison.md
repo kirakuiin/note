@@ -4,7 +4,6 @@ tags:
 grammer_type: adjectives and adverbs
 visibility: public
 area: knowledge
-status: archived
 ---
 比较级一般有两种形式：
 

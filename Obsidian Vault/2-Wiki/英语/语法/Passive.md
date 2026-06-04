@@ -4,7 +4,6 @@ tags:
 grammer_type: passive
 visibility: public
 area: knowledge
-status: archived
 ---
 主动语态强调的是主语做了什么；**被动语态**强调主语发生了什么，至于谁导致了事情发生一般是未知或者是不重要的。
 

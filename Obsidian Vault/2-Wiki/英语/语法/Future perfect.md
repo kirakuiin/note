@@ -4,7 +4,6 @@ tags:
 grammer_type: future
 visibility: public
 area: knowledge
-status: archived
 ---
 > [!example]
 > The file will already have started by the time we got to the cinema.

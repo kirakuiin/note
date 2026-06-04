@@ -4,7 +4,6 @@ tags:
 grammer_type: -ing and to
 visibility: public
 area: knowledge
-status: archived
 ---
 某些动词后要接 **-ing**：[[Verb + -ing]]，某些动词后要接[[Verb + to]]。但有些词两者均可。
 

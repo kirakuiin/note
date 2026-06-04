@@ -4,7 +4,6 @@ tags:
 grammer_type: prepositions
 visibility: public
 area: knowledge
-status: archived
 ---
 下面介绍一些形容词+介词的搭配。
 

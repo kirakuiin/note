@@ -3,7 +3,6 @@ tags:
   - 编程语言
 visibility: public
 area: knowledge
-status: archived
 ---
 > [!note] 导入的基础知识
 > 1. `import`的搜索路径存储在`sys.path`列表之中，在列表的前边搜索到指定模块之后不会继续搜索。

@@ -1,9 +1,6 @@
 ---
 area: project
 visibility: public
-status: paused
-created: 2026-04-29
-updated: 2026-04-29
 tags:
   - 项目
 ---

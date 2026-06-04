@@ -3,7 +3,6 @@ visibility: public
 area: knowledge
 tags:
   - 游戏开发
-status: archived
 ---
 1. 两个2D碰撞体一切设置都没问题：
 	- 层的设置

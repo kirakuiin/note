@@ -1,10 +1,9 @@
 ---
-aliases: 
+aliases:
 tags:
   - AI与Agent
 visibility: public
 area: knowledge
-status: archived
 ---
 # SDD 开发流程
 

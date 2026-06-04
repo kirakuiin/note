@@ -4,7 +4,6 @@ tags:
 grammer_type: articles and nouns
 visibility: public
 area: knowledge
-status: archived
 ---
 在大多数的人或动物，机构(由一群人构成的)，地点及时间后可以加 **'s** 来表达前面名词的所有格。意为什么的。
 

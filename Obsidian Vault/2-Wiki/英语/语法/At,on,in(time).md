@@ -4,7 +4,6 @@ tags:
 grammer_type: prepositions
 visibility: public
 area: knowledge
-status: archived
 ---
 对于时间来说：
 - **at**用于一天的某个时间点。

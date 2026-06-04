@@ -4,7 +4,6 @@ tags:
 grammer_type: conjunctions and prepositions
 visibility: public
 area: knowledge
-status: archived
 ---
 **in case** = 因为某事可能发生，以防万一。
 

@@ -4,7 +4,6 @@ tags:
 grammer_type: adjectives and adverbs
 visibility: public
 area: knowledge
-status: archived
 ---
 **enough**可以用在形容词和副词之后。
 

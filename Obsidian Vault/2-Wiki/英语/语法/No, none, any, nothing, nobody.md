@@ -4,7 +4,6 @@ tags:
 grammer_type: pronouns and determiners
 visibility: public
 area: knowledge
-status: archived
 ---
 **no + noun.** = **not a**或**not any**。可以用在句子的开头。
 

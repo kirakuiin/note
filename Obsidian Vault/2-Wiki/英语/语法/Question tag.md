@@ -4,7 +4,6 @@ tags:
 grammer_type: question
 visibility: public
 area: knowledge
-status: archived
 ---
 在口语中如果一个语句后跟随一个短小的问题，这就是附加问句。通常使用 **助动词 + 主语？** 的形式。在一般现在和过去时态时，使用**do/does/did**。和[[Auxiliary verbs|助动词]]的规则保持一致。
 

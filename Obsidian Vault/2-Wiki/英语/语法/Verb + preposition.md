@@ -4,7 +4,6 @@ tags:
 grammer_type: prepositions
 visibility: public
 area: knowledge
-status: archived
 ---
 **talk / speak to somebody**
 

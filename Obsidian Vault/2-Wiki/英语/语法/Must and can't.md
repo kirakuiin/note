@@ -4,7 +4,6 @@ tags:
 grammer_type: modals
 visibility: public
 area: knowledge
-status: archived
 ---
 **must**表示你坚信某事是确定的，而**can't**则表示你坚信某事是不可能的。这俩是一对反义词。
 

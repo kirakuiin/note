@@ -4,7 +4,6 @@ tags:
 grammer_type: future
 visibility: public
 area: knowledge
-status: archived
 ---
 > [!example]
 > Don't phone between 7 and 8. We'll be having dinner.

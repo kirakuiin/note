@@ -4,7 +4,6 @@ tags:
 grammer_type: reported speech
 visibility: public
 area: knowledge
-status: archived
 ---
 当转述别人说的话时，有两种表达方式。直接引语和间接引语。
 

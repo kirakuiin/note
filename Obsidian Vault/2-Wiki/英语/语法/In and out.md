@@ -4,7 +4,6 @@ tags:
 grammer_type: phrasal verbs
 visibility: public
 area: knowledge
-status: archived
 ---
 **in** = 进入房间，建筑，汽车等等。
 

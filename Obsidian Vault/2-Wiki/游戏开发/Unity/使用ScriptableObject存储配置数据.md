@@ -1,10 +1,9 @@
 ---
 tags:
   - 游戏开发
-unity_type: 
+unity_type:
 visibility: public
 area: knowledge
-status: archived
 ---
 `ScriptableObject`是Unity提供的一个保存大量数据的数据容器，我们可以将其实例保存为自定义的资源文件。
 

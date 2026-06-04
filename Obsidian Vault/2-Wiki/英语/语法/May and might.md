@@ -4,7 +4,6 @@ tags:
 grammer_type: modals
 visibility: public
 area: knowledge
-status: archived
 ---
 **may**和**might**可以现在或未来表达某事有可能的意思。
 

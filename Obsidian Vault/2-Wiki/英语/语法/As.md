@@ -4,7 +4,6 @@ tags:
 grammer_type: conjunctions and prepositions
 visibility: public
 area: knowledge
-status: archived
 ---
 **as** = 两件事同时发生，或者某事发生在过去你在做某事时。
 

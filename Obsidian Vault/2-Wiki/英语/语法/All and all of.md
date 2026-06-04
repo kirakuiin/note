@@ -4,7 +4,6 @@ tags:
 grammer_type: pronouns and determiners
 visibility: public
 area: knowledge
-status: archived
 ---
 以下词后可以接名词：
 **all some any most much/many little/few no**。

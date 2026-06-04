@@ -4,7 +4,6 @@ tags:
 grammer_type: adjectives and adverbs
 visibility: public
 area: knowledge
-status: archived
 ---
 动词和宾语一般连在一起。
 

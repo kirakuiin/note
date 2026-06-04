@@ -4,7 +4,6 @@ tags:
 grammer_type: conjunctions and prepositions
 visibility: public
 area: knowledge
-status: archived
 ---
 **although, though, in spite of, despite**都含有尽管如此，但是...的含义。它们的用法有一定的区别。
 

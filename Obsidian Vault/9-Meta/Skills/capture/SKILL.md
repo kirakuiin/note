@@ -114,7 +114,8 @@ Produce a draft **without writing any file yet**. The draft contains:
 - **Frontmatter** (keep it minimal — see next section)
 - **Body** (the actual content, in Obsidian Flavored Markdown)
 - **Link updates**: optional forward links and any strong reciprocal
-  backlinks; which `_index.md` / `_log.md` files will be updated
+  backlinks; which `_index.md` files will be updated, and whether the
+  sparse `_log.md` criteria are met
 - **Command plan**: the exact `obsidian` CLI commands that will run in
   Step 3 (one per line, in order). This lets the user catch a wrong
   `path=`/`file=` flag or a nonexistent target before anything is
@@ -130,9 +131,11 @@ Before showing the draft, run these checks:
    target page and note any existing tables/lists the new fact belongs
    to. Do not add the same fact in two places (e.g., code block AND
    table) — pick the one that matches the page's current structure.
-3. **`_log.md` style.** Read a few existing entries in the target
-   region's `_log.md` and match their style (headers vs. bullets,
-   date format, field order).
+3. **Sparse `_log.md` decision.** Decide whether this capture is
+   structural enough to log. Log new wiki pages, multi-page updates,
+   boundary-sensitive changes, or rule/schema changes. Do not log typo
+   fixes, wording polish, formatting cleanup, single-section additions,
+   or one-off link tweaks.
 4. **Do not invent mechanism.** If the user reported only a symptom,
    keep the body to the symptom + workaround. Never dress up your own
    guess as the cause. When a cause is worth noting at all, prefix it
@@ -167,15 +170,16 @@ Order of operations:
    relationship is strong enough that users would naturally discover one
    page from the other, or when the user explicitly asks for it. Stay
    within ±1 hop.
-4. **Update `_log.md`** — before appending, read the last few entries
-   to match their existing style (headers vs. bullets, date format,
-   field order). As a reference template, entries look roughly like:
+4. **Update `_log.md` only when sparse criteria are met** — before
+   appending, read the last few entries to keep the compact format
+   consistent. As a reference template, entries look roughly like:
    ```markdown
    ## [YYYY-MM-DD] capture | <short subject>
    - target: [[page-name]]
    - updated back-refs: [[page-a]], [[page-b]]
    ```
-   — but follow the file's current style if it differs.
+   Keep it to 1-3 high-signal lines. If the capture only appends a small
+   fact to one existing page, skip `_log.md`.
 5. **Verify links** — run `obsidian unresolved total` once; if the count
    increased, report the delta and surface it to the user.
 
@@ -204,8 +208,9 @@ tags:
 
 **Do NOT add** `status`, `created`, `updated`, or custom provenance fields
 like `source_skill`, `source_repo`, `source_session`. Frontmatter minimality
-beats provenance tracking — provenance can live in the body prose or in
-`_log.md`.
+beats provenance tracking — provenance belongs in body prose for small
+captures, or in `_log.md` only for structural captures that meet the
+sparse logging criteria.
 
 ## Tags policy
 

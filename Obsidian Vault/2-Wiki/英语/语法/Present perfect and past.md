@@ -4,7 +4,6 @@ tags:
 grammer_type: present perfect and past
 visibility: public
 area: knowledge
-status: archived
 ---
 这两个语法的主要区别在于，[[Present perfect|现在完成时]]永远告诉我们的是现在的情况；而[[Past simple|一般过去时]]只是告诉我们在过去发生过某事，现在怎么样是不知道的。
 

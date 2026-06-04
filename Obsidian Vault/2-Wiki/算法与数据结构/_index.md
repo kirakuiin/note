@@ -3,9 +3,6 @@ area: knowledge
 visibility: public
 tags:
   - 算法与数据结构
-status: draft
-created: 2026-04-29
-updated: 2026-04-29
 ---
 # 算法与数据结构 — 索引
 

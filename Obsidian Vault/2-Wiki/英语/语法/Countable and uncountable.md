@@ -4,7 +4,6 @@ tags:
 grammer_type: articles and nouns
 visibility: public
 area: knowledge
-status: archived
 ---
 名词分为可数名词和不可数名词。
 

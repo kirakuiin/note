@@ -4,7 +4,6 @@ tags:
 grammer_type: -ing and to
 visibility: public
 area: knowledge
-status: archived
 ---
 **prefer to do** 或 **prefer doing**表达你一般更喜欢做某事。
 

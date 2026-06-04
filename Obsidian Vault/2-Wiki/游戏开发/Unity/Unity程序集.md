@@ -1,10 +1,9 @@
 ---
-unity_type: 
+unity_type:
 tags:
   - 游戏开发
 visibility: public
 area: knowledge
-status: archived
 ---
 程序集是Unity中用于组织代码的手段，通过将不同模块的代码分别放置到各个程序集中，可以有效增加代码的编译速度，减少依赖性。
 

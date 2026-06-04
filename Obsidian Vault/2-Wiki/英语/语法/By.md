@@ -4,7 +4,6 @@ tags:
 grammer_type: prepositions
 visibility: public
 area: knowledge
-status: archived
 ---
 **by**可以用来表达某人如何做某事的。
 

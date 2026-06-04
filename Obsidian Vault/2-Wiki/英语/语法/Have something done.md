@@ -4,7 +4,6 @@ tags:
 grammer_type: passive
 visibility: public
 area: knowledge
-status: archived
 ---
 用**have something done**来表达我们安排其他人来为我做某事。**have**可以用**get**替代。
 

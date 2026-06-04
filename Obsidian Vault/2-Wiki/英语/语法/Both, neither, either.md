@@ -4,7 +4,6 @@ tags:
 grammer_type: pronouns and determiners
 visibility: public
 area: knowledge
-status: archived
 ---
 **both, neither, either**均只能描述两个事物，它们的后面可以加名词。代表两者都，两者都不，任一均可的含义。(**neither**，**either**后谓语动词为单数)。
 

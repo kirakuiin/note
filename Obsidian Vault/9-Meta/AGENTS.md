@@ -147,7 +147,7 @@ aliases:
 - **`_index.md`**：本领域页面目录，每行 `[[页面名]] — 一句话摘要`。每次新增/删除页面要同步更新。`tags` 以页面 frontmatter 为准，不在 `_index.md` 双写
 - **不使用 `_MOC.md`**：领域入口统一收敛到 `_index.md`。agent 不创建、更新或依赖 `_MOC.md`
 - `2-Wiki/_index.md`：全局领域索引（指向各 `<领域>/_index.md`）
-- `2-Wiki/_log.md`：append-only 操作日志，每条 `## [YYYY-MM-DD] <operation> | <subject>`，agent ingest 后追加一条
+- `2-Wiki/_log.md`：append-only 稀疏操作日志，只记录结构性 wiki 变更；每条 `## [YYYY-MM-DD] <operation> | <subject>`，下接简短影响摘要
 
 Netease 区独立维护 `Netease/2-Wiki/_index.md` / `_log.md`，与公开区完全不互通。
 
@@ -307,9 +307,11 @@ obsidian unresolved       # 记一下基线断链数（修改后回比，确保�
 
 ### Step 5 — 留痕
 
-每次 ingest-session / capture 新建页面 / 大批 wiki 修改后：
+只在高信号、结构性 wiki 变更后留痕：
 
-- 在 `2-Wiki/_log.md` 末尾追加一行 `## [YYYY-MM-DD] <operation> | <subject>`，下接受影响页面列表
+- 应写入 `_log.md`：ingest 产生或更新多页、capture 新建 wiki 页、批量重构、移动/改名/删除、lint-fix 跨页或结构性修复、公私边界处理、AGENTS / skill / OpenSpec 规则变更
+- 不写入 `_log.md`：错别字、措辞润色、格式清理、单页小段落补充、单个链接微调、只读 lint 报告
+- 日志条目保持紧凑：`## [YYYY-MM-DD] <operation> | <subject>`，下方 1-3 行列出关键影响；不要把完整报告、长表格或执行流水塞进 `_log.md`
 - 若本次创建了 session，在 session 文件 frontmatter 回填 `wiki_pages_touched` 数组
 - 跑 `obsidian unresolved` 比对断链数变化，如果新增断链立刻报告
 
@@ -345,7 +347,7 @@ obsidian unresolved       # 记一下基线断链数（修改后回比，确保�
 - **不得** 在用户未确认前批量修改 ≥5 个文件
 - **不得** 在 lint 阶段擅自写入修复（lint 只产报告，修复必须经用户确认）
 - **不得** 删除 agent 自己也不理解用途的文件
-- **不得** 跳过 `_index.md` / `_log.md` 的同步更新
+- **不得** 跳过 `_index.md` 更新；`_log.md` 按 Step 5 的稀疏日志规则更新
 - **不得** 在 `2-Wiki/` 区放原始对话（那是 `1-Sessions/` 的职责）
 - **不得** 在不验证 `obsidian version` 的情况下开始操作（会撞 PATH 陷阱或 Obsidian 未启动陷阱）
 - **不得** 静默忽略红线违反或确认协议失败 —— 任何疑问都必须停下问用户

@@ -4,7 +4,6 @@ tags:
 grammer_type: modals
 visibility: public
 area: knowledge
-status: archived
 ---
 You **should do** something 的含义是做某事是好的或正确的。一般用于提建议和表达观点。
 

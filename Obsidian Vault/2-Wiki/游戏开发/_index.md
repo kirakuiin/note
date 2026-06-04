@@ -1,11 +1,8 @@
-﻿---
+---
 area: knowledge
 visibility: public
 tags:
   - 游戏开发
-status: draft
-created: 2026-04-29
-updated: 2026-04-29
 ---
 # 游戏开发 — 索引
 

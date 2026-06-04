@@ -4,7 +4,6 @@ tags:
 grammer_type: pronouns and determiners
 visibility: public
 area: knowledge
-status: archived
 ---
 **some**一般用于肯定句，**any**一般用于否定句（也包括形式上不是否定句，但含义是否定的句子）。
 

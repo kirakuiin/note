@@ -4,7 +4,6 @@ tags:
 grammer_type: phrasal verbs
 visibility: public
 area: knowledge
-status: archived
 ---
 **away** = 离开家。
 **back** = 回家。

@@ -1,11 +1,8 @@
-﻿---
+---
 area: knowledge
 visibility: public
 tags:
   - 方法论
-status: draft
-created: 2026-04-29
-updated: 2026-04-29
 ---
 # 方法论 — 索引
 

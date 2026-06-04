@@ -4,7 +4,6 @@ tags:
 grammer_type: future
 visibility: public
 area: knowledge
-status: archived
 ---
 > [!example]
 > Are you going to eat anything?

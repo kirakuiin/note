@@ -4,7 +4,6 @@ tags:
 grammer_type: articles and nouns
 visibility: public
 area: knowledge
-status: archived
 ---
 **a/an**是用来形容非特定的名词的，比如**a chair**的意思是一把椅子，并不是指具体的某一把；**the**是用来形容特定的名词的。
 

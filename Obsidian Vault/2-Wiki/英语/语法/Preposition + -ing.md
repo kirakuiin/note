@@ -4,7 +4,6 @@ tags:
 grammer_type: -ing and to
 visibility: public
 area: knowledge
-status: archived
 ---
 如果介词后（**in/for/about**）后跟随着动词，那么动词要加**ing**。
 

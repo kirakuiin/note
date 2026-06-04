@@ -2,10 +2,9 @@
 tags:
   - 英语
 grammer_type: future
-aliases: 
+aliases:
 visibility: public
 area: knowledge
-status: archived
 ---
 > [!example]
 > I will go and shut the door.

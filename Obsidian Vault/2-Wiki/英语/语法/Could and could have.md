@@ -4,7 +4,6 @@ tags:
 grammer_type: modals
 visibility: public
 area: knowledge
-status: archived
 ---
 **could**有很多种用法，下面依次举例说明。
 

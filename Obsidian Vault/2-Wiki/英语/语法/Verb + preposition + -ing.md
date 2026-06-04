@@ -4,7 +4,6 @@ tags:
 grammer_type: -ing and to
 visibility: public
 area: knowledge
-status: archived
 ---
 许多动词有**verb + preposition + object**的结构，如果介词后面是动词，则动词要改为**ing**形式。
 

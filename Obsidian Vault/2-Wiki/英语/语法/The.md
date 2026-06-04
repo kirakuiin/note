@@ -4,7 +4,6 @@ tags:
 grammer_type: articles and nouns
 visibility: public
 area: knowledge
-status: archived
 ---
 当某事只有一个存在时，我们用**the**。
 

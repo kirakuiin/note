@@ -4,7 +4,6 @@ tags:
 grammer_type: articles and nouns
 visibility: public
 area: knowledge
-status: archived
 ---
 你可以将两个及以上名词放到一起来表达一个事物，此时前面的名词像一个形容词，修饰第最后一个词的性质。比如：
 

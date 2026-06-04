@@ -4,7 +4,6 @@ tags:
 grammer_type: modals
 visibility: public
 area: knowledge
-status: archived
 ---
 I **had better** do something的含义是建议你去做它，如果不做可能以后有问题。用于现在和将来，而不是过去。
 

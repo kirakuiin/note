@@ -4,7 +4,6 @@ tags:
 grammer_type: conjunctions and prepositions
 visibility: public
 area: knowledge
-status: archived
 ---
 **like** 可以在 **looks/sounds/feels**词后表达某人某事如何的含义。此时可以用**as if / as though**进行替换，含义一致，不过更加正式一点。
 

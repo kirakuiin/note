@@ -1,7 +1,6 @@
 ---
 area: knowledge
 visibility: public
-status: stable
 tags:
   - AI与Agent
 source: external

@@ -4,7 +4,6 @@ tags:
 grammer_type: relative clauses
 visibility: public
 area: knowledge
-status: archived
 ---
 在关系从句里，用**whose**替代**his/her/their**。
 

@@ -2,9 +2,6 @@
 note_type: dashboard
 area: meta
 visibility: public
-status: stable
-created: 2026-04-29
-updated: 2026-04-29
 aliases:
   - Dashboard
   - 工作台

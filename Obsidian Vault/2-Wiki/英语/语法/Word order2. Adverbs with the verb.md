@@ -4,7 +4,6 @@ tags:
 grammer_type: adjectives and adverbs
 visibility: public
 area: knowledge
-status: archived
 ---
 有一些副词一般会跟随动词一起出现，比如**always，also，probably**等。它们具有如下规律。
 

@@ -4,7 +4,6 @@ tags:
 grammer_type: phrasal verbs
 visibility: public
 area: knowledge
-status: archived
 ---
 **put sth up** = 放上去。
 **pick sth up** = 拾起来。

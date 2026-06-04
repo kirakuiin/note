@@ -4,7 +4,6 @@ tags:
 grammer_type: present perfect and past
 visibility: public
 area: knowledge
-status: archived
 ---
 > [!example]
 > Ow! I've cut my finger.

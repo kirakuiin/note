@@ -4,7 +4,6 @@ tags:
 grammer_type: articles and nouns
 visibility: public
 area: knowledge
-status: archived
 ---
 对于有两个部分组成的名词，一般用复数形态。比如：
 **trousers(two legs), glasses, scissors

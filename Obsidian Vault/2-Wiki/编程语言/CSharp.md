@@ -3,7 +3,6 @@ tags:
   - 编程语言
 visibility: public
 area: knowledge
-status: archived
 ---
 #  C#的编译过程
 

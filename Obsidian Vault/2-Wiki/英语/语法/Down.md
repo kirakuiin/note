@@ -4,7 +4,6 @@ tags:
 grammer_type: phrasal verbs
 visibility: public
 area: knowledge
-status: archived
 ---
 **down** 有越来越少的含义。
 

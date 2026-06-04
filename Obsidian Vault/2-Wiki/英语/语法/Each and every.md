@@ -4,7 +4,6 @@ tags:
 grammer_type: pronouns and determiners
 visibility: public
 area: knowledge
-status: archived
 ---
 **each** = 分别考虑整体中的每一个，强调的是个体。各个。
 **every** = 将事情整体考虑，意思接近于**all**。每个。

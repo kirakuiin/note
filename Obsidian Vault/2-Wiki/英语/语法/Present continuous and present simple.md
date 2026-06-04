@@ -4,7 +4,6 @@ tags:
 grammer_type: present and past
 visibility: public
 area: knowledge
-status: archived
 ---
 > [!example]
 > **Present continuous**:

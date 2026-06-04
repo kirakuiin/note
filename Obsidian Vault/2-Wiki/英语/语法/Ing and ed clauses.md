@@ -4,7 +4,6 @@ tags:
 grammer_type: relative clauses
 visibility: public
 area: knowledge
-status: archived
 ---
 **ing**从句告诉我们某事或某事在某个特定时间在做什么。
 

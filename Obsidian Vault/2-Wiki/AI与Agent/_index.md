@@ -1,11 +1,8 @@
-﻿---
+---
 area: knowledge
 visibility: public
 tags:
   - AI与Agent
-status: draft
-created: 2026-04-29
-updated: 2026-04-29
 ---
 # AI与Agent — 索引
 

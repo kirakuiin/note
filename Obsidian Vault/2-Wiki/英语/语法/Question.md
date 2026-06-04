@@ -4,7 +4,6 @@ tags:
 grammer_type: question
 visibility: public
 area: knowledge
-status: archived
 ---
 在疑问句里，将主语放到**第一个动词**之后。
 

@@ -3,7 +3,6 @@ tags:
   - 编程语言
 area: knowledge
 visibility: public
-status: draft
 ---
 主要用于存储部分较为零散的知识点。当知识扩展到一定规模后在存储到其他的文件中。
 
