@@ -1,6 +1,8 @@
 ---
 name: markitdown
 description: Use when the user asks to read, view, or extract content from PDF, DOCX, PPTX, XLSX, XLS, EPUB, HTML, CSV, JSON, XML, ZIP, images (JPG/PNG), audio (WAV/MP3), or Outlook messages. Converts these files to Markdown for readable output. Triggers on "read this PDF", "show me this docx", "extract text from", or any request involving supported binary/document formats.
+area: meta
+visibility: public
 ---
 
 # MarkItDown File Converter

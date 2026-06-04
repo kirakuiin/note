@@ -60,6 +60,29 @@ WIKILINK_RE = re.compile(r"!?\[\[([^\]]+)\]\]")
 MARKDOWN_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 INLINE_TAG_RE = re.compile(r"(?<![\w/])#([A-Za-z0-9_\-/\u4e00-\u9fff]+)")
 HEADING_RE = re.compile(r"^##\s+(.+?)\s*$", re.MULTILINE)
+NON_NOTE_SUFFIXES = {
+    ".avif",
+    ".bmp",
+    ".canvas",
+    ".excalidraw",
+    ".gif",
+    ".html",
+    ".js",
+    ".jpeg",
+    ".jpg",
+    ".json",
+    ".pdf",
+    ".png",
+    ".ps1",
+    ".py",
+    ".svg",
+    ".toml",
+    ".ts",
+    ".txt",
+    ".webp",
+    ".yaml",
+    ".yml",
+}
 
 
 def relpath(path: Path, vault_root: Path) -> str:
@@ -358,7 +381,11 @@ def is_tag_governance_exempt_file(rel: str) -> bool:
 
 
 def is_link_placeholder_target(target: str) -> bool:
-    return "{{" in target or "}}" in target or "'" in target or '"' in target or target.startswith("[")
+    return "{{" in target or "}}" in target or target.startswith(("[", "'", '"'))
+
+
+def is_template_placeholder_tag(tag: str) -> bool:
+    return "{{" in tag or "}}" in tag
 
 
 def scan_vault(vault_root: Path) -> dict[str, Any]:
@@ -417,12 +444,12 @@ def scan_vault(vault_root: Path) -> dict[str, Any]:
                     )
                 )
 
-        for match in WIKILINK_RE.finditer(scan_text):
+        for match in WIKILINK_RE.finditer(scan_body):
             target = clean_link_target(match.group(1))
             if is_link_placeholder_target(target):
                 continue
             suffix = Path(target).suffix.lower()
-            if suffix and suffix != ".md":
+            if suffix in NON_NOTE_SUFFIXES:
                 continue
             resolved = resolve_target(target, path, vault_root, index)
             if resolved:
@@ -468,7 +495,10 @@ def scan_vault(vault_root: Path) -> dict[str, Any]:
                     )
                 )
 
-        for tag in [] if is_tag_governance_exempt_file(rel) else tags_from_fm(fm):
+        candidate_tags = [] if is_tag_governance_exempt_file(rel) else tags_from_fm(fm)
+        if rel.startswith("9-Meta/Templates/"):
+            candidate_tags = [tag for tag in candidate_tags if not is_template_placeholder_tag(tag)]
+        for tag in candidate_tags:
             whitelist = (
                 tag_rules["private_whitelist"]
                 if region == "private"

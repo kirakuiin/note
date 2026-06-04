@@ -1,3 +1,7 @@
+---
+area: meta
+visibility: public
+---
 ## ADDED Requirements
 
 ### Requirement: 0-Daily directory structure
@@ -13,16 +17,16 @@
 #### Scenario: Year-month subdirectory organization
 
 - **WHEN** a daily report for 2026-04-30 is created
-- **THEN** it SHALL be placed at `Netease/0-Daily/2026/04/2026-04-30_ÈÕ±¨.md`
+- **THEN** it SHALL be placed at `Netease/0-Daily/2026/04/2026-04-30_ï¿½Õ±ï¿½.md`
 
 ### Requirement: Daily report file naming
 
-Daily report files SHALL follow the naming convention `YYYY-MM-DD_ÈÕ±¨.md`.
+Daily report files SHALL follow the naming convention `YYYY-MM-DD_ï¿½Õ±ï¿½.md`.
 
 #### Scenario: Correct file name format
 
 - **WHEN** a daily report for March 26, 2026 is saved
-- **THEN** the file name SHALL be `2026-03-26_ÈÕ±¨.md`
+- **THEN** the file name SHALL be `2026-03-26_ï¿½Õ±ï¿½.md`
 
 ### Requirement: Daily report frontmatter
 
@@ -57,5 +61,5 @@ All internal path references within `Netease/` SHALL use `Netease/` (capital N) 
 
 #### Scenario: Base file uses correct folder path
 
-- **WHEN** `¹¤×÷±¨¸æ×ÜÀÀ.base` is read
+- **WHEN** `ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.base` is read
 - **THEN** `file.inFolder` SHALL reference `Netease/0-Daily` (not `netease/daily`)

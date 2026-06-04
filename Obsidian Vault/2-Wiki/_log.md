@@ -1,8 +1,6 @@
 ---
 area: knowledge
 visibility: public
-tags:
-  - meta
 ---
 # Wiki 操作日志
 

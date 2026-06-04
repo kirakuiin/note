@@ -1,3 +1,7 @@
+---
+area: meta
+visibility: public
+---
 # Trigger keywords — Token 提取规则
 
 dev-assist 的 ripgrep 侦测**不维护固定关键词清单**，而是从当前任务描述、

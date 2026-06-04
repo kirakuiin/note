@@ -1,3 +1,7 @@
+---
+area: meta
+visibility: public
+---
 # Domain mapping — cwd → wiki 子目录加权表
 
 dev-assist 的 ripgrep 侦测**始终全库搜**（公开区 + Netease）。

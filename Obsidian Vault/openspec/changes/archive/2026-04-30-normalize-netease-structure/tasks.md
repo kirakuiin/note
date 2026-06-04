@@ -1,32 +1,36 @@
-## 1. ´´½¨ 0-Daily ¹Ç¼Ü
+---
+area: meta
+visibility: public
+---
+## 1. ï¿½ï¿½ï¿½ï¿½ 0-Daily ï¿½Ç¼ï¿½
 
-- [x] 1.1 ´´½¨ `Netease/0-Daily/` Ä¿Â¼
-- [x] 1.2 ´´½¨ `Netease/0-Daily/_index.md`£¬frontmatter º¬ `area: journal`¡¢`visibility: private`£¬ÕýÎÄËµÃ÷ journal area ÓÃÍ¾ºÍÎÄ¼þÃüÃû¹æÔò
+- [x] 1.1 ï¿½ï¿½ï¿½ï¿½ `Netease/0-Daily/` Ä¿Â¼
+- [x] 1.2 ï¿½ï¿½ï¿½ï¿½ `Netease/0-Daily/_index.md`ï¿½ï¿½frontmatter ï¿½ï¿½ `area: journal`ï¿½ï¿½`visibility: private`ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½ journal area ï¿½ï¿½Í¾ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-## 2. Ç¨ÒÆÈÕ±¨ÎÄ¼þ
+## 2. Ç¨ï¿½ï¿½ï¿½Õ±ï¿½ï¿½Ä¼ï¿½
 
-- [x] 2.1 ½« `Netease/daily/2026/` ÏÂËùÓÐÎÄ¼þºÍ×ÓÄ¿Â¼ÒÆ¶¯ÖÁ `Netease/0-Daily/2026/`£¨±£³Ö `03/`¡¢`04/` ×ÓÄ¿Â¼½á¹¹£©
-- [x] 2.2 É¾³ý `Netease/daily/2026/03/_fix_daily.py`
-- [x] 2.3 É¾³ý¿ÕµÄ `Netease/daily/` Ä¿Â¼
+- [x] 2.1 ï¿½ï¿½ `Netease/daily/2026/` ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿Â¼ï¿½Æ¶ï¿½ï¿½ï¿½ `Netease/0-Daily/2026/`ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ `03/`ï¿½ï¿½`04/` ï¿½ï¿½Ä¿Â¼ï¿½á¹¹ï¿½ï¿½
+- [x] 2.2 É¾ï¿½ï¿½ `Netease/daily/2026/03/_fix_daily.py`
+- [x] 2.3 É¾ï¿½ï¿½ï¿½Õµï¿½ `Netease/daily/` Ä¿Â¼
 
-## 3. ÐÞ¸´ frontmatter
+## 3. ï¿½Þ¸ï¿½ frontmatter
 
-- [x] 3.1 ÅúÁ¿ÐÞ¸Ä `Netease/0-Daily/2026/` ÏÂËùÓÐ `.md` ÎÄ¼þµÄ frontmatter£º`area: unknown` ¡ú `area: journal`
+- [x] 3.1 ï¿½ï¿½ï¿½ï¿½ï¿½Þ¸ï¿½ `Netease/0-Daily/2026/` ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ `.md` ï¿½Ä¼ï¿½ï¿½ï¿½ frontmatterï¿½ï¿½`area: unknown` ï¿½ï¿½ `area: journal`
 
-## 4. ¸üÐÂ 4-Reference Ë÷Òý
+## 4. ï¿½ï¿½ï¿½ï¿½ 4-Reference ï¿½ï¿½ï¿½ï¿½
 
-- [x] 4.1 ¸üÐÂ `Netease/4-Reference/_index.md`£¬½«"ÔÝÎÞÌõÄ¿"Ìæ»»ÎªÈý¸ö¾µÏñÔ´µÄ¶þ´ÎË÷ÒýÁ´½Ó£¨Ö¸Ïò `arcolab_docs/INDEX.md`¡¢`popo_card_docs/INDEX.md`¡¢`popo_robot_docs/INDEX.md`£©
+- [x] 4.1 ï¿½ï¿½ï¿½ï¿½ `Netease/4-Reference/_index.md`ï¿½ï¿½ï¿½ï¿½"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿"ï¿½æ»»Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½Ä¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó£ï¿½Ö¸ï¿½ï¿½ `arcolab_docs/INDEX.md`ï¿½ï¿½`popo_card_docs/INDEX.md`ï¿½ï¿½`popo_robot_docs/INDEX.md`ï¿½ï¿½
 
-## 5. Í¬²½Â·¾¶ÒýÓÃ
+## 5. Í¬ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-- [x] 5.1 È«¾ÖÌæ»» `Netease/AGENTS.md` ÖÐËùÓÐ `netease/` ¡ú `Netease/`£¨Ô¼ 36 ´¦£©
-- [x] 5.2 ¸üÐÂ `Netease/daily/¹¤×÷±¨¸æ×ÜÀÀ.base`£¨Ç¨ÒÆºóÂ·¾¶±äÎª `Netease/0-Daily/¹¤×÷±¨¸æ×ÜÀÀ.base`£©£º`file.inFolder("netease/daily")` ¡ú `file.inFolder("Netease/0-Daily")`
-- [x] 5.3 È·ÈÏ¹«¿ªÇøÎÞ `netease/` ÒýÓÃ£¨ºìÏß¼ì²é£©
+- [x] 5.1 È«ï¿½ï¿½ï¿½æ»» `Netease/AGENTS.md` ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ `netease/` ï¿½ï¿½ `Netease/`ï¿½ï¿½Ô¼ 36 ï¿½ï¿½ï¿½ï¿½
+- [x] 5.2 ï¿½ï¿½ï¿½ï¿½ `Netease/daily/ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.base`ï¿½ï¿½Ç¨ï¿½Æºï¿½Â·ï¿½ï¿½ï¿½ï¿½Îª `Netease/0-Daily/ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.base`ï¿½ï¿½ï¿½ï¿½`file.inFolder("netease/daily")` ï¿½ï¿½ `file.inFolder("Netease/0-Daily")`
+- [x] 5.3 È·ï¿½Ï¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ `netease/` ï¿½ï¿½ï¿½Ã£ï¿½ï¿½ï¿½ï¿½ß¼ï¿½é£©
 
-## 6. ÑéÖ¤
+## 6. ï¿½ï¿½Ö¤
 
-- [x] 6.1 ÔËÐÐ `obsidian unresolved` ¼ì²éÎÞ¶ÏÁÑ wikilink
-- [x] 6.2 È·ÈÏ `Netease/0-Daily/` ÏÂËùÓÐÎÄ¼þ frontmatter µÄ `area` Îª `journal`
-- [x] 6.3 È·ÈÏ `Netease/AGENTS.md` ÖÐÎÞ²ÐÁô `netease/`£¨Ð¡Ð´£©
-- [x] 6.4 È·ÈÏ `Netease/daily/` Ä¿Â¼ÒÑÉ¾³ý
-- [x] 6.5 ¸üÐÂ `Netease/AGENTS.md` ¡ì10 ×´Ì¬ËÙ²é£º`0-Daily/` ±ê¼ÇÎªÒÑ¾ÍÎ»£¬ÒÆ³ý `daily/` ÒýÓÃ
+- [x] 6.1 ï¿½ï¿½ï¿½ï¿½ `obsidian unresolved` ï¿½ï¿½ï¿½ï¿½Þ¶ï¿½ï¿½ï¿½ wikilink
+- [x] 6.2 È·ï¿½ï¿½ `Netease/0-Daily/` ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ frontmatter ï¿½ï¿½ `area` Îª `journal`
+- [x] 6.3 È·ï¿½ï¿½ `Netease/AGENTS.md` ï¿½ï¿½ï¿½Þ²ï¿½ï¿½ï¿½ `netease/`ï¿½ï¿½Ð¡Ð´ï¿½ï¿½
+- [x] 6.4 È·ï¿½ï¿½ `Netease/daily/` Ä¿Â¼ï¿½ï¿½É¾ï¿½ï¿½
+- [x] 6.5 ï¿½ï¿½ï¿½ï¿½ `Netease/AGENTS.md` ï¿½ï¿½10 ×´Ì¬ï¿½Ù²é£º`0-Daily/` ï¿½ï¿½ï¿½Îªï¿½Ñ¾ï¿½Î»ï¿½ï¿½ï¿½Æ³ï¿½ `daily/` ï¿½ï¿½ï¿½ï¿½

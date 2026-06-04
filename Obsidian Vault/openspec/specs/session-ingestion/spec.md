@@ -1,3 +1,7 @@
+---
+area: meta
+visibility: public
+---
 # session-ingestion Specification
 
 ## Purpose

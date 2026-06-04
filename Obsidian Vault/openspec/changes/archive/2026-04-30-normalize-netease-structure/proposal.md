@@ -1,30 +1,34 @@
+---
+area: meta
+visibility: public
+---
 ## Why
 
-`Netease/` 私有区在之前的 `restructure-vault-as-llm-wiki` change 中建立了骨架（`1-Sessions/`、`2-Wiki/`、`3-Projects/`、`4-Reference/`），但历史 `daily/` 目录未归档，且目录名从 `netease` 改为 `Netease` 后内部大量路径引用未同步。现在无效数据已清理完毕，是正规化的最佳时机。
+`Netease/` 私锟斤拷锟斤拷锟斤拷之前锟斤拷 `restructure-vault-as-llm-wiki` change 锟叫斤拷锟斤拷锟剿骨架ｏ拷`1-Sessions/`锟斤拷`2-Wiki/`锟斤拷`3-Projects/`锟斤拷`4-Reference/`锟斤拷锟斤拷锟斤拷锟斤拷史 `daily/` 目录未锟介档锟斤拷锟斤拷目录锟斤拷锟斤拷 `netease` 锟斤拷为 `Netease` 锟斤拷锟节诧拷锟斤拷锟斤拷路锟斤拷锟斤拷锟斤拷未同锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷效锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷希锟斤拷锟斤拷锟斤拷婊拷锟斤拷锟斤拷时锟斤拷锟斤拷
 
 ## What Changes
 
-- 创建 `0-Daily/` 目录及 `_index.md`，补齐 AGENTS.md 规划的 journal area
-- 将 `daily/2026/` 下所有日报/周报/月报迁移至 `0-Daily/2026/`，保持原有子目录结构
-- 批量修复迁移后文件的 frontmatter：`area: unknown` → `area: journal`
-- 删除 `daily/` 目录及 `_fix_daily.py` 脚本
-- 更新 `4-Reference/_index.md`：从"暂无条目"改为二次索引，指向三个子目录的 INDEX.md
-- 更新 `daily/工作报告总览.base`：`file.inFolder` 路径从 `netease/daily` 改为 `Netease/0-Daily`
-- 全局替换 `Netease/AGENTS.md` 中所有 `netease/` → `Netease/`（约 36 处）
+- 锟斤拷锟斤拷 `0-Daily/` 目录锟斤拷 `_index.md`锟斤拷锟斤拷锟斤拷 AGENTS.md 锟芥划锟斤拷 journal area
+- 锟斤拷 `daily/2026/` 锟斤拷锟斤拷锟斤拷锟秸憋拷/锟杰憋拷/锟铰憋拷迁锟斤拷锟斤拷 `0-Daily/2026/`锟斤拷锟斤拷锟斤拷原锟斤拷锟斤拷目录锟结构
+- 锟斤拷锟斤拷锟睫革拷迁锟狡猴拷锟侥硷拷锟斤拷 frontmatter锟斤拷`area: unknown` 锟斤拷 `area: journal`
+- 删锟斤拷 `daily/` 目录锟斤拷 `_fix_daily.py` 锟脚憋拷
+- 锟斤拷锟斤拷 `4-Reference/_index.md`锟斤拷锟斤拷"锟斤拷锟斤拷锟斤拷目"锟斤拷为锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷指锟斤拷锟斤拷锟斤拷锟斤拷目录锟斤拷 INDEX.md
+- 锟斤拷锟斤拷 `daily/锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷.base`锟斤拷`file.inFolder` 路锟斤拷锟斤拷 `netease/daily` 锟斤拷为 `Netease/0-Daily`
+- 全锟斤拷锟芥换 `Netease/AGENTS.md` 锟斤拷锟斤拷锟斤拷 `netease/` 锟斤拷 `Netease/`锟斤拷约 36 锟斤拷锟斤拷
 
 ## Capabilities
 
 ### New Capabilities
 
-- `netease-journal`: `0-Daily/` 目录作为私有区工作日报/周报/月报的 journal area，按 `YYYY/MM/` 子目录组织，文件命名 `YYYY-MM-DD_日报.md`
+- `netease-journal`: `0-Daily/` 目录锟斤拷为私锟斤拷锟斤拷锟斤拷锟斤拷锟秸憋拷/锟杰憋拷/锟铰憋拷锟斤拷 journal area锟斤拷锟斤拷 `YYYY/MM/` 锟斤拷目录锟斤拷织锟斤拷锟侥硷拷锟斤拷锟斤拷 `YYYY-MM-DD_锟秸憋拷.md`
 
 ### Modified Capabilities
 
-（无——本次不修改已有 spec 的需求，仅做结构调整和路径同步）
+锟斤拷锟睫★拷锟斤拷锟斤拷锟轿诧拷锟睫革拷锟斤拷锟斤拷 spec 锟斤拷锟斤拷锟襟，斤拷锟斤拷锟结构锟斤拷锟斤拷锟斤拷路锟斤拷同锟斤拷锟斤拷
 
 ## Impact
 
-- 受影响文件：`Netease/AGENTS.md`（路径引用更新）、`Netease/4-Reference/_index.md`（内容更新）、`Netease/daily/工作报告总览.base`（路径更新）
-- 受影响目录：`Netease/daily/`（删除）、`Netease/0-Daily/`（新建）
-- 迁移文件数：28 个（24 日报 + 3 周报 + 1 月报），frontmatter 批量修复
-- 无公开区影响，无 API 变更，无依赖变更
+- 锟斤拷影锟斤拷锟侥硷拷锟斤拷`Netease/AGENTS.md`锟斤拷路锟斤拷锟斤拷锟矫革拷锟铰ｏ拷锟斤拷`Netease/4-Reference/_index.md`锟斤拷锟斤拷锟捷革拷锟铰ｏ拷锟斤拷`Netease/daily/锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷.base`锟斤拷路锟斤拷锟斤拷锟铰ｏ拷
+- 锟斤拷影锟斤拷目录锟斤拷`Netease/daily/`锟斤拷删锟斤拷锟斤拷锟斤拷`Netease/0-Daily/`锟斤拷锟铰斤拷锟斤拷
+- 迁锟斤拷锟侥硷拷锟斤拷锟斤拷28 锟斤拷锟斤拷24 锟秸憋拷 + 3 锟杰憋拷 + 1 锟铰憋拷锟斤拷锟斤拷frontmatter 锟斤拷锟斤拷锟睫革拷
+- 锟睫癸拷锟斤拷锟斤拷影锟届，锟斤拷 API 锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷

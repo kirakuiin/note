@@ -1,3 +1,7 @@
+---
+area: meta
+visibility: public
+---
 # agent-schema Specification
 
 ## Purpose

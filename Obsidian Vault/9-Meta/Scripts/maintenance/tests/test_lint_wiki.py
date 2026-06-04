@@ -170,6 +170,148 @@ tags:
     assert w2 == []
 
 
+def test_templates_allow_explicit_tag_placeholders(tmp_path):
+    vault = base_vault(tmp_path)
+    write(
+        vault / "9-Meta" / "Templates" / "daily.md",
+        """---
+area: journal
+visibility: public
+date: {{date}}
+tags:
+  - {{tag}}
+---
+# {{date}}
+""",
+    )
+
+    report = lint_wiki.scan_vault(vault)
+    s2 = [
+        issue
+        for issue in issues_by_id(report).get("S2", [])
+        if issue["path"] == "9-Meta/Templates/daily.md"
+    ]
+
+    assert s2 == []
+
+
+def test_frontmatter_example_wikilinks_do_not_count_as_broken_links(tmp_path):
+    vault = base_vault(tmp_path)
+    write(
+        vault / "9-Meta" / "Skills" / "capture" / "SKILL.md",
+        """---
+name: capture
+description: Use when user says append to [[Page]].
+area: meta
+visibility: public
+---
+# Capture
+""",
+    )
+
+    report = lint_wiki.scan_vault(vault)
+    w1 = [
+        issue
+        for issue in issues_by_id(report).get("W1", [])
+        if issue["path"] == "9-Meta/Skills/capture/SKILL.md"
+    ]
+
+    assert w1 == []
+
+
+def test_wikilinks_with_apostrophes_count_as_real_links(tmp_path):
+    vault = base_vault(tmp_path)
+    write(
+        vault / "2-Wiki" / "English" / "Grammar" / "It's time.md",
+        """---
+area: knowledge
+visibility: public
+tags:
+  - 缂栫▼璇█
+---
+# It's time
+""",
+    )
+    write(
+        vault / "2-Wiki" / "English" / "_index.md",
+        """---
+area: knowledge
+visibility: public
+tags:
+  - 缂栫▼璇█
+---
+- [[Grammar/It's time]]
+""",
+    )
+
+    report = lint_wiki.scan_vault(vault)
+    s1 = [
+        issue
+        for issue in issues_by_id(report).get("S1", [])
+        if issue["path"] == "2-Wiki/English/Grammar/It's time.md"
+    ]
+
+    assert s1 == []
+
+
+def test_wikilinks_with_periods_count_as_real_links(tmp_path):
+    vault = base_vault(tmp_path)
+    write(
+        vault / "2-Wiki" / "Game" / "Godot" / "2.5D setup.md",
+        """---
+area: knowledge
+visibility: public
+tags:
+  - 缂栫▼璇█
+---
+# 2.5D setup
+""",
+    )
+    write(
+        vault / "2-Wiki" / "Game" / "_index.md",
+        """---
+area: knowledge
+visibility: public
+tags:
+  - 缂栫▼璇█
+---
+- [[Godot/2.5D setup]]
+""",
+    )
+
+    report = lint_wiki.scan_vault(vault)
+    s1 = [
+        issue
+        for issue in issues_by_id(report).get("S1", [])
+        if issue["path"] == "2-Wiki/Game/Godot/2.5D setup.md"
+    ]
+
+    assert s1 == []
+
+
+def test_source_file_wikilinks_are_not_broken_note_links(tmp_path):
+    vault = base_vault(tmp_path)
+    write(vault / "9-Meta" / "Scripts" / "tool.py", "print('ok')\n")
+    write(
+        vault / "9-Meta" / "Scripts" / "_index.md",
+        """---
+area: meta
+visibility: public
+---
+- [[tool.py]]
+""",
+    )
+
+    report = lint_wiki.scan_vault(vault)
+    w1 = [
+        issue
+        for issue in issues_by_id(report).get("W1", [])
+        if issue["path"] == "9-Meta/Scripts/_index.md"
+    ]
+
+    assert w1 == []
+
+
 def test_tags_authority_file_does_not_leak_its_own_redline_definitions(tmp_path):
     vault = base_vault(tmp_path)
 

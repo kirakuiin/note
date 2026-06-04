@@ -1,8 +1,6 @@
 ---
 area: life
 visibility: public
-tags:
-  - 桌游
 ---
 # 桌游
 

@@ -1,3 +1,7 @@
+---
+area: meta
+visibility: public
+---
 # wiki-conventions Specification
 
 ## Purpose

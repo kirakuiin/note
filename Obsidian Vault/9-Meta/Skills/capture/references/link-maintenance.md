@@ -1,3 +1,7 @@
+---
+area: meta
+visibility: public
+---
 # Link Maintenance Patterns
 
 When `capture` creates or updates a page, it must also maintain the
