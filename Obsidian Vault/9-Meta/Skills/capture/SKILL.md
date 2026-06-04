@@ -22,8 +22,8 @@ This skill is a lightweight counterpart to `ingest`:
 
 | Skill | Use when |
 |---|---|
-| `ingest` | There is a whole conversation, long document, or multi-page decision trail worth archiving. May produce a session file + optional wiki pages. |
-| `capture` (this) | There is only a single atomic piece of knowledge worth saving — a lesson, a rule, a trap. Writes straight to wiki. No session file. |
+| `ingest` | There is a whole conversation, long document, multi-page decision trail, or context that needs a session record. May produce a session file + optional wiki pages. |
+| `capture` (this) | There is one atomic piece of reusable knowledge worth saving — a lesson, rule, trap, or compact spec. Writes straight to wiki. No session file. |
 
 ## When to trigger
 
@@ -35,7 +35,8 @@ This skill is a lightweight counterpart to `ingest`:
 
 **Do NOT trigger** when:
 - The user just stated a fact in passing and moved on. Wait for an explicit save intent.
-- The content is a whole conversation or a long document (>200 chars of prose). Route to `ingest` instead.
+- The content is a whole conversation, long document, decision trail, or anything whose original context should be preserved. Route to `ingest` instead.
+- Length is only a heuristic: a compact spec can still be `capture` if it is one reusable rule; a short exchange can still be `ingest` if traceability matters.
 - The user is asking a knowledge question ("what do I know about X?"). Route to `query-wiki`.
 
 When in doubt about whether to trigger, ask one short question before acting.

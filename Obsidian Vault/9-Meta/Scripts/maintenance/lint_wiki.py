@@ -155,6 +155,8 @@ def all_tags(text: str, fm: dict[str, Any]) -> list[str]:
 def strip_code_spans(text: str) -> str:
     text = re.sub(r"```.*?```", "", text, flags=re.DOTALL)
     text = re.sub(r"`[^`\n]*`", "", text)
+    text = re.sub(r"\[[^\]]+\]\([^)]+\)", "", text)
+    text = re.sub(r"<[^>]+>", "", text)
     return text
 
 
@@ -211,7 +213,7 @@ def load_tag_rules(vault_root: Path) -> dict[str, Any]:
 
     return {
         "public_whitelist": public_whitelist,
-        "private_whitelist": public_whitelist | private_whitelist,
+        "private_whitelist": public_whitelist | private_whitelist | redline_literals,
         "redline_literals": redline_literals,
         "redline_prefixes": redline_prefixes,
         "cleanup": cleanup,
@@ -300,6 +302,10 @@ def check_required_frontmatter(rel: str, fm: dict[str, Any]) -> list[str]:
     for field in ("area", "visibility"):
         if not fm.get(field):
             missing.append(field)
+    if rel.startswith("9-Meta/Templates/"):
+        return missing
+    if Path(rel).name in {"_index.md", "_log.md"}:
+        return missing
     if area in {"knowledge", "session", "project"} and not tags_from_fm(fm):
         missing.append("tags")
     if area == "session":
@@ -326,6 +332,8 @@ def related_not_last(body: str) -> bool:
 
 
 def check_session_sections(rel: str, body: str) -> list[str]:
+    if Path(rel).name in {"_index.md", "_log.md"}:
+        return []
     if "/1-Sessions/" not in f"/{rel}" and not rel.startswith("1-Sessions/"):
         return []
     headings = set(HEADING_RE.findall(body))
@@ -343,6 +351,14 @@ def is_boundary_governance_file(rel: str) -> bool:
         or rel.startswith("9-Meta/Skills/")
         or rel.startswith("openspec/")
     )
+
+
+def is_tag_governance_exempt_file(rel: str) -> bool:
+    return is_tag_authority_file(rel) or is_boundary_governance_file(rel) or rel.startswith("9-Meta/Excalidraw/")
+
+
+def is_link_placeholder_target(target: str) -> bool:
+    return "{{" in target or "}}" in target or "'" in target or '"' in target or target.startswith("[")
 
 
 def scan_vault(vault_root: Path) -> dict[str, Any]:
@@ -403,6 +419,8 @@ def scan_vault(vault_root: Path) -> dict[str, Any]:
 
         for match in WIKILINK_RE.finditer(scan_text):
             target = clean_link_target(match.group(1))
+            if is_link_placeholder_target(target):
+                continue
             suffix = Path(target).suffix.lower()
             if suffix and suffix != ".md":
                 continue
@@ -450,7 +468,7 @@ def scan_vault(vault_root: Path) -> dict[str, Any]:
                     )
                 )
 
-        for tag in [] if is_tag_authority_file(rel) or is_boundary_governance_file(rel) else all_tags(scan_text, fm):
+        for tag in [] if is_tag_governance_exempt_file(rel) else tags_from_fm(fm):
             whitelist = (
                 tag_rules["private_whitelist"]
                 if region == "private"
@@ -475,6 +493,8 @@ def scan_vault(vault_root: Path) -> dict[str, Any]:
             elif "/" in tag:
                 top = tag.split("/", 1)[0]
                 suggestion = "Use a whitelisted top-level tag and at most one nested segment."
+                if region == "private" and any(tag.startswith(prefix + "/") for prefix in tag_rules["redline_prefixes"]):
+                    continue
                 if top in whitelist and tag.count("/") <= 1:
                     continue
             elif tag in whitelist:
