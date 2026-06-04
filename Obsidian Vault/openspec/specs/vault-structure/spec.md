@@ -1,3 +1,7 @@
+---
+area: meta
+visibility: public
+---
 # vault-structure Specification
 
 ## Purpose

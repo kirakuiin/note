@@ -1,3 +1,7 @@
+---
+area: meta
+visibility: public
+---
 # wiki-lint Specification
 
 ## Purpose

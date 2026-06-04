@@ -36,6 +36,7 @@ visibility: public
 | Tag | 说明 |
 |---|---|
 | `#sdc` | x |
+| `#mhxy` | x |
 
 ### 3.5 嵌套红线
 
@@ -95,6 +96,220 @@ tags:
         if issue["path"] == "2-Wiki/编程语言/Python.md"
     ]
     assert python_w2 == []
+
+
+def test_index_pages_need_only_basic_frontmatter(tmp_path):
+    vault = base_vault(tmp_path)
+    write(
+        vault / "1-Sessions" / "_index.md",
+        """---
+area: session
+visibility: public
+---
+# Sessions
+""",
+    )
+
+    report = lint_wiki.scan_vault(vault)
+    findings = [
+        issue
+        for issue in report["issues"]
+        if issue["path"] == "1-Sessions/_index.md"
+        and issue["id"] in {"W2", "W8"}
+    ]
+
+    assert findings == []
+
+
+def test_body_hash_words_are_not_wild_tags(tmp_path):
+    vault = base_vault(tmp_path)
+    write(
+        vault / "6-Tools" / "版本控制-SVN.md",
+        """---
+area: tool
+visibility: public
+category: 版本控制
+tags:
+  - 工具/SVN
+---
+# 合并
+正文提到 #提交 和 #解决冲突。
+""",
+    )
+
+    report = lint_wiki.scan_vault(vault)
+    s2 = [
+        issue
+        for issue in issues_by_id(report).get("S2", [])
+        if issue["path"] == "6-Tools/版本控制-SVN.md"
+    ]
+
+    assert s2 == []
+
+
+def test_templates_allow_empty_tag_placeholders(tmp_path):
+    vault = base_vault(tmp_path)
+    write(
+        vault / "9-Meta" / "Templates" / "wiki-page.md",
+        """---
+area: knowledge
+visibility: public
+tags:
+---
+# {{title}}
+""",
+    )
+
+    report = lint_wiki.scan_vault(vault)
+    w2 = [
+        issue
+        for issue in issues_by_id(report).get("W2", [])
+        if issue["path"] == "9-Meta/Templates/wiki-page.md"
+    ]
+
+    assert w2 == []
+
+
+def test_templates_allow_explicit_tag_placeholders(tmp_path):
+    vault = base_vault(tmp_path)
+    write(
+        vault / "9-Meta" / "Templates" / "daily.md",
+        """---
+area: journal
+visibility: public
+date: {{date}}
+tags:
+  - {{tag}}
+---
+# {{date}}
+""",
+    )
+
+    report = lint_wiki.scan_vault(vault)
+    s2 = [
+        issue
+        for issue in issues_by_id(report).get("S2", [])
+        if issue["path"] == "9-Meta/Templates/daily.md"
+    ]
+
+    assert s2 == []
+
+
+def test_frontmatter_example_wikilinks_do_not_count_as_broken_links(tmp_path):
+    vault = base_vault(tmp_path)
+    write(
+        vault / "9-Meta" / "Skills" / "capture" / "SKILL.md",
+        """---
+name: capture
+description: Use when user says append to [[Page]].
+area: meta
+visibility: public
+---
+# Capture
+""",
+    )
+
+    report = lint_wiki.scan_vault(vault)
+    w1 = [
+        issue
+        for issue in issues_by_id(report).get("W1", [])
+        if issue["path"] == "9-Meta/Skills/capture/SKILL.md"
+    ]
+
+    assert w1 == []
+
+
+def test_wikilinks_with_apostrophes_count_as_real_links(tmp_path):
+    vault = base_vault(tmp_path)
+    write(
+        vault / "2-Wiki" / "English" / "Grammar" / "It's time.md",
+        """---
+area: knowledge
+visibility: public
+tags:
+  - 缂栫▼璇█
+---
+# It's time
+""",
+    )
+    write(
+        vault / "2-Wiki" / "English" / "_index.md",
+        """---
+area: knowledge
+visibility: public
+tags:
+  - 缂栫▼璇█
+---
+- [[Grammar/It's time]]
+""",
+    )
+
+    report = lint_wiki.scan_vault(vault)
+    s1 = [
+        issue
+        for issue in issues_by_id(report).get("S1", [])
+        if issue["path"] == "2-Wiki/English/Grammar/It's time.md"
+    ]
+
+    assert s1 == []
+
+
+def test_wikilinks_with_periods_count_as_real_links(tmp_path):
+    vault = base_vault(tmp_path)
+    write(
+        vault / "2-Wiki" / "Game" / "Godot" / "2.5D setup.md",
+        """---
+area: knowledge
+visibility: public
+tags:
+  - 缂栫▼璇█
+---
+# 2.5D setup
+""",
+    )
+    write(
+        vault / "2-Wiki" / "Game" / "_index.md",
+        """---
+area: knowledge
+visibility: public
+tags:
+  - 缂栫▼璇█
+---
+- [[Godot/2.5D setup]]
+""",
+    )
+
+    report = lint_wiki.scan_vault(vault)
+    s1 = [
+        issue
+        for issue in issues_by_id(report).get("S1", [])
+        if issue["path"] == "2-Wiki/Game/Godot/2.5D setup.md"
+    ]
+
+    assert s1 == []
+
+
+def test_source_file_wikilinks_are_not_broken_note_links(tmp_path):
+    vault = base_vault(tmp_path)
+    write(vault / "9-Meta" / "Scripts" / "tool.py", "print('ok')\n")
+    write(
+        vault / "9-Meta" / "Scripts" / "_index.md",
+        """---
+area: meta
+visibility: public
+---
+- [[tool.py]]
+""",
+    )
+
+    report = lint_wiki.scan_vault(vault)
+    w1 = [
+        issue
+        for issue in issues_by_id(report).get("W1", [])
+        if issue["path"] == "9-Meta/Scripts/_index.md"
+    ]
+
+    assert w1 == []
 
 
 def test_tags_authority_file_does_not_leak_its_own_redline_definitions(tmp_path):
@@ -228,6 +443,38 @@ Inline `[['other','=','yyy']]` too.
     assert w1 == []
 
 
+def test_table_code_and_template_links_are_not_broken_wikilinks(tmp_path):
+    vault = base_vault(tmp_path)
+    write(
+        vault / "Netease" / "4-Reference" / "sdk.md",
+        """---
+area: reference
+visibility: private
+source: docs
+---
+| = | [['name','=','xxx']] |
+""",
+    )
+    write(
+        vault / "9-Meta" / "Templates" / "index.md",
+        """---
+area: meta
+visibility: public
+---
+| item | [[{{path_1}}]] |
+""",
+    )
+
+    report = lint_wiki.scan_vault(vault)
+    w1 = [
+        issue
+        for issue in issues_by_id(report).get("W1", [])
+        if issue["path"] in {"Netease/4-Reference/sdk.md", "9-Meta/Templates/index.md"}
+    ]
+
+    assert w1 == []
+
+
 def test_wikilink_path_suffix_resolves_within_vault(tmp_path):
     vault = base_vault(tmp_path)
     write(
@@ -314,6 +561,80 @@ tags:
 
     assert any("sdc" in issue["problem"] for issue in by_id.get("C2", []))
     assert any("编程语言" in issue["suggestion"] for issue in by_id.get("S2", []))
+
+
+def test_private_redline_tags_are_allowed(tmp_path):
+    vault = base_vault(tmp_path)
+    write(
+        vault / "Netease" / "2-Wiki" / "业务" / "Internal.md",
+        """---
+area: knowledge
+visibility: private
+tags:
+  - mhxy
+  - sdc/大地图
+---
+# Internal
+""",
+    )
+
+    report = lint_wiki.scan_vault(vault)
+    findings = [
+        issue
+        for issue in report["issues"]
+        if issue["path"] == "Netease/2-Wiki/业务/Internal.md"
+        and issue["id"] in {"C2", "S2"}
+    ]
+
+    assert findings == []
+
+
+def test_html_colors_and_markdown_anchors_are_not_tags(tmp_path):
+    vault = base_vault(tmp_path)
+    write(
+        vault / "Netease" / "4-Reference" / "doc.md",
+        """---
+area: reference
+visibility: private
+source: docs
+---
+<span style="background:#f8a5a5;color:#4a0000">新增</span>
+| [_index.md](#_indexmd) | changed |
+""",
+    )
+
+    report = lint_wiki.scan_vault(vault)
+    s2 = [
+        issue
+        for issue in issues_by_id(report).get("S2", [])
+        if issue["path"] == "Netease/4-Reference/doc.md"
+    ]
+
+    assert s2 == []
+
+
+def test_excalidraw_plugin_tags_are_ignored(tmp_path):
+    vault = base_vault(tmp_path)
+    write(
+        vault / "9-Meta" / "Excalidraw" / "drawing.excalidraw.md",
+        """---
+excalidraw-plugin: parsed
+tags: [excalidraw]
+visibility: public
+area: meta
+---
+# Excalidraw Data
+""",
+    )
+
+    report = lint_wiki.scan_vault(vault)
+    s2 = [
+        issue
+        for issue in issues_by_id(report).get("S2", [])
+        if issue["path"] == "9-Meta/Excalidraw/drawing.excalidraw.md"
+    ]
+
+    assert s2 == []
 
 
 def test_public_nested_tool_tags_from_legal_examples_are_allowed(tmp_path):

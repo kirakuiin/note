@@ -35,6 +35,9 @@
     "play times": "number",
     "excalidraw-export-internal-links": "checkbox",
     "created": "date",
-    "updated": "date"
+    "updated": "date",
+    "area": "text",
+    "visibility": "text",
+    "source": "text"
   }
 }

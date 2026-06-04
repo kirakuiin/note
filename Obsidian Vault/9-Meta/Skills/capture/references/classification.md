@@ -1,3 +1,7 @@
+---
+area: meta
+visibility: public
+---
 # Classification Decision Procedure
 
 When invoked by `capture`, use this procedure to decide where a piece of

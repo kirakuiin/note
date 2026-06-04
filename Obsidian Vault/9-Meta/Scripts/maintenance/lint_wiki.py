@@ -60,6 +60,29 @@ WIKILINK_RE = re.compile(r"!?\[\[([^\]]+)\]\]")
 MARKDOWN_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 INLINE_TAG_RE = re.compile(r"(?<![\w/])#([A-Za-z0-9_\-/\u4e00-\u9fff]+)")
 HEADING_RE = re.compile(r"^##\s+(.+?)\s*$", re.MULTILINE)
+NON_NOTE_SUFFIXES = {
+    ".avif",
+    ".bmp",
+    ".canvas",
+    ".excalidraw",
+    ".gif",
+    ".html",
+    ".js",
+    ".jpeg",
+    ".jpg",
+    ".json",
+    ".pdf",
+    ".png",
+    ".ps1",
+    ".py",
+    ".svg",
+    ".toml",
+    ".ts",
+    ".txt",
+    ".webp",
+    ".yaml",
+    ".yml",
+}
 
 
 def relpath(path: Path, vault_root: Path) -> str:
@@ -155,6 +178,8 @@ def all_tags(text: str, fm: dict[str, Any]) -> list[str]:
 def strip_code_spans(text: str) -> str:
     text = re.sub(r"```.*?```", "", text, flags=re.DOTALL)
     text = re.sub(r"`[^`\n]*`", "", text)
+    text = re.sub(r"\[[^\]]+\]\([^)]+\)", "", text)
+    text = re.sub(r"<[^>]+>", "", text)
     return text
 
 
@@ -211,7 +236,7 @@ def load_tag_rules(vault_root: Path) -> dict[str, Any]:
 
     return {
         "public_whitelist": public_whitelist,
-        "private_whitelist": public_whitelist | private_whitelist,
+        "private_whitelist": public_whitelist | private_whitelist | redline_literals,
         "redline_literals": redline_literals,
         "redline_prefixes": redline_prefixes,
         "cleanup": cleanup,
@@ -300,6 +325,10 @@ def check_required_frontmatter(rel: str, fm: dict[str, Any]) -> list[str]:
     for field in ("area", "visibility"):
         if not fm.get(field):
             missing.append(field)
+    if rel.startswith("9-Meta/Templates/"):
+        return missing
+    if Path(rel).name in {"_index.md", "_log.md"}:
+        return missing
     if area in {"knowledge", "session", "project"} and not tags_from_fm(fm):
         missing.append("tags")
     if area == "session":
@@ -326,6 +355,8 @@ def related_not_last(body: str) -> bool:
 
 
 def check_session_sections(rel: str, body: str) -> list[str]:
+    if Path(rel).name in {"_index.md", "_log.md"}:
+        return []
     if "/1-Sessions/" not in f"/{rel}" and not rel.startswith("1-Sessions/"):
         return []
     headings = set(HEADING_RE.findall(body))
@@ -343,6 +374,18 @@ def is_boundary_governance_file(rel: str) -> bool:
         or rel.startswith("9-Meta/Skills/")
         or rel.startswith("openspec/")
     )
+
+
+def is_tag_governance_exempt_file(rel: str) -> bool:
+    return is_tag_authority_file(rel) or is_boundary_governance_file(rel) or rel.startswith("9-Meta/Excalidraw/")
+
+
+def is_link_placeholder_target(target: str) -> bool:
+    return "{{" in target or "}}" in target or target.startswith(("[", "'", '"'))
+
+
+def is_template_placeholder_tag(tag: str) -> bool:
+    return "{{" in tag or "}}" in tag
 
 
 def scan_vault(vault_root: Path) -> dict[str, Any]:
@@ -401,10 +444,12 @@ def scan_vault(vault_root: Path) -> dict[str, Any]:
                     )
                 )
 
-        for match in WIKILINK_RE.finditer(scan_text):
+        for match in WIKILINK_RE.finditer(scan_body):
             target = clean_link_target(match.group(1))
+            if is_link_placeholder_target(target):
+                continue
             suffix = Path(target).suffix.lower()
-            if suffix and suffix != ".md":
+            if suffix in NON_NOTE_SUFFIXES:
                 continue
             resolved = resolve_target(target, path, vault_root, index)
             if resolved:
@@ -450,7 +495,10 @@ def scan_vault(vault_root: Path) -> dict[str, Any]:
                     )
                 )
 
-        for tag in [] if is_tag_authority_file(rel) or is_boundary_governance_file(rel) else all_tags(scan_text, fm):
+        candidate_tags = [] if is_tag_governance_exempt_file(rel) else tags_from_fm(fm)
+        if rel.startswith("9-Meta/Templates/"):
+            candidate_tags = [tag for tag in candidate_tags if not is_template_placeholder_tag(tag)]
+        for tag in candidate_tags:
             whitelist = (
                 tag_rules["private_whitelist"]
                 if region == "private"
@@ -475,6 +523,8 @@ def scan_vault(vault_root: Path) -> dict[str, Any]:
             elif "/" in tag:
                 top = tag.split("/", 1)[0]
                 suggestion = "Use a whitelisted top-level tag and at most one nested segment."
+                if region == "private" and any(tag.startswith(prefix + "/") for prefix in tag_rules["redline_prefixes"]):
+                    continue
                 if top in whitelist and tag.count("/") <= 1:
                     continue
             elif tag in whitelist:

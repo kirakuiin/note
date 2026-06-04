@@ -1,8 +1,6 @@
 ---
 area: knowledge
 visibility: public
-tags:
-  - meta
 ---
 # Wiki 操作日志
 
@@ -41,3 +39,15 @@ tags:
 
 - `_log.md` 从全量活动流水收窄为稀疏结构性审计日志。
 - 更新 AGENTS、capture / ingest / lint skills、active OpenSpec specs，并压缩公开区与私有区历史 `_log.md`。
+
+## [2026-06-04] skill-update | capture / ingest / dev-assist 协同
+
+- 明确 capture 与 ingest 按“是否需要 session/追溯”分流，不按字数硬切。
+- 修正 ingest 公私边界为公开区不得引用私有区，私有区可按需引用公开区。
+- 补充 dev-assist 只提示适合 capture，不自动写入。
+
+## [2026-06-04] skill-update | dev-assist 检索反馈
+
+- 简化 dev-assist frontmatter description，仅保留触发条件。
+- 将短英文 token 噪声降权写入 Phase 2 排序规则。
+- 新增 miss lesson 记录机制，用于持续调优 token、domain mapping 与页面关键词。

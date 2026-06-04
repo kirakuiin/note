@@ -1,3 +1,7 @@
+---
+area: meta
+visibility: public
+---
 # note-frontmatter Specification
 
 ## Purpose
