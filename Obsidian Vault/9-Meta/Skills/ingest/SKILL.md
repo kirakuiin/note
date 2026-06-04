@@ -73,6 +73,17 @@ Phase 3 and handle the durable knowledge with `capture`.
 Use `obsidian create` with the `session` template if available, otherwise
 construct the file manually. Keep it concise — 200-800 words.
 
+**Windows-safe write rule:** write full session or wiki page bodies with
+`obsidian create path=... content=...` (or `append` when the target is truly
+append-only). Do not put multi-line markdown bodies into
+`obsidian eval code=...`; shell / CLI escaping can corrupt backticks,
+backslashes, Chinese paths, template literals, or long base64 strings. Use
+`eval` only for short targeted edits to existing files, such as inserting one
+index line, updating a frontmatter field, or inserting before a marker.
+After complex writes, verify the specific target with `obsidian read path=...`
+or a marker check before continuing; empty output or zero exit code alone is not
+proof that Obsidian modified the file.
+
 **Required frontmatter:**
 ```yaml
 ---
@@ -144,6 +155,9 @@ write nothing.
    - update `_log.md` in the target region only when the ingest creates
      a session, creates wiki pages, or updates multiple existing pages
    - run `obsidian unresolved`
+   - if an `obsidian eval` edit fails or appears to no-op, split the operation:
+     main content via `create` / `append`, then small guarded `eval` calls for
+     indexes, backlinks, or metadata
 4. **Backfill when a session exists**: Update the session file's
    `wiki_pages_touched` with wikilinks to all affected pages.
 

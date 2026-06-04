@@ -159,6 +159,28 @@ Use the `obsidian-cli` skill for every file operation. See the
 `obsidian-cli` skill for syntax and the `obsidian-markdown` skill for
 content syntax.
 
+### Obsidian CLI write strategy
+
+Pick the write primitive by payload size and escaping risk:
+
+- Use `obsidian create path=... content=...` for a new full page body.
+- Use `obsidian append` only when appending to the true end of an append-friendly
+  file or section.
+- Use `obsidian eval` only for short targeted edits to existing files, such as
+  inserting one `_index.md` line after a marker or inserting a backlink before a
+  final `## 相关` section.
+- Do **not** put a multi-line markdown page body into `obsidian eval code=...`.
+  Windows shell / CLI escaping can corrupt backticks, backslashes, Chinese paths,
+  template literals, or long base64 strings. Symptoms include `Invalid or
+  unexpected token`, empty CLI output with no write, or `obsidian read` reporting
+  the expected file does not exist.
+- After every complex `create`, `append`, or `eval`, verify the specific target
+  with `obsidian read path=...` or a marker check before continuing. Do not treat
+  zero exit code or empty output as proof of success.
+- If `eval` fails or appears to no-op, split the operation: write the main body
+  with `create` / `append`, then use small guarded `eval` calls for indexes,
+  backlinks, or frontmatter transforms.
+
 Order of operations:
 
 1. **Write/append** the main target file.
