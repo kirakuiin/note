@@ -1,201 +1,197 @@
 ---
 name: lint-wiki
 description: >
-  Audit an Obsidian vault for wiki health issues such as broken wikilinks,
+  Use when auditing this Obsidian vault for wiki health: broken wikilinks,
   public/private boundary leaks, redline tag leaks, visibility mismatches,
-  missing frontmatter, index drift, naming violations, orphan pages, and stale
-  project pages. Use when the user asks to lint the wiki, check wiki health,
-  find broken links, validate frontmatter, audit the vault, or fix reported
-  wiki lint issues.
+  missing frontmatter, index drift, naming violations, orphan pages, stale
+  projects, duplicate topics, or reported lint issues.
 visibility: public
 area: meta
 ---
 # Lint-Wiki Skill
 
-Inspect the vault for health issues, produce a severity-ordered report,
-fix only after user confirmation.
+Run a read-only mechanical audit first. Produce a severity-ordered report.
+Modify files only after explicit user confirmation.
 
-Lint protects safety and mechanical maintainability. It should catch broken
-links, boundary leaks, invalid metadata, and missing lightweight indexes; it
-should not try to make the wiki graph perfect.
+Lint protects safety and maintainability. It catches boundary leaks,
+metadata drift, broken links, index drift, naming drift, and tag drift. It
+does not enforce graph completeness or deep semantic correctness.
 
-## When to use this skill
+## Preconditions
 
-**Explicit:** "lint the wiki", "check wiki health", "find broken links",
-"validate frontmatter", "audit vault".
+1. Read `OBSIDIAN_VAULT`. If unset, stop and ask user to set it. Do not
+   fall back to cwd.
+2. Read `9-Meta/AGENTS.md`, `9-Meta/TAGS.md`, and, if present,
+   `Netease/AGENTS.md`.
+3. Verify Obsidian CLI:
+   ```powershell
+   obsidian version
+   obsidian unresolved total
+   ```
+   If `obsidian` resolves to `Obsidian.com`, that is OK when commands return
+   correctly. Current minimum version: `1.12.7`.
+4. Treat `obsidian unresolved total` as current broken-link count. If no prior
+   lint report exists, say baseline is "never"; do not invent one.
 
-**Auto-trigger:** after any operation affecting >=10 vault files, after
-restructuring/file moves, before archiving an OpenSpec change, or if
->30 days since last lint.
+## Git Isolation
 
-## Vault location
+Before applying confirmed lint fixes, isolate the work on a dedicated branch:
 
-Vault root comes from the `OBSIDIAN_VAULT` env var (Windows:
-`%OBSIDIAN_VAULT%`, Unix: `$OBSIDIAN_VAULT`). If unset, stop and ask the
-user to set it (e.g., `setx OBSIDIAN_VAULT "c:\\path\\to\\vault"`). Do
-not guess, do not fall back to pwd. All paths in this skill resolve
-against that root.
+1. Inspect dirty state:
+   ```powershell
+   git -C "<repo-root>" status --short
+   ```
+2. If unrelated user changes exist, do not stage or modify them. Either keep
+   fixes scoped to separate files or stop and ask if the dirty files overlap
+   the requested fixes.
+3. Create/switch a branch named `codex/lint-wiki-YYYYMMDD` from the current
+   branch before making fixes.
+4. Run the scan and fixes on that branch only.
+5. Commit verified lint fixes on that branch.
+6. Merge back to the original branch only after:
+   - `python 9-Meta/Scripts/maintenance/lint_wiki.py --vault "$env:OBSIDIAN_VAULT" --json` runs successfully
+   - `obsidian unresolved total` does not increase
+   - C1-C3 are zero if any Critical fix was attempted
+   - `git diff --check` is clean
+7. If merge conflicts or overlapping user changes appear, stop and report the
+   branch name plus conflict files; do not force merge.
 
-## Region routing
+## Region Rules
 
-The vault has two regions with distinct rules:
-
-| Region | Path | Authority | Tag vocab | visibility |
+| Region | Path | Authority | Tag vocab | Required visibility |
 |---|---|---|---|---|
-| Public | not under `Netease/` | `9-Meta/AGENTS.md` | `9-Meta/TAGS.md` | `public` |
-| Private | under `Netease/` | `Netease/AGENTS.md` | private vocab in `Netease/AGENTS.md` §4 | `private` |
+| public | everything outside `Netease/` | `9-Meta/AGENTS.md` | `9-Meta/TAGS.md` | `public` |
+| private | `Netease/` subtree | `Netease/AGENTS.md` | public vocab + `Netease/AGENTS.md` private vocab | `private` |
 
-Before scanning, read **both** AGENTS.md files (if `Netease/` exists)
-so each file is checked against its own vocab. Report region-tagged
-issues separately — never merge public + private rows
-(AGENTS.md §4 audit rule).
+Report public and private findings under separate headings. Never mix rows.
 
-## Workflow
+## Read-Only Scan
 
-### Phase 1: Run all checks (read-only)
+Preferred scanner:
 
-#### 🔴 Critical (security/privacy)
+```powershell
+python "9-Meta/Scripts/maintenance/lint_wiki.py" --vault "$env:OBSIDIAN_VAULT" --json
+```
 
-| # | Check | Detection |
+Use script output as scan data, then format the human report below. The
+script is read-only. If script output and Obsidian CLI disagree on broken
+links, treat `obsidian unresolved` as source of truth for W1 count.
+
+Skip during full-vault traversal:
+
+- hidden/system entries: `.obsidian/`, `.git/`, `.mypy_cache/`, `.DS_Store`
+- binary/assets unless a check explicitly targets them
+- retired `_MOC.md` maintenance expectations
+
+Boundary governance docs may describe `Netease/` paths and redline tags as
+policy/examples without being reported as C1/C2/S2 leaks:
+
+- `9-Meta/AGENTS.md`, `9-Meta/TAGS.md`, `Netease/AGENTS.md`
+- `9-Meta/Skills/**`
+- `openspec/**`
+
+Still check those files for basic frontmatter and visibility consistency.
+
+Do not skip root-level non-hidden files or unknown non-hidden dirs; W6 should
+report those if they are not allowed by `9-Meta/AGENTS.md`.
+
+### Critical
+
+| ID | Check | Detection |
 |---|---|---|
-| C1 | Cross-boundary references | Public file wikilinks/embeds/frontmatter pointing to a `Netease/` path |
-| C2 | Redline tag leak | Public file has any tag in TAGS.md §3 — match literal entries (§3.1–§3.4 + §3.5 explicit nested paths) AND prefix patterns (`#sdc/*`, `#Arcolab/*`, `#frame-tool/*`, `#战斗/*`, `#战斗系统/*`, `#模块/*`, `#文档/*`) |
-| C3 | Visibility mismatch | `visibility` field disagrees with path region (Netease/ → must be `private`; else `public`) |
+| C1 | Cross-boundary references | Public file wikilinks, embeds, markdown links, or frontmatter values resolve to or mention `Netease/`. Build a note-name/path index so `[[Private Page]]` resolving into `Netease/` is caught, not only literal `Netease/...` strings. |
+| C2 | Redline tag leak | Public file has any tag from `TAGS.md` redline section. Match literal entries, explicit redline nested paths, and redline prefixes (`#sdc/*`, `#Arcolab/*`, `#frame-tool/*`, `#战斗/*`, `#战斗系统/*`, `#模块/*`, `#文档/*`). |
+| C3 | Visibility mismatch | `visibility` disagrees with path region: `Netease/` must be `private`; all other paths must be `public`. |
 
-#### 🟠 Warning (data integrity)
+### Warning
 
-| # | Check | Detection |
+| ID | Check | Detection |
 |---|---|---|
-| W1 | Broken wikilinks | `obsidian unresolved` |
-| W2 | Missing frontmatter | Per-area requirements from AGENTS.md §5.1: knowledge (`tags`>=1), session (`tags`>=1, `date`, `topic`), project (`tags`>=1), journal (`date`), tool (`category`); private files additionally need `visibility: private` |
-| W3 | `## 相关` not last section | Any non-index/log page where `## 相关` exists with content or another heading after it (breaks the cheap append protocol — AGENTS.md §5.4) |
-| W4 | Index drift | Page in `2-Wiki/<domain>/` not listed in domain `_index.md`, or `_index.md` lists a nonexistent page |
-| W5 | `_index.md` entry format | Lines should be lightweight: `[[Page]] — 一句话摘要`; do not require duplicated tags/date metadata |
-| W6 | Unknown top-level dir | Any vault root entry not in AGENTS.md §3 whitelist + allowed extras (`Netease/`, `Dashboard.md`, `openspec/`) — new top-level dirs require an OpenSpec change |
-| W7 | Naming violations | Session: `1-Sessions/YYYY/MM/YYYY-MM-DD-<topic>.md` (or `-N` suffix for same-day repeats); `6-Tools/`: flat `<类别>-<工具名>.md`; reserved fixed names: `_index.md` / `_log.md` |
-| W8 | Session structure | `1-Sessions/` files missing any of `## 背景` / `## 关键讨论` / `## 结论` / `## 产出物` (AGENTS.md §9 Step 6) |
-| W9 | `wiki_pages_touched` validity | Each entry in a session's `wiki_pages_touched` must resolve to an existing wiki page |
+| W1 | Broken wikilinks | Prefer `obsidian unresolved`. Use `total` for count and detailed output for report lines. |
+| W2 | Missing frontmatter | Required by current `AGENTS.md`: all files need `area` + `visibility`; `knowledge`/`session`/`project` need `tags` with at least one item; `session` also needs `date` + `topic`; public `journal` needs `date`; public `tool` needs `category`; private `journal` needs `date`; private `reference` should include `source` when inferable. Do not require `status`, `created`, or `updated`. |
+| W3 | `## 相关` not last section | Non-index/log page has `## 相关` and any heading or body content after it. |
+| W4 | Index drift | Page under `2-Wiki/<domain>/` or `Netease/2-Wiki/<domain>/` missing from that domain `_index.md`, or `_index.md` lists nonexistent page. Ignore `_MOC.md`. |
+| W5 | `_index.md` entry format | Domain index entries should be lightweight: `[[Page]] — 一句话摘要`. Do not require duplicated tags/date metadata. |
+| W6 | Unknown top-level entry | Public root entry not allowed by `9-Meta/AGENTS.md` plus allowed extras (`Netease/`, `Dashboard.md`, `openspec/`). Ignore hidden/system entries listed above. For private root, apply `Netease/AGENTS.md` allowed structure. |
+| W7 | Naming violations | Public sessions: `1-Sessions/YYYY/MM/YYYY-MM-DD-<topic>.md` with optional same-day numeric suffix. Private sessions mirror under `Netease/1-Sessions/`. Private daily notes: `Netease/0-Daily/YYYY/MM/YYYY-MM-DD_日报.md`. Public tools: flat `6-Tools/<类别>-<工具名>.md`. Reserved names: `_index.md`, `_log.md`. |
+| W8 | Session structure | Session files missing any required section from `AGENTS.md` Step 6: `## 背景 / 问题`, `## 关键讨论`, `## 结论`, `## 产出物`. |
+| W9 | `wiki_pages_touched` validity | Every frontmatter entry resolves to an existing wiki page in the same region or an allowed private-to-public reference. |
 
-#### 🟡 Suggestion (quality)
+### Suggestion
 
-| # | Check | Detection |
+| ID | Check | Detection |
 |---|---|---|
-| S1 | Orphan pages | Non-index/log pages with zero `obsidian backlinks` |
-| S2 | Wild tag | Tag not in the region's whitelist. **Always look up TAGS.md §4 cleanup table first** — if there's a mapped target, suggest it; only fall back to "closest match" when no §4 entry exists. Also enforce TAGS.md §1: nested tag's top-level segment must be in the whitelist and tag depth must be at most two (`#top` or `#top/sub`) |
-| S3 | Duplicate topics | Same-domain pages with strongly overlapping titles or near-identical first paragraphs (flag only — never auto-merge) |
+| S1 | Orphan pages | Non-index/log wiki pages with zero backlinks. Suggestion only. Missing reciprocal links are not failures. |
+| S2 | Wild tag | Tag not in the region whitelist, or nested tag depth exceeds two segments. First consult `TAGS.md` cleanup table; if mapped, suggest exact target. Do not invent new whitelist tags. |
+| S3 | Stale active project | Project marked active but no meaningful activity for more than 30 days, only when `status`/activity metadata already exists. Since `status` is no longer required, absence of `status` is not an issue. |
+| S4 | Duplicate topics | Same-domain pages with strongly overlapping titles or near-identical opening paragraphs. Flag only; never auto-merge. |
 
-### Phase 2: Produce the report
+Out of scope: stale-claim detection across sessions/wiki, missing-concept
+inference, semantic dedup beyond simple duplicate-topic hints. Route those to
+a future deep audit.
+
+## Report Format
 
 ```markdown
 # Wiki Lint Report — YYYY-MM-DD
-- Region(s) scanned: public + private (or just one)
-- Broken-link baseline: <prev N> → current <N> (delta <±N>)
-- Last lint: <date or "never">
+- Region(s) scanned: public + private
+- Broken-link baseline: <previous N or "never"> → current <N>
+- Current unresolved total: <N>
 
-## 🔴 Critical
+## Critical
 ### [public] C1 Cross-boundary references
-- `path` — issue → suggested fix
+- `path` — problem → suggested fix
 
-### [private] C2 ...
+## Warning
+### [private] W2 Missing frontmatter
+- `path` — problem → suggested fix
 
-## 🟠 Warning
-### [public] W3 ...
-
-## 🟡 Suggestion
-### [public] S2 ...
+## Suggestion
+### [public] S2 Wild tag
+- `path` — problem → suggested fix
 ```
 
-Each line: file path, problem, suggested fix. Public and private rows
-go under separate sub-headings.
+Rules:
 
-### Phase 3: Confirmation
+- Show findings in severity order: Critical, Warning, Suggestion.
+- Within each severity, split `[public]` and `[private]`.
+- Each line includes path, concrete problem, suggested fix.
+- If a category has no findings, say `None`.
+- Default output is conversation only. Save report only if user asks.
 
-Present the report. Ask:
-"哪些需要修复？可回复 '全部'、'只修 Critical'、或具体条目号。"
+After report, ask:
 
-**Auto-fix without asking** — only if all true:
-1. Issue is W2 (missing frontmatter)
-2. Fix is field **addition**, never a value change
-3. Default values: `area` inferred from path; `visibility` = `private`
-   if path under `Netease/` else `public`; `tags: []` only when no whitelist
-   tag can be inferred safely. Empty tags
-   remain a warning for user follow-up; do not pretend the tag requirement is
-   fully fixed.
+`哪些需要修复？可回复 "全部"、"只修 Critical"、或具体条目号。`
 
-All other fixes require explicit confirmation, including any value
-change, file move, or content edit.
+## Fix Rules
 
-### Phase 4: Execute fixes
+No automatic fixes. Even obvious W2 frontmatter additions require user
+confirmation.
 
-**Frontmatter changes** SHALL go through `obsidian property:set` /
-`property:remove`, never raw `edit`/`write`. AGENTS.md §8.3.1 puts
-frontmatter outside the edit-tool exception (even for auto-fixes).
+After confirmation:
 
-**Content / file ops** (move, rename, create, delete, body edits
-involving wikilinks) SHALL go through `obsidian-cli`. Obsidian's
-link auto-update (`alwaysUpdateLinks: true`) only fires through the cli.
+- Frontmatter changes must use `obsidian property:set` /
+  `obsidian property:remove`, not raw file writes.
+- Content edits, moves, renames, creates, deletes, and wikilink changes must
+  go through `obsidian` CLI so Obsidian can update links.
+- `lint_wiki.py` is the only maintenance script for lint scans. Do not use
+  ad-hoc Python scripts for fixes; confirmed fixes go through Obsidian CLI.
+- A pure read-only helper script is acceptable if it modifies nothing.
+- Refuse any fix that would create or preserve a public-to-`Netease/` link.
 
 After each fix batch:
-1. Run `obsidian unresolved total`; verify count is ≤ baseline.
-2. If a Critical fix was applied, re-run C1+C2+C3 to confirm closure.
-3. Refuse to write any fix that would create a public→private wikilink.
 
-### Phase 5: Persist baseline + sparse log
+1. Run `obsidian unresolved total`; count must not increase.
+2. If any Critical item was fixed, re-run C1-C3.
+3. Append `_log.md` only for confirmed structural or cross-page fixes:
+   `2-Wiki/_log.md` for public, `Netease/2-Wiki/_log.md` for private.
+   Do not log read-only lint reports or tiny single-file cleanup.
 
-1. Save the full report to
-   `1-Sessions/YYYY/MM/YYYY-MM-DD-lint-report.md`
-   (or `Netease/1-Sessions/...` for private). Always — the next lint
-   diffs against this baseline.
-2. Append to `2-Wiki/_log.md` (or `Netease/2-Wiki/_log.md` for private)
-   only if confirmed fixes made a structural or cross-page change:
-   ```markdown
-   ## [YYYY-MM-DD] lint-fix | <one-line summary>
-   - critical: <N> | warning: <N> | suggestion: <N>
-   - fixed: <N> across <M> files
-   - unresolved delta: <±N>
-   ```
-   Do not log read-only lint reports or tiny single-file cleanup fixes.
+## Common Pitfalls
 
-## Check reference
-
-| # | Check | Severity | Auto-fix? |
-|---|---|---|---|
-| C1 | Cross-boundary refs | Critical | No |
-| C2 | Redline tag leak (incl. §3.5 prefixes) | Critical | No |
-| C3 | Visibility mismatch | Critical | No |
-| W1 | Broken wikilinks | Warning | No |
-| W2 | Missing frontmatter | Warning | Yes (defaults only, via cli) |
-| W3 | `## 相关` not last section | Warning | No |
-| W4 | Index drift | Warning | No |
-| W5 | `_index.md` entry format | Warning | No |
-| W6 | Unknown top-level dir | Warning | No |
-| W7 | Naming violations | Warning | No |
-| W8 | Session structure | Warning | No |
-| W9 | `wiki_pages_touched` validity | Warning | No |
-| S1 | Orphan pages | Suggestion | No |
-| S2 | Wild tag (consult TAGS.md §4 first) | Suggestion | No |
-| S3 | Stale project | Suggestion | No |
-| S4 | Duplicate topics | Suggestion | No |
-
-## Important constraints
-
-- **Read-only until confirmed.** Phase 1-2 modify nothing. `_log.md`
-  append in Phase 5 is sparse and only follows confirmed structural fixes.
-- **Region authority.** Public files follow `9-Meta/AGENTS.md` +
-  `9-Meta/TAGS.md`; private files follow `Netease/AGENTS.md` + its
-  internal vocab. Mixing the two is a bug.
-- **Frontmatter via cli.** Even auto-fixes use `obsidian property:set`,
-  not raw edits.
-- **Cli for vault file ops.** No `mv`, `write`, `xcopy` for
-  `.md`/`.base`/`.canvas`.
-- **TAGS.md §4 cleanup table is authoritative for wild-tag renames.**
-  Don't invent "closest match" when an exact target exists.
-- **Boundary scope.** C1, C2, C3 are Critical. Refuse to write a fix
-  that would create or preserve a public→private link.
-- **No MOC maintenance.** `_MOC.md` is retired from the maintenance path.
-  Do not require it, recreate it, update it, or report its absence as drift.
-- **No graph-completeness enforcement.** Missing reciprocal backlinks are not
-  lint failures. Orphans, duplicates, and stale pages stay Suggestions.
-- **Out of scope (route to a future `deep-audit` skill):** stale-claim
-  detection across sessions/wiki, missing-concept inference, deep
-  semantic dedup. Lint stays mechanical.
+- Do not treat root hidden/system entries as W6 violations.
+- Do not require `_MOC.md`; it is retired.
+- Do not require `status`, `created`, or `updated`.
+- Do not trust string-only C1 scans; resolve note names to paths.
+- Do not use public tag whitelist for private-only tags.
+- Do not merge public/private findings in one list.
