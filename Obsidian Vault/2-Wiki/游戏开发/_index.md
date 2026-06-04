@@ -51,6 +51,7 @@ tags:
 - [[Godot/Godot基础]]
 - [[Godot/Godot插件使用记录]]
 - [[Godot/2.5D tilemaplayer的设置]]
+- [[Godot/Godot 插件和游戏开发工具推荐]] — Godot 插件、项目管理、美术、音频与音乐原型工具清单
 
 ### Unity
 - [[Unity/Unity基础]]

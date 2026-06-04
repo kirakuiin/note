@@ -9,328 +9,140 @@ area: meta
 ---
 # Dev-Assist Skill
 
-Surface relevant wiki knowledge to the agent **at the start of any coding
-task**, so accumulated lessons, conventions, and gotchas inform new code
-automatically rather than only when the user thinks to ask.
+Surface relevant wiki knowledge **before coding work** so prior lessons,
+conventions, and pitfalls inform the implementation.
 
-This skill is the **proactive** counterpart to `query-wiki`:
+## Trigger
 
-| Skill | Trigger model | When to use |
-|---|---|---|
-| `query-wiki` | User asks a knowledge question | "What do I know about X?" |
-| `dev-assist` (this) | User starts a coding task | Any coding/debug/refactor work |
-| `capture` | User says "记一下 …" | Filing a new lesson back |
+Use for substantive coding, debugging, refactoring, review, feature work, or
+technical spec writing. Skip pure knowledge questions, trivial doc edits, and
+vault maintenance.
 
-## When to trigger
+## Vault
 
-**Auto-trigger on any coding-related task**, including:
+Read `OBSIDIAN_VAULT` at invocation start. If unset, stop and ask the user to
+configure it. Search only:
 
-- Writing new code (functions, classes, modules)
-- Debugging an error or unexpected behavior
-- Refactoring or renaming
-- Reviewing code the user pasted
-- Implementing a feature based on a spec
+- `$OBSIDIAN_VAULT/Netease/2-Wiki`
+- `$OBSIDIAN_VAULT/2-Wiki`
 
-**Do NOT trigger on:**
-
-- Pure knowledge questions ("what is a closure") — that's `query-wiki`
-- **Trivial** doc edits (typo fix, version bump, single-line README change) —
-  no wiki context needed, just edit
-- Vault maintenance (Obsidian operations on `.md` files) — use the relevant
-  Obsidian skills directly
-
-**Do trigger on substantive doc writing.** Writing a new technical note,
-synthesizing a multi-section spec, or drafting a wiki page IS knowledge
-work and benefits from wiki context — even though the output is `.md`.
-Edge case: dev-assist surfaces wiki for the writer; per the write-side
-red line below, the resulting public-region note must not link Netease
-paths even if private wiki content was used as reference.
-
-The trigger is intentionally aggressive. The probe step is cheap (single
-ripgrep). The cost of a false trigger is one ripgrep call; the cost of
-missing a relevant lesson is a repeated mistake. We bias toward the cheap
-side.
-
-## Vault location
-
-The wiki lives in an Obsidian vault whose path is given by the
-`OBSIDIAN_VAULT` environment variable. Read it at the start of each invocation:
-
-- Windows: `%OBSIDIAN_VAULT%`
-- macOS/Linux: `$OBSIDIAN_VAULT`
-
-If the variable is unset, stop and ask the user to configure it (e.g.,
-`setx OBSIDIAN_VAULT "c:\\path\\to\\vault"` on Windows). Do not guess a path.
-
-All vault-relative paths in this skill resolve against that root.
+Never search, list, glob, or inspect the current project before the wiki probe.
 
 ## Workflow
 
-The skill has two layers: a **fast probe** that decides whether to engage,
-and a **deep search** that runs only when the probe hits.
+### Phase 1: Probe
 
-### Phase 1: Probe (fast path, terminates ~90% of invocations)
+Call the bundled script; do not hand-write tokens or `rg` commands.
 
-0. **Resolve vault root and construct absolute search paths.** Read
-   `OBSIDIAN_VAULT` env var, then build absolute paths for the two
-   wiki roots: `$OBSIDIAN_VAULT/Netease/2-Wiki` and
-   `$OBSIDIAN_VAULT/2-Wiki`.
+```bash
+python "$OBSIDIAN_VAULT/9-Meta/Skills/dev-assist/scripts/dev_assist_probe.py" \
+  --task "<current user task text>" \
+  --cwd "<current cwd path string>" \
+  --open-file "<open file path string, repeat as needed>"
+```
 
-   **Hard rule — search target is the vault, never the project:**
-   - ❌ Do NOT Glob, Grep, or ripgrep the current project directory
-   - ❌ Do NOT explore cwd files to "understand the codebase first"
-   - ❌ Do NOT run `ls`, `tree`, or any filesystem listing in cwd
-   - ✅ The ONE AND ONLY search target is the Obsidian vault
-   - ✅ Token extraction below reads from the task description string,
-     the cwd path string, and the open-file path strings — it does
-     NOT mean opening or reading those files
+The script does one vault-only ripgrep pass, caps tokens at 8, excludes
+`_log.md` and `_index.md`, captures UTF-8 output, and normalizes paths to `/`.
+Retrieval rules live in `references/probe-rules.json`.
 
-   If the vault roots don't exist on disk (e.g., `2-Wiki` is missing),
-   search whichever exists. If neither exists, output
-   `> dev-assist: vault wiki 根目录不存在，已跳过` and stop.
+Interpret JSON:
 
-1. **Run the probe script.** Do not hand-roll token extraction or the
-   ripgrep command. Use the bundled script so miss fixes stay centralized:
+- `hits` → continue to Phase 2.
+- `no_hits` / `no_tokens` / `no_roots` → output
+  `> dev-assist: wiki 中无相关条目，已跳过` and stop.
+- `no_vault_env` / `rg_not_found` / `rg_error` → report the skip briefly.
 
-   ```bash
-   python "$OBSIDIAN_VAULT/9-Meta/Skills/dev-assist/scripts/dev_assist_probe.py" \
-     --task "<current user task text>" \
-     --cwd "<current cwd path string>" \
-     --open-file "<open file path string, repeat as needed>"
-   ```
+Do not add `_index.md` navigation rescue unless this skill is explicitly
+updated to support it.
 
-   The script extracts up to 8 tokens from the task description, cwd
-   path string, and open-file path strings, then runs one ripgrep pass
-   against the wiki roots. See `references/trigger-keywords.md` for the
-   exact extraction rules and regression notes.
+### Phase 2: Rank And Read
 
-2. **Interpret the JSON result.** The script returns:
+Group hits by subtree and read the deepest covering `_index.md` for context.
+Rank candidates by:
 
-   - `status`: `hits`, `no_hits`, `no_tokens`, `no_roots`, `no_vault_env`,
-     `rg_not_found`, or `rg_error`
-   - `tokens`: the exact probe tokens used
-   - `hits`: slash-normalized markdown file paths when `status == "hits"`
+| Signal | Weight |
+|---|---:|
+| Filename contains probe token | +3 |
+| Content contains probe token | +1 |
+| cwd domain maps to the wiki subtree | +2 |
 
-   If `status` is `rg_not_found`, try installing/restarting `rg` only if the
-   user's task can wait; otherwise report the skip. Do not silently fall back
-   to searching the project directory.
+Use `references/domain-mapping.md` for cwd → wiki subtree weighting. If no
+mapping matches, continue without domain weight.
 
-   Notes:
-   - `--glob '!_log.md' --glob '!_index.md'` excludes
-     meta files from probe results. These files aggregate keywords from
-     their subtrees and produce false hits in almost every probe. They
-     are NOT knowledge pages. `_index.md` is still read in Phase 2 for
-     subtree navigation — excluding it here does not affect that step.
-   - The script passes `--no-ignore-vcs` because `Netease/` is in `.gitignore`
-     but is a valid search target (private wiki content can inform any
-     coding task — see "Write-side red line" below)
-   - The script captures ripgrep output as UTF-8 and normalizes `\` to `/`.
-   - The script still excludes `_index.md` in Phase 1; do not add index-page
-     navigation rescue unless the skill is explicitly updated to do so.
+Noise guard: if one short English token (≤6 chars) accounts for more than half
+of hits, downgrade that token and drop candidates that only match it unless too
+few candidates remain.
 
-3. **Decide:**
-   - **0 hits** → output one line: `> dev-assist: wiki 中无相关条目，已跳过` and stop
-   - **1+ hits** → continue to Phase 2
+Pick top 3. Read each full page, or first 50 lines if over 200 lines. On
+Windows, read wiki files with UTF-8 (`Get-Content -Encoding UTF8`); if output is
+mojibake, rerun with UTF-8 before judging relevance.
 
-### Phase 2: Deep search (slow path)
+### Phase 3: Surface
 
-1. **Read the deepest `_index.md` for each hit subtree.** Group probe
-   hits by their containing wiki subtree, then for each subtree read the
-   **deepest** `_index.md` covering all hits in that subtree (de-duplicate;
-   read each `_index.md` at most once).
-
-   Example: probe hits `Netease/2-Wiki/梦幻西游客户端/UI开发/foo.md` and
-   `Netease/2-Wiki/梦幻西游客户端/踩坑集/bar.md` →
-   read `Netease/2-Wiki/梦幻西游客户端/_index.md` (covers both subtrees),
-   not the two child `_index.md` files separately.
-
-   Why deepest-covering: parent `_index.md` describes child page roles
-   in their relative context (e.g., "踩坑集 — 高频坑：confirm_box…"),
-   which is more useful than reading a top-level "私有区结构化知识库" index.
-
-2. **Apply domain weighting.** Detect the user's current domain from cwd
-   (see `references/domain-mapping.md` for explicit regex patterns +
-   fallback inference). Pages **under the matching wiki subtree** get
-   +2 to relevance score; others get +0. The matching wiki subtree
-   granularity is whatever `domain-mapping.md` declares (typically a
-   top-level domain like `梦幻西游客户端/`, not a sub-area like
-   `UI开发/` — finer-grained narrowing comes from ripgrep hits on file
-   names, not from the mapping). This is **only** used for ranking —
-   we do not exclude any region from search.
-
-3. **Pick top 3 candidates** by combined score. Scoring per candidate:
-
-   | Signal | Weight | Rationale |
-   |---|---|---|
-   | **Filename contains token** | +3 per token | Page title matching a probe token is the strongest relevance signal (e.g., token `confirm_box` → file `confirm_box回调语义反直觉.md`) |
-   | **Content contains token** | +1 per token | Body mention — weaker because common terms appear in many pages |
-   | **Domain weight** | +2 | cwd matches domain-mapping entry (see step 2) |
-
-   **Noise guard before final ranking**: if one short English token (≤6
-   chars, e.g. `Single`, `Handle`, `Panel`) accounts for >50% of probe hits,
-   treat it as noisy. For that token, count filename matches as +1 total and
-   content matches as +0. Drop candidates that only match noisy tokens and have
-   no domain weight unless fewer than 3 candidates remain.
-
-   **Tie-breaking**: among equal scores, prefer pages under `踩坑集/`
-   (pitfall pages are actionable), then shorter filenames (more focused).
-
-   Read each top-3 candidate's full content (or first 50 lines if
-   >200 lines).
-
-   **Windows encoding rule:** when reading wiki files with PowerShell, force
-   UTF-8 (`Get-Content -Encoding UTF8`). If output is mojibake, rerun with
-   UTF-8 before deciding the page or index is irrelevant.
-
-4. **Synthesize a one-line relevance note** per candidate explaining why
-   the page matters to the current task.
-
-### Phase 3: Surface results
-
-Output a single callout block, **before** doing any other work on the
-user's task. Use **single-line per candidate** to avoid Obsidian rendering
-ambiguity (multi-line list items inside callouts can collapse or split
-unpredictably depending on theme):
+Before doing the coding task, output:
 
 ```markdown
 > [!info] dev-assist · 相关 wiki
-> - **[[页面名 1]]** — <≤30 字相关性> · <从页面提取的关键 1 句>
-> - **[[页面名 2]]** — <…> · <…>
-> - **[[页面名 3]]** — <…> · <…>
+> - **[[页面名 1]]** — <≤30 字相关性> · <关键一句>
+> - **[[页面名 2]]** — <≤30 字相关性> · <关键一句>
+> - **[[页面名 3]]** — <≤30 字相关性> · <关键一句>
 ```
 
-Then proceed with the user's actual task, **using the wiki content as
-context**. Do not ask "do you want me to read these?" — surfacing them
-inline IS the value.
+Then proceed using the surfaced wiki context. Do not ask whether to read them.
 
-## Write-side red line
+## Write-Side Red Line
 
-Reading any wiki region is allowed (`Netease/` included). **Writing** has
-a hard rule from `9-Meta/AGENTS.md`:
+Reading `Netease/` is allowed. Writing Netease paths or wikilinks into public
+region files is forbidden by `9-Meta/AGENTS.md`. If coding in a public region,
+paraphrase private lessons instead of citing private paths.
 
-> Public-region files must not wikilink, embed, or frontmatter-reference
-> any path under `Netease/`.
+## Self-Maintenance
 
-Practical implication for dev-assist:
+If cwd has no domain mapping, after the result callout add:
 
-- ✅ **Read** Netease wiki to inform code in any cwd
-- ✅ **Inject** Netease wiki content into the agent's context
-- ❌ **Write** Netease paths or wikilinks into public-region files
-  (code comments, public docs, public wiki pages)
-- If the user's coding task is in a public-region directory and the
-  most relevant wiki page is in `Netease/`, you may use the lesson but
-  must **paraphrase** the content rather than citing the Netease path.
-  When in doubt, ask the user.
+```markdown
+> [!tip] dev-assist · 建议
+> 当前 cwd `<path>` 不在 domain-mapping 中。若此项目会长期使用，建议加一行映射以提升相关性排序。
+```
 
-## Self-maintenance: prompt the user when domain mapping is incomplete
-
-If the probe runs in a cwd that doesn't match any entry in
-`references/domain-mapping.md`:
-
-- Functionality is **not affected** — full-library ripgrep still works
-- After the result callout, append a one-line prompt:
-
-  ```markdown
-  > [!tip] dev-assist · 建议
-  > 当前 cwd `<path>` 不在 domain-mapping 中。若此项目会长期使用，
-  > 建议加一行映射以提升相关性排序（可让我帮你 append）。
-  ```
-
-- If the user agrees, append a row to `domain-mapping.md`. Note that
-  naive `obsidian append` will land **after** the table (the table is
-  followed by other sections); see `references/domain-mapping.md`'s own
-  "append 一行的标准操作" section for the up-to-date method —
-  responsibility for the actual mechanism lives in that file, not here.
-
-## Self-maintenance: record retrieval misses
-
-If, during or after a coding task, the user points out a relevant wiki page
-that dev-assist did not surface, or the agent later finds one manually, record
-a compact miss lesson in `## Lessons` before `## 相关`:
+If the user identifies a relevant wiki page that dev-assist missed, record a
+compact lesson before `## 相关`:
 
 ```markdown
 > [!note] L-<next> (YYYY-MM-DD · miss)
-> Task: `<short user wording>`; missed: [[page]]; cause: <token/noise/domain/capture-keywords>; action: <rule/page/mapping update or none>.
+> Task: `<short wording>`; missed: [[page]]; cause: <token/noise/domain/keywords>; action: <rule/page/mapping update or none>.
 ```
 
-Use `obsidian eval` to insert the lesson before `## 相关`; do not use
-`obsidian append`. If the fix is obvious but changes another skill/reference
-or wiki page, ask before applying it. Misses usually map to one of four fixes:
-add/adjust token extraction, add domain mapping, improve page title/first
-paragraph keywords via `capture`, or tune noise scoring.
+If changing retrieval behavior, update `scripts/test_probe.py`, then
+`references/probe-rules.json` or the generic extractor, and run the focused
+probe tests.
 
 ## Constraints
 
-- **Search target is the vault, never the local project.** Do not Glob,
-  Grep, `ls`, or ripgrep the current working directory. The probe's one
-  ripgrep call targets `$OBSIDIAN_VAULT` only. Exploring the project
-  directory before or alongside the vault search defeats the purpose of
-  a cheap probe and pollutes context with irrelevant local results.
-- **Probe must be cheap.** One ripgrep call, no Obsidian roundtrip in
-  Phase 1. If the probe needs >1 second, redesign the token extraction.
-- **Output must be terminating.** Do not enter a loop of "found nothing,
-  let me try other keywords". Either the probe hits or it doesn't.
-- **Max 3 candidates.** Surfacing 5+ pages saturates the agent's context
-  and dilutes relevance. Ranking is for narrowing, not for thoroughness.
-- **No caching.** Each task re-probes. ripgrep is fast enough; cache
-  invalidation across wiki edits is a worse problem than re-running.
-- **Do not chain into capture automatically.** dev-assist surfaces prior
-  knowledge; capture files new knowledge. If a coding task reveals a durable
-  new lesson, finish the task and mention one concise "适合 capture" suggestion.
-  Run `capture` only after the user explicitly asks to save it.
+- Vault-only Phase 1; never search the project.
+- Probe is one script call and must terminate.
+- Surface at most 3 pages.
+- No caching.
+- Do not chain into `capture` unless the user explicitly asks to save a lesson.
 
-## Example
+## References
 
-**User:** "我要给这个 panel 加个状态机切换"
-*(cwd = `D:/workspace/trunk/mhimage/scripts/ui/some_panel/`)*
+- `scripts/dev_assist_probe.py` — deterministic Phase 1 probe.
+- `references/probe-rules.json` — configurable synonyms, stopwords, noise, boosts.
+- `references/trigger-keywords.md` — compact probe maintenance guide.
+- `references/domain-mapping.md` — cwd → wiki subtree ranking weights.
 
-**Probe:**
-- Tokens extracted from prompt + cwd: `panel`、`状态机`、`mhimage`
-  - 注：`panel` 是短英文边缘案例（单独可能噪声），但在描述中与`状态机`
-    共现 → 按 `trigger-keywords.md` L-1 规则保留
-- ripgrep hits（按 token 命中数排序）：`UIStateGroupComponent状态机.md`,
-  `状态机_current_status初值是None.md`, `状态机默认态是空串不是default.md`,
-  `Handle与Single基类.md`
-
-**Domain weight:** cwd `D:/workspace/trunk/mhimage/scripts/ui/some_panel/`
-matches mapping pattern `D:/workspace/.*/mhimage/`
-→ pages under `Netease/2-Wiki/梦幻西游客户端/` get +2
-
-**Surfaced output:**
-
-```markdown
-> [!info] dev-assist · 相关 wiki
-> - **[[UIStateGroupComponent状态机]]** — 状态机控件用法权威页 · 通过状态名 → 子节点显隐切换
-> - **[[状态机_current_status初值是None]]** — 初始化坑 · 未 set_status 前不要直接读 _current_status
-> - **[[状态机默认态是空串不是default]]** — 默认态命名约定 · 配置里默认态是 ""（空串）而非 "default"
-```
-
-然后才开始为用户实现需求。
-
-## Reference files
-
-- `references/trigger-keywords.md` — Token extraction rules for Phase 1
-  probe. Self-adapting; no manual updates needed when wiki grows.
-- `references/domain-mapping.md` — cwd path patterns → wiki subdirectory
-  mappings for Phase 2 ranking. Append-only; updated only when the user
-  starts working in a new project.
-- `scripts/dev_assist_probe.py` — deterministic Phase 1 probe used instead
-  of ad hoc agent token extraction and ripgrep construction.
-
-## Lessons (append-only)
+## Lessons
 
 > [!note] L-1 (2026-06-04 · miss)
-> Task: `搜打撤模式下，战斗外法术施放要走 infosdc 里面的法术白名单`; missed: `战斗外师门法术使用链路`; cause: probe searched exact task terms and did not bridge `施放/施法/释放/使用`, plus Windows mojibake hid an index clue; action: centralize Phase 1 in `scripts/dev_assist_probe.py`, add spell-action synonym expansion with contextual `使用` tokens, require UTF-8 reads, and add page aliases.
+> Task: `搜打撤模式下，战斗外法术施放要走 infosdc 里面的法术白名单`; missed: `战斗外师门法术使用链路`; cause: exact wording mismatch and Windows mojibake; action: add script-backed probe, contextual synonym expansion, UTF-8 read rule, page aliases.
 
-> [!important] 维护守则
-> 本节插入新 lesson 时**不要用 `obsidian append`** —— append 落到文件
-> 末尾，会跑到 `## 相关` 之后，破坏 AGENTS.md §5.4 "`## 相关` 必须末节"
-> 约定。使用 `obsidian eval` 读取全文，把新 lesson 插入到 `\n## 相关`
-> 标记之前；若标记不存在，先停下报告，不要猜插入位置。
+> [!note] L-2 (2026-06-04 · review)
+> First script version overfit by hardcoding business terms in Python; action: keep Python generic and move synonyms/stopwords/noise/boosts to `probe-rules.json`.
 
 ## 相关
 
-- [[9-Meta/Skills/query-wiki/SKILL|query-wiki]] — 用户主动问问题时用
-- [[9-Meta/Skills/capture/SKILL|capture]] — 沉淀新经验回 wiki
-- [[9-Meta/Skills/obsidian-cli/SKILL|obsidian-cli]] — append domain-mapping 行的 CLI 用法
-- [[9-Meta/AGENTS]] — 红线政策权威源
+- [[9-Meta/Skills/query-wiki/SKILL|query-wiki]]
+- [[9-Meta/Skills/capture/SKILL|capture]]
+- [[9-Meta/Skills/obsidian-cli/SKILL|obsidian-cli]]
+- [[9-Meta/AGENTS]]

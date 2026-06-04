@@ -117,9 +117,10 @@ Produce a draft **without writing any file yet**. The draft contains:
 - **Link updates**: optional forward links and any strong reciprocal
   backlinks; which `_index.md` files will be updated, and whether the
   sparse `_log.md` criteria are met
-- **Command plan**: the exact `obsidian` CLI commands that will run in
-  Step 3 (one per line, in order). This lets the user catch a wrong
-  `path=`/`file=` flag or a nonexistent target before anything is
+- **Write plan**: the exact file operations that will run in Step 3
+  (one per line, in order), including whether each operation uses
+  `apply_patch`, direct UTF-8 replacement, or `obsidian-cli`. This lets the
+  user catch a wrong target path or unsafe write primitive before anything is
   written.
 
 Before showing the draft, run these checks:
@@ -155,31 +156,26 @@ Present the draft to the user. Ask: "这个方案看着对吗？确认我就落�
 
 ### Step 3 — Execute (only after confirmation)
 
-Use the `obsidian-cli` skill for every file operation. See the
-`obsidian-cli` skill for syntax and the `obsidian-markdown` skill for
-content syntax.
+Use Obsidian Flavored Markdown for content syntax. Use `obsidian-cli` only for
+move / rename / delete / operations that require Obsidian to maintain wikilinks
+automatically.
 
-### Obsidian CLI write strategy
+### Vault write strategy
 
-Pick the write primitive by payload size and escaping risk:
+Pick the write primitive by this priority:
 
-- Use `obsidian create path=... content=...` for a new full page body.
-- Use `obsidian append` only when appending to the true end of an append-friendly
-  file or section.
-- Use `obsidian eval` only for short targeted edits to existing files, such as
-  inserting one `_index.md` line after a marker or inserting a backlink before a
-  final `## 相关` section.
-- Do **not** put a multi-line markdown page body into `obsidian eval code=...`.
-  Windows shell / CLI escaping can corrupt backticks, backslashes, Chinese paths,
-  template literals, or long base64 strings. Symptoms include `Invalid or
-  unexpected token`, empty CLI output with no write, or `obsidian read` reporting
-  the expected file does not exist.
-- After every complex `create`, `append`, or `eval`, verify the specific target
-  with `obsidian read path=...` or a marker check before continuing. Do not treat
-  zero exit code or empty output as proof of success.
-- If `eval` fails or appears to no-op, split the operation: write the main body
-  with `create` / `append`, then use small guarded `eval` calls for indexes,
-  backlinks, or frontmatter transforms.
+1. `apply_patch`: preferred for new files, body content, frontmatter,
+   `_index.md`, and `_log.md`.
+2. Direct UTF-8 text replacement: when `apply_patch` cannot match context, use
+   PowerShell/Python/Node to replace a stable anchor.
+3. `obsidian-cli`: use only for move / rename / delete / operations that require
+   Obsidian to maintain wikilinks automatically.
+4. Do not use `obsidian create`, `obsidian append`, or `obsidian eval` to write
+   long body content, Chinese paths, or multi-line Markdown.
+
+After every write, verify the specific target by reading it back as UTF-8 and
+running a targeted search or `git diff`; empty output and zero exit code alone
+are not proof of success.
 
 Order of operations:
 
@@ -262,8 +258,8 @@ discovery, not graph completeness. When capturing:
 - The new/updated page MAY have a **"## 相关"** section listing 0–3
   wikilinks when they help understanding or future discovery.
 - **`## 相关` must be the last section of the file** (AGENTS.md §5.4).
-  Nothing else may come after it. This lets back-ref maintenance use
-  cheap `obsidian append` rather than fragile `eval` + string patching.
+  Nothing else may come after it. This lets back-ref maintenance use targeted
+  direct patching.
 - Reciprocal backlinks are optional. Add one only for strong semantic
   relationships, common discovery paths, hub pages that should list the
   new page, or explicit user request.
@@ -271,16 +267,20 @@ discovery, not graph completeness. When capturing:
   weak context links, or to make the graph look complete.
 - Before appending a back-ref to a target page, `read` it to confirm
   `## 相关` is the last section. If it isn't (legacy page), either
-  patch via `eval`, skip the reciprocal backlink, or fix the page to put
-  `## 相关` last as part of this capture (±1 hop scope).
+  patch it directly with `apply_patch` or UTF-8 replacement, skip the
+  reciprocal backlink, or fix the page to put `## 相关` last as part of this
+  capture (±1 hop scope).
 - Scope: stay within ±1 hop. Don't recursively update the whole graph.
 - See `references/link-maintenance.md` for exact edit patterns.
 
 ## What NOT to do
 
 - Do NOT write files before the user confirms the draft.
-- Do NOT use generic file tools (`write`, `edit`, `mv`). Every vault
-  file operation goes through the `obsidian-cli` skill.
+- Do NOT use `obsidian create`, `obsidian append`, or `obsidian eval` for long
+  body content, Chinese paths, or multi-line Markdown. Use `apply_patch` first,
+  then direct UTF-8 replacement if patch context fails.
+- Do NOT use shell `mv` for Obsidian-managed rename/move/delete work; use
+  `obsidian-cli` when Obsidian must maintain wikilinks automatically.
 - Do NOT create a wikilink from a public-region page to a
   `Netease/`-region page. If the content seems to require that, stop
   and surface it.
@@ -302,7 +302,8 @@ discovery, not graph completeness. When capturing:
 
 - `references/classification.md` — classification decision procedure
 - `references/link-maintenance.md` — bidirectional wikilink patterns
-- External: `obsidian-cli` skill (file ops), `obsidian-markdown` skill
+- External: `obsidian-cli` skill (move / rename / delete / automatic wikilink
+  maintenance), `obsidian-markdown` skill
   (OFM syntax), `<vault>/9-Meta/AGENTS.md` (public region rules),
   `<vault>/Netease/AGENTS.md` (private region rules),
   `<vault>/9-Meta/TAGS.md` (tag vocabulary)

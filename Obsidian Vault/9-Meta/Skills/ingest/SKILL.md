@@ -61,7 +61,9 @@ All vault-relative paths in this skill (e.g., `<vault>/1-Sessions/...`,
    tradeoffs, disputes, or explicit user requests. Do not create a session for
    one reusable fact/gotcha/rule even if the wording is >200 characters; route
    that to `capture`. Conversely, a short exchange can still need `ingest` if
-   the decision trail or source context matters.
+   the decision trail or source context matters. This is only a proposed
+   decision; no file may be written until the user confirms the exact write
+   location.
 
 ### Phase 2: Write the session file when needed
 
@@ -70,19 +72,30 @@ If Phase 1 decides a session is needed, create the file at
 `Netease/1-Sessions/...` for private). If no session is needed, skip to
 Phase 3 and handle the durable knowledge with `capture`.
 
-Use `obsidian create` with the `session` template if available, otherwise
-construct the file manually. Keep it concise — 200-800 words.
+Before drafting or writing any vault document, read the `obsidian-markdown`
+(`obsidian_markdown`) skill and use Obsidian Markdown syntax for the content.
 
-**Windows-safe write rule:** write full session or wiki page bodies with
-`obsidian create path=... content=...` (or `append` when the target is truly
-append-only). Do not put multi-line markdown bodies into
-`obsidian eval code=...`; shell / CLI escaping can corrupt backticks,
-backslashes, Chinese paths, template literals, or long base64 strings. Use
-`eval` only for short targeted edits to existing files, such as inserting one
-index line, updating a frontmatter field, or inserting before a marker.
-After complex writes, verify the specific target with `obsidian read path=...`
-or a marker check before continuing; empty output or zero exit code alone is not
-proof that Obsidian modified the file.
+Before writing any file, show the user the exact vault-relative write location
+and all files that will be touched, then wait for explicit confirmation. Do not
+write session files, wiki pages, `_index.md`, or `_log.md` directly without
+that confirmation.
+
+Use the `session` template if available, otherwise construct the file manually.
+Keep it concise — 200-800 words.
+
+**Write priority:**
+1. `apply_patch`: preferred for new files, body content, frontmatter,
+   `_index.md`, and `_log.md`.
+2. Direct UTF-8 text replacement: when `apply_patch` cannot match context, use
+   PowerShell/Python/Node to replace a stable anchor.
+3. `obsidian-cli`: use only for move / rename / delete / operations that require
+   Obsidian to maintain wikilinks automatically.
+4. Do not use `obsidian create`, `obsidian append`, or `obsidian eval` to write
+   long body content, Chinese paths, or multi-line Markdown.
+
+After every write, verify the specific target by reading it back as UTF-8 and
+running a targeted search or `git diff`; empty output and zero exit code alone
+are not proof of success.
 
 **Required frontmatter:**
 ```yaml
@@ -155,9 +168,6 @@ write nothing.
    - update `_log.md` in the target region only when the ingest creates
      a session, creates wiki pages, or updates multiple existing pages
    - run `obsidian unresolved`
-   - if an `obsidian eval` edit fails or appears to no-op, split the operation:
-     main content via `create` / `append`, then small guarded `eval` calls for
-     indexes, backlinks, or metadata
 4. **Backfill when a session exists**: Update the session file's
    `wiki_pages_touched` with wikilinks to all affected pages.
 
@@ -181,9 +191,9 @@ write nothing.
 
 - **Session files are optional concise records, not transcripts.** 200-800 words.
   If the conversation was very long, capture only the highlights.
-- **Never write wiki pages without user confirmation.** The session file
-  itself can be created without confirmation (it's just a record), but
-  wiki modifications must be approved.
+- **Never write vault documents without user confirmation.** Before writing,
+  show the exact write location and all files that will be touched. This applies
+  to session files, wiki pages, `_index.md`, and `_log.md`.
 - **Do not create a session for single atomic knowledge.** Route single
   lessons, gotchas, rules, compact specs, and small append requests to
   `capture`; use `ingest` when source context or decisions need traceability.
@@ -196,12 +206,13 @@ write nothing.
 - **Tags must come from `9-Meta/TAGS.md`.** Read the tag vocabulary before
   assigning tags. If a needed tag isn't in the whitelist, ask the user
   before using it.
-- **Use obsidian-cli for all file operations.** Never use `mv`, `write`,
-  or direct file tools for vault files.
-- **Use Obsidian Flavored Markdown** for all vault content. Session files
-  and wiki pages must use wikilinks (`[[...]]`), callouts (`> [!note]`),
-  embeds (`![[...]]`), and proper YAML frontmatter. See `obsidian-markdown`
-  skill for full syntax reference.
+- **Use the write priority above for vault writes.** Use `apply_patch` first,
+  direct UTF-8 replacement when patch context fails, and reserve
+  `obsidian-cli` for move / rename / delete / automatic wikilink maintenance.
+- **Read `obsidian-markdown` before writing vault content.** Session files
+  and wiki pages must use Obsidian Markdown syntax, including wikilinks
+  (`[[...]]`), callouts (`> [!note]`), embeds (`![[...]]`), and proper YAML
+  frontmatter.
 
 ## Templates reference
 

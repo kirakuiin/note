@@ -1,0 +1,58 @@
+{
+  "synonym_groups": [
+    {
+      "terms": ["施放", "施法", "释放", "使用"],
+      "trigger_terms": ["施放", "施法", "释放"],
+      "contextual_only": ["使用"]
+    }
+  ],
+  "phrase_stopwords": [
+    "的",
+    "了",
+    "和",
+    "与",
+    "及",
+    "或",
+    "要",
+    "走",
+    "下",
+    "里",
+    "里面",
+    "原本",
+    "类似",
+    "相关",
+    "这个",
+    "那个",
+    "一个",
+    "一些"
+  ],
+  "phrase_boost_terms": [
+    "白名单",
+    "链路",
+    "流程"
+  ],
+  "noise_tokens": [
+    "函数",
+    "类",
+    "变量",
+    "模块",
+    "方法",
+    "代码",
+    "项目",
+    "bug",
+    "fix",
+    "error",
+    "debug",
+    "function",
+    "class",
+    "var",
+    "module",
+    "method",
+    "return",
+    "if",
+    "for",
+    "while",
+    "true",
+    "false"
+  ]
+}

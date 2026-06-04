@@ -16,48 +16,35 @@ from typing import Iterable
 
 
 MAX_TOKENS = 8
-SPELL_ACTIONS = ("施放", "施法", "释放", "使用")
-CHINESE_PRIORITY_TERMS = (
-    "战斗外",
-    "战斗内",
-    "法术",
-    "技能",
-    "白名单",
-    "快捷栏",
-    "属性面板",
-    "模式",
-    "机制",
-    "链路",
-    "流程",
-    "入口",
-    "字段",
-    "状态",
-    "配置",
-    "按钮",
-)
+DEFAULT_RULES_PATH = Path(__file__).resolve().parents[1] / "references" / "probe-rules.json"
 CHINESE_RE = re.compile(r"[\u4e00-\u9fff]+")
 SNAKE_RE = re.compile(r"\b[a-z_][a-z0-9_]{2,}\b")
 CAMEL_RE = re.compile(r"\b[A-Z][a-zA-Z0-9]{2,}\b")
-LOW_VALUE_CODE_TOKENS = {
-    "class",
-    "false",
-    "for",
-    "function",
-    "if",
-    "method",
-    "module",
-    "return",
-    "true",
-    "var",
-    "while",
-}
 
 
-def _add(candidates: list[tuple[int, int, str]], seen: set[str], strength: int, token: str) -> None:
+def load_rules(path: Path | None = None) -> dict:
+    rules_path = path or DEFAULT_RULES_PATH
+    with rules_path.open("r", encoding="utf-8") as file:
+        rules = json.load(file)
+
+    rules.setdefault("synonym_groups", [])
+    rules.setdefault("phrase_stopwords", [])
+    rules.setdefault("phrase_boost_terms", [])
+    rules.setdefault("noise_tokens", [])
+    return rules
+
+
+def _add(
+    candidates: list[tuple[int, int, str]],
+    seen: set[str],
+    noise: set[str],
+    strength: int,
+    token: str,
+) -> None:
     token = token.strip()
     if not token or token in seen:
         return
-    if token.lower() in LOW_VALUE_CODE_TOKENS:
+    if token in noise or token.lower() in noise:
         return
     seen.add(token)
     candidates.append((strength, len(candidates), token))
@@ -73,54 +60,102 @@ def _path_parts(paths: Iterable[str]) -> list[str]:
     return parts
 
 
-def _extract_code_tokens(text: str, candidates: list[tuple[int, int, str]], seen: set[str], strength: int) -> None:
+def _extract_code_tokens(
+    text: str,
+    candidates: list[tuple[int, int, str]],
+    seen: set[str],
+    noise: set[str],
+    strength: int,
+) -> None:
     for match in SNAKE_RE.finditer(text):
-        _add(candidates, seen, strength, match.group(0))
+        _add(candidates, seen, noise, strength, match.group(0))
     for match in CAMEL_RE.finditer(text):
         token = match.group(0)
         if len(token) <= 6:
             strength -= 1
-        _add(candidates, seen, strength, token)
+        _add(candidates, seen, noise, strength, token)
 
 
-def _extract_chinese_tokens(text: str, candidates: list[tuple[int, int, str]], seen: set[str]) -> None:
-    for term in CHINESE_PRIORITY_TERMS:
-        if term in text:
-            _add(candidates, seen, 80, term)
+def _split_chinese_phrase(run: str, stopwords: list[str]) -> list[str]:
+    if not stopwords:
+        return [run]
 
-    if any(action in text for action in SPELL_ACTIONS):
-        if "战斗外" in text and "法术" in text:
-            _add(candidates, seen, 90, "战斗外法术使用")
-        if "战斗外" in text and "技能" in text:
-            _add(candidates, seen, 90, "战斗外技能使用")
-        if "法术" in text:
-            _add(candidates, seen, 84, "法术使用")
-        if "技能" in text:
-            _add(candidates, seen, 84, "技能使用")
-        for action in ("施放", "施法", "释放"):
-            _add(candidates, seen, 85, action)
+    pattern = "|".join(re.escape(word) for word in sorted(stopwords, key=len, reverse=True))
+    return [part for part in re.split(pattern, run) if part]
+
+
+def _extract_chinese_phrases(
+    text: str,
+    candidates: list[tuple[int, int, str]],
+    seen: set[str],
+    noise: set[str],
+    rules: dict,
+) -> list[str]:
+    phrases: list[str] = []
+    stopwords = rules.get("phrase_stopwords", [])
+    synonym_triggers = {
+        term
+        for group in rules.get("synonym_groups", [])
+        for term in group.get("trigger_terms", group.get("terms", []))
+    }
+    phrase_boost_terms = set(rules.get("phrase_boost_terms", []))
 
     for match in CHINESE_RE.finditer(text):
-        run = match.group(0)
-        if len(run) < 2:
+        for phrase in _split_chinese_phrase(match.group(0), stopwords):
+            if not 3 <= len(phrase) <= 12:
+                continue
+            phrases.append(phrase)
+            boost = 8 if any(term in phrase for term in synonym_triggers | phrase_boost_terms) else 0
+            _add(candidates, seen, noise, 74 + min(len(phrase), 8) + boost, phrase)
+
+    return phrases
+
+
+def _apply_synonyms(
+    text: str,
+    phrases: list[str],
+    candidates: list[tuple[int, int, str]],
+    seen: set[str],
+    noise: set[str],
+    rules: dict,
+) -> None:
+    for group in rules.get("synonym_groups", []):
+        terms = group.get("terms", [])
+        triggers = group.get("trigger_terms", terms)
+        contextual_only = set(group.get("contextual_only", []))
+
+        if not any(term in text for term in triggers):
             continue
-        for suffix in ("白名单", "链路", "流程", "机制", "模式"):
-            idx = run.find(suffix)
-            if idx > 0:
-                start = max(0, idx - 4)
-                _add(candidates, seen, 70, run[start : idx + len(suffix)])
+
+        for term in terms:
+            if term not in contextual_only:
+                _add(candidates, seen, noise, 84, term)
+
+        for phrase in phrases:
+            if len(phrase) < 6:
+                continue
+            for source in terms:
+                if source not in phrase:
+                    continue
+                for target in contextual_only:
+                    expanded = phrase.replace(source, target)
+                    if expanded != phrase:
+                        _add(candidates, seen, noise, 88, expanded)
 
 
-def extract_tokens(task: str, cwd: str = "", open_files: Iterable[str] = ()) -> list[str]:
+def extract_tokens(task: str, cwd: str = "", open_files: Iterable[str] = (), rules: dict | None = None) -> list[str]:
     """Extract up to eight probe tokens from task text and path strings."""
+    rules = rules or load_rules()
+    noise = {str(token).lower() for token in rules.get("noise_tokens", [])}
     candidates: list[tuple[int, int, str]] = []
     seen: set[str] = set()
 
-    _extract_code_tokens(task, candidates, seen, 100)
-    _extract_chinese_tokens(task, candidates, seen)
+    _extract_code_tokens(task, candidates, seen, noise, 100)
+    phrases = _extract_chinese_phrases(task, candidates, seen, noise, rules)
+    _apply_synonyms(task, phrases, candidates, seen, noise, rules)
 
     path_text = " ".join(_path_parts([cwd, *open_files]))
-    _extract_code_tokens(path_text, candidates, seen, 40)
+    _extract_code_tokens(path_text, candidates, seen, noise, 40)
 
     ranked = sorted(candidates, key=lambda item: (-item[0], item[1]))
     return [token for _, _, token in ranked[:MAX_TOKENS]]
@@ -153,14 +188,21 @@ def find_rg() -> str | None:
     return matches[0] if matches else None
 
 
-def run_probe(task: str, cwd: str = "", open_files: Iterable[str] = (), vault: Path | None = None) -> dict:
+def run_probe(
+    task: str,
+    cwd: str = "",
+    open_files: Iterable[str] = (),
+    vault: Path | None = None,
+    rules_path: Path | None = None,
+) -> dict:
     if vault is None:
         vault_value = os.environ.get("OBSIDIAN_VAULT")
         if not vault_value:
             return {"status": "no_vault_env", "tokens": [], "hits": []}
         vault = Path(vault_value)
 
-    tokens = extract_tokens(task, cwd=cwd, open_files=open_files)
+    rules = load_rules(rules_path)
+    tokens = extract_tokens(task, cwd=cwd, open_files=open_files, rules=rules)
     if not tokens:
         return {"status": "no_tokens", "tokens": [], "hits": []}
 
@@ -210,10 +252,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--cwd", default=os.getcwd(), help="Current workspace path string.")
     parser.add_argument("--open-file", action="append", default=[], help="Open file path string. Repeatable.")
     parser.add_argument("--vault", default=os.environ.get("OBSIDIAN_VAULT"), help="Obsidian vault root.")
+    parser.add_argument("--rules", default=str(DEFAULT_RULES_PATH), help="Probe rules JSON path.")
     args = parser.parse_args(argv)
 
     vault = Path(args.vault) if args.vault else None
-    result = run_probe(args.task, cwd=args.cwd, open_files=args.open_file, vault=vault)
+    result = run_probe(args.task, cwd=args.cwd, open_files=args.open_file, vault=vault, rules_path=Path(args.rules))
     json.dump(result, sys.stdout, ensure_ascii=False, indent=2)
     sys.stdout.write("\n")
     return 0
