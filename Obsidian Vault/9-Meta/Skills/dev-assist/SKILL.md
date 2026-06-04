@@ -1,13 +1,9 @@
 ---
 name: dev-assist
 description: >
-  MANDATORY first step for ANY coding task. Invoke BEFORE writing, debugging,
-  refactoring, or reviewing code — even trivial changes. Runs a single cheap
-  ripgrep probe against the user's Obsidian wiki; exits silently on miss, so
-  false triggers cost near zero. TRIGGER: user asks to write code, fix a bug,
-  refactor, review code, implement a feature, or any task that will touch
-  source files. Do NOT skip this skill to "save time" — the probe is faster
-  than reading one file.
+  Use when Codex is about to write, debug, refactor, review, or otherwise
+  touch source code, including coding tasks based on specs, pasted errors,
+  or requested implementation changes.
 visibility: public
 area: meta
 ---
@@ -171,6 +167,12 @@ and a **deep search** that runs only when the probe hits.
    | **Content contains token** | +1 per token | Body mention — weaker because common terms appear in many pages |
    | **Domain weight** | +2 | cwd matches domain-mapping entry (see step 2) |
 
+   **Noise guard before final ranking**: if one short English token (≤6
+   chars, e.g. `Single`, `Handle`, `Panel`) accounts for >50% of probe hits,
+   treat it as noisy. For that token, count filename matches as +1 total and
+   content matches as +0. Drop candidates that only match noisy tokens and have
+   no domain weight unless fewer than 3 candidates remain.
+
    **Tie-breaking**: among equal scores, prefer pages under `踩坑集/`
    (pitfall pages are actionable), then shorter filenames (more focused).
 
@@ -237,6 +239,23 @@ If the probe runs in a cwd that doesn't match any entry in
   "append 一行的标准操作" section for the up-to-date method —
   responsibility for the actual mechanism lives in that file, not here.
 
+## Self-maintenance: record retrieval misses
+
+If, during or after a coding task, the user points out a relevant wiki page
+that dev-assist did not surface, or the agent later finds one manually, record
+a compact miss lesson in `## Lessons` before `## 相关`:
+
+```markdown
+> [!note] L-<next> (YYYY-MM-DD · miss)
+> Task: `<short user wording>`; missed: [[page]]; cause: <token/noise/domain/capture-keywords>; action: <rule/page/mapping update or none>.
+```
+
+Use `obsidian eval` to insert the lesson before `## 相关`; do not use
+`obsidian append`. If the fix is obvious but changes another skill/reference
+or wiki page, ask before applying it. Misses usually map to one of four fixes:
+add/adjust token extraction, add domain mapping, improve page title/first
+paragraph keywords via `capture`, or tune noise scoring.
+
 ## Constraints
 
 - **Search target is the vault, never the local project.** Do not Glob,
@@ -252,9 +271,10 @@ If the probe runs in a cwd that doesn't match any entry in
   and dilutes relevance. Ranking is for narrowing, not for thoroughness.
 - **No caching.** Each task re-probes. ripgrep is fast enough; cache
   invalidation across wiki edits is a worse problem than re-running.
-- **Do not chain into capture.** If during the coding task the user
-  discovers a new lesson worth filing, they will explicitly invoke
-  `capture`. dev-assist surfaces; capture files. They are independent.
+- **Do not chain into capture automatically.** dev-assist surfaces prior
+  knowledge; capture files new knowledge. If a coding task reveals a durable
+  new lesson, finish the task and mention one concise "适合 capture" suggestion.
+  Run `capture` only after the user explicitly asks to save it.
 
 ## Example
 
@@ -300,10 +320,8 @@ real-world hit/miss is a candidate lesson.)
 > [!important] 维护守则
 > 本节插入新 lesson 时**不要用 `obsidian append`** —— append 落到文件
 > 末尾，会跑到 `## 相关` 之后，破坏 AGENTS.md §5.4 "`## 相关` 必须末节"
-> 约定。
->
-> 实操方案待第一次添加 lesson 时确定（`obsidian eval` 精确插入 / 临时
-> 脚本 / 手动编辑等都可），不预先杜撰未实测的 CLI 模板。
+> 约定。使用 `obsidian eval` 读取全文，把新 lesson 插入到 `\n## 相关`
+> 标记之前；若标记不存在，先停下报告，不要猜插入位置。
 
 ## 相关
 

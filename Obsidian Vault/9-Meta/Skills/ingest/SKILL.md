@@ -59,7 +59,9 @@ All vault-relative paths in this skill (e.g., `<vault>/1-Sessions/...`,
 4. **Decide whether to create a session file**. Create one by default for
    long conversations/documents, multi-page wiki updates, important decisions,
    tradeoffs, disputes, or explicit user requests. Do not create a session for
-   a single atomic lesson; route that to `capture`.
+   one reusable fact/gotcha/rule even if the wording is >200 characters; route
+   that to `capture`. Conversely, a short exchange can still need `ingest` if
+   the decision trail or source context matters.
 
 ### Phase 2: Write the session file when needed
 
@@ -169,10 +171,14 @@ write nothing.
   itself can be created without confirmation (it's just a record), but
   wiki modifications must be approved.
 - **Do not create a session for single atomic knowledge.** Route single
-  lessons, gotchas, rules, and small append requests to `capture`.
+  lessons, gotchas, rules, compact specs, and small append requests to
+  `capture`; use `ingest` when source context or decisions need traceability.
 - **Respect the public/private boundary.** Private content goes to
-  `Netease/1-Sessions/`, public to `1-Sessions/`. Never cross-reference
-  between them.
+  `Netease/1-Sessions/` / `Netease/2-Wiki/`, public to `1-Sessions/` /
+  `2-Wiki/`. Public-region files must never wikilink, embed, or
+  frontmatter-reference `Netease/` paths. Private-region files may link to
+  public wiki pages when useful. If one ingest spans both regions, split
+  outputs by region and report them separately.
 - **Tags must come from `9-Meta/TAGS.md`.** Read the tag vocabulary before
   assigning tags. If a needed tag isn't in the whitelist, ask the user
   before using it.
