@@ -8,8 +8,6 @@ TBD - created by archiving change restructure-vault-as-llm-wiki. Update Purpose 
 All markdown files in the vault SHALL adopt a unified frontmatter schema. Fields are categorized as required (per file location) or optional.
 
 **Universal optional fields** (任何文件都可有):
-- `created` — ISO date, 文件创建时间
-- `updated` — ISO date, 最近修改时间
 - `aliases` — 数组，文件别名（Obsidian wikilink 解析时使用）
 
 **Universal required fields**:
@@ -40,21 +38,17 @@ All markdown files in the vault SHALL adopt a unified frontmatter schema. Fields
 
 不同 area 下的文件 SHALL 有额外的必填字段：
 
-- **area: knowledge** (wiki 页面)：必须有 `tags`(≥1)、`status`(`draft`/`stable`/`stale`/`archived`)
+- **area: knowledge** (wiki 页面)：必须有 `tags`(≥1)
 - **area: session**：必须有 `tags`(≥1)、`date` (ISO date)、`topic` (短标题)；可选 `wiki_pages_touched` (数组)
-- **area: project**：必须有 `status`(`active`/`paused`/`done`/`archived`)、`tags`(≥1)
+- **area: project**：必须有 `tags`(≥1)
 - **area: journal**：必须有 `date` (ISO date)；可选 `period` (`daily`/`weekly`/`monthly`/`yearly`)
 - **area: tool**：必须有 `category` (字符串，如 `编辑器`/`版本控制`/`AI` 等)
 - **area: meta**：无强制额外字段（meta 文件内部结构差异大）
 - **area: inbox**、**area: life**、**area: reference**：仅需 universal required，无额外必填
 
-#### Scenario: knowledge 类页面缺 status
-- **WHEN** wiki 页面的 frontmatter 缺少 `status` 字段
-- **THEN** lint 标记为 Warning；agent 创建时默认 `status: draft`
-
-#### Scenario: project 类页面 status 不在合法集
-- **WHEN** project 文件的 `status` 字段值不属于 `active`/`paused`/`done`/`archived`
-- **THEN** lint 标记为 Warning，建议改为合法值
+#### Scenario: 新建页面不添加维护型元数据
+- **WHEN** agent 创建任意 markdown 文件
+- **THEN** SHALL NOT 默认添加 `status`、`created`、`updated`；旧页面已有这些字段时不作为 lint failure
 
 ---
 
@@ -69,6 +63,9 @@ All `tags` values used in frontmatter SHALL come from the controlled vocabulary 
 - **来源 tag**：`#from-session` `#from-doc` `#from-book` `#from-conference`
 
 每个 tag 在 TAGS.md 中有 1-2 行说明。
+
+Tag depth SHALL be at most two levels: `#top` or `#top/sub`. Deeper tags such
+as `#top/sub/deeper` SHALL be rejected or simplified before use.
 
 #### Scenario: 使用不在词表的 tag
 - **WHEN** agent 试图给笔记加一个不在 TAGS.md 中的 tag

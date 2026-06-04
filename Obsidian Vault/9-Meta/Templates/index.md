@@ -1,9 +1,6 @@
 ---
 area: meta
 visibility: public
-status: stable
-created: {{date}}
-updated: {{date}}
 ---
 # {{directory_name}}
 

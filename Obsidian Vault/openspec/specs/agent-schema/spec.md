@@ -142,7 +142,7 @@ Agents operating on this vault MUST 优先使用 Obsidian 生态对应的专用 
 
 Vault 内一切 tag 的使用 SHALL 遵循 `9-Meta/TAGS.md` 中定义的命名规则、白名单、红线清单。`9-Meta/TAGS.md` 是 tag 治理的**单一权威源**，覆盖以下四个方面：
 
-1. **命名规则**：大小写、连字符风格（kebab-case / camelCase 取一）、中英文混用规则、嵌套 tag (`/` 分隔) 的层级约定
+1. **命名规则**：大小写、连字符风格（kebab-case / camelCase 取一）、中英文混用规则、嵌套 tag (`/` 分隔，最多两级) 的层级约定
 2. **核心白名单**：按学科 / 笔记类型 / 状态分组列出推荐 tag；agent 在打 tag 前 SHALL 先查白名单，能用白名单内的就不要造新 tag
 3. **🔴 红线清单**：仅可在 `netease/` 私有区出现的 tag（如内部项目代号、敏感词），公开区出现 = lint Critical
 4. **历史脏 tag 清理表**：列出已知需要替换 / 删除的 tag 及其目标值，作为持续清理的 backlog

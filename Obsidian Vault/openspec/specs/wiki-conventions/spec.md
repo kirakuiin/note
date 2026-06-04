@@ -10,9 +10,8 @@ Every markdown file under `2-Wiki/` (both public `2-Wiki/` and private `netease/
 - `tags`：数组，至少包含 1 个领域 tag（取自 `9-Meta/TAGS.md` 词表）
 - `area`：固定字符串 `knowledge`
 - `visibility`：`public` 或 `private`，必须与所在区域匹配
-- `status`：`draft` / `stable` / `stale` / `archived` 之一
 
-可选字段：`source`（来源 session 文件路径或外部书名/文档名）、`updated`（最近修改日期，ISO 格式）、`created`（创建日期）。
+可选字段：`source`（来源 session 文件路径或外部书名/文档名）。
 
 #### Scenario: 创建新 wiki 页面缺少必填字段
 - **WHEN** agent 试图在 `2-Wiki/` 下创建新 markdown 文件，但 frontmatter 缺少必填字段
@@ -47,7 +46,7 @@ Pages under `2-Wiki/` SHALL prefer wikilinks `[[页面名]]` over plain-text ref
 
 - 按领域子目录分类组织
 - 每个页面一行：`[[页面名]] — 一句话摘要`
-- `tags/status` 等 metadata 以页面 frontmatter 为准，不在 `_index.md` 双写
+- `tags` 等 metadata 以页面 frontmatter 为准，不在 `_index.md` 双写
 - 由 agent 在每次新建/删除页面后自动更新
 
 netease 内部独立维护 `netease/2-Wiki/_index.md`，与公开区 index 不互通。

@@ -9,16 +9,15 @@ The `lint-wiki` workflow SHALL inspect the wiki for the following health issues 
 
 1. **断链 (Broken wikilinks)**：wikilink 指向不存在的页面
 2. **孤儿页面 (Orphans)**：除 `_index.md`、`_log.md` 外，无任何反向链接的页面；Suggestion 级，不作为图谱完整性硬约束
-3. **缺 frontmatter**：缺少必填字段 `tags`、`area`、`visibility`、`status` 的页面
+3. **缺 frontmatter**：缺少必填字段 `tags`、`area`、`visibility` 的页面
 4. **visibility 与位置不符**：公开区页面标 `private`、netease 区页面标 `public` (跨边界泄露风险)
 5. **跨边界引用**：公开区页面 wikilink 到 netease 路径
 6. **Index 漂移**：`_index.md` 漏登记的页面、登记了但已被删的页面
 7. **重复主题**：两页讨论几乎相同的主题（agent 通过标题/内容启发式判断）
 8. **过时声明 (Stale claims)**：旧 session 的结论被新 session 推翻但 wiki 未同步
 9. **概念缺页**：被频繁裸文本提到但无独立页面的概念（≥3 处）
-10. **超期未访问的活跃项目**：`3-Projects/` 中标 `status: active` 但 `updated` 已 >30 天
-11. **野生 tag (Out-of-vocabulary)**：使用了不在 `9-Meta/TAGS.md` 白名单的 tag（Suggestion 级，列出每个野生 tag 的出现位置 + 推荐替换）
-12. **红线 tag 越界 (Privacy leak via tag)**：公开区文件出现 `9-Meta/TAGS.md` 红线清单中的 tag（Critical 级，与 visibility 跨边界并列为最高级警报）
+10. **野生 tag (Out-of-vocabulary)**：使用了不在 `9-Meta/TAGS.md` 白名单的 tag，或 tag 深度超过两级（Suggestion 级，列出每个野生 tag 的出现位置 + 推荐替换）
+11. **红线 tag 越界 (Privacy leak via tag)**：公开区文件出现 `9-Meta/TAGS.md` 红线清单中的 tag（Critical 级，与 visibility 跨边界并列为最高级警报）
 
 Lint 的目标是防坏、防漏，而不是强制 wiki 图谱完美。缺少 reciprocal backlink 或弱相关链接未补全，不应作为 lint failure。
 
@@ -27,7 +26,7 @@ Lint 的目标是防坏、防漏，而不是强制 wiki 图谱完美。缺少 re
 - **THEN** agent SHALL 按上述 12 项检查全量扫描，输出分类报告（每项问题列出受影响文件清单）
 
 #### Scenario: Tag 检查依赖 TAGS.md
-- **WHEN** 跑第 11、12 项检查时 `9-Meta/TAGS.md` 不存在
+- **WHEN** 跑第 10、11 项检查时 `9-Meta/TAGS.md` 不存在
 - **THEN** SHALL 跳过这两项检查并在报告头部标注"TAGS.md missing — tag governance disabled"，不阻断其他检查项
 
 #### Scenario: 单项 lint

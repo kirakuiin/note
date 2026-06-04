@@ -240,3 +240,10 @@ Get-ChildItem -Recurse '2-Wiki' -Filter *.md | Where-Object { $_.Name -notmatch 
 ## [2026-06-04] maintenance | retire MOC navigation
 - removed public domain _MOC.md files and 9-Meta/Templates/MOC.md
 - updated Dashboard, _index.md, skills, AGENTS, and OpenSpec rules to use _index.md as the sole wiki entry
+
+
+## [2026-06-04] maintenance | simplify frontmatter policy
+- retired status, created, and updated from required/recommended metadata
+- kept area, visibility, and tags as the core metadata set
+- limited tag depth to #top or #top/sub
+- updated AGENTS, TAGS, templates, skills, and active OpenSpec specs

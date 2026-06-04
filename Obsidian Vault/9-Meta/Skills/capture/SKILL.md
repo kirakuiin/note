@@ -193,21 +193,19 @@ Keep frontmatter as short as possible. The rules:
 ---
 area: knowledge
 visibility: public     # or private, must match the path
-status: stable         # or draft if the content is tentative
 tags:
   - <at least 1 tag>   # from TAGS.md whitelist (see §Tags)
 ---
 ```
 
 **Optional** — only include when genuinely useful:
-- `created` / `updated` — add only if the user wants versioning; skip
-  otherwise (the filesystem already tracks mtime).
 - `aliases` — only if the page has a common alternate name that would
   appear in wikilinks.
 
-**Do NOT add** custom provenance fields like `source_skill`, `source_repo`,
-`source_session`. Frontmatter minimality beats provenance tracking —
-provenance can live in the body prose or in `_log.md`.
+**Do NOT add** `status`, `created`, `updated`, or custom provenance fields
+like `source_skill`, `source_repo`, `source_session`. Frontmatter minimality
+beats provenance tracking — provenance can live in the body prose or in
+`_log.md`.
 
 ## Tags policy
 
@@ -217,13 +215,15 @@ tags:
 1. **Read the tag vocabulary first**: `<vault>/9-Meta/TAGS.md` (public)
    or the private tag section of `Netease/AGENTS.md` §4 (private).
 2. **Only use tags already in the whitelist.** Do not invent tags.
-3. **If the needed tag is not in the whitelist**, stop and ask the user:
+3. **Use at most two tag levels.** Valid: `#top`, `#top/sub`. Invalid:
+   `#top/sub/deeper`.
+4. **If the needed tag is not in the whitelist**, stop and ask the user:
    "需要 tag `#xxx`，但不在白名单里。要我把它加到 `TAGS.md` 吗？"
-4. **If the user confirms a new tag**, add it to `TAGS.md` in the correct
-   section (领域 / 类型 / 状态 / 来源 / 红线) BEFORE using it in the
+5. **If the user confirms a new tag**, add it to `TAGS.md` in the correct
+   section (领域 / 类型 / 来源 / 红线) BEFORE using it in the
    page. TAGS.md is the single source of truth; pages and vocabulary
    must stay in sync.
-5. **Deprecated tags** (marked in TAGS.md `[deprecated]` or §4 历史脏 tag 清理表):
+6. **Deprecated tags** (marked in TAGS.md `[deprecated]` or §4 历史脏 tag 清理表):
    do not use; substitute the target tag per the cleanup table.
 
 ## Link maintenance summary

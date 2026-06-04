@@ -1,9 +1,6 @@
 ---
 area: project
 visibility: public
-status: active
-created: {{date}}
-updated: {{date}}
 tags:
 ---
 # {{project_name}}

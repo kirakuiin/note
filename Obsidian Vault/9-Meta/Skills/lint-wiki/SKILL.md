@@ -67,10 +67,10 @@ issues separately — never merge public + private rows
 | # | Check | Detection |
 |---|---|---|
 | W1 | Broken wikilinks | `obsidian unresolved` |
-| W2 | Missing frontmatter | Per-area requirements from AGENTS.md §5.1: knowledge (`tags`>=1, `status`), session (`tags`>=1, `date`, `topic`), project (`status`, `tags`>=1), journal (`date`), tool (`category`); private files additionally need `confidentiality` per Netease/AGENTS.md |
+| W2 | Missing frontmatter | Per-area requirements from AGENTS.md §5.1: knowledge (`tags`>=1), session (`tags`>=1, `date`, `topic`), project (`tags`>=1), journal (`date`), tool (`category`); private files additionally need `visibility: private` |
 | W3 | `## 相关` not last section | Any non-index/log page where `## 相关` exists with content or another heading after it (breaks the cheap append protocol — AGENTS.md §5.4) |
 | W4 | Index drift | Page in `2-Wiki/<domain>/` not listed in domain `_index.md`, or `_index.md` lists a nonexistent page |
-| W5 | `_index.md` entry format | Lines should be lightweight: `[[Page]] — 一句话摘要`; do not require duplicated tags/status metadata |
+| W5 | `_index.md` entry format | Lines should be lightweight: `[[Page]] — 一句话摘要`; do not require duplicated tags/date metadata |
 | W6 | Unknown top-level dir | Any vault root entry not in AGENTS.md §3 whitelist + allowed extras (`Netease/`, `Dashboard.md`, `openspec/`) — new top-level dirs require an OpenSpec change |
 | W7 | Naming violations | Session: `1-Sessions/YYYY/MM/YYYY-MM-DD-<topic>.md` (or `-N` suffix for same-day repeats); `6-Tools/`: flat `<类别>-<工具名>.md`; reserved fixed names: `_index.md` / `_log.md` |
 | W8 | Session structure | `1-Sessions/` files missing any of `## 背景` / `## 关键讨论` / `## 结论` / `## 产出物` (AGENTS.md §9 Step 6) |
@@ -81,9 +81,8 @@ issues separately — never merge public + private rows
 | # | Check | Detection |
 |---|---|---|
 | S1 | Orphan pages | Non-index/log pages with zero `obsidian backlinks` |
-| S2 | Wild tag | Tag not in the region's whitelist. **Always look up TAGS.md §4 cleanup table first** — if there's a mapped target, suggest it; only fall back to "closest match" when no §4 entry exists. Also enforce TAGS.md §1: nested tag's top-level segment must be in the whitelist |
-| S3 | Stale project | `3-Projects/` files with `status: active` and `updated` >30d ago (fallback: filesystem mtime if `updated` field is missing) |
-| S4 | Duplicate topics | Same-domain pages with strongly overlapping titles or near-identical first paragraphs (flag only — never auto-merge) |
+| S2 | Wild tag | Tag not in the region's whitelist. **Always look up TAGS.md §4 cleanup table first** — if there's a mapped target, suggest it; only fall back to "closest match" when no §4 entry exists. Also enforce TAGS.md §1: nested tag's top-level segment must be in the whitelist and tag depth must be at most two (`#top` or `#top/sub`) |
+| S3 | Duplicate topics | Same-domain pages with strongly overlapping titles or near-identical first paragraphs (flag only — never auto-merge) |
 
 ### Phase 2: Produce the report
 
@@ -118,8 +117,8 @@ Present the report. Ask:
 1. Issue is W2 (missing frontmatter)
 2. Fix is field **addition**, never a value change
 3. Default values: `area` inferred from path; `visibility` = `private`
-   if path under `Netease/` else `public`; `status: draft` (knowledge);
-   `tags: []` only when no whitelist tag can be inferred safely. Empty tags
+   if path under `Netease/` else `public`; `tags: []` only when no whitelist
+   tag can be inferred safely. Empty tags
    remain a warning for user follow-up; do not pretend the tag requirement is
    fully fixed.
 

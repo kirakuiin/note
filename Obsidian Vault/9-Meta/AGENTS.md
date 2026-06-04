@@ -2,9 +2,6 @@
 note_type: agents-config
 area: meta
 visibility: public
-status: stable
-created: 2026-04-29
-updated: 2026-04-29
 aliases:
   - Agent Bootstrap
   - AI Agent 入口
@@ -125,17 +122,17 @@ aliases:
 
 | area | 强制字段 | 可选字段 |
 |---|---|---|
-| 全部 | `area`、`visibility` | `created`、`updated`、`aliases` |
-| `knowledge` (`2-Wiki/`) | + `tags`(>=1)、`status` | `source`、`wiki_pages_touched` |
+| 全部 | `area`、`visibility` | `aliases` |
+| `knowledge` (`2-Wiki/`) | + `tags`(>=1) | `source`、`wiki_pages_touched` |
 | `session` (`1-Sessions/`) | + `tags`(>=1)、`date`、`topic` | `wiki_pages_touched` |
-| `project` (`3-Projects/`) | + `status`(`active`/`paused`/`done`/`archived`)、`tags`(>=1) | — |
+| `project` (`3-Projects/`) | + `tags`(>=1) | — |
 | `journal` (`4-Journal/`) | + `date` | `period`(`daily`/`weekly`/`monthly`/`yearly`) |
 | `tool` (`6-Tools/`) | + `category` | — |
 | `inbox`/`life`/`meta` | 仅需 area+visibility | — |
 
 **`visibility` 必须严格匹配路径**：公开区路径 → `public`；`Netease/` 路径 → `private`。Agent 在写文件前根据路径自动设值，且永不允许 public 文件 embed/wikilink 到 private 文件。
 
-**`status` 取值**（knowledge 类）：`draft` / `stable` / `stale` / `archived`。新建默认 `draft`。
+**不维护 `status` / `created` / `updated`**：这些字段不再是必填或推荐字段。旧页面中已有的值可保留，不作为 lint 失败；新建页面默认不添加。
 
 ### 5.2 wikilink 优先
 
@@ -147,7 +144,7 @@ aliases:
 
 每个 `2-Wiki/<领域>/` 目录下：
 
-- **`_index.md`**：本领域页面目录，每行 `[[页面名]] — 一句话摘要`。每次新增/删除页面要同步更新。`tags/status` 以页面 frontmatter 为准，不在 `_index.md` 双写
+- **`_index.md`**：本领域页面目录，每行 `[[页面名]] — 一句话摘要`。每次新增/删除页面要同步更新。`tags` 以页面 frontmatter 为准，不在 `_index.md` 双写
 - **不使用 `_MOC.md`**：领域入口统一收敛到 `_index.md`。agent 不创建、更新或依赖 `_MOC.md`
 - `2-Wiki/_index.md`：全局领域索引（指向各 `<领域>/_index.md`）
 - `2-Wiki/_log.md`：append-only 操作日志，每条 `## [YYYY-MM-DD] <operation> | <subject>`，agent ingest 后追加一条
@@ -177,6 +174,7 @@ Agent 在创建新页时：
 所有 `tags` 必须取自 `[[9-Meta/TAGS|TAGS.md]]` 词表。Agent 行为：
 
 - 打 tag 前先读 TAGS.md 白名单，命中即用
+- tag 只允许一层可选细分：`#top` 或 `#top/sub`；不得使用 `#top/sub/deeper`
 - 未命中：**停下询问用户**"是否新增 `#xxx` 到白名单"，不得擅自造 tag
 - TAGS.md 标记 `[deprecated]` 的 tag：禁止再使用，按其指向的目标值替换
 

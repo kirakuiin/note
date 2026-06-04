@@ -1,9 +1,6 @@
 ---
 area: meta
 visibility: public
-status: stable
-created: 2026-04-29
-updated: 2026-04-29
 aliases:
   - Tag 词表
   - Tag Vocabulary
@@ -21,7 +18,7 @@ aliases:
 |---|---|
 | **风格** | 统一使用 **kebab-case**（小写字母 + 连字符），如 `game-dev`、`data-structure` |
 | **中文 tag** | 领域 tag 使用中文（与 `2-Wiki/` 子目录名一致），如 `编程语言`、`游戏开发` |
-| **嵌套 tag** | 使用 `/` 分隔层级，如 `编程语言/Python`、`算法与数据结构/图`。**顶层必须来自白名单**，嵌套路径自由组合 |
+| **嵌套 tag** | 使用 `/` 分隔层级，如 `编程语言/Python`、`算法与数据结构/图`。**顶层必须来自白名单**，最多两级，不允许 `top/sub/deeper` |
 | **大小写** | 全部小写（中文无此概念）。禁止 camelCase、PascalCase、snake_case |
 | **禁止** | 禁止在 tag 中使用空格、emoji、标点符号（`/` 除外） |
 
@@ -51,16 +48,7 @@ aliases:
 | `#项目` | 项目级笔记（计划、进度、复盘） |
 | `#interview` | 面试经验复盘（含问题、答案、HR 流程、薪资谈判等） |
 
-### 2.3 状态 tag（与 frontmatter `status` 字段对应）
-
-| Tag | 说明 |
-|---|---|
-| `#draft` | 草稿，内容不完整 |
-| `#stable` | 稳定，可被引用 |
-| `#stale` | 过时，需要更新 |
-| `#archived` | 已归档，仅保留供参考 |
-
-### 2.4 来源 tag
+### 2.3 来源 tag
 
 | Tag | 说明 |
 |---|---|
@@ -69,7 +57,7 @@ aliases:
 | `#from-book` | 提炼自书籍阅读 |
 | `#from-conference` | 提炼自会议/分享 |
 
-### 2.5 工具 tag
+### 2.4 工具 tag
 
 | Tag | 说明 |
 |---|---|

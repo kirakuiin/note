@@ -1,9 +1,6 @@
 ---
 area: knowledge
 visibility: public
-status: draft
-created: {{date}}
-updated: {{date}}
 tags:
 aliases: 
 ---
