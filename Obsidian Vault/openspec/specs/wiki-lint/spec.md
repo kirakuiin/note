@@ -8,7 +8,7 @@ TBD - created by archiving change restructure-vault-as-llm-wiki. Update Purpose 
 The `lint-wiki` workflow SHALL inspect the wiki for the following health issues and produce a structured report:
 
 1. **断链 (Broken wikilinks)**：wikilink 指向不存在的页面
-2. **孤儿页面 (Orphans)**：除 `_MOC.md`、`_index.md`、`_log.md` 外，无任何反向链接的页面
+2. **孤儿页面 (Orphans)**：除 `_index.md`、`_log.md` 外，无任何反向链接的页面；Suggestion 级，不作为图谱完整性硬约束
 3. **缺 frontmatter**：缺少必填字段 `tags`、`area`、`visibility`、`status` 的页面
 4. **visibility 与位置不符**：公开区页面标 `private`、netease 区页面标 `public` (跨边界泄露风险)
 5. **跨边界引用**：公开区页面 wikilink 到 netease 路径
@@ -19,6 +19,8 @@ The `lint-wiki` workflow SHALL inspect the wiki for the following health issues 
 10. **超期未访问的活跃项目**：`3-Projects/` 中标 `status: active` 但 `updated` 已 >30 天
 11. **野生 tag (Out-of-vocabulary)**：使用了不在 `9-Meta/TAGS.md` 白名单的 tag（Suggestion 级，列出每个野生 tag 的出现位置 + 推荐替换）
 12. **红线 tag 越界 (Privacy leak via tag)**：公开区文件出现 `9-Meta/TAGS.md` 红线清单中的 tag（Critical 级，与 visibility 跨边界并列为最高级警报）
+
+Lint 的目标是防坏、防漏，而不是强制 wiki 图谱完美。缺少 reciprocal backlink 或弱相关链接未补全，不应作为 lint failure。
 
 #### Scenario: 全量 lint
 - **WHEN** 用户请求"巡检 wiki"

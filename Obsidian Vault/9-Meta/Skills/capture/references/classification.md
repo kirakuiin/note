@@ -37,11 +37,10 @@ If no domain matches:
   `9-Meta/AGENTS.md` §3 territory ("新建顶级目录必须先开 OpenSpec
   change").
 
-### 2. Read the domain's index and MOC
+### 2. Read the domain's index
 
 ```
 <region>/<domain>/_index.md
-<region>/<domain>/_MOC.md
 ```
 
 List out candidate pages whose title or summary overlaps with the new
@@ -104,7 +103,7 @@ From the candidate pages identified in step 2, select 1–2 that the new
 page should wikilink to in its "## 相关" section. Criteria:
 
 - Pick the page that is the closest super-concept or sibling concept.
-- Pick the domain's `_index` or `_MOC` only if nothing more specific exists.
+- Pick the domain's `_index` only if nothing more specific exists.
 - Avoid linking to pages that merely share a tag — shared-tag is not a
   reason to cross-link.
 

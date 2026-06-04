@@ -29,17 +29,17 @@ aliases:
 
 ---
 
-## 知识地图
+## 知识入口
 
-按学科领域分类的 7 个主题 MOC（每个 MOC 是该领域的"知识地图入口"，从这里两跳可达任意 wiki 页）：
+按学科领域分类的 7 个主题索引：
 
-- [[2-Wiki/编程语言/_MOC|💻 编程语言]]
-- [[2-Wiki/游戏开发/_MOC|🎮 游戏开发]]
-- [[2-Wiki/算法与数据结构/_MOC|🧮 算法与数据结构]]
-- [[2-Wiki/AI与Agent/_MOC|🤖 AI 与 Agent]]
-- [[2-Wiki/英语/_MOC|🔤 英语]]
-- [[2-Wiki/方法论/_MOC|🧭 方法论]]
-- [[2-Wiki/计科基础/_MOC|🏗️ 计科基础]]
+- [[2-Wiki/编程语言/_index|💻 编程语言]]
+- [[2-Wiki/游戏开发/_index|🎮 游戏开发]]
+- [[2-Wiki/算法与数据结构/_index|🧮 算法与数据结构]]
+- [[2-Wiki/AI与Agent/_index|🤖 AI 与 Agent]]
+- [[2-Wiki/英语/_index|🔤 英语]]
+- [[2-Wiki/方法论/_index|🧭 方法论]]
+- [[2-Wiki/计科基础/_index|🏗️ 计科基础]]
 
 > 新增领域请先开 OpenSpec change 修订 [[9-Meta/AGENTS|AGENTS.md]]，禁止直接加顶级目录。
 

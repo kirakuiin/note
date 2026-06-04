@@ -109,13 +109,13 @@ and a **deep search** that runs only when the probe hits.
 
    ```bash
    rg -i -l --type md --no-ignore-vcs \
-     --glob '!_log.md' --glob '!_MOC.md' --glob '!_index.md' \
+     --glob '!_log.md' --glob '!_index.md' \
      -e "<token1>" -e "<token2>" ... \
      "$OBSIDIAN_VAULT/Netease/2-Wiki" "$OBSIDIAN_VAULT/2-Wiki"
    ```
 
    Notes:
-   - `--glob '!_log.md' --glob '!_MOC.md' --glob '!_index.md'` excludes
+   - `--glob '!_log.md' --glob '!_index.md'` excludes
      meta files from probe results. These files aggregate keywords from
      their subtrees and produce false hits in almost every probe. They
      are NOT knowledge pages. `_index.md` is still read in Phase 2 for

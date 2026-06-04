@@ -61,7 +61,7 @@ answers are worth filing back as permanent wiki pages.
 4. **Expand if needed.** If the top 5 pages don't contain the answer:
    - Search `1-Sessions/` for related session files (use `obsidian search`
      or grep for keywords)
-   - Check `_MOC.md` files in relevant `2-Wiki/<domain>/` directories
+   - Search the relevant `2-Wiki/<domain>/` directory for narrower keywords
    - If still nothing, report "wiki doesn't have this yet"
 
 ### Phase 3: Synthesize and answer

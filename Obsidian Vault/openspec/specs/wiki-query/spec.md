@@ -37,7 +37,7 @@ After answering a query, the agent SHALL evaluate whether the answer itself has 
 
 #### Scenario: 综合回答有沉淀价值
 - **WHEN** agent 完成一次跨多页的综合回答
-- **THEN** SHALL 在回答末尾询问"这个综合是否值得作为新 wiki 页面归档？"，征得用户同意后走 ingest-session 流程
+- **THEN** SHALL 在回答末尾询问"这个综合是否值得作为新 wiki 页面归档？"，征得用户同意后走 `capture` 的轻量写入流程；只有需要保留长上下文或多页面决策时才创建 session
 
 #### Scenario: 简单事实型回答
 - **WHEN** 回答只是从某一页面提取一段文字

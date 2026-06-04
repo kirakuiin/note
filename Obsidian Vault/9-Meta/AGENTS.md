@@ -36,13 +36,13 @@ aliases:
 
 | 层 | 目录 | 性质 | 谁主导写 |
 |---|---|---|---|
-| **Raw** 原始层 | `1-Sessions/` | 对话、外部文档的原文沉淀（不可变） | agent ingest 时写 |
-| **Wiki** 知识层 | `2-Wiki/` | 结构化、互链、长期维护的知识页面 | agent 主导，用户审核 |
+| **Raw** 原始层 | `1-Sessions/` | 长对话、外部文档、重要决策的原始沉淀（不可变，可选） | agent ingest 时按需写 |
+| **Wiki** 知识层 | `2-Wiki/` | 结构化、轻量互链、长期维护的知识页面 | agent 主导，用户审核 |
 | **Meta** 元层 | `9-Meta/` | 仓库自身配置（本文件、Skills、Templates） | 用户与 agent 共同维护 |
 
 其余顶级目录（`0-Inbox` `3-Projects` `4-Journal` `5-Life` `6-Tools`）按其它生命周期维度组织，详见下一节。
 
-**关键原则**：知识从 Raw 层提炼后**写入** Wiki 层，原始 session 文件本身保持不变。Wiki 页面通过 `wiki_pages_touched` frontmatter 字段反向追溯它的源 session。
+**关键原则**：Wiki 页面是核心资产；Raw/session 只在长上下文、外部文档、多页面变更或重要决策需要追溯时创建。知识从 Raw 层提炼后**写入** Wiki 层，原始 session 文件本身保持不变。若存在 session，Wiki 页面可通过 `source` 或 session 的 `wiki_pages_touched` 字段追溯来源。
 
 ---
 
@@ -51,8 +51,8 @@ aliases:
 | 目录 | area | 语义 | agent 可写 | 命名约定 |
 |---|---|---|---|---|
 | `0-Inbox/` | inbox | 未分类临时投递（人工速记、待整理项） | 是 | 无强制 |
-| `1-Sessions/` | session | 对话与外部文档原始沉淀（raw 层） | 是 | `YYYY/MM/YYYY-MM-DD-<topic>.md` |
-| `2-Wiki/` | knowledge | LLM 主导维护的结构化知识库 | 是（核心职责） | 中文领域名子目录，每个含 `_index.md` + `_MOC.md` |
+| `1-Sessions/` | session | 长对话、外部文档、重要决策的原始沉淀（raw 层，可选） | 是 | `YYYY/MM/YYYY-MM-DD-<topic>.md` |
+| `2-Wiki/` | knowledge | LLM 主导维护的结构化知识库 | 是（核心职责） | 中文领域名子目录，每个含 `_index.md`；不再使用 `_MOC.md` |
 | `3-Projects/` | project | 进行中的个人项目 | 谨慎写 | 一项目一目录，含 `README.md` |
 | `4-Journal/` | journal | 个人复盘（年度/项目/面试） | 仅按用户请求 | `YYYY/` 子目录 |
 | `5-Life/` | life | 生活兴趣（桌游、金融、读物） | 仅按用户请求 | 自由 |
@@ -140,25 +140,25 @@ aliases:
 ### 5.2 wikilink 优先
 
 - `2-Wiki/` 下页面在提到一个有独立 wiki 页面的概念时 SHALL 用 `[[页面名]]` 而非裸文本
-- 每个非 MOC 页面 SHOULD 有至少 1 个出链
+- 普通 wiki 页面 SHOULD 在有价值时提供少量出链；不要为了图谱完整性强行加链接
 - 跨边界引用尝试（公开区 → Netease）→ 拒绝写入并停下问用户
 
-### 5.3 `_index.md` / `_MOC.md` / `_log.md`
+### 5.3 `_index.md` / `_log.md`
 
 每个 `2-Wiki/<领域>/` 目录下：
 
-- **`_index.md`**：本领域页面目录，每行 `[[页面名]] — 一句话摘要 (tags: ..., status: ...)`。每次新增/删除页面要同步更新
-- **`_MOC.md`**：本领域的"知识地图"，按主题分组 + 学习路径组织 wikilink。允许"高出度低入度"，lint 不算孤儿
-- `2-Wiki/_index.md`：全局领域索引（指向各 `<领域>/_MOC.md`）
+- **`_index.md`**：本领域页面目录，每行 `[[页面名]] — 一句话摘要`。每次新增/删除页面要同步更新。`tags/status` 以页面 frontmatter 为准，不在 `_index.md` 双写
+- **不使用 `_MOC.md`**：领域入口统一收敛到 `_index.md`。agent 不创建、更新或依赖 `_MOC.md`
+- `2-Wiki/_index.md`：全局领域索引（指向各 `<领域>/_index.md`）
 - `2-Wiki/_log.md`：append-only 操作日志，每条 `## [YYYY-MM-DD] <operation> | <subject>`，agent ingest 后追加一条
 
 Netease 区独立维护 `Netease/2-Wiki/_index.md` / `_log.md`，与公开区完全不互通。
 
-### 5.4 `## 相关` 必须是文件最末节
+### 5.4 `## 相关` 若存在必须是文件最末节
 
-所有 wiki 页面（`_index.md` / `_MOC.md` / `_log.md` 除外）SHALL 把
-`## 相关`（Related）section 放在**文件的最末尾**，其后不再有任何
-标题或正文内容。理由是操作层面的：
+普通 wiki 页面（`_index.md` / `_log.md` 除外）可以在有价值时包含
+`## 相关`（Related）section；一旦包含，SHALL 放在**文件的最末尾**，
+其后不再有任何标题或正文内容。理由是操作层面的：
 
 - 反向链接维护依赖 **`obsidian append`** 在文件尾加一行 `- [[新页]]`
 - 只有 `## 相关` 在末节时，这一操作才等价于"在 Related 列表里加一条"
@@ -166,7 +166,7 @@ Netease 区独立维护 `Netease/2-Wiki/_index.md` / `_log.md`，与公开区完
 
 Agent 在创建新页时：
 
-- 必须把 `## 相关` 放最末，其后禁止再开新 section
+- 若写入 `## 相关`，必须把它放最末，其后禁止再开新 section
 - 发现旧页 `## 相关` 不在末节时，SHOULD 在本次改动范围内顺手挪到末节（±1 hop 内，不递归全库）
 - Append 反向链接前 SHALL 先 `read` 一次目标页确认 `## 相关` 确实是末节；若不是，退回 `eval` 方案
 
@@ -195,7 +195,6 @@ Agent 在创建新页时：
 | Wiki 页面 | 中文短名，能独立表达概念 | `单例模式.md` `状态机.md` |
 | 同名页面冲突 | 加领域后缀消歧 | `单例模式（游戏编程模式）.md` |
 | `6-Tools/` 文件 | 扁平结构，`<类别>-<工具名>.md` | `编辑器-VSCode.md` `版本控制-Git.md` |
-| MOC | `_MOC.md` 固定文件名 | — |
 | 索引 | `_index.md` 固定文件名 | — |
 | 日志 | `_log.md` 固定文件名 | — |
 | 项目 | 一项目一目录，含 `README.md` | `3-Projects/代号α/README.md` |
@@ -292,10 +291,9 @@ obsidian unresolved       # 记一下基线断链数（修改后回比，确保�
 
 1. `9-Meta/AGENTS.md`（本文件，规则权威）
 2. 仓库根 `README.md`（仓库定位）
-3. 目标 `2-Wiki/<领域>/_MOC.md`（要操作哪个领域）
-4. 目标 `2-Wiki/<领域>/_index.md`（看现有页面）
-5. `9-Meta/TAGS.md`（要打 tag 时）
-6. 当前活跃的 OpenSpec change（`openspec/changes/<name>/`，仅当处在 change 工作期内）
+3. 目标 `2-Wiki/<领域>/_index.md`（看现有页面）
+4. `9-Meta/TAGS.md`（要打 tag 时）
+5. 当前活跃的 OpenSpec change（`openspec/changes/<name>/`，仅当处在 change 工作期内）
 
 ### Step 3 — 加载 skill
 
@@ -311,10 +309,10 @@ obsidian unresolved       # 记一下基线断链数（修改后回比，确保�
 
 ### Step 5 — 留痕
 
-每次 ingest-session / 大批 wiki 修改后：
+每次 ingest-session / capture 新建页面 / 大批 wiki 修改后：
 
 - 在 `2-Wiki/_log.md` 末尾追加一行 `## [YYYY-MM-DD] <operation> | <subject>`，下接受影响页面列表
-- 在 session 文件 frontmatter 回填 `wiki_pages_touched` 数组
+- 若本次创建了 session，在 session 文件 frontmatter 回填 `wiki_pages_touched` 数组
 - 跑 `obsidian unresolved` 比对断链数变化，如果新增断链立刻报告
 
 ### Step 6 — Session 结构

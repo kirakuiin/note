@@ -5,16 +5,16 @@ TBD - created by archiving change restructure-vault-as-llm-wiki. Update Purpose 
 ## Requirements
 ### Requirement: Session 文件命名与位置
 
-Each ingested session (a meaningful conversation or document) SHALL be persisted as a markdown file under `1-Sessions/YYYY/MM/YYYY-MM-DD-<topic>.md`. `<topic>` is a kebab-case 或中文短语，能够独立表达本次内容主题（如 `知识库结构设计`、`debug-skill-loader`）。
+Each ingested long conversation, external document, multi-page decision trail, or explicitly requested session SHALL be persisted as a markdown file under `1-Sessions/YYYY/MM/YYYY-MM-DD-<topic>.md`. Single atomic lessons, gotchas, rules, and small append requests SHALL route to `capture` and do not create a session file by default. `<topic>` is a kebab-case 或中文短语，能够独立表达本次内容主题（如 `知识库结构设计`、`debug-skill-loader`）。
 
 netease 工作侧的 session 同样存放于 `netease/1-Sessions/YYYY/MM/`，结构对称。
 
-#### Scenario: 同一天有多次 session
+#### Scenario: 同一天有多次 persisted session
 - **WHEN** 同一天发生多次 ingest
 - **THEN** 每次产出独立文件，文件名通过不同的 `<topic>` 区分；如有重名则添加序号后缀 `-2`、`-3`
 
 #### Scenario: 用户没指定 topic
-- **WHEN** ingest-session 触发但用户未明确给出主题
+- **WHEN** ingest-session 触发且需要创建 session，但用户未明确给出主题
 - **THEN** agent SHALL 基于对话内容自动提炼一个 5-15 字的主题，并在写入前呈现给用户确认
 
 ---
@@ -30,9 +30,13 @@ Each session file SHALL contain at minimum:
    - `## 产出物`：本次产生的 wiki 页面、代码、文档的 wikilink/路径
    - `## 后续`（可选）：未尽事宜、待办
 
-#### Scenario: 沉淀有价值的对话
-- **WHEN** 用户请求"把这次对话总结归档"
+#### Scenario: 沉淀有价值的长对话
+- **WHEN** 用户请求"把这次对话总结归档"，且内容包含长上下文、重要决策、外部文档或多页面变更线索
 - **THEN** agent SHALL 创建符合上述结构的 session 文件，长度建议在 200-1500 字之间（过短信息不足、过长应拆分多次 ingest）
+
+#### Scenario: 单条知识保存
+- **WHEN** 用户只要求保存一个独立经验、坑点、规则或短 insight
+- **THEN** agent SHALL route to `capture` and write/update the target wiki page directly, without creating a session unless the user explicitly asks
 
 #### Scenario: 直接输入文档的 ingest
 - **WHEN** 用户粘贴一份外部文档让 agent 消化
@@ -42,13 +46,13 @@ Each session file SHALL contain at minimum:
 
 ### Requirement: Session 触发 Wiki 更新的工作流
 
-After persisting a session file, the agent SHALL evaluate whether wiki pages should be created or updated, following this protocol:
+After persisting a session file (if one is needed), the agent SHALL evaluate whether wiki pages should be created or updated, following this protocol:
 
 1. **检测**：基于 session 内容，识别需要新建/更新的 wiki 页面
 2. **呈现**：把改动列表（新建 X 页、更新 Y 页）呈现给用户
 3. **确认**：等待用户确认（默认全部接受、或勾选）
-4. **执行**：按确认结果修改 wiki 页面、`_index.md`、`_log.md`
-5. **回填**：在 session 文件的 frontmatter `wiki_pages_touched` 字段填入所有受影响页面
+4. **执行**：按 `capture` 的轻量写入规则修改 wiki 页面、`_index.md`、`_log.md`
+5. **回填**：如果存在 session 文件，在 frontmatter `wiki_pages_touched` 字段填入所有受影响页面
 
 #### Scenario: 一次 session 涉及多个 wiki 页面
 - **WHEN** ingest-session 检测到本次对话涉及创建 ≥1 个新页面或更新 ≥3 个已有页面
@@ -66,7 +70,7 @@ After persisting a session file, the agent SHALL evaluate whether wiki pages sho
 
 ### Requirement: Ingest 操作必须留痕
 
-每次 ingest-session 完成后 SHALL 在 `2-Wiki/_log.md`（或 netease 区的 log）末尾追加一条记录，格式如下（注意：示例中的 `H2` 表示 markdown 二级标题 `##`，此处避免被解析器误吞）：
+每次 ingest-session 完成后 SHALL 在 `2-Wiki/_log.md`（或 netease 区的 log）末尾追加一条记录。普通单条 capture 走 capture 日志格式。ingest-session 格式如下（注意：示例中的 `H2` 表示 markdown 二级标题 `##`，此处避免被解析器误吞）：
 
 ```text
 H2 [YYYY-MM-DD] ingest-session | <topic>

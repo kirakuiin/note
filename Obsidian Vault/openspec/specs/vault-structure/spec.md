@@ -88,7 +88,7 @@ Within `9-Meta/Skills/`, each skill SHALL be a self-contained directory with at 
 
 #### Scenario: 创建新 wiki 主题分支
 - **WHEN** 在 `2-Wiki/` 下创建新的领域目录
-- **THEN** 命名 SHALL 用中文且能精确描述该领域；同时在该目录下创建 `_MOC.md` 入口文件
+- **THEN** 命名 SHALL 用中文且能精确描述该领域；同时在该目录下创建 `_index.md` 入口文件；不得创建 `_MOC.md`
 
 #### Scenario: 归档 session
 - **WHEN** 在 `1-Sessions/` 下保存对话记录

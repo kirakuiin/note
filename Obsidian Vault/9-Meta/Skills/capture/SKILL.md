@@ -22,7 +22,7 @@ This skill is a lightweight counterpart to `ingest`:
 
 | Skill | Use when |
 |---|---|
-| `ingest` | There is a whole conversation or a full external document worth archiving. Produces a session file + optional wiki pages. |
+| `ingest` | There is a whole conversation, long document, or multi-page decision trail worth archiving. May produce a session file + optional wiki pages. |
 | `capture` (this) | There is only a single atomic piece of knowledge worth saving — a lesson, a rule, a trap. Writes straight to wiki. No session file. |
 
 ## When to trigger
@@ -85,7 +85,7 @@ short:
 1. Read the target region's top-level `_index.md` (`2-Wiki/_index.md` or
    `Netease/2-Wiki/_index.md`) to see existing domains.
 2. Match the content to a domain by topic and keywords.
-3. Read that domain's `_index.md` and `_MOC.md` to see existing pages.
+3. Read that domain's `_index.md` to see existing pages.
 4. Decide: **append to an existing page** or **create a new page**?
    - Append if the content is a follow-up / addition / new bullet on an
      existing topic.
@@ -113,8 +113,8 @@ Produce a draft **without writing any file yet**. The draft contains:
 - **Target path** (vault-relative)
 - **Frontmatter** (keep it minimal — see next section)
 - **Body** (the actual content, in Obsidian Flavored Markdown)
-- **Link updates**: which existing pages will gain a back-reference, and
-  which `_index.md` / `_MOC.md` / `_log.md` files will be updated
+- **Link updates**: optional forward links and any strong reciprocal
+  backlinks; which `_index.md` / `_log.md` files will be updated
 - **Command plan**: the exact `obsidian` CLI commands that will run in
   Step 3 (one per line, in order). This lets the user catch a wrong
   `path=`/`file=` flag or a nonexistent target before anything is
@@ -158,14 +158,15 @@ content syntax.
 Order of operations:
 
 1. **Write/append** the main target file.
-2. **Update back-references** — edit the "相关" (Related) section of each
-   existing page that the new content cross-references, adding a
-   wikilink back to the new page. See `references/link-maintenance.md`.
-3. **Update `_index.md`** — if a new page was created, append a line to
+2. **Update `_index.md`** — if a new page was created, append a line to
    the domain's `_index.md` in the format:
    ```markdown
    - [[Page Name]] — one-line summary (~15 字以内)
    ```
+3. **Optional reciprocal backlinks** — only add a backlink when the
+   relationship is strong enough that users would naturally discover one
+   page from the other, or when the user explicitly asks for it. Stay
+   within ±1 hop.
 4. **Update `_log.md`** — before appending, read the last few entries
    to match their existing style (headers vs. bullets, date format,
    field order). As a reference template, entries look roughly like:
@@ -192,17 +193,13 @@ Keep frontmatter as short as possible. The rules:
 ---
 area: knowledge
 visibility: public     # or private, must match the path
+status: stable         # or draft if the content is tentative
 tags:
   - <at least 1 tag>   # from TAGS.md whitelist (see §Tags)
 ---
 ```
 
 **Optional** — only include when genuinely useful:
-- `status` — include **only if the content's maturity is unclear**
-  (e.g., `status: stable` once the user has run the code in prod, or
-  `status: draft` when the content is explicitly a guess/TODO). Most
-  captured lessons are already stable facts the user has hit —
-  prefer omitting `status` over defaulting to `draft`.
 - `created` / `updated` — add only if the user wants versioning; skip
   otherwise (the filesystem already tracks mtime).
 - `aliases` — only if the page has a common alternate name that would
@@ -214,7 +211,8 @@ provenance can live in the body prose or in `_log.md`.
 
 ## Tags policy
 
-Tags are recommended but not required. When assigning tags:
+Tags are required for knowledge pages, but keep them minimal. When assigning
+tags:
 
 1. **Read the tag vocabulary first**: `<vault>/9-Meta/TAGS.md` (public)
    or the private tag section of `Netease/AGENTS.md` §4 (private).
@@ -230,20 +228,23 @@ Tags are recommended but not required. When assigning tags:
 
 ## Link maintenance summary
 
-The wiki's value comes from dense, accurate wikilinks. When capturing:
+The wiki's value comes from useful, accurate wikilinks. Links serve
+discovery, not graph completeness. When capturing:
 
-- The new/updated page SHOULD have a **"## 相关"** section listing 1–2
-  wikilinks to directly related pages.
+- The new/updated page MAY have a **"## 相关"** section listing 0–3
+  wikilinks when they help understanding or future discovery.
 - **`## 相关` must be the last section of the file** (AGENTS.md §5.4).
   Nothing else may come after it. This lets back-ref maintenance use
   cheap `obsidian append` rather than fragile `eval` + string patching.
-- Each page wikilinked FROM the new page SHOULD gain a reciprocal
-  wikilink back in ITS "## 相关" section — making the relationship
-  bidirectional.
+- Reciprocal backlinks are optional. Add one only for strong semantic
+  relationships, common discovery paths, hub pages that should list the
+  new page, or explicit user request.
+- Do not add reciprocal backlinks for background mentions, tool names,
+  weak context links, or to make the graph look complete.
 - Before appending a back-ref to a target page, `read` it to confirm
   `## 相关` is the last section. If it isn't (legacy page), either
-  patch via `eval`, or fix the page to put `## 相关` last as part of
-  this capture (±1 hop scope).
+  patch via `eval`, skip the reciprocal backlink, or fix the page to put
+  `## 相关` last as part of this capture (±1 hop scope).
 - Scope: stay within ±1 hop. Don't recursively update the whole graph.
 - See `references/link-maintenance.md` for exact edit patterns.
 

@@ -1,4 +1,4 @@
----
+﻿---
 area: knowledge
 visibility: public
 tags:
@@ -12,18 +12,18 @@ updated: 2026-04-29
 各编程语言的语法、特性、最佳实践（Python / C# / C++ / Lua / TypeScript ...）
 
 > 本文件由 OpenSpec change `restructure-vault-as-llm-wiki` task 1.7 创建。
-> 入口请走 [[2-Wiki/编程语言/_MOC|_MOC]]。Phase 2 内容迁移后会按页面追加条目。
+> 本页是该领域的页面入口。Phase 2 内容迁移后会按页面追加条目。
 
 ## 页面列表
 
 ### 根级
-- [[C++.md|C++]] — C++ 语言特性笔记 (tags: 编程语言, status: archived)
-- [[CSharp]] — C# 编译过程、GC、闭包等 (tags: 编程语言, status: archived)
-- [[Effective C++]] — 《Effective C++》读书笔记 (tags: 编程语言, status: archived)
-- [[Effective CSharp]] — 《Effective C#》读书笔记 (tags: 编程语言, status: archived)
-- [[MVC模式]] — MVC 架构模式笔记 (tags: 编程语言, status: archived)
-- [[什么是面向对象]] — 面向对象核心概念 (tags: 编程语言, status: archived)
-- [[代码整洁之道]] — 《代码整洁之道》读书笔记 (tags: 编程语言, status: archived)
+- [[C++.md|C++]] — C++ 语言特性笔记
+- [[CSharp]] — C# 编译过程、GC、闭包等
+- [[Effective C++]] — 《Effective C++》读书笔记
+- [[Effective CSharp]] — 《Effective C#》读书笔记
+- [[MVC模式]] — MVC 架构模式笔记
+- [[什么是面向对象]] — 面向对象核心概念
+- [[代码整洁之道]] — 《代码整洁之道》读书笔记
 
 ### Python
 - [[Python/Python 导入问题]]

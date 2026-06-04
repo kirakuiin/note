@@ -134,7 +134,7 @@ def scan_vault(vault_root: Path) -> list[dict]:
         if any(part.startswith(".") for part in md_file.parts):
             continue
         if md_file.name.startswith("_"):
-            continue  # _index.md, _MOC.md, _log.md are meta files
+            continue  # _index.md and _log.md are meta files
 
         try:
             text = md_file.read_text(encoding="utf-8")

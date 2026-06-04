@@ -1,23 +1,33 @@
 ---
 name: ingest
 description: >
+  Turn a conversation, chat, pasted article, or external document into a concise
+  optional Obsidian session record, then optionally propose extracting durable
+  knowledge into wiki pages. Use when the user asks to archive, ingest,
+  summarize, save, record, or write up a whole conversation, long discussion,
+  external document, or multi-page decision trail rather than a single atomic
+  fact.
 visibility: public
 area: meta
 ---
 # Ingest Skill
 
-Turn a conversation or document into a structured session record, and
-optionally extract lasting knowledge into wiki pages.
+Turn a conversation or document into an optional structured session record,
+and optionally extract lasting knowledge into wiki pages.
 
 ## When to use this skill
 
 - User says "archive this conversation", "summarize this chat", "ingest this"
-- User pastes a document/article and wants it digested
-- User says "save this", "record this", "write this up", "make a note of this"
-- After a session that produced new insights, decisions, or wiki pages
+- User pastes a long document/article and wants it digested
+- User says "save this", "record this", "write this up", or "make a note of this"
+  where "this" clearly refers to a whole conversation, long document,
+  multi-page change, or decision trail
+- The user explicitly asks to record a session that produced new insights,
+  decisions, or wiki pages
 
 Do NOT trigger on: casual "remember this" (too vague), single-line facts
-(better as direct wiki edits), or when the user is actively mid-discussion.
+(route to `capture`), one bug/gotcha/rule (route to `capture`), or when
+the user is actively mid-discussion.
 
 ## Vault location
 
@@ -46,11 +56,17 @@ All vault-relative paths in this skill (e.g., `<vault>/1-Sessions/...`,
    topic based on the conversation. Let the user confirm or edit.
 3. **Identify source type**: conversation (this chat) or external document
    (user pasted content). This affects the session file structure.
+4. **Decide whether to create a session file**. Create one by default for
+   long conversations/documents, multi-page wiki updates, important decisions,
+   tradeoffs, disputes, or explicit user requests. Do not create a session for
+   a single atomic lesson; route that to `capture`.
 
-### Phase 2: Write the session file
+### Phase 2: Write the session file when needed
 
-Create the file at `<vault>/1-Sessions/YYYY/MM/YYYY-MM-DD-<topic>.md`
-(or `Netease/1-Sessions/...` for private).
+If Phase 1 decides a session is needed, create the file at
+`<vault>/1-Sessions/YYYY/MM/YYYY-MM-DD-<topic>.md` (or
+`Netease/1-Sessions/...` for private). If no session is needed, skip to
+Phase 3 and handle the durable knowledge with `capture`.
 
 Use `obsidian create` with the `session` template if available, otherwise
 construct the file manually. Keep it concise — 200-800 words.
@@ -98,8 +114,8 @@ wiki_pages_touched: []
 
 ### Phase 3: Detect wiki-worthy knowledge
 
-After writing the session file, scan the conversation for knowledge that
-deserves a permanent wiki page. Ask yourself:
+After writing the session file (if any), scan the conversation or document for
+knowledge that deserves a permanent wiki page. Ask yourself:
 
 - Was a new concept defined or explained?
 - Was a technique/pattern/method demonstrated?
@@ -107,41 +123,49 @@ deserves a permanent wiki page. Ask yourself:
 - Was a bug/trap documented with a solution?
 - Did the user explicitly ask to create a wiki page?
 
-If nothing qualifies, skip to Phase 5 with `wiki_pages_touched: []`.
+If nothing qualifies and a session was created, skip to Phase 5 with
+`wiki_pages_touched: []`. If no session was created and nothing qualifies,
+write nothing.
 
 ### Phase 4: Propose and execute wiki updates
 
-1. **List proposed changes**: "I found X items worth saving to wiki:
-   - New page: `概念名` — <one-line description>
-   - Update: `已有页面` — <what to add>"
+1. **List proposed capture items**: "I found X items worth saving to wiki:
+   - Capture: `概念名` — <new page or append target, one-line description>
+   - Capture: `已有页面` — <what to add>"
 2. **Wait for user confirmation**. User can accept all, pick some, or reject.
-3. **Execute confirmed changes**:
-   - New pages: `obsidian create` with `wiki-page` template, write to
-     `2-Wiki/<domain>/` matching the appropriate TAGS.md domain tag
-   - Updates: `obsidian append` or `obsidian read` + edit + write back
-   - Update `_index.md` in the affected wiki directory
-   - Append to `2-Wiki/_log.md` (or Netease equivalent)
-4. **Backfill**: Update the session file's `wiki_pages_touched` with
-   wikilinks to all affected pages.
+3. **Execute confirmed changes using `capture`'s write rules**:
+   - classify target region/domain/page
+   - create or append the main knowledge page
+   - update `_index.md` only for newly created pages
+   - add reciprocal backlinks only for strong relationships or explicit
+     user request
+   - update `_log.md` in the target region
+   - run `obsidian unresolved`
+4. **Backfill when a session exists**: Update the session file's
+   `wiki_pages_touched` with wikilinks to all affected pages.
 
 ### Phase 5: Log and verify
 
-1. Append to `2-Wiki/_log.md` (or Netease equivalent):
+1. If a session was created, append a compact batch entry to `2-Wiki/_log.md`
+   (or Netease equivalent):
    ```markdown
    ## [YYYY-MM-DD] ingest | <topic>
    - session: [[1-Sessions/YYYY/MM/YYYY-MM-DD-<topic>]]
    - touched: [[page1]], [[page2]]
    ```
 2. Run `obsidian unresolved` to verify no broken links were introduced.
-3. Report summary to user: "Session saved. X wiki pages created/updated."
+3. Report summary to user: "Session saved. X wiki pages created/updated." If
+   no session was created, report only the wiki pages created/updated.
 
 ## Important constraints
 
-- **Session files are concise records, not transcripts.** 200-800 words.
+- **Session files are optional concise records, not transcripts.** 200-800 words.
   If the conversation was very long, capture only the highlights.
 - **Never write wiki pages without user confirmation.** The session file
   itself can be created without confirmation (it's just a record), but
   wiki modifications must be approved.
+- **Do not create a session for single atomic knowledge.** Route single
+  lessons, gotchas, rules, and small append requests to `capture`.
 - **Respect the public/private boundary.** Private content goes to
   `Netease/1-Sessions/`, public to `1-Sessions/`. Never cross-reference
   between them.

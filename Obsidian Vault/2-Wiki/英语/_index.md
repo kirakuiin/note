@@ -12,7 +12,7 @@ updated: 2026-04-29
 英语语法、词汇、表达；以《Essential Grammar in Use》为骨架
 
 > 本文件由 OpenSpec change `restructure-vault-as-llm-wiki` task 1.7 创建。
-> 入口请走 [[2-Wiki/英语/_MOC|_MOC]]。Phase 2 内容迁移后会按页面追加条目。
+> 本页是该领域的页面入口。Phase 2 内容迁移后会按页面追加条目。
 
 ## 页面列表
 

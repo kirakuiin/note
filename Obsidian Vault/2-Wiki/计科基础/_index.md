@@ -1,4 +1,4 @@
----
+﻿---
 area: knowledge
 visibility: public
 tags:
@@ -12,8 +12,8 @@ updated: 2026-04-29
 计算机科学的基础知识：原理、操作系统、网络、编译、体系结构等横向通用底座。
 
 > 本文件由 OpenSpec change `restructure-vault-as-llm-wiki` task 3.4 (Batch C) 创建。
-> 入口请走 [[2-Wiki/计科基础/_MOC|_MOC]]。Phase 2 内容迁移后会按页面追加条目。
+> 本页是该领域的页面入口。Phase 2 内容迁移后会按页面追加条目。
 
 ## 页面列表
 
-- [[计科基础知识]] — 计算机科学基础综合笔记 (tags: 计科基础, status: archived)
+- [[计科基础知识]] — 计算机科学基础综合笔记

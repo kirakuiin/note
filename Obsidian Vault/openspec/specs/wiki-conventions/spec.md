@@ -25,7 +25,7 @@ Every markdown file under `2-Wiki/` (both public `2-Wiki/` and private `netease/
 ---
 ### Requirement: 优先使用 wikilink 而非裸文本
 
-Pages under `2-Wiki/` SHALL prefer wikilinks `[[页面名]]` over plain-text references when mentioning concepts that have their own wiki page. Each non-MOC page SHOULD have at least one outgoing wikilink (or an explicit reason in frontmatter for being a "leaf" page).
+Pages under `2-Wiki/` SHALL prefer wikilinks `[[页面名]]` over plain-text references when mentioning concepts that have their own wiki page. Ordinary wiki pages SHOULD include a small number of useful outgoing wikilinks when they improve understanding or discovery; graph completeness is not required.
 
 #### Scenario: 提到一个有独立页面的概念
 - **WHEN** wiki 页面正文提到一个在 `2-Wiki/` 中已有独立页面的概念
@@ -46,8 +46,9 @@ Pages under `2-Wiki/` SHALL prefer wikilinks `[[页面名]]` over plain-text ref
 `2-Wiki/_index.md` SHALL be maintained as a content-oriented catalog. Format:
 
 - 按领域子目录分类组织
-- 每个页面一行：`[[页面名]] — 一句话摘要 (tags: ..., status: ...)`
-- 由 agent 在每次 ingest 后自动更新
+- 每个页面一行：`[[页面名]] — 一句话摘要`
+- `tags/status` 等 metadata 以页面 frontmatter 为准，不在 `_index.md` 双写
+- 由 agent 在每次新建/删除页面后自动更新
 
 netease 内部独立维护 `netease/2-Wiki/_index.md`，与公开区 index 不互通。
 
@@ -83,21 +84,22 @@ netease 内部独立维护 `netease/2-Wiki/_index.md`，与公开区 index 不�
 
 ---
 
-### Requirement: 每个领域目录提供 `_MOC.md` 入口
+### Requirement: `_MOC.md` 不再作为 wiki 结构
 
-每个 `2-Wiki/<领域>/` 子目录 SHALL 包含一个 `_MOC.md` 文件，作为该领域的导航地图。MOC 内容包含：
+`_MOC.md` SHALL NOT be part of the maintained wiki structure. Agents SHALL NOT
+create, update, read, or rely on domain `_MOC.md` files during normal
+capture/ingest/query/lint workflows. `_index.md` is the required domain entry
+and machine-maintained catalog.
 
-- 该领域涵盖的核心主题分组
-- 关键页面的 wikilink（按重要程度或学习路径排序）
-- 推荐的入门/深入阅读路径
-
-`_MOC.md` 是少数允许"高出度（很多 outlink）但低入度（少 inlink）"的合法页面类型，lint 时不算孤儿。
+If an old `_MOC.md` file is encountered during maintenance, it SHOULD be
+removed after any remaining useful links have been represented in `_index.md`
+or normal wiki pages.
 
 #### Scenario: 新增领域子目录
 - **WHEN** 在 `2-Wiki/` 下新增领域子目录
-- **THEN** SHALL 同时创建该目录的 `_MOC.md`，且在 `_index.md` 中新增该领域分类
+- **THEN** SHALL 创建该目录的 `_index.md`，且在全局 `_index.md` 中新增该领域分类；不得创建 `_MOC.md`
 
 #### Scenario: 用户从顶层进入某领域
 - **WHEN** 用户通过 Dashboard 或 `_index.md` 进入某领域
-- **THEN** 入口 SHALL 是该领域的 `_MOC.md`，而不是某个具体页面
+- **THEN** 入口 SHALL 是该领域的 `_index.md`
 

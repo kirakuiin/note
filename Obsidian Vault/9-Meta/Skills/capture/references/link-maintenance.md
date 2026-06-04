@@ -8,8 +8,7 @@ wiki's link graph. Follow these patterns.
 Keep wikilinks **bidirectional within ±1 hop**:
 
 - When page A wikilinks to page B, page B SHOULD also wikilink back to A
-  (unless A is the root index or a MOC, which may have one-way outbound
-  links).
+  (unless A is the root index, which may have one-way outbound links).
 - Don't recurse further — updating A↔B doesn't require updating B↔C.
 - The goal is a navigable graph, not a fully transitive closure.
 
@@ -38,7 +37,7 @@ prose.
 Exceptions:
 - Wikilinks used in-line in body prose (e.g., "详见 `X`" in a table) are
   kept; they don't need a duplicate in `## 相关`.
-- `_index.md` and `_MOC.md` have their own structure; see below.
+- `_index.md` has its own structure; see below.
 
 ## Pattern 1 — New page created
 
@@ -63,10 +62,6 @@ When `capture` creates a new page N:
    - [[path/to/N|display name]] — one-line summary (≤15 字)
    ```
 
-4. **The domain's `_MOC.md`** — add a link ONLY if the new page fits a
-   specific learning-path or knowledge-grouping in the MOC. Don't add
-   generically. The MOC is curated, the index is exhaustive.
-
 ## Pattern 2 — Append to existing page
 
 When `capture` appends content to an existing page P:
@@ -84,8 +79,6 @@ When `capture` appends content to an existing page P:
 
    Exception: if the appended content substantially changes what P is
    about, the one-line summary in `_index.md` may need a refresh.
-
-4. **`_MOC.md` rarely changes on append.**
 
 ## Pattern 3 — Renaming or moving a page
 

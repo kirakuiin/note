@@ -235,3 +235,8 @@ Get-ChildItem -Recurse '2-Wiki' -Filter *.md | Where-Object { $_.Name -notmatch 
 **沉淀文件：**
 - 9-Meta/AGENTS.md §8.3.1（新规则）
 - 9-Meta/Skills/obsidian-cli/SKILL.md §Append vs eval / §Eval gotchas / §Shell escape（CLI 知识扩展）
+
+
+## [2026-06-04] maintenance | retire MOC navigation
+- removed public domain _MOC.md files and 9-Meta/Templates/MOC.md
+- updated Dashboard, _index.md, skills, AGENTS, and OpenSpec rules to use _index.md as the sole wiki entry

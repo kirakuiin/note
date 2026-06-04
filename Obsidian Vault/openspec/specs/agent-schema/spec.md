@@ -24,9 +24,9 @@ The vault SHALL contain a file at `9-Meta/AGENTS.md` that serves as the single a
 2. **Three-layer architecture**：sessions / wiki / meta 的关系
 3. **Top-level directories**：每个顶级目录的语义、agent 是否可写、命名约定（参照 vault-structure spec）
 4. **Public/private boundary (RED LINE)**：硬性安全规则
-5. **Wiki page conventions**：frontmatter、wikilink、_index/_log/_MOC（参照 wiki-conventions spec）
+5. **Wiki page conventions**：frontmatter、wikilink、_index/_log（参照 wiki-conventions spec）
 6. **Tag vocabulary**：指向 `9-Meta/TAGS.md` 词表
-7. **Naming conventions**：session 文件名、日报、MOC、index、log
+7. **Naming conventions**：session 文件名、日报、index、log
 8. **Workflow entry points**：列出主要 skill 及其用途
 9. **Operation protocol**：agent 在做改动时必须遵循的流程（先 read index、列改动、确认、执行、updateindex/log）
 10. **What NOT to do**：明确的禁止事项
@@ -99,8 +99,8 @@ Agents operating on this vault MUST 优先使用 Obsidian 生态对应的专用 
 - **WHEN** agent 要在 `2-Wiki/<主题>/` 下新建一个页面
 - **THEN** SHALL 先 `use_skill obsidian-markdown`（确认 frontmatter / wikilink / callout 写法），再 `use_skill obsidian-cli`（用 `obsidian create path=... template=wiki-page` 落地），不得直接 `edit_file` 写入
 
-#### Scenario: 沉淀一次对话为 session
-- **WHEN** ingest-session 流程开始
+#### Scenario: 沉淀长对话或文档为 session
+- **WHEN** ingest-session 流程开始且内容需要保留长上下文、外部文档、多页面决策或用户明确要求 session
 - **THEN** SHALL 用 `obsidian create` + 现成的 `session.md` 模板生成文件，而不是手工拼接 markdown 字符串
 
 #### Scenario: 移动 / 重命名 vault 内文件

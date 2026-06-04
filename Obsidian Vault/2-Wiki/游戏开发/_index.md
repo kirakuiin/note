@@ -1,4 +1,4 @@
----
+﻿---
 area: knowledge
 visibility: public
 tags:
@@ -12,16 +12,16 @@ updated: 2026-04-29
 游戏引擎（Unity / Cocos / Godot）、图形渲染、游戏架构、GameAI
 
 > 本文件由 OpenSpec change `restructure-vault-as-llm-wiki` task 1.7 创建。
-> 入口请走 [[2-Wiki/游戏开发/_MOC|_MOC]]。Phase 2 内容迁移后会按页面追加条目。
+> 本页是该领域的页面入口。Phase 2 内容迁移后会按页面追加条目。
 
 ## 页面列表
 
 ### 根级
-- [[游戏开发知识点]] — 游戏开发综合知识点 (tags: 游戏开发, status: archived)
-- [[游戏的体系架构]] — 游戏引擎架构概览 (tags: 游戏开发, status: archived)
-- [[游戏设计艺术]] — 《游戏设计艺术》读书笔记 (tags: 游戏开发, status: archived)
-- [[独立游戏开发流程]] — 独立游戏开发流程参考 (tags: 游戏开发, status: archived)
-- [[Shader知识点]] — Shader 编程基础 (tags: 游戏开发, status: archived)
+- [[游戏开发知识点]] — 游戏开发综合知识点
+- [[游戏的体系架构]] — 游戏引擎架构概览
+- [[游戏设计艺术]] — 《游戏设计艺术》读书笔记
+- [[独立游戏开发流程]] — 独立游戏开发流程参考
+- [[Shader知识点]] — Shader 编程基础
 
 ### 3D数学
 - [[3D数学/基础知识]]
