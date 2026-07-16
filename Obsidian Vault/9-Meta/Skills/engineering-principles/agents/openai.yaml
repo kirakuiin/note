@@ -1,0 +1,4 @@
+interface:
+  display_name: "工程设计原则"
+  short_description: "在系统设计、代码实现、重构与审查中应用简洁工程原则"
+  default_prompt: "使用 $engineering-principles 评估这个设计或实现，并给出符合项目约束的最小改进。"
