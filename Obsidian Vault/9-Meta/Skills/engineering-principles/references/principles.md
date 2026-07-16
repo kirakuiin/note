@@ -4,7 +4,7 @@ Derived from the user's notes [[代码整洁之道]] and [[什么是面向对象
 
 ## System design
 
-- Choose the simplest design that satisfies the current requirement. Let architecture evolve through tested changes instead of predicting distant needs.
+- Choose the simplest design that satisfies the current requirement. Let architecture evolve through verified changes instead of predicting distant needs.
 - Give each module, class, and function one coherent reason to change. Measure size by responsibility, not raw line count.
 - Keep related behavior and data together. Minimize dependencies, public surface area, and knowledge of internal details.
 - Make dependency direction explicit. High-level policy should not depend unnecessarily on volatile low-level details.
@@ -28,13 +28,15 @@ Derived from the user's notes [[代码整洁之道]] and [[什么是面向对象
 - Delete dead code when the task safely establishes that it is unreachable and removal is in scope.
 - Follow team formatting and naming conventions before generic clean-code preferences.
 
-## Testing and evolution
+## Verification and evolution
 
-- Treat tests as protection for change, not a numeric target. Cover observable behavior, important boundaries, failure paths, and integration contracts.
+- Choose the strongest feasible verification. Prefer automated tests for independently runnable logic; otherwise combine build or static checks, call-chain and side-effect analysis, historical logs or protocol samples, and a runtime verification checklist.
+- Treat tests as protection for change, not a numeric target. Cover observable behavior, important boundaries, failure paths, and integration contracts where tests are practical.
 - Keep tests focused, repeatable, independent, self-validating, and readable as usage examples.
 - For defects, reproduce the failure when practical, make the smallest correction, and verify the relevant regression surface.
 - Refactor incrementally under verification. First preserve behavior, then improve names, responsibilities, duplication, and placement.
-- A design that is difficult to test often reveals hidden coupling or unclear ownership; simplify the boundary before adding elaborate test machinery.
+- For engine-embedded, UI, protocol, asynchronous, lifecycle, or platform-dependent behavior, keep changes small and record required in-environment scenarios. Mark unexecuted checks as verification debt; do not claim runtime equivalence from static evidence alone.
+- Difficulty verifying behavior may reveal hidden coupling or unclear ownership, but do not introduce mocks, interfaces, or dependency injection solely to manufacture unit tests. Simplify a boundary only when that also improves the design.
 
 ## OOP principles in context
 
@@ -61,4 +63,3 @@ Treat the following as warning signals that invite examination, not automatic vi
 - getters, setters, interfaces, and inheritance.
 
 Judge each case by clarity, compatibility, failure behavior, change frequency, and the surrounding repository's conventions.
-
