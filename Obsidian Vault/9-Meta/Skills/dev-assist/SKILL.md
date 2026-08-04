@@ -1,9 +1,8 @@
 ---
 name: dev-assist
 description: >
-  Use when Codex is about to write, debug, refactor, review, or otherwise
-  touch source code, including coding tasks based on specs, pasted errors,
-  or requested implementation changes.
+  Use only when the user explicitly invokes $dev-assist, /dev-assist, or
+  asks to use dev-assist by name. Do not use automatically for coding tasks.
 visibility: public
 area: meta
 ---
@@ -14,9 +13,9 @@ conventions, and pitfalls inform the implementation.
 
 ## Trigger
 
-Use for substantive coding, debugging, refactoring, review, feature work, or
-technical spec writing. Skip pure knowledge questions, trivial doc edits, and
-vault maintenance.
+Trigger only when the user explicitly invokes `$dev-assist`, `/dev-assist`, or
+asks to use dev-assist by name. Do not auto-trigger for coding, debugging,
+refactoring, review, feature work, technical specs, or pasted errors.
 
 ## Vault
 

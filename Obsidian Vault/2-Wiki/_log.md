@@ -51,3 +51,7 @@ visibility: public
 - 简化 dev-assist frontmatter description，仅保留触发条件。
 - 将短英文 token 噪声降权写入 Phase 2 排序规则。
 - 新增 miss lesson 记录机制，用于持续调优 token、domain mapping 与页面关键词。
+
+## [2026-08-04] update | dev-assist 改为显式调用
+
+将 dev-assist 从普通编码任务自动触发，收窄为仅在用户明确调用或按名称请求时启用。
