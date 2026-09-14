@@ -55,3 +55,7 @@ visibility: public
 ## [2026-08-04] update | dev-assist 改为显式调用
 
 将 dev-assist 从普通编码任务自动触发，收窄为仅在用户明确调用或按名称请求时启用。
+
+## [2026-09-14] capture | FastCtx部署与用途
+
+- 新增 [[FastCtx部署与用途]]，保留部署方式、解决的问题及首帖来源，并更新 AI与Agent 索引。
