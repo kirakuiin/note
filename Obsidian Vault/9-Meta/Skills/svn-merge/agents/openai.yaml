@@ -1,0 +1,4 @@
+interface:
+  display_name: "SVN 合并"
+  short_description: "安全执行 SVN 分支同步、版本推导和冲突记录管理"
+  default_prompt: "使用 $svn-merge 安全执行 SVN 分支合并：先切到 HTTPS，推导候选版本并 dry-run，确认后再真实合并；正式分支提交日志必须写 finish/refs #单号，禁止 auto commit:。"

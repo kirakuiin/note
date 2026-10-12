@@ -12,7 +12,7 @@ Agent 可调用的 skill 集合。每个 skill 是一个子目录，至少含 `S
 
 ## Vault 自有 skill
 
-本 vault 业务流程相关，仅供本 vault 的 agent 使用。
+本 vault 业务流程相关。与其他 skill 一样全局暴露（见下方「暴露方式」），但主要服务于本 vault 的工作流。
 
 | Skill | 文件 | 用途 |
 |---|---|---|
@@ -26,7 +26,7 @@ Agent 可调用的 skill 集合。每个 skill 是一个子目录，至少含 `S
 
 ## 外部系统 skill
 
-由 [CodeMaker](https://codemaker.app) 等 AI 助手通用调用。这些 skill 在本目录维护，并通过 junction/symbolic-link 暴露给 `%USERPROFILE%\.codemaker\skills\<name>`。**修改文件后无需重建 link**（link 是路径级，不是文件级）。
+由 Codex、Claude Code 等 AI 助手通用调用。这些 skill 在本目录维护，按「暴露方式」链接到各工具的全局 skill 目录。
 
 ### 来自 [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills)
 
@@ -40,13 +40,28 @@ Agent 可调用的 skill 集合。每个 skill 是一个子目录，至少含 `S
 
 ### 自定义
 
-跨 cwd 可用（通过 junction 暴露给 codemaker）。
+跨 cwd 可用（通过 junction 暴露给 Codex 与 Claude Code）。
 
 | Skill              | 文件                                          | 用途                          |
 | ------------------ | ------------------------------------------- | --------------------------- |
 | `coding-guideline` | [[9-Meta/Skills/coding-guideline/SKILL.md]] | Karpathy 编码守则，减少 LLM 编码常见错误 |
 | `work-summary`     | [[9-Meta/Skills/work-summary/SKILL.md]]     | 把 AI 交互内容总结为日报/周报/月报/年报     |
 | `markitdown`       | [[9-Meta/Skills/markitdown/SKILL.md]]       | 将部分ai无法识别的格式转为md格式          |
+
+## 暴露方式
+
+本目录是自管 skill 的唯一实体位置（2026-10-12 起），Codex 与 Claude Code 各自的全局目录只放指向这里的目录 junction，任一工具目录出问题不影响另一边：
+
+```powershell
+New-Item -ItemType Junction -Path "$env:USERPROFILE\.codex\skills\<name>" -Target "C:\Users\wangzhuowei\note\Obsidian Vault\9-Meta\Skills\<name>"
+New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\<name>" -Target "C:\Users\wangzhuowei\note\Obsidian Vault\9-Meta\Skills\<name>"
+```
+
+- 新增 skill：放进本目录后，两边各建一个 junction。
+- 修改 skill：直接改本目录，无需重建 link（link 是路径级，不是文件级）。
+- 删除 skill：删本目录实体，并删掉两边的 junction；不要通过 junction 路径删除文件（会删到实体）。
+- 由其他工具直接安装到 `.codex\skills` / `.claude\skills` 的 skill（如 popo-cli 安装的 popo/km/pm 系列）不在本目录管理。
+- 完整约定同时写在 `%USERPROFILE%\.codex\AGENTS.md` 与 `%USERPROFILE%\.claude\CLAUDE.md` 的「Skill 安装」一节。
 
 ## 安装新 obsidian-skills
 

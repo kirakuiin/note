@@ -1,0 +1,5 @@
+# PopoMgr MongoDB is 3.2; pymongo 4.x handshake gets dropped, so pin to 3.x.
+# Keep this file ASCII-only: pip reads it with the system locale (GBK on Windows).
+# Install with: python -m pip install -r requirements.txt
+pymongo>=3.12,<4
+requests>=2.25
