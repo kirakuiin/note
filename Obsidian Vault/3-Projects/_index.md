@@ -12,3 +12,4 @@ visibility: public
 
 - [[3-Projects/项目总结/_index|项目总结]]（多个项目复盘文档集合）
 - [[3-Projects/代号α/_index|代号α]]（个人卡牌游戏设计，paused）
+- [[3-Projects/桌游档案/_index|桌游档案]]（按游戏整理规则、实现规格与来源资料）
