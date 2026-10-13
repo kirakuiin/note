@@ -38,7 +38,7 @@
 
 | 场景 | 先读取 |
 | --- | --- |
-| 设计、新增、修改、重构或审查代码 | `engineering-principles.md` |
+| 解释代码流程、设计、新增、修改、重构或审查代码 | `engineering-principles.md` |
 | 代码修改完成、交付之前（审查循环，决定是否需要审查） | `code-review.md` |
 | Mock、调试、debug、运行时探测、自测、确认客户端操作是否报错（委派给子代理时也要把此文件交给它） | `game-debugging.md` |
 | 覆盖率的创建、设置、跑测、补测、查询、提交、删除 | `coverage.md`，客户端操作同时遵循 `game-debugging.md` |
