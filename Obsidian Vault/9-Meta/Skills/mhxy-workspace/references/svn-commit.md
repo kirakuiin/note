@@ -1,6 +1,6 @@
 # SVN 提交
 
-交付时生成提交说明和待提交文件清单。用户明确确认后，agent 可以通过 openforge 的 `svn` 工具代为提交（见「提交」）；不用 shell 里的 `svn commit`，本机的 SVN 防护 hook 会拦截。用户不确认或 openforge 不可用时，由用户自己提交。
+交付时生成提交说明和待提交文件清单。用户明确确认后，agent 按「提交」选择本地 Python 脚本或 openforge 代为提交，不手写 shell `svn commit` 命令。
 
 ## 何时提供
 
@@ -118,9 +118,36 @@ python "<skill>/scripts/precommit.py" --root "<项目根目录>"
 
 只有用户针对**本次**的提交说明和待提交文件明确同意（例如“提交吧”）后才执行。交付、自检通过或以前的同意都不算确认；确认之后说明或清单又有变化（重新修改代码、增减文件、改说明），要重新确认。
 
-只用 openforge MCP 的 `svn` 工具。Claude Code 下它可能是延迟加载的，先用 ToolSearch 搜索 `openforge svn` 并加载定义；搜不到就说明未接入，请用户自己提交。
+### 选择入口
 
-1. **新文件**：清单中需要加入版本控制的文件，用 `command: "add"`、`paths` 传这些文件。
+- **trunk、周期分支**：使用本技能的 `scripts/svn_commit.py`，由 Python 直接调用本机 `svn.exe`。按实际 SVN URL 识别 `trunk` 及 `_ship` 下的已知周期分支，类型复用 `workspace.py` 的 `PERIODIC_TYPES`（如 test、release、release2、zlp、newbie）；同时支持直接类型名与带日期的名称。不要先试 openforge 的提交接口，也不要改写已确认的 `finish` 说明来适应它的旧格式校验。
+- **研发分支**：继续使用 openforge MCP 的 `svn` 工具。Claude Code 下可能需要先用 ToolSearch 加载 `openforge svn`；不可用时说明未接入，由用户自己提交。
+
+### 本地 Python 脚本
+
+仅处理工作副本根目录内明确列出的文件。支持修改、新增、删除和文件属性修改；拒绝目录、跨工作副本或已切换的文件、本地辅助文件和导表数据。新文件的父目录必须已受版本控制。本脚本不执行更新、合并、relocate、冲突处理或自动重试。
+
+1. 把已确认的**完整说明**写到临时 UTF-8 文本文件。脚本校验首行 `finish #工单号 描述`，不会拼接或改写说明。
+2. **只读预览**（以下文件名仅作例子，以本次确认的清单为准）：
+
+```text
+python "<skill>/scripts/svn_commit.py" --root "<项目根目录>" --message-file "<UTF-8说明文件>" --path "gameplay/ui_msg/example.py" --path "spec/bugfix/example.md"
+```
+
+核对返回的 `branch.url`、`message`、`entries` 和 `changed_count`。必须与确认的分支、说明、文件清单及数量一致；`will_add` 只包含确认清单中的新文件，预览不会添加它们。
+
+3. **提交**：使用完全相同的参数，仅追加 `--apply`。脚本只添加清单内的新文件，再以 UTF-8 消息文件提交，随后读取**指定的新修订**，核验完整日志与实际变更路径集合。
+4. `committed: true` 且 `verified: true` 时报告新版本号；两个字段分别表示“已提交”和“日志与路径核验通过”，不能混用。
+
+失败处理：
+- `committed: false`：未发起提交；如果新文件已添加，保留并说明其本地状态。
+- `committed: null`：提交结果不明，先只读查询仓库日志确认结果，不重复提交。
+- `committed: true` 但 `verified: false`：已提交，报告版本号与核验错误，先核对仓库日志，不重复提交。
+- 冲突、版本过旧等错误：报告错误原文，不自动 update、resolve 或重试。
+
+### openforge（研发分支）
+
+1. **新文件**：用 `command: "add"`、`paths` 传清单中的新文件。
 2. **预览**：`command: "commit"`、`dry_run: true`，参数与正式提交完全相同。核对返回的 `message` 与确认的说明一致，`status.entries` 中每个路径都是本次要提交的改动，且 `changed_count` 等于清单中的文件数。
 3. **提交**：去掉 `dry_run` 再执行一次。返回 `committed` 为 true 时，把新版本号告诉用户。
 
@@ -130,7 +157,7 @@ python "<skill>/scripts/precommit.py" --root "<项目根目录>"
 - `paths`：**必须**显式列出清单中的每个文件（相对 `workcopy`）。不传时会提交工作副本中的全部改动：`ignore-on-commit` 只是 TortoiseSVN 提交对话框里默认不勾选，命令行提交不认它，入口文件和导表数据都会被一起提交。
 - 不要不带 `paths` 调用 `command: "status"`：整个工作副本的输出可能过大，导致 MCP 连接断开。查看状态用「提交前自检」的脚本。
 
-失败处理：
+openforge 失败处理：
 - 冲突、版本过旧（out of date）等错误：报告错误原文，不要自动 update、resolve 或重试。
 - 结果不明（例如连接中断）：先用 `command: "log"`（`limit` 取几条）确认是否已经提交，不要直接重复提交。
 - 删除的文件（自检中状态为 `deleted`）可以随清单一起提交；状态为缺失（`missing`）的文件属于阻断问题，先由用户处理。

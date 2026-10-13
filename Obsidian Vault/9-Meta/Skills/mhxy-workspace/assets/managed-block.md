@@ -54,5 +54,5 @@
 ### 边界
 - 配置文件、本区段、追踪文件和索引只由 skill 脚本写入。
 - `.mhxy-workspace/` 是可清理的本地辅助目录，不放业务数据。
-- 初始化、配置更新和清理只在用户明确要求时执行。用户确认分支检出或复用后，可按 `branch.md` 执行 checkout、cleanup、switch，以及删除与目标不在同一仓库的旧资源工作副本；用户确认本次提交说明和文件清单后，可按 `svn-commit.md` 通过 openforge 提交；其他流程不执行 SVN 写操作。入口文件放入本地 `ignore-on-commit` 变更列表不影响服务器。
+- 初始化、配置更新和清理只在用户明确要求时执行。用户确认分支检出或复用后，可按 `branch.md` 执行 checkout、cleanup、switch，以及删除与目标不在同一仓库的旧资源工作副本；用户确认本次提交说明和文件清单后，可按 `svn-commit.md` 指定的入口提交；其他流程不执行 SVN 写操作。入口文件放入本地 `ignore-on-commit` 变更列表不影响服务器。
 <!-- mhxy-workspace:end -->
