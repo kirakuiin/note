@@ -127,3 +127,14 @@ def test_release_requires_terminal_state_and_explicit_restoration(tmp_path, caps
     with patch.object(sys, "argv", ["cli_testing", "release", "--job", str(tmp_path), "--restored"]):
         assert c.main() == 0
     assert not lock.exists()
+
+
+@pytest.mark.skipif(c.os.name != "nt", reason="Windows 控制台创建标志")
+def test_cli_child_has_no_console_window(tmp_path):
+    c.write_json(tmp_path / "state.json", {"status": "starting"})
+    (tmp_path / "prompt.txt").write_text("probe", encoding="utf-8")
+    with patch.object(c.subprocess, "Popen", side_effect=OSError("probe")) as launch:
+        c.monitor(tmp_path, ["node.exe"], idle_seconds=.1)
+    flags = launch.call_args.kwargs["creationflags"]
+    assert flags & c.subprocess.CREATE_NO_WINDOW
+    assert flags & c.subprocess.CREATE_NEW_PROCESS_GROUP

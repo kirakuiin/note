@@ -158,7 +158,8 @@ def monitor(job, command, idle_seconds=IDLE_SECONDS):
             process = subprocess.Popen(command, stdin=prompt, stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE, cwd=job,
                                        start_new_session=os.name != "nt",
-                                       creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0)
+                                       creationflags=(subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW)
+                                       if os.name == "nt" else 0)
         state["cli_pid"] = process.pid
         state["last_output_at"] = time.time()
         write_json(job / "state.json", state)
