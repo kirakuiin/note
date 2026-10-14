@@ -38,9 +38,11 @@
 
 | 场景 | 先读取 |
 | --- | --- |
+| 需求核对，或方案、取舍需要用户判断 | 使用 `grilling` 技能；先调查可查事实，再提出需用户判断的问题。沿用用户指定的提问节奏，不重复已确认事项 |
+| GPT 顶层主会话：规划并委派已授权的 Mock、自测、跑测及覆盖率测试任务 | `cli-testing.md`；客户端操作同时遵循 `game-debugging.md`，覆盖率同时读取 `coverage.md` |
 | 解释代码流程、设计、新增、修改、重构或审查代码 | `engineering-principles.md` |
 | 代码修改完成、交付之前（审查循环，决定是否需要审查） | `code-review.md` |
-| Mock、调试、debug、运行时探测、自测、确认客户端操作是否报错（委派给子代理时也要把此文件交给它） | `game-debugging.md` |
+| Mock、调试、debug、运行时探测、自测、确认客户端操作是否报错（委派执行时也要提供此文件） | `game-debugging.md` |
 | 覆盖率的创建、设置、跑测、补测、查询、提交、删除 | `coverage.md`，客户端操作同时遵循 `game-debugging.md` |
 | 获取当前任务，追踪、追加、替换或取消追踪工单 | `task-tracking.md` |
 | 更新 SVN 工作副本 | `svn-update.md` |
