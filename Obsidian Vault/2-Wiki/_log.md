@@ -94,3 +94,7 @@ visibility: public
 
 - 正式及周期分支改用 Python 直接调用 svn.exe，保留提交说明与文件清单确认、只读预览、UTF-8 日志和提交后核验。
 - 新增隔离测试及临时 SVN 仓库集成验证，版本升级到 0.3.16；研发分支继续使用 openforge。
+
+## [2026-10-15] rule | AGENTS 新增 skill 目录例外
+
+- `9-Meta/AGENTS.md` 新增 8.3.2：`9-Meta/Skills/<skill>/` 按代码仓库维护，不走 obsidian-cli、不要求 frontmatter、不记 _log；公私红线仍然有效。

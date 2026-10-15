@@ -263,6 +263,15 @@ Agent 在创建新页时：
 用 `edit` 工具修复 `_log.md` 中反引号被 cmd 多层 shell 转义成 `` \` `` 的瑕疵，`unresolved` 持平 185。说明此类纯字面修复确实不破坏索引，强制走 cli 是过度保守。
 甚至本节自身的引入也踩了同一个坑：用 `obsidian eval` 写本节时反斜杠被吃，改用 `edit` 工具二次修复——**元层印证**了规则的合理性。
 
+### 8.3.2 例外：`9-Meta/Skills/<skill>/` 按代码仓库维护
+
+各 skill 子目录（`9-Meta/Skills/<skill>/` 下的全部文件）是给 agent 加载的代码和文档，不是笔记：
+
+- 用通用文件工具（read / edit / write / 脚本）直接新建、修改、移动、删除，不走 `obsidian-cli`，不需要先跑 `obsidian version` / `obsidian unresolved`
+- 其中的 `.md` 不要求 `area` / `visibility` 等 frontmatter，不受 TAGS 词表约束；`SKILL.md` 的 frontmatter 按各 agent 工具的 skill 规范写
+- 不写 `_log.md`（skill 自己的变更记录放在 skill 内，例如 `specs/`）
+- 仍然有效：公私红线（不得引用 `Netease/` 路径），以及 `9-Meta/Skills/_index.md` 本身按普通 vault 文件处理
+
 ### 8.4 Skill 缺失时的行为
 
 - 该 skill 在当前会话未注册（`use_skill` 报错）→ **停下并提示用户先 enable / install**，不得跳过 skill 直接手写
