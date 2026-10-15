@@ -2,11 +2,14 @@
 """提交前自检：只读检查工作副本的待提交内容，输出 JSON。
 
 规则说明见 references/svn-commit.md「提交前自检」，本脚本只做其中可确定判断的部分：
-提交范围分类、冲突与缺失、Python 编码和语法、新增行中的调试残留。不执行任何 SVN 写操作。
+提交范围分类、冲突与缺失、Python 编码和语法、新增行中的调试残留、review 之后的改动。不执行任何 SVN 写操作。
+--mark-reviewed 只记录 review 指纹到个人目录，不做自检。
 
 退出码：0 没有阻断问题；2 有阻断问题；1 自检本身失败（如 svn 不可用）。
 """
 import argparse
+from datetime import datetime
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -26,10 +29,22 @@ BLOCKING_ITEMS = {"conflicted", "missing", "obstructed", "incomplete"}
 SOURCE_SUFFIXES = (".py", ".tmpl")  # 与项目编码检查工具的默认扫描范围一致。
 ENCODING_TOOL = "tools/check_py_source_encoding.py"
 # 新增行中的疑似调试残留：(模式, 说明)。只给警告，由主线程判断是否属于正常代码。
+# Mock／追踪器只认 game-debugging.md「Mock 与验证」和 exec-check 的注入写法，不误报普通的回调赋值。
 LEFTOVERS = ((re.compile(r"\bpdb\b|\bbreakpoint\(\)"), "调试断点"),
              (re.compile(r"^\s*print\("), "新增 print"),
-             (re.compile(r"mh_at_[0-9a-f]{32}"), "写死的设备 ID"))
+             (re.compile(r"mh_at_[0-9a-f]{32}"), "写死的设备 ID"),
+             (re.compile(r"\b(?:sys|threading)\.(?:settrace|setprofile)\s*\("), "追踪器残留"),
+             (re.compile(r"\b(?:exec_check_start|error_watch_start|error_watch_finish)\b|_error_watch_collector"),
+              "自检模板残留"),
+             (re.compile(r"\bunittest\.mock\b|^\s*(?:from\s+mock\s+import|import\s+mock\b)|\bmock\.patch\b"
+                         r"|\bpatch\.object\(|\bMagicMock\b"), "Mock 残留"),
+             # 用 lambda *a, **k 整体替换模块或类的属性；self.／cls. 上的赋值是正常写法，不算。
+             (re.compile(r"^\s*(?!self\.|cls\.)[A-Za-z_]\w*(?:\.\w+)+\s*=\s*lambda\s*\*"
+                         r"|\bsetattr\([^,]+,[^,]+,\s*lambda\b"), "疑似 monkey patch"),
+             (re.compile(r"^\s*_*orig(?:inal)?_\w*\s*=\s*(?!self\.|cls\.)[A-Za-z_]\w*(?:\.\w+)+\s*$"),
+              "疑似 Mock 保存的原函数"))
 LIST_LIMIT = 50  # 每类路径最多列出的数量，避免输出过长。
+REVIEW_MARK = "review-mark.json"  # 位于个人目录，记录 review 通过时各文件的指纹。
 
 
 class PrecheckError(Exception):
@@ -248,6 +263,61 @@ def check_leftovers(root, entries):
     return warnings
 
 
+def review_fingerprints(root, entries):
+    """可能提交的各文件指纹：{相对路径: "状态/属性状态:内容 sha256"}。
+
+    范围与 classify 列出的改动相同（不含本地辅助文件、导表数据和 ignore-on-commit）；
+    未纳管目录展开为其中的文件，已删除或缺失的文件内容记为 "-"。
+    """
+    result = {}
+    for entry in entries:
+        item, props = entry["item"], entry.get("props")
+        if not in_scope(entry) or (item in ("external", "ignored", "normal", "none")
+                                   and props not in ("modified", "conflicted")):
+            continue
+        path = root / entry["path"]
+        if item == "unversioned" and path.is_dir():
+            files = [(p, p.relative_to(root).as_posix()) for p in path.rglob("*") if p.is_file()]
+        else:
+            files = [(path, entry["path"])]
+        for file, relative in files:
+            digest = hashlib.sha256(file.read_bytes()).hexdigest() if file.is_file() else "-"
+            result[relative] = f"{item}/{props}:{digest}"
+    return result
+
+
+def mark_reviewed(root_arg):
+    """记录 review 通过时的指纹到个人目录的 review-mark.json，覆盖旧记录。"""
+    root = Path(root_arg).resolve()
+    workspace.require_initialized(root)  # 不在未初始化的目录里新建个人目录
+    files = review_fingerprints(root, svn_status(root))
+    marked_at = datetime.now().astimezone().isoformat(timespec="seconds")
+    path = root / workspace.DIRECTORY / REVIEW_MARK
+    workspace.apply_changes([(path, workspace.read_bytes(path),
+                              workspace.json_bytes({"marked_at": marked_at, "files": files}))])
+    return {"root": str(root), "review_mark": marked_at, "files": len(files), "path": str(path)}
+
+
+def review_delta(root, entries):
+    """与 review 记录比较：返回 (记录时间或 None, review 后变化的文件, 警告)。
+
+    变化包括内容或状态不同、记录后新出现的改动，以及记录中有、现在已没有改动的文件。
+    """
+    path = root / workspace.DIRECTORY / REVIEW_MARK
+    try:
+        raw = workspace.read_bytes(path)
+        if raw is None:
+            return None, [], []
+        mark = workspace.parse_json(raw, path)
+        if not isinstance(mark.get("marked_at"), str) or not isinstance(mark.get("files"), dict):
+            raise workspace.WorkspaceError(f"结构无效：{path}")
+    except (workspace.WorkspaceError, OSError) as error:
+        return None, [], [f"review 记录无法读取，按没有记录处理：{error}"]
+    current, old = review_fingerprints(root, entries), mark["files"]
+    changed = sorted(name for name in current.keys() | old.keys() if current.get(name) != old.get(name))
+    return mark["marked_at"], changed, []
+
+
 def precheck(root_arg):
     """执行全部自检并返回结果字典（见模块说明）。"""
     root = Path(root_arg).resolve()
@@ -256,12 +326,14 @@ def precheck(root_arg):
     blocking, warnings, method = check_sources(root, source_files(root, entries))
     result["blocking"] += blocking
     result["warnings"] = warnings + check_leftovers(root, entries)
+    result["review_mark"], result["changed_since_review"], mark_warnings = review_delta(root, entries)
+    result["warnings"] += mark_warnings
     if result["property_changes"]:
         result["warnings"].append("有属性改动（可能是外链更新）：建议与代码分开提交，并在说明末尾加 [NO MERGE]")
     if result["excluded_data"]:
         result["warnings"].append("导表数据默认不提交，已从待提交清单排除，请自行处理")
     for key in ("commit", "excluded_local_only", "excluded_data", "ignore_on_commit", "unversioned", "property_changes",
-                "warnings"):
+                "changed_since_review", "warnings"):
         if len(result[key]) > LIST_LIMIT:
             result[key] = result[key][:LIST_LIMIT] + [f"……另有 {len(result[key]) - LIST_LIMIT} 项未列出"]
     return {"root": str(root), "branch": workspace.svn_branch(root), "source_check": method, **result}
@@ -273,8 +345,13 @@ def main():
             stream.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", default=".")
+    parser.add_argument("--mark-reviewed", action="store_true",
+                        help="只记录当前改动的 review 指纹（写 .mhxy-workspace/review-mark.json），不做自检")
     args = parser.parse_args()
     try:
+        if args.mark_reviewed:
+            print(json.dumps(mark_reviewed(args.root), ensure_ascii=False, indent=2))
+            return 0
         result = precheck(args.root)
     except (PrecheckError, workspace.WorkspaceError, OSError, ElementTree.ParseError,
             subprocess.SubprocessError) as error:

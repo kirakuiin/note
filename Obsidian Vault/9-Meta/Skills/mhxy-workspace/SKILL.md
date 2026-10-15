@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 为梦幻西游项目工作区安装本地工作约定，同时支持 Codex 和 Claude Code。只在用户明确要求**初始化、更新配置或清理**时执行。日常开发依靠入口文件里的规则，不需要调用本 skill。
 
-当前目录就是项目根目录，不要向上寻找仓库；用户明确指定其他目录时（例如刚检出的分支）以该目录为准，所有命令的 `--root` 都传该目录。工作区脚本只需要 Python 3.10+ 标准库；CLI 测试管理脚本需要 Python 3.11+。下文 `<skill>` 指本 skill 的安装目录。
+当前目录就是项目根目录，不要向上寻找仓库；用户明确指定其他目录时（例如刚检出的分支）以该目录为准，所有命令的 `--root` 都传该目录。工作区脚本只需要 Python 3.10+ 标准库；Codex 委派脚本 `codex_cli.py` 需要 Python 3.11+。下文 `<skill>` 指本 skill 的安装目录。
 
 ## 初始化或更新配置
 
@@ -36,7 +36,7 @@ sync 会写入用户级配置、AGENTS.md 和 CLAUDE.md 的受管区段、Claude
 | 会话开始加载 context | 按入口规则运行命令 | SessionStart hook 自动注入 |
 | 禁止自动调用本 skill | `agents/openai.yaml` | 头部 `disable-model-invocation`，需用 `/mhxy-workspace` 手动调用 |
 | MCP 工具 | 直接可见 | 可能需要先用 ToolSearch 加载，见 game-debugging.md |
-| 设计／审查子代理 | 见 engineering-principles.md「独立子代理」 | 用 Plan 子代理，见同一节 |
+| 委派（调查、review、真机自检） | 原生子代理 investigator／reviewer／verifier，见 cli.md「Codex 主会话」 | `scripts/codex_cli.py`，见 cli.md「Claude 主会话」 |
 | 隐藏输入密码 | 取决于终端 | 命令工具没有交互终端，见 workspace-management.md「密码」 |
 
 ## 维护本 skill

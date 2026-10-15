@@ -142,6 +142,82 @@ class PrecommitTests(unittest.TestCase):
         self.assertEqual(sorted(warnings), ["gameplay/newdir/b.tmpl：新增 print：print('x')",
                                             "gameplay/newdir/sub/a.py：调试断点：breakpoint()"])
 
+    def test_mock_and_tracer_leftovers(self):
+        flagged = {
+            "sys.settrace(tracer)": "追踪器残留",
+            "threading.setprofile(f)": "追踪器残留",
+            "[error_watch_start(), exec_check_start(TARGETS, CASES)]": "自检模板残留",
+            "from unittest.mock import patch": "Mock 残留",
+            "import mock": "Mock 残留",
+            "with mock.patch('a.b'):": "Mock 残留",
+            "obj = MagicMock()": "Mock 残留",
+            "gameplay.chat.send = lambda *a, **k: None": "疑似 monkey patch",
+            "setattr(module, 'send', lambda *a: None)": "疑似 monkey patch",
+            "_orig_send = gameplay.chat.send": "疑似 Mock 保存的原函数",
+        }
+        normal = ["self.callback = lambda *args: self.close()", "btn.onClick = lambda: self.close()",
+                  "self.settrace_enabled = True", "old_pos = role.pos", "orig_x = self.x", "mocked = 1"]
+        self.write("gameplay/new.py", "\n".join([*flagged, *normal]) + "\n")
+        warnings = p.check_leftovers(self.root, [{"path": "gameplay/new.py", "item": "unversioned"}])
+        self.assertEqual(len(warnings), len(flagged), warnings)
+        for line, label in flagged.items():
+            self.assertIn(f"gameplay/new.py：{label}：{line}", warnings)
+        # 个人目录下的用例脚本不在扫描范围内。
+        self.write(".mhxy-workspace/exec-check/case.py", "sys.settrace(None)\n")
+        self.assertEqual(p.check_leftovers(self.root, [{"path": ".mhxy-workspace", "item": "unversioned"}]), [])
+
+    def status(self, path, item, props="none", changelist=None):
+        return {"path": path, "item": item, "props": props, "tree_conflict": False, "changelist": changelist}
+
+    def test_review_mark_and_changes_since_review(self):
+        self.write("gameplay/a.py", "a = 1\n")
+        self.write("gameplay/b.py", "b = 1\n")
+        self.write("gameplay/newdir/c.py", "c = 1\n")
+        self.write("data/t.py", "t = 1\n")
+        entries = [self.status("gameplay/a.py", "modified"), self.status("gameplay/b.py", "added"),
+                   self.status("gameplay/newdir", "unversioned"), self.status("old.py", "deleted"),
+                   self.status("data/t.py", "modified"), self.status(".mhxy-workspace", "unversioned"),
+                   self.status("gameplay/local.py", "modified", changelist="ignore-on-commit"),
+                   self.status("prot", "external")]
+        self.assertEqual(p.review_delta(self.root, entries), (None, [], []))
+        with patch.object(p, "svn_status", return_value=entries), \
+                patch.object(p.workspace, "require_initialized") as initialized:
+            marked = p.mark_reviewed(self.root)
+        initialized.assert_called_once_with(self.root)
+        self.assertEqual(marked["files"], 4)
+        mark = json.loads((self.root / ".mhxy-workspace" / p.REVIEW_MARK).read_text(encoding="utf-8"))
+        self.assertEqual(sorted(mark["files"]), ["gameplay/a.py", "gameplay/b.py", "gameplay/newdir/c.py", "old.py"])
+        self.assertEqual(p.review_delta(self.root, entries), (marked["review_mark"], [], []))
+        # 改内容、改状态、新增改动、改动消失、范围外的改动不算。
+        self.write("gameplay/a.py", "a = 2\n")
+        self.write("data/t.py", "t = 2\n")
+        self.write("gameplay/newdir/d.py", "d = 1\n")
+        self.write("gameplay/e.py", "e = 1\n")
+        later = [self.status("gameplay/a.py", "modified"), self.status("gameplay/b.py", "modified"),
+                 self.status("gameplay/newdir", "unversioned"), self.status("gameplay/e.py", "unversioned"),
+                 self.status("data/t.py", "modified")]
+        _, changed, warnings = p.review_delta(self.root, later)
+        self.assertEqual(changed, ["gameplay/a.py", "gameplay/b.py", "gameplay/e.py", "gameplay/newdir/d.py",
+                                   "old.py"])
+        self.assertEqual(warnings, [])
+        with patch.object(p, "svn_status", return_value=later), \
+                patch.object(p.workspace, "svn_branch", return_value=None):
+            result = p.precheck(self.root)
+        self.assertEqual((result["review_mark"], result["changed_since_review"]), (marked["review_mark"], changed))
+        self.assertEqual(result["blocking"], [])
+        (self.root / ".mhxy-workspace" / p.REVIEW_MARK).write_text("[]")
+        marked_at, changed, warnings = p.review_delta(self.root, later)
+        self.assertEqual((marked_at, changed), (None, []))
+        self.assertIn("review 记录无法读取", warnings[0])
+
+    def test_mark_reviewed_cli_requires_initialized_workspace(self):
+        with patch.object(p, "svn_status", return_value=[]), \
+                patch.object(sys, "argv", ["precommit.py", "--root", str(self.root), "--mark-reviewed"]), \
+                contextlib.redirect_stderr(io.StringIO()) as stderr:
+            self.assertEqual(p.main(), 1)
+        self.assertIn("不是已初始化的工作区", json.loads(stderr.getvalue())["error"])
+        self.assertFalse((self.root / ".mhxy-workspace").exists())
+
     def test_cli_reports_workspace_errors_and_timeouts_as_json(self):
         for error in (p.workspace.WorkspaceError("文档编码无法处理"),
                       subprocess.TimeoutExpired(["python"], 300),

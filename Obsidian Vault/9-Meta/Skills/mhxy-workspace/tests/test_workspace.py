@@ -1,6 +1,8 @@
 """Isolated standard-library tests; never use the real home configuration."""
 import codecs
+import contextlib
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
@@ -867,6 +869,52 @@ class WorkspaceTests(unittest.TestCase):
                 patch.object(sys.stdin, "isatty", return_value=True), patch.object(sys.stderr, "isatty", return_value=False):
             self.assertEqual(w.main(), 1)
         prompt.assert_not_called()
+
+    def run_main(self, *argv):
+        stderr, stdout = io.StringIO(), io.StringIO()
+        with patch.object(sys, "argv", ["workspace.py", *argv]), contextlib.redirect_stderr(stderr), \
+                contextlib.redirect_stdout(stdout):
+            code = w.main()
+        return code, stdout.getvalue(), stderr.getvalue()
+
+    def test_track_and_coverage_task_require_initialized_workspace(self):
+        common = ["--root", str(self.root), "--global-config", str(self.global_config)]
+        commands = (["track", "--issue-id", "123", "--apply"], ["untrack", "--issue-id", "123", "--apply"],
+                    ["coverage-task", "--branch", "branchs/dev/x", "--task-name", "t", "--redmine-id", "1",
+                     "--coder-name", "dev", "--apply"])
+        for command in commands:
+            with self.subTest(command=command[0]):
+                code, _, stderr = self.run_main(*command, *common)
+                self.assertEqual(code, 1)
+                self.assertIn("不是已初始化的工作区", json.loads(stderr)["error"])
+        self.assertFalse(self.personal.exists())
+        self.initialize()
+        code, stdout, stderr = self.run_main(*commands[2], *common)
+        self.assertEqual(code, 0, stderr)
+        self.assertEqual(len(w.read_tracking(self.personal)[2]["coverage_tasks"]), 1)
+
+    def test_clean_refuses_running_or_unreleased_codex_jobs(self):
+        self.initialize()
+        jobs = self.personal / w.CODEX_JOBS
+        cases = (({"status": "starting", "kind": "review"}, "starting"),
+                 ({"status": "running", "kind": "investigate"}, "running"),
+                 ({"status": "completed", "kind": "test", "released": False}, "release"),
+                 ({"status": "failed", "kind": "test"}, "release"))
+        for state, message in cases:
+            with self.subTest(state=state):
+                shutil.rmtree(jobs, ignore_errors=True)
+                (jobs / "job1").mkdir(parents=True)
+                (jobs / "job1" / "state.json").write_text(json.dumps(state))
+                before = self.snapshot()
+                for apply in (False, True):
+                    with self.assertRaisesRegex(w.WorkspaceError, message):
+                        w.clean(self.root, self.global_config, apply)
+                self.assertEqual(before, self.snapshot())
+        (jobs / "job1" / "state.json").write_text(json.dumps({"status": "completed", "kind": "test", "released": True}))
+        (jobs / "job2").mkdir()
+        (jobs / "job2" / "state.json").write_text(json.dumps({"status": "cancelled", "kind": "review"}))
+        w.clean(self.root, self.global_config, True)
+        self.assertEqual(list(self.personal.iterdir()), [])
 
     def test_legacy_name_updates_in_place(self):
         self.initialize()

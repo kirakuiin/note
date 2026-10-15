@@ -48,6 +48,8 @@ PERIODIC_NAME = re.compile(rf"^{_PERIODIC_NAME}$")
 PERIODIC_BRANCH = re.compile(rf"/wzimage/branchs/\d{{4}}_ship/{_PERIODIC_NAME}/?$")
 INDEX_SUMMARY_LIMIT = 60  # 索引中每篇 spec 摘要的最大字符数。
 HOOK_FLAG = "--from-hook"  # 标识本 skill 写入 Claude Code 设置的 hooks（context 与 index）。
+CODEX_JOBS = "codex-cli"  # codex_cli.py 在个人目录下的任务目录，每个任务一个子目录，含 state.json。
+CODEX_ACTIVE = ("starting", "running")  # 仍在运行、清理会破坏其输出的任务状态。
 
 
 class WorkspaceError(Exception):
@@ -1037,10 +1039,43 @@ def record_coverage_task(root_arg, global_arg, task, apply=False):
     return save_tracking(path, old, value, "coverage-task", apply)
 
 
+def busy_codex_jobs(personal):
+    """返回不能清理的 codex-cli 任务：仍在运行（starting／running），或 test 任务的设备尚未 release。
+
+    state.json 无法读取时也算在内，由用户核实后再清理。
+    """
+    jobs = personal / CODEX_JOBS
+    no_links(jobs)
+    if not jobs.is_dir():
+        return []
+    busy = []
+    for job in sorted(jobs.iterdir()):
+        state_path = job / "state.json"
+        try:
+            raw = read_bytes(state_path)
+            if raw is None:
+                continue
+            state = parse_json(raw, state_path)
+        except (WorkspaceError, OSError) as error:
+            busy.append(f"{job.name}（state.json 无法读取：{error}）")
+            continue
+        status = state.get("status")
+        if isinstance(status, str) and status.startswith(CODEX_ACTIVE):
+            busy.append(f"{job.name}（{status}）")
+        elif state.get("kind") == "test" and state.get("released") is not True:
+            busy.append(f"{job.name}（test 任务尚未 release）")
+    return busy
+
+
 def clean(root_arg, global_arg, apply=False):
+    """清空个人目录；codex-cli 有未结束或未 release 的任务时拒绝，不删除任何内容。"""
     root, personal, global_config = paths(root_arg, global_arg)
     if not exists(personal):
         return {"action": "clean", "applied": apply, "target": str(personal), "entries": []}
+    busy = busy_codex_jobs(personal)
+    if busy:
+        raise WorkspaceError("codex-cli 还有未结束或未 release 的任务，请先等待完成、取消或 release 后再清理："
+                             + "、".join(busy))
     identity = personal.stat()
     items = []
 
@@ -1163,14 +1198,16 @@ def main():
             result = configure_global(args.global_config, args.set_global, password, args.apply)
             password = None
         elif args.action == "coverage-task":
-            branch = args.branch or (svn_branch(Path(args.root)) or {}).get("path")
+            require_initialized(paths(args.root, args.global_config)[0])
+            branch =args.branch or (svn_branch(Path(args.root)) or {}).get("path")
             if not branch:
                 raise WorkspaceError("无法从 svn 推断分支，请用 --branch 传仓库相对路径（如 branchs/2026_dev/x）")
             result = record_coverage_task(args.root, args.global_config,
                 {"task_name": args.task_name, "branch": branch,
                  "redmine_id": args.redmine_id, "coder_name": args.coder_name, "created": True}, args.apply)
         elif args.action in ("track", "untrack"):
-            result = track_tasks(args.root, args.global_config, args.issue_id,
+            require_initialized(paths(args.root, args.global_config)[0])
+            result =track_tasks(args.root, args.global_config, args.issue_id,
                                  args.replace, args.action == "untrack", args.apply)
         else:
             result = clean(args.root, args.global_config, args.apply)
