@@ -22,6 +22,9 @@ import tempfile
 from urllib.parse import unquote
 from xml.etree import ElementTree
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import skill_links  # noqa: E402
+
 SKILL = Path(__file__).resolve().parents[1]
 NAME = "mhxy-workspace"
 LEGACY_NAME = "mhxy-workspace-init"
@@ -957,6 +960,8 @@ def record_hook_write(root_arg, global_arg, payload):
 def context(root_arg, global_arg):
     """会话开始时一次性加载：当前分支、脱敏配置、追踪工单、覆盖率身份、最近的 spec 和遗留的交接文件。
 
+    同时按 skill_links.repair 补建共享 skill 目录到全局 skill 目录的链接，补建过的列在
+    skill_links_repaired（Codex 要到新会话才加载这些 skill）。
     各部分独立读取，某部分失败只记入 problems，不影响其余部分。不创建配置或追踪文件；
     索引状态缺失（首次或清理后）时以当前时间为起点新建空名单。branch 为 None 表示
     svn 不可用或不是工作副本。
@@ -992,6 +997,13 @@ def context(root_arg, global_arg):
                                .astimezone().isoformat(timespec="seconds")} for path in files]
     except (WorkspaceError, OSError) as error:
         problems.append(f"交接文件：{error}")
+    try:
+        links = skill_links.repair()
+        if links["created"] or links["replaced"]:
+            result["skill_links_repaired"] = links["created"] + links["replaced"]
+        problems += [f"skill 链接：{problem}" for problem in links["problems"]]
+    except OSError as error:
+        problems.append(f"skill 链接：{error}")
     result["problems"] = problems
     return result
 

@@ -46,8 +46,15 @@ class WorkspaceTests(unittest.TestCase):
         self.branch = self.branch_patch.start()
         self.changelist_patch = patch.object(w, "svn_changelist", return_value=None)
         self.changelist = self.changelist_patch.start()
+        # context 会修复真实家目录下的 skill 链接；skill_links 有独立测试，这里一律不碰。
+        self.links_patch = patch.object(w.skill_links, "repair",
+                                        return_value={"created": [], "replaced": [], "problems": []})
+        self.links_patch.start()
+        # 子进程运行的 context 同样按家目录修复链接，指向临时目录。
+        self.home_env = {**os.environ, "USERPROFILE": str(self.base / "家"), "HOME": str(self.base / "家")}
 
     def tearDown(self):
+        self.links_patch.stop()
         self.changelist_patch.stop()
         self.branch_patch.stop()
         self.svn_patch.stop()
@@ -725,7 +732,8 @@ class WorkspaceTests(unittest.TestCase):
         script = self.skill / "scripts/workspace.py"
         for root in (self.root, self.base / "不存在"):
             completed = subprocess.run([sys.executable, str(script), "context", "--root", str(root),
-                                        "--global-config", str(self.global_config), w.HOOK_FLAG], capture_output=True)
+                                        "--global-config", str(self.global_config), w.HOOK_FLAG],
+                                       capture_output=True, env=self.home_env)
             self.assertEqual(completed.returncode, 0, completed.stderr)
             output = json.loads(completed.stdout)["hookSpecificOutput"]
             self.assertEqual(output["hookEventName"], "SessionStart")

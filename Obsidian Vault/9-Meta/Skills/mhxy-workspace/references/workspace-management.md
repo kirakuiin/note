@@ -36,8 +36,17 @@ python "<skill>/scripts/workspace.py" context --root "<项目>"
 
 - `sync`：初始化或更新工作区，可同时设置配置。
 - `config`：用 `--set-global` 只改用户级配置；用 `--root` 加 `--set-local` 只改工作区级配置。都不碰入口文件。
-- `context`：查看合并后的配置（已脱敏），以及追踪工单和索引状态。
+- `context`：查看合并后的配置（已脱敏），以及追踪工单和索引状态；同时修复 skill 链接，见下节。
 - 值写 `键=null` 表示不配置。
+
+## skill 链接自检
+
+本 skill 和同级的其他 skill 放在一个共享目录（如笔记库 `9-Meta/Skills/`），用目录联接（junction）链接进 `~/.claude/skills` 和 `~/.codex/skills`。这些链接曾被外部工具重置，所以每次 `context`（包括 SessionStart hook）都运行 `scripts/skill_links.py` 的检查：
+
+- 共享目录下每个含 `SKILL.md` 的子目录，在已安装工具（`~/.claude`、`~/.codex` 存在）的 skill 目录里都应有指向它的链接。缺失就新建，指向别处或已失效就替换；只删除链接本身，不碰任何目标目录。
+- 同名的普通目录或文件不替换，记入 `problems`，由用户处理。
+- 补建过的链接列在 context 的 `skill_links_repaired` 里。Claude Code 会在会话中途发现新链接的 skill，Codex 要到新会话才加载；告诉用户哪些链接补建了。
+- skill 直接装在工具的 skill 目录里（没有共享目录）时不做任何事。也可以单独运行 `python "<skill>/scripts/skill_links.py"` 检查和修复。
 
 **规则**
 - 配置文件只由脚本写入。不要手写 JSON，也不要直接输出配置原文。
