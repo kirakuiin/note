@@ -55,10 +55,10 @@ Claude 主会话在第 2、4、6 步完成后和开始另一项功能前检查�
 | 场景 | 先读取 |
 | --- | --- |
 | 需求或方案取舍真正需要用户决策 | 使用 `grilling` 技能；先调查可查事实，再提出需用户判断的问题。沿用用户指定的提问节奏，不重复已确认事项 |
-| 委派 Codex 调查、review 或真机自检（含已授权的 Mock、自测、覆盖率跑测；Claude 和 Codex 主会话都适用） | `cli.md`；客户端操作同时遵循 `game-debugging.md`，覆盖率同时读取 `coverage.md` |
+| 要实际操作客户端的测试：真机自检、用户临时要求的 Mock／跑测／自测、覆盖率跑测——一律委派执行（例外见 `game-debugging.md` 开头）；以及委派 Codex 调查、review。Claude 和 Codex 主会话都适用 | `cli.md`；覆盖率同时读取 `coverage.md` |
 | 解释代码流程、设计（讨论需求、方案流程图、spec）、新增、修改、重构或审查代码 | `engineering-principles.md` |
 | 代码修改完成、交付之前（是否需要 Codex review，审查循环） | `code-review.md` |
-| Mock、调试、debug、运行时探测、自测、确认某个客户端操作是否报错（委派执行时也要提供此文件；逐行检查未提交改动属于改动执行检查） | `game-debugging.md` |
+| 客户端操作规范（选设备、调用工具、收集报错、Mock 恢复）：测试执行者执行时读取；主线程只在例外情况下自己操作客户端时读取 | `game-debugging.md` |
 | 覆盖率的创建、设置、跑测、补测、查询、提交、删除 | `coverage.md`，客户端操作同时遵循 `game-debugging.md` |
 | 获取当前任务，追踪、追加、替换或取消追踪工单 | `task-tracking.md` |
 | 更新 SVN 工作副本 | `svn-update.md` |
