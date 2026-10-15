@@ -18,7 +18,10 @@
 - **先看实际工具定义，不要猜参数。**
 - **Claude Code**：MCP 工具名形如 `mcp__mh-game-mcp__execute_code`，可能是延迟加载的，不在初始工具列表里。判断“未接入”之前，先用 ToolSearch 搜索 `execute_code` 和 `init_client` 并加载定义，搜不到才算未接入。
 - **选工具**：
-  - 状态、UI、NPC、移动、背包等，优先用专用工具。
+  - 状态、UI、NPC、移动、背包等，优先用专用工具：
+    - UI：`get_ui_navigation` → `get_top_panel` → `get_panel_interactive_widgets`；改控件前先看 `get_ui_control_docs`，再 `set_ui_data`。
+    - NPC：`goto_npc`／`click_npc` → `get_npc_chat` → `click_option`／`answer_question`。
+    - 移动：`walk_to` 是异步的，用 `get_distance` 验证到达；`goto` 是跳转，不等于普通寻路。
   - 游戏指令用 `execute_command`；不确定指令时先用 `search_chat_cmd`。
   - 专用工具覆盖不了的探测、函数调用和 Mock，用 `execute_code`。
   - 客户端代码不要发给 MOS2 服务端工具。
@@ -68,6 +71,12 @@ python -X utf8 "<skill>/scripts/game-debugging/mcp_call.py" <工具名> < "<UTF-
 - 控件 ID、物品位置、NPC 序号都从当前状态获取。异步的移动、UI 操作和服务端指令，通过后续状态来验证。
 - 判断操作是否报错，以「收集客户端报错」的结果为主，日志文件只作补充。日志在对应客户端（`pc_client_dir` 或 `ht_client_dir`）的 `Log/` 下，文件名带进程号（`log_<pid>.txt`、`errorlog_<pid>.txt`）。同机多开时，几个客户端共用这个目录，先用 `execute_code` 取 `os.getpid()` 确认是哪个文件，只看操作前后的内容。
 - 交付时分别说明代码是否成功、客户端表现是否正确、服务端是否生效，并说明证据、未验证的范围和临时状态的恢复结果。用户明确要求保留的状态，按任务目标处理。
+
+## 服务端指令
+
+- 前缀：普通服 `$`，战斗服 `$%`，客户端 `$$`。服务端 `$call 文件->函数(...)` 中的 `$id` 是自己 uid 的占位符，不能改写成客户端 `$$call`。不要给已有前缀的指令重复拼接，也不要凭前缀猜执行权限。
+- 指令回显在聊天的 254 频道（`RECV_SYSTEM_MSG`）。
+- 改运行期变量（run_conf）：`$call 文件->wizcmd($id, "ls 变量")`／`"set 变量 值"`／`"reset_conf 变量"`。改之前记下原值和是否已被覆盖，测试结束恢复：原来是默认值就 `reset_conf`，原来有覆盖值就设回原值。update 不会清掉覆盖值，只有重启才恢复默认。
 
 ## 战斗测试
 

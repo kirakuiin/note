@@ -231,6 +231,11 @@ def submit(root_arg, paths, message_file, apply=False):
         if error:
             raise ValueError(error)
         result["revision"] = revision
+        try:
+            precommit.forget_reviewed(root, [entry["path"] for entry in result["entries"]])
+        except (workspace.WorkspaceError, OSError) as error:
+            # 已经提交成功，review 记录更新失败只作提醒。
+            result["warnings"] = [f"review 记录未能删除已提交的文件：{error}"]
         verify_log(root, result["branch"]["url"], result["revision"], message,
                    [entry["path"] for entry in result["entries"]])
         result["verified"] = True

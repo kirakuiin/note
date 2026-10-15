@@ -264,10 +264,11 @@ def check_leftovers(root, entries):
 
 
 def review_fingerprints(root, entries):
-    """可能提交的各文件指纹：{相对路径: "状态/属性状态:内容 sha256"}。
+    """可能提交的各文件和目录的指纹：{相对路径: "状态/属性状态:内容 sha256[:props=属性值 sha256]"}。
 
     范围与 classify 列出的改动相同（不含本地辅助文件、导表数据和 ignore-on-commit）；
-    未纳管目录展开为其中的文件，已删除或缺失的文件内容记为 "-"。
+    未纳管目录展开为其中的文件，已删除或缺失的文件和目录的内容记为 "-"。
+    属性修改的条目另记当前属性值（svn proplist -v）的哈希，属性状态不变但值变了也能发现。
     """
     result = {}
     for entry in entries:
@@ -283,6 +284,9 @@ def review_fingerprints(root, entries):
         for file, relative in files:
             digest = hashlib.sha256(file.read_bytes()).hexdigest() if file.is_file() else "-"
             result[relative] = f"{item}/{props}:{digest}"
+        if props == "modified":
+            values = run_svn(root, "proplist", "-v", "--xml", "--depth", "empty", entry["path"])
+            result[entry["path"]] += ":props=" + hashlib.sha256(values).hexdigest()
     return result
 
 
@@ -298,10 +302,29 @@ def mark_reviewed(root_arg):
     return {"root": str(root), "review_mark": marked_at, "files": len(files), "path": str(path)}
 
 
+def forget_reviewed(root, paths):
+    """提交成功后从 review 记录中删掉已提交的文件；没有记录时什么也不做。
+
+    Raises:
+        workspace.WorkspaceError: 记录无法读取或写入；调用方只作为警告，不影响提交结果。
+    """
+    path = root / workspace.DIRECTORY / REVIEW_MARK
+    raw = workspace.read_bytes(path)
+    if raw is None:
+        return
+    mark = workspace.parse_json(raw, path)
+    if not isinstance(mark.get("files"), dict):
+        raise workspace.WorkspaceError(f"结构无效：{path}")
+    remaining = {name: value for name, value in mark["files"].items() if name not in set(paths)}
+    if remaining != mark["files"]:
+        workspace.apply_changes([(path, raw, workspace.json_bytes({**mark, "files": remaining}))])
+
+
 def review_delta(root, entries):
     """与 review 记录比较：返回 (记录时间或 None, review 后变化的文件, 警告)。
 
-    变化包括内容或状态不同、记录后新出现的改动，以及记录中有、现在已没有改动的文件。
+    变化包括内容、状态或属性值不同，以及记录后新出现的改动；记录中有、现在已没有本地改动的文件
+    （例如已提交或已还原）没有可审查的内容，不列出。
     """
     path = root / workspace.DIRECTORY / REVIEW_MARK
     try:
@@ -314,7 +337,7 @@ def review_delta(root, entries):
     except (workspace.WorkspaceError, OSError) as error:
         return None, [], [f"review 记录无法读取，按没有记录处理：{error}"]
     current, old = review_fingerprints(root, entries), mark["files"]
-    changed = sorted(name for name in current.keys() | old.keys() if current.get(name) != old.get(name))
+    changed = sorted(name for name in current if current[name] != old.get(name))
     return mark["marked_at"], changed, []
 
 
@@ -332,8 +355,9 @@ def precheck(root_arg):
         result["warnings"].append("有属性改动（可能是外链更新）：建议与代码分开提交，并在说明末尾加 [NO MERGE]")
     if result["excluded_data"]:
         result["warnings"].append("导表数据默认不提交，已从待提交清单排除，请自行处理")
+    # changed_since_review 要完整交给增量 review，不截断。
     for key in ("commit", "excluded_local_only", "excluded_data", "ignore_on_commit", "unversioned", "property_changes",
-                "changed_since_review", "warnings"):
+                "warnings"):
         if len(result[key]) > LIST_LIMIT:
             result[key] = result[key][:LIST_LIMIT] + [f"……另有 {len(result[key]) - LIST_LIMIT} 项未列出"]
     return {"root": str(root), "branch": workspace.svn_branch(root), "source_check": method, **result}

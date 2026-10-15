@@ -1042,7 +1042,7 @@ def record_coverage_task(root_arg, global_arg, task, apply=False):
 def busy_codex_jobs(personal):
     """返回不能清理的 codex-cli 任务：仍在运行（starting／running），或 test 任务的设备尚未 release。
 
-    state.json 无法读取时也算在内，由用户核实后再清理。
+    没有或无法读取 state.json 时状态未知，也算在内，由用户核实后再清理。
     """
     jobs = personal / CODEX_JOBS
     no_links(jobs)
@@ -1054,6 +1054,9 @@ def busy_codex_jobs(personal):
         try:
             raw = read_bytes(state_path)
             if raw is None:
+                busy.append(f"{job.name}（没有 state.json，可能正在创建或创建时中断：确认没有 codex_cli.py 进程"
+                            "在使用它、全机设备锁目录 %LOCALAPPDATA%\\mhxy-cli-testing\\locks 中没有指向它的锁后，"
+                            "手动删除该任务目录）")
                 continue
             state = parse_json(raw, state_path)
         except (WorkspaceError, OSError) as error:

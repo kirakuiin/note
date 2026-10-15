@@ -899,12 +899,15 @@ class WorkspaceTests(unittest.TestCase):
         cases = (({"status": "starting", "kind": "review"}, "starting"),
                  ({"status": "running", "kind": "investigate"}, "running"),
                  ({"status": "completed", "kind": "test", "released": False}, "release"),
-                 ({"status": "failed", "kind": "test"}, "release"))
+                 ({"status": "failed", "kind": "test"}, "release"),
+                 ({"status": "native", "kind": "test", "released": False}, "release"),
+                 (None, "没有 state.json.*手动删除"))
         for state, message in cases:
             with self.subTest(state=state):
                 shutil.rmtree(jobs, ignore_errors=True)
                 (jobs / "job1").mkdir(parents=True)
-                (jobs / "job1" / "state.json").write_text(json.dumps(state))
+                if state is not None:
+                    (jobs / "job1" / "state.json").write_text(json.dumps(state))
                 before = self.snapshot()
                 for apply in (False, True):
                     with self.assertRaisesRegex(w.WorkspaceError, message):

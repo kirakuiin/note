@@ -66,7 +66,7 @@ python "<skill>/scripts/workspace.py" config --set-global "openid_username=<CORP
   - PostToolUse：运行 `index --from-hook`，写入 spec 后立即收录。
 - **需求索引**：没有收录名单时新建（起点为当前时间、名单为空），然后刷新，见下节。
 - **保留的内容**：区段外的内容、原有编码（UTF-8、UTF-16 BOM、GB18030）和换行格式，以及工作区级配置。Codex 和 Claude Code 按 UTF-8 读取入口文件，所以 AGENTS.md／CLAUDE.md 不是 UTF-8 时 `warnings` 会提示，由用户决定是否转换；脚本不自动转换。
-- **初始化只由 sync 完成**：`context`、`index`（包括 hook）要求 `--root` 的 AGENTS.md 已有受管区段，否则报错且不写入，避免从子目录运行时另建一个 `.mhxy-workspace/`。hook 遇到这种情况时不阻断会话或工具：SessionStart 把错误放进注入的 `problems`，PostToolUse 静默跳过。
+- **初始化只由 sync 完成**：`context`、`index`（包括 hook）、`track`／`untrack`、`coverage-task` 和 `precommit.py --mark-reviewed` 要求 `--root` 的 AGENTS.md 已有受管区段，否则报错且不写入，避免从子目录运行时另建一个 `.mhxy-workspace/`。hook 遇到这种情况时不阻断会话或工具：SessionStart 把错误放进注入的 `problems`，PostToolUse 静默跳过。
 - **入口规则是否变化**：输出中的 `entry_rules_changed` 只比较 AGENTS.md 受管区段去掉管理元数据后的内容；单纯升级版本号不算变化。
 - **安全检查**：先检查全部目标，再逐个文件原子替换；写入失败可捕获时回滚本轮变更。目标文件只读（例如 `svn:needs-lock` 未加锁）时，写入任何文件之前就报错，不自动去掉只读属性。遇到异常标记、未知结构版本或版本降级（AGENTS.md 或 CLAUDE.md 任一版本更新）时停止。内容无变化时不写入。进程被杀、断电或有其他程序同时写入时，不保证跨文件的原子性，重跑时先处理报出的不一致。不要删除标记来绕过报错。
 - **防止误提交**：受版本控制的 `AGENTS.md`、`CLAUDE.md`（`AGENTS.md` 是团队规范文件）写入受管区段后，会显示为已修改。写入完成后，自动用 `svn changelist ignore-on-commit` 把它们放进 TortoiseSVN 提交对话框默认不勾选的变更列表。这只改本地工作副本的元数据，不影响服务器；真要提交团队规范的修改时，在对话框里手动勾选即可。
@@ -104,7 +104,8 @@ python "<skill>/scripts/workspace.py" clean --root "<项目>"
 python "<skill>/scripts/workspace.py" clean --root "<项目>" --apply
 ```
 
-- **会删除**：`.mhxy-workspace/` 内的全部内容，包括工作区级配置、索引和收录名单、工单正文和图片、`tracking.json`、覆盖率登记和 Mock、改动执行检查的用例脚本、CR diff 及其清单和上传记录 `applied.json`（清理后脚本不再能拦截同一工单的重复上传）。目录本身保留为空；目录不存在时不创建。
+- **会删除**：`.mhxy-workspace/` 内的全部内容，包括工作区级配置、索引和收录名单、工单正文和图片、`tracking.json`、覆盖率登记和 Mock、改动执行检查的用例脚本、CR diff 及其清单和上传记录 `applied.json`（清理后脚本不再能拦截同一工单的重复上传）、`codex_cli.py` 的任务目录 `codex-cli/`、review 指纹 `review-mark.json`。目录本身保留为空；目录不存在时不创建。
+- **拒绝清理**：`codex-cli/` 中有任务的 `state.json` 状态为 starting／running，或 test 任务（含 `lock` 建立的 native 任务）的 `released` 不是 true，或任务目录没有、无法读取 state.json（状态未知）时，预览和应用都报错并列出这些任务，不删除任何内容。请用户先等任务结束、取消或 release，再重新预览；没有 state.json 的目录按报错中的方法核实后由用户手动删除。
 - **不会修改**：spec、业务代码、AGENTS.md、CLAUDE.md、用户级配置和远端任务。
 - **安全检查**：脚本先扫描全部待删项，遇到符号链接、目录联接或其他 reparse point 就整体停止。请用户先核实并处理该链接，再重新预览；不要用递归删除绕过。清理无法撤销；中途遇到文件占用等错误时，会报告可能已部分清理。不要在其他程序正在修改这个目录时清理。
 - **清理之后**：下次 context 以当时为新起点建立空索引，之后只收录新建或修改的 spec。配置覆盖、追踪和覆盖率登记要等用户再做对应操作时才会重新创建，不需要重新初始化。

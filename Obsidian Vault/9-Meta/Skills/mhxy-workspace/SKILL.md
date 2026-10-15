@@ -41,7 +41,7 @@ sync 会写入用户级配置、AGENTS.md 和 CLAUDE.md 的受管区段、Claude
 
 ## 维护本 skill
 
-- **每条规则只在一个文件里完整描述**，其他地方只放链接。归属：配置、密码、入口文件、索引、hook、清理 → `workspace-management.md`；其余按能力写在各自的 reference 里。入口模板 `assets/managed-block.md` 只放每次会话都要遵守的内容：会话开始、项目约定、需求索引和追踪工单的用法、「按需读取」表和边界；配置字段等细节只放链接，完整说明留在对应的 reference。
+- **每条规则只在一个文件里完整描述**，其他地方只放链接。归属：配置、密码、入口文件、索引、hook、清理 → `workspace-management.md`；其余按能力写在各自的 reference 里。入口模板 `assets/managed-block.md` 只放每次会话都要遵守的内容：会话开始、项目约定、开发流程概要（细节链接到对应 reference）、需求索引和追踪工单的用法、「按需读取」表和边界；配置字段等细节只放链接，完整说明留在对应的 reference。
 - 版本的唯一来源是 `config/version.json`。修改模板或行为时递增发布版本；结构不兼容时再递增结构版本（当前只支持 2）。
 - 升级 skill 不会修改已有工作区；入口规则变化后，由用户在各工作区重新执行更新。references 直接从安装目录引用，改了立即生效。
 - 新能力放进 `references/` 和 `scripts/`，并在入口模板的「按需读取」表里加一行。保持只依赖标准库；`cryptography` 只是 OpenID 登录的可选依赖。

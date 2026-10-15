@@ -22,6 +22,8 @@ MODEL = "gpt-6.1-sol"
 EFFORT = "high"
 IDLE_SECONDS = 600
 START_SECONDS = 10
+RELEASE_GRACE = 5  # release 等待监控、CLI 进程退出的秒数；正常结束时监控写完终态后很快退出。
+NATIVE = "native"  # lock 建立的设备锁任务：原生 verifier 占用设备，没有监控和 CLI 进程。
 GUARD = "MHXY_CODEX_CHILD"
 GAME_URL = "https://mh-game-mcp.eros.nie.netease.com/mcp"
 PROVIDER_KEYS = ("model_provider", "model_providers", "model_catalog_json")
@@ -62,7 +64,9 @@ ROLE = {
 DEFAULT_REFS = {"investigate": [], "review": ["code-review.md", "engineering-principles.md"],
                 "test": ["cli.md", "game-debugging.md", "exec-check.md"]}
 COMMON = ("你是被委派的执行者，不是顶层主会话：不得派生、调用或者请求新的子代理，"
-          "不得运行 codex 或 codex_cli.py，不与用户核对需求。先读取 references 中的文件，再执行任务。\n")
+          "不得运行 codex 或 codex_cli.py，不与用户核对需求。"
+          "AGENTS.md 受管区段中的「会话开始」「开发流程」「按需读取」是主会话规则，你不执行；"
+          "只遵守其中的「项目约定」「边界」和本任务的 references。先读取 references 中的文件，再执行任务。\n")
 
 
 def retry(action, attempts=40):
@@ -206,6 +210,9 @@ def cli_command(job, task, state):
                "-c", "features.multi_agent=false", "-c", "features.hooks=false", "-c", "plugins={}",
                "-c", "mcp_servers=" + toml_value(mcp_servers(task, config) if kind == "test" else {}),
                "--json", "--output-schema", str(job / "schema.json"), "-o", str(job / "result.json")]
+    if os.name == "nt":
+        # 用户配置的 elevated 沙箱在非交互后台进程里初始化失败，不设置时命令一律被策略拒绝。
+        options += ["-c", 'windows.sandbox="unelevated"']
     # 只复用模型连接配置，避免加载宿主插件、hooks 和无关 MCP；不记录含认证的命令。
     for key in PROVIDER_KEYS:
         if key in config:
@@ -279,7 +286,7 @@ def finish(job, state, returncode):
 def monitor(job, command, idle_seconds=IDLE_SECONDS):
     """持续排空两路输出；只有 CLI 字节输出刷新静默计时，无总时长上限。"""
     state = read_json(job / "state.json")
-    state.update(status="running", monitor_pid=os.getpid())
+    state.update(status="running", monitor_pid=os.getpid(), monitor_started=started_at(os.getpid()))
     write_json(job / "state.json", state)
     process = None
     streams = queue.Queue()
@@ -309,7 +316,7 @@ def monitor(job, command, idle_seconds=IDLE_SECONDS):
                                        start_new_session=os.name != "nt",
                                        creationflags=(subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW)
                                        if os.name == "nt" else 0)
-        state["cli_pid"] = process.pid
+        state.update(cli_pid=process.pid, cli_started=started_at(process.pid))
         state["last_output_at"] = time.time()
         write_json(job / "state.json", state)
         for pipe, name in ((process.stdout, "stdout"), (process.stderr, "stderr")):
@@ -364,8 +371,7 @@ def worker(job):
     except FileExistsError:
         return 1
     state = read_json(job / "state.json")
-    pids = [state.get("cli_pid"), state.get("monitor_pid")]
-    if state["status"] != "starting" or any(pid and pid != os.getpid() and alive(pid) for pid in pids):
+    if state["status"] != "starting" or any(pid != os.getpid() for pid in live_pids(state)):
         return 1
     state["monitor_pid"] = os.getpid()
     write_json(job / "state.json", state)
@@ -441,9 +447,11 @@ def start(root, kind, task_file, resume=None):
         Path(directory).mkdir(parents=True, exist_ok=True)
     job = jobs / (time.strftime("%Y%m%d-%H%M%S-") + kind + "-" + uuid.uuid4().hex[:8])
     job.mkdir()
-    lock = acquire_lock(task["devid"], job) if kind == "test" else None
+    lock = None
     published = False
     try:
+        if kind == "test":
+            lock = acquire_lock(task["devid"], job)
         refs = references(root, kind, task)
         write_json(job / "task.json", task)
         write_json(job / "schema.json", SCHEMAS[kind])
@@ -486,12 +494,12 @@ def start(root, kind, task_file, resume=None):
             time.sleep(0.05)
         # 超时仍未发布时 worker 可能仍在启动：不写 failed，不删锁，交给 status／wait 判断。
         result = {"job": str(job), "kind": kind, "status": state["status"]}
-        if state["status"] == "starting":
+        if not published and state["status"] == "starting":
             result["note"] = "后台 worker 尚未接手，用 status／wait 继续查询"
         return result
     except Exception:
         if not published and not (job / "worker.pid").exists():
-            # worker 未启动：删除半成品目录和设备锁，避免 clean 被永远停在 starting 的任务挡住。
+            # worker 未启动（含设备已被占用）：删除半成品目录和本任务加的锁，不留下没有 state.json 的目录。
             if lock:
                 lock.unlink(missing_ok=True)
             shutil.rmtree(job, ignore_errors=True)
@@ -510,16 +518,61 @@ def status(job):
             pid = int((job / "worker.pid").read_text(encoding="utf-8"))
         except (OSError, ValueError):
             pid = None
-    if pid and not alive(pid):
+    if pid and not alive(pid, state.get("monitor_started")):
         # 监控已经不在，没有并发写者，可以安全写回，避免 clean 永远等待。
         state = read_json(job / "state.json")
         if state["status"] not in TERMINAL:
-            state.update(status="failed", error="后台监控已退出但未发布结果", finished_at=time.time())
+            error = "后台监控已退出但未发布结果"
+            if live_pids(state):
+                # CLI 成了孤儿：cancel 不再生效，设备锁保留，release 会拒绝。
+                state["orphan_cli_pid"] = state["cli_pid"]
+                error += (f"；CLI 进程 {state['cli_pid']} 仍在运行，cancel 已无效："
+                          "确认是本任务的 Codex 进程后手动结束其进程树，再核对恢复并 release")
+            state.update(status="failed", error=error, finished_at=time.time())
             write_json(job / "state.json", state)
     return state
 
 
-def alive(pid):
+def alive(pid, started=None):
+    """进程是否存活；给出记录时的创建时间 started 时，创建时间不同视为 PID 已被复用。"""
+    if not pid_exists(pid):
+        return False
+    current = started_at(pid) if started is not None else None
+    return current is None or current == started
+
+
+def live_pids(state):
+    """仍存活的监控和 CLI 进程 PID。"""
+    pairs = ((state.get("monitor_pid"), state.get("monitor_started")), (state.get("cli_pid"), state.get("cli_started")))
+    return [pid for pid, started in pairs if pid and alive(pid, started)]
+
+
+def started_at(pid):
+    """进程创建时间（平台相关的整数），用于识别 PID 复用；无法查询时返回 None。"""
+    if os.name == "nt":
+        import ctypes
+        kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel.OpenProcess.restype = ctypes.c_void_p
+        kernel.OpenProcess.argtypes = [ctypes.c_uint32, ctypes.c_int, ctypes.c_uint32]
+        kernel.GetProcessTimes.argtypes = [ctypes.c_void_p] + [ctypes.POINTER(ctypes.c_uint64)] * 4
+        kernel.CloseHandle.argtypes = [ctypes.c_void_p]
+        handle = kernel.OpenProcess(0x1000, False, pid)
+        if not handle:
+            return None
+        times = [ctypes.c_uint64() for _ in range(4)]
+        try:
+            ok = kernel.GetProcessTimes(handle, *(ctypes.byref(t) for t in times))
+            return times[0].value if ok else None
+        finally:
+            kernel.CloseHandle(handle)
+    try:
+        # /proc/<pid>/stat 第 22 个字段是启动时间；进程名可能含空格，从最后一个右括号之后数。
+        return int(Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].split()[19])
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def pid_exists(pid):
     """不发送信号地查询 Windows 进程；POSIX 使用零信号。"""
     if os.name == "nt":
         import ctypes
@@ -546,12 +599,18 @@ def alive(pid):
 
 
 def release(job):
-    """test 任务终止并由主线程核对恢复后，删除设备锁并标记 released。"""
+    """test 任务终止并由主线程核对恢复后，删除设备锁并标记 released；监控或 CLI 进程仍在时拒绝。"""
     state = status(job)
     if state.get("kind") != "test":
         raise ValueError("只有 test 任务需要 release")
-    if state["status"] not in TERMINAL:
+    if state["status"] not in TERMINAL and state["status"] != NATIVE:
         raise ValueError("任务终止并核对恢复后才可 release --restored")
+    deadline = time.monotonic() + RELEASE_GRACE
+    while running := live_pids(state):
+        if time.monotonic() >= deadline:
+            raise ValueError("任务进程仍在运行（PID " + "、".join(map(str, running))
+                             + "）：确认是本任务的进程并结束后再 release，设备锁保留")
+        time.sleep(0.2)
     lock = Path(state["lock"])
     if lock.exists():
         if read_json(lock)["job"] != str(job):
@@ -562,10 +621,37 @@ def release(job):
     return state
 
 
+def lock(root, devid):
+    """Codex 主会话派生原生 verifier 前加设备锁：只建轻量的 test 任务目录，不启动 Codex。"""
+    root = Path(root).resolve()
+    if not root.is_dir():
+        raise ValueError("项目根目录不存在")
+    if not isinstance(devid, str) or not devid.strip():
+        raise ValueError("lock 需要已选定的非空 --devid")
+    base = root / ".mhxy-workspace"
+    jobs = checked_directory(base / "codex-cli", base)
+    jobs.mkdir(parents=True, exist_ok=True)
+    job = jobs / (time.strftime("%Y%m%d-%H%M%S-") + NATIVE + "-" + uuid.uuid4().hex[:8])
+    job.mkdir()
+    device = None
+    try:
+        device = acquire_lock(devid, job)
+        state = {"job": str(job), "kind": "test", "status": NATIVE, "root": str(root), "devid": devid,
+                 "lock": str(device), "restoration": "unknown", "released": False, "started_at": time.time()}
+        write_json(job / "state.json", state)
+        return state
+    except Exception:
+        # state.json 发布前失败：删除目录和本次加的锁，不留下状态未知的任务。
+        if device:
+            device.unlink(missing_ok=True)
+        shutil.rmtree(job, ignore_errors=True)
+        raise
+
+
 def main():
     """命令行入口；状态使用 JSON，错误不打印含凭据的命令或配置。"""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["start", "status", "wait", "cancel", "release", "_worker"])
+    parser.add_argument("command", choices=["start", "status", "wait", "cancel", "release", "lock", "_worker"])
     parser.add_argument("--root")
     parser.add_argument("--kind", choices=KINDS)
     parser.add_argument("--task-file")
@@ -573,12 +659,17 @@ def main():
     parser.add_argument("--job")
     parser.add_argument("--timeout", type=float, default=None)
     parser.add_argument("--restored", action="store_true")
+    parser.add_argument("--devid")
     args = parser.parse_args()
     try:
         if args.command == "start":
             if not args.root or not args.kind or not args.task_file:
                 raise ValueError("start 需要 --root、--kind 和 --task-file")
             result = start(args.root, args.kind, args.task_file, args.resume)
+        elif args.command == "lock":
+            if not args.root:
+                raise ValueError("lock 需要 --root 和 --devid")
+            result = lock(args.root, args.devid)
         else:
             if not args.job:
                 raise ValueError("需要 --job")
@@ -591,6 +682,8 @@ def main():
                 result = release(job)
             else:
                 result = status(job)
+                if result["status"] == NATIVE and args.command in ("wait", "cancel"):
+                    raise ValueError("lock 建立的设备锁任务没有后台进程，只能 status 或 release")
             if args.command == "wait":
                 if args.timeout is not None and args.timeout < 0:
                     raise ValueError("timeout 不能为负数")

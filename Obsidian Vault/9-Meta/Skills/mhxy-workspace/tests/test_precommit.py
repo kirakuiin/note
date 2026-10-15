@@ -3,6 +3,7 @@ import contextlib
 import io
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -188,7 +189,7 @@ class PrecommitTests(unittest.TestCase):
         mark = json.loads((self.root / ".mhxy-workspace" / p.REVIEW_MARK).read_text(encoding="utf-8"))
         self.assertEqual(sorted(mark["files"]), ["gameplay/a.py", "gameplay/b.py", "gameplay/newdir/c.py", "old.py"])
         self.assertEqual(p.review_delta(self.root, entries), (marked["review_mark"], [], []))
-        # 改内容、改状态、新增改动、改动消失、范围外的改动不算。
+        # 改内容、改状态、新增改动算；改动消失（如已提交）、范围外的改动不算。
         self.write("gameplay/a.py", "a = 2\n")
         self.write("data/t.py", "t = 2\n")
         self.write("gameplay/newdir/d.py", "d = 1\n")
@@ -197,10 +198,9 @@ class PrecommitTests(unittest.TestCase):
                  self.status("gameplay/newdir", "unversioned"), self.status("gameplay/e.py", "unversioned"),
                  self.status("data/t.py", "modified")]
         _, changed, warnings = p.review_delta(self.root, later)
-        self.assertEqual(changed, ["gameplay/a.py", "gameplay/b.py", "gameplay/e.py", "gameplay/newdir/d.py",
-                                   "old.py"])
+        self.assertEqual(changed, ["gameplay/a.py", "gameplay/b.py", "gameplay/e.py", "gameplay/newdir/d.py"])
         self.assertEqual(warnings, [])
-        with patch.object(p, "svn_status", return_value=later), \
+        with patch.object(p, "svn_status", return_value=later), patch.object(p, "run_svn", return_value=b""), \
                 patch.object(p.workspace, "svn_branch", return_value=None):
             result = p.precheck(self.root)
         self.assertEqual((result["review_mark"], result["changed_since_review"]), (marked["review_mark"], changed))
@@ -209,6 +209,37 @@ class PrecommitTests(unittest.TestCase):
         marked_at, changed, warnings = p.review_delta(self.root, later)
         self.assertEqual((marked_at, changed), (None, []))
         self.assertIn("review 记录无法读取", warnings[0])
+
+    @unittest.skipUnless(shutil.which("svn") and shutil.which("svnadmin"), "需要本机 svn 和 svnadmin")
+    def test_property_value_change_after_review_mark(self):
+        """属性状态一直是 modified，但 mark 之后文件和目录的属性值变了，也要列为 review 之后的改动。"""
+        seed, repository, root = self.root / "seed", self.root / "repo", self.root / "wc"
+        (seed / "lib").mkdir(parents=True)
+        (seed / "a.py").write_text("a = 1\n", encoding="utf-8")
+
+        def svn(*args, cwd=None):
+            subprocess.run(["svn", *args, "--non-interactive"], cwd=cwd, check=True, capture_output=True)
+
+        subprocess.run(["svnadmin", "create", str(repository)], check=True, capture_output=True)
+        svn("import", str(seed), repository.as_uri() + "/trunk", "-m", "seed")
+        svn("checkout", repository.as_uri() + "/trunk", str(root))
+        svn("propset", "custom:flag", "one", "a.py", cwd=root)
+        svn("propset", "svn:ignore", "*.tmp", "lib", cwd=root)
+        with patch.object(p.workspace, "require_initialized"):
+            p.mark_reviewed(root)
+        self.assertEqual(p.review_delta(root, p.svn_status(root))[1], [])
+        svn("propset", "custom:flag", "two", "a.py", cwd=root)
+        svn("propset", "svn:ignore", "*.bak", "lib", cwd=root)
+        entries = p.svn_status(root)
+        self.assertEqual({e["path"]: e["props"] for e in entries if e["path"] in ("a.py", "lib")},
+                         {"a.py": "modified", "lib": "modified"})
+        self.assertEqual(p.review_delta(root, entries)[1], ["a.py", "lib"])
+
+    def test_changed_since_review_is_not_truncated(self):
+        changed = [f"f{i}.py" for i in range(p.LIST_LIMIT + 5)]
+        with patch.object(p, "svn_status", return_value=[]), patch.object(p.workspace, "svn_branch", return_value=None), \
+                patch.object(p, "review_delta", return_value=("t", changed, [])):
+            self.assertEqual(p.precheck(self.root)["changed_since_review"], changed)
 
     def test_mark_reviewed_cli_requires_initialized_workspace(self):
         with patch.object(p, "svn_status", return_value=[]), \

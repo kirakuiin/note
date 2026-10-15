@@ -1,4 +1,5 @@
 """定向提交的范围、失败语义和临时 SVN 仓库集成测试，不连接业务仓库。"""
+import json
 from pathlib import Path
 import shutil
 import subprocess
@@ -118,6 +119,22 @@ class CommitTests(unittest.TestCase):
         self.assertEqual(self.commit_message_bytes, MESSAGE.encode("utf-8"))
         self.assertEqual([call for call in self.calls if call[0] == "add"], [("add", "--depth", "empty", "./new.txt@")])
         self.assertEqual(self.last_targets, ["a.py", "new.txt"])
+
+    def test_commit_removes_committed_files_from_review_mark(self):
+        mark = self.root / ".mhxy-workspace" / "review-mark.json"
+        mark.parent.mkdir()
+        mark.write_text(json.dumps({"marked_at": "t", "files": {"a.py": "x", "new.txt": "y", "b.py": "z"}}),
+                        encoding="utf-8")
+        result = self.submit(apply=True)
+        self.assertTrue(result["committed"] and result["verified"])
+        self.assertNotIn("warnings", result)
+        self.assertEqual(json.loads(mark.read_text(encoding="utf-8")), {"marked_at": "t", "files": {"b.py": "z"}})
+        # 记录损坏只给警告，不影响已提交的结果。
+        mark.write_text("[]", encoding="utf-8")
+        result = self.submit(apply=True)
+        self.assertTrue(result["committed"] and result["verified"])
+        self.assertNotIn("error", result)
+        self.assertIn("review 记录", result["warnings"][0])
 
     def test_rejects_unsafe_or_unrelated_paths_without_writes(self):
         for path in (".", "../outside.py", str(self.root / "a.py"), "AGENTS.md", ".mhxy-workspace/cache.json", "data/table.py"):
