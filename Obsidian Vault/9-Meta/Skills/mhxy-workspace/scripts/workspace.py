@@ -11,6 +11,7 @@ from datetime import datetime
 import getpass
 import itertools
 import json
+import locale
 import os
 from pathlib import Path
 import re
@@ -18,6 +19,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+from urllib.parse import unquote
 from xml.etree import ElementTree
 
 SKILL = Path(__file__).resolve().parents[1]
@@ -174,6 +176,14 @@ def block_info(text):
     return start, finish, meta
 
 
+METADATA_SECTION = re.compile(r"### 管理元数据\s*\r?\n```json\r?\n.*?\r?\n```", re.S)
+
+
+def rule_body(block):
+    """去掉管理元数据并统一换行，用于判断受管区段的规则内容是否变化（版本号变化不算）。"""
+    return METADATA_SECTION.sub("", block.replace("\r\n", "\n"))
+
+
 def validate_config(config, keys, label):
     if set(config) - set(keys):
         raise WorkspaceError(f"未知配置键：{label}：{sorted(set(config) - set(keys))}")
@@ -218,8 +228,16 @@ def paths(root_arg, global_arg):
     return root, personal, global_config
 
 
+def ensure_writable(path):
+    """拒绝只读的目标文件（svn:needs-lock 未加锁或被手动设为只读），不自行去掉只读属性。"""
+    if exists(path) and not path.stat().st_mode & stat.S_IWRITE:
+        raise WorkspaceError(f"目标文件只读（可能是 svn:needs-lock 未加锁或被手动设为只读），"
+                             f"请先确认并解除只读后重试：{path}")
+
+
 def atomic_write(path, data):
     no_links(path)
+    ensure_writable(path)
     descriptor, name = tempfile.mkstemp(prefix=".mhxy-write-", dir=path.parent)
     temporary = Path(name)
     try:
@@ -228,11 +246,18 @@ def atomic_write(path, data):
             stream.flush()
             os.fsync(stream.fileno())
         if exists(path):
+            # 目标已确认可写，复制权限位不会让临时文件变成只读。
             os.chmod(temporary, stat.S_IMODE(path.stat().st_mode))
         os.replace(temporary, path)
-    finally:
-        if exists(temporary):
-            temporary.unlink()
+    except BaseException:
+        # 清理失败不能掩盖原始错误；临时文件可能被设成只读，先恢复可写再删除。
+        try:
+            if exists(temporary):
+                os.chmod(temporary, stat.S_IREAD | stat.S_IWRITE)
+                temporary.unlink()
+        except OSError:
+            pass
+        raise
 
 
 def apply_changes(changes):
@@ -242,6 +267,7 @@ def apply_changes(changes):
         for path, old, new in changes:
             if read_bytes(path) != old:
                 raise WorkspaceError(f"检测到并发修改：{path}")
+            ensure_writable(path)  # 写入任何文件之前先发现只读目标。
         for path, old, new in changes:
             missing = []
             parent = path.parent
@@ -382,18 +408,23 @@ def sync(root_arg, global_arg, assignments=(), apply=False, skill=SKILL, local_a
         info = block_info(text)
         if info and release(info[2]["applied_version"]) > release(metadata["applied_version"]):
             raise WorkspaceError(f"拒绝降级：{path}")
+        if old is not None and encoding != "utf-8":
+            warnings.append(f"{filename} 的编码是 {encoding.upper()}，Codex 和 Claude Code 按 UTF-8 读取，"
+                            "可能读不到或读错规则；sync 保留原编码，建议用户自行转换为 UTF-8")
         documents.append((path, old, text, encoding, bom, newline, info, template_name))
 
     variables = {
         "metadata": json.dumps(metadata, ensure_ascii=False, indent=2),
-        "global_config": global_config.as_posix(),
         "references_dir": (skill.resolve() / "references").as_posix(),
         "workspace_script": (skill.resolve() / "scripts/workspace.py").as_posix(),
     }
+    entry_changed = False
     for path, old, text, encoding, bom, newline, info, template_name in documents:
         template = (skill / "assets" / template_name).read_text(encoding="utf-8").rstrip("\n")
         block = re.sub(r"\{\{(\w+)\}\}", lambda match: variables[match[1]], template)
         rendered = block.replace("\n", newline)
+        if path.name == ENTRY_FILES[0]:
+            entry_changed = not info or rule_body(text[info[0]:info[1]]) != rule_body(rendered)
         if info:
             new_text = text[:info[0]] + rendered + text[info[1]:]
         else:
@@ -417,7 +448,7 @@ def sync(root_arg, global_arg, assignments=(), apply=False, skill=SKILL, local_a
         changelist, changelist_warnings = plan_ignore_on_commit(root)
     warnings += changelist_warnings
     # 当前会话里已加载的是旧入口规则；明确提示，避免 agent 凭印象认为规则没变。
-    entry_changed = any(path.name == ENTRY_FILES[0] for path, _, _ in changes)
+    # 只比较去掉管理元数据后的规则内容，单纯的版本号变化不提示。
     notice = ("入口规则（AGENTS.md 受管区段）有变化：" + ("应用后" if not apply else "")
               + "请重新读取该区段，并向用户说明新增或变化的规则；当前会话已加载的是旧版本。") if entry_changed else ""
     return {"action": "sync", "applied": apply, "root": str(root),
@@ -473,7 +504,7 @@ def spec_relative(root, value):
     except ValueError:  # 不同盘符
         return None
     parts = rel.parts
-    if (len(parts) < 2 or parts[0].lower() != SPEC_DIRECTORY or parts[0] == ".."
+    if (len(parts) < 2 or parts[0].lower() != SPEC_DIRECTORY
             or not rel.name.lower().endswith(".md") or any(part.startswith(".") for part in parts[1:])):
         return None
     return "/".join((SPEC_DIRECTORY, *parts[1:]))
@@ -494,22 +525,55 @@ def spec_files(path):
     return found
 
 
-def svn_local_changes(root):
-    """返回 spec/ 下本地有改动（修改、新增、未纳入版本控制等）的 Markdown 相对路径集合。
+def decode_output(data):
+    """解码 svn 的非 XML 输出：先按 UTF-8 严格解码，失败再按系统区域编码（中文 Windows 为 GBK）。
 
-    未纳入版本控制的目录展开为其中的文件。svn 不可用、不是工作副本或超时时返回 None，
-    调用方据此跳过这一收录来源，不视为错误。只读，不修改工作副本。
+    UTF-8 字节恰好也是合法 GBK 的情况很常见，反之很少，因此先试 UTF-8。
+    """
+    try:
+        return data.decode("utf-8")
+    except UnicodeDecodeError:
+        return data.decode(locale.getpreferredencoding(False) or "utf-8", "replace")
+
+
+def svn_merge_pending(root, tree):
+    """判断工作副本是否有未提交的 svn:mergeinfo 变更（svn merge 之后、提交之前）。
+
+    检查项目根目录，以及 spec 状态中属性有改动的条目；只读。查询失败时视为没有。
+    """
+    targets = ["."]
+    for entry in tree.iter("entry"):
+        status = entry.find("wc-status")
+        if entry.get("path") and status is not None and status.get("props") == "modified":
+            targets.append(entry.get("path"))
+    try:
+        completed = subprocess.run(["svn", "diff", "--properties-only", "--depth", "empty", "--non-interactive",
+                                    *targets], cwd=root, capture_output=True, timeout=20)
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return not completed.returncode and b"svn:mergeinfo" in completed.stdout
+
+
+def svn_local_changes(root):
+    """返回 (状态, spec/ 下本地有改动的 Markdown 相对路径集合)。
+
+    本地有改动指修改、新增、未纳入版本控制等；未纳入版本控制的目录展开为其中的文件。
+    状态为 `ok`；svn 不可用、不是工作副本或超时时为 `unavailable`；有未提交的合并
+    （svn:mergeinfo 有改动）时为 `merge_pending`，此时合并进来的他人 spec 也显示为本地
+    改动，无法区分，集合为空。后两种情况调用方跳过这一收录来源，不视为错误。只读。
     """
     if not (root / SPEC_DIRECTORY).is_dir():
-        return set()
+        return "ok", set()
     try:
         completed = subprocess.run(["svn", "status", "--xml", "--non-interactive", SPEC_DIRECTORY],
                                    cwd=root, capture_output=True, timeout=20)
         if completed.returncode or b"155007" in completed.stderr:  # 非工作副本时只有警告、退出码为 0
-            return None
+            return "unavailable", set()
         tree = ElementTree.fromstring(completed.stdout)
     except (OSError, subprocess.SubprocessError, ElementTree.ParseError):
-        return None
+        return "unavailable", set()
+    if svn_merge_pending(root, tree):
+        return "merge_pending", set()
     changed = set()
     for entry in tree.iter("entry"):
         status = entry.find("wc-status")
@@ -519,7 +583,7 @@ def svn_local_changes(root):
             rel = spec_relative(root, path)
             if rel:
                 changed.add(rel)
-    return changed
+    return "ok", changed
 
 
 def classify_branch(url):
@@ -537,7 +601,8 @@ def branch_path(url):
     覆盖率网站和 coverage-task 登记都用这个格式；无法识别时返回 None。
     """
     match = re.search(r"/wzimage/(.+?)/?$", url)
-    return match.group(1) if match else None
+    # svn info 返回的 URL 是 URI 编码的，网站和日志里的路径是解码后的
+    return unquote(match.group(1)) if match else None
 
 
 def svn_branch(root):
@@ -550,10 +615,10 @@ def svn_branch(root):
                                    cwd=root, capture_output=True, timeout=20)
     except (OSError, subprocess.SubprocessError):
         return None
-    url = completed.stdout.decode("utf-8", "replace").strip()
+    url = decode_output(completed.stdout).strip()
     if completed.returncode or not url:
         return None
-    return {"url": url, "name": url.rstrip("/").rsplit("/", 1)[-1], "path": branch_path(url),
+    return {"url": url, "name": unquote(url.rstrip("/").rsplit("/", 1)[-1]), "path": branch_path(url),
             "kind": classify_branch(url)}
 
 
@@ -574,8 +639,8 @@ def svn_changelist(root, name):
     if completed.returncode:
         if b"W155010" in completed.stderr or b"E155007" in completed.stderr:  # 未纳入版本控制／不是工作副本
             return None
-        raise WorkspaceError(completed.stderr.decode("utf-8", "replace").strip() or "svn info 失败")
-    return completed.stdout.decode("utf-8", "replace").strip()
+        raise WorkspaceError(decode_output(completed.stderr).strip() or "svn info 失败")
+    return decode_output(completed.stdout).strip()
 
 
 def plan_ignore_on_commit(root):
@@ -616,7 +681,7 @@ def apply_ignore_on_commit(root, names):
     except (OSError, subprocess.SubprocessError) as error:
         return [f"未能把 {', '.join(names)} 加入 {IGNORE_ON_COMMIT}：{error}"]
     if completed.returncode:
-        detail = completed.stderr.decode("utf-8", "replace").strip()
+        detail = decode_output(completed.stderr).strip()
         return [f"未能把 {', '.join(names)} 加入 {IGNORE_ON_COMMIT}：{detail}"]
     return []
 
@@ -627,8 +692,9 @@ def read_index_state(personal):
     从 0.2.x 升级时，旧版手写索引里登记过的 spec 路径会迁入名单，避免丢失。
 
     Returns:
-        (状态文件路径, 原始字节或 None, 状态)。状态含 since（带时区的 ISO 时间）和
-        specs（相对项目根的路径列表）。
+        (状态文件路径, 原始字节或 None, 状态)。状态含 since（带时区的 ISO 时间）、
+        specs（收录名单）和 excluded（用户移出、不再自动收录的名单），路径都相对项目根。
+        0.3.18 及之前写入的状态没有 excluded，按空名单读取。
 
     Raises:
         WorkspaceError: 状态文件损坏。
@@ -637,8 +703,10 @@ def read_index_state(personal):
     old = read_bytes(path)
     if old is not None:
         state = parse_json(old, path)
-        if (set(state) != {"since", "specs"} or not isinstance(state["specs"], list)
-                or not all(isinstance(item, str) for item in state["specs"])):
+        state.setdefault("excluded", [])
+        if (set(state) != {"since", "specs", "excluded"}
+                or not all(isinstance(state[key], list) and all(isinstance(item, str) for item in state[key])
+                           for key in ("specs", "excluded"))):
             raise WorkspaceError(f"索引状态结构无效：{path}")
         try:
             datetime.fromisoformat(state["since"]).timestamp()
@@ -651,7 +719,8 @@ def read_index_state(personal):
         text = decode_document(legacy)[0]
         if not text.startswith(INDEX_HEADER):
             specs = re.findall(r"^\s*-\s*(spec/.+?\.md)\s*[：:]", text, re.M)
-    return path, None, {"since": datetime.now().astimezone().isoformat(timespec="seconds"), "specs": specs}
+    return path, None, {"since": datetime.now().astimezone().isoformat(timespec="seconds"),
+                        "specs": specs, "excluded": []}
 
 
 def render_index(since, entries):
@@ -666,12 +735,24 @@ def render_index(since, entries):
     return "\n".join(lines).encode("utf-8")
 
 
-def plan_index(root, personal, add=(), remove=(), scan=True):
+def mtime(path):
+    """返回文件修改时间；文件已不存在（例如刚被删除或改名）时返回 None。"""
+    try:
+        return path.stat().st_mtime
+    except FileNotFoundError:
+        return None
+
+
+def plan_index(root, personal, add=(), remove=(), scan=True, written=()):
     """计算新的收录名单与索引内容，只返回变更，不写入。
 
-    名单只增不减。新增来源：add（不受起点限制），以及 scan 时“起点之后修改、且 svn 显示
-    本地有改动”的 spec；svn update 拉下的他人 spec 在本地无改动，因此不会被收录。
-    文件已不存在或在 remove 中的条目移出名单。
+    名单只增不减。新增来源：
+    - add：用户手动收录，不受起点限制，同时从排除名单中去掉；
+    - written：hook 报告刚写入的 spec，不受起点限制；
+    - scan 时“起点之后修改、且 svn 显示本地有改动”的 spec。svn update 拉下的他人 spec
+      在本地无改动，因此不会被收录；有未提交的合并时跳过这一来源（见 svn_local_changes）。
+    remove 中的条目移出名单并记入排除名单，written 和 scan 不会再收录它们。文件已不存在的
+    条目从两个名单中移出。
 
     Returns:
         (changes, stats, entries)。changes 可交给 apply_changes；entries 为按组排序的
@@ -679,37 +760,57 @@ def plan_index(root, personal, add=(), remove=(), scan=True):
     """
     state_path, old_state, state = read_index_state(personal)
     since = datetime.fromisoformat(state["since"]).timestamp()
-    members = set(state["specs"]) | set(add)
+    excluded = (set(state["excluded"]) | set(remove)) - set(add)
+    members = set(state["specs"]) | set(add) | (set(written) - excluded)
     svn = "skipped"
     if scan:
-        changed = svn_local_changes(root)
-        svn = "unavailable" if changed is None else "ok"
-        members |= {rel for rel in changed or () if (root / rel).stat().st_mtime > since}
-    members = sorted(rel for rel in members - set(remove) if (root / rel).is_file() and not is_link(root / rel))
+        svn, changed = svn_local_changes(root)
+        members |= {rel for rel in changed - excluded if (mtime(root / rel) or 0) > since}
+
+    def present(rel):
+        return (root / rel).is_file() and not is_link(root / rel)
+    members = sorted(rel for rel in members - excluded if present(rel))
+    excluded = sorted(rel for rel in excluded if present(rel))
     entries = sorted((Path(rel).parts[1] if len(Path(rel).parts) > 2 else "", rel, *spec_summary(root / rel))
                      for rel in members)
     index_path = personal / INDEX_FILE
-    candidates = ((state_path, old_state, json_bytes({"since": state["since"], "specs": members})),
+    new_state = {"since": state["since"], "specs": members, "excluded": excluded}
+    candidates = ((state_path, old_state, json_bytes(new_state)),
                   (index_path, read_bytes(index_path), render_index(state["since"], entries)))
     changes = [change for change in candidates if change[1] != change[2]]
     stats = {"path": f"{DIRECTORY}/{INDEX_FILE}", "specs": len(members), "since": state["since"], "svn": svn}
     return changes, stats, entries
 
 
-def refresh_index(root, personal, add=(), remove=(), scan=True):
+def refresh_index(root, personal, add=(), remove=(), scan=True, written=()):
     """按 plan_index 更新收录名单和索引，无变化不写入；返回 (统计信息, entries)。"""
-    changes, stats, entries = plan_index(root, personal, add, remove, scan)
+    changes, stats, entries = plan_index(root, personal, add, remove, scan, written)
     apply_changes(changes)
     return {**stats, "updated": bool(changes)}, entries
+
+
+def require_initialized(root):
+    """只有 sync 能初始化工作区；其他会写个人目录的命令要求根目录 AGENTS.md 已有受管区段。
+
+    防止从子目录传 `--root "."` 时在错误的位置新建 `.mhxy-workspace/`。
+
+    Raises:
+        WorkspaceError: AGENTS.md 不存在、无法解码或没有受管区段。
+    """
+    if block_info(decode_document(read_bytes(root / ENTRY_FILES[0]))[0]) is None:
+        raise WorkspaceError(f"{root} 不是已初始化的工作区（AGENTS.md 中没有 {NAME} 受管区段）；"
+                             "请把 --root 指向项目根目录，或先按 SKILL.md 初始化")
 
 
 def query_index(root_arg, global_arg, terms=(), add=(), remove=(), limit=50):
     """刷新索引，可同时手动收录或移出 spec，再按关键词（全部命中、不区分大小写）匹配。
 
     Raises:
-        WorkspaceError: add／remove 的路径不是 spec/ 下的 Markdown，或要收录的文件不存在。
+        WorkspaceError: 工作区未初始化；add／remove 的路径不是 spec/ 下的 Markdown，
+            或要收录的文件不存在。
     """
     root, personal, _ = paths(root_arg, global_arg)
+    require_initialized(root)
     normalized = {}
     for label, values in (("add", add), ("remove", remove)):
         normalized[label] = []
@@ -729,7 +830,7 @@ def query_index(root_arg, global_arg, terms=(), add=(), remove=(), limit=50):
 def record_hook_write(root_arg, global_arg, payload):
     """Claude Code PostToolUse hook：工具刚写入 spec/ 下的 Markdown 时收录该文件。
 
-    其他文件直接忽略；只更新名单和索引，不运行 svn。
+    其他文件直接忽略；用户移出过的 spec 不再收录。只更新名单和索引，不运行 svn。
     """
     tool_input = payload.get("tool_input") if isinstance(payload, dict) else None
     file_path = tool_input.get("file_path") if isinstance(tool_input, dict) else None
@@ -738,7 +839,8 @@ def record_hook_write(root_arg, global_arg, payload):
     root, personal, _ = paths(root_arg, global_arg)
     rel = spec_relative(root, file_path)
     if rel and (root / rel).is_file():
-        refresh_index(root, personal, add=[rel], scan=False)
+        require_initialized(root)
+        refresh_index(root, personal, scan=False, written=[rel])
 
 
 def context(root_arg, global_arg):
@@ -747,8 +849,12 @@ def context(root_arg, global_arg):
     各部分独立读取，某部分失败只记入 problems，不影响其余部分。不创建配置或追踪文件；
     索引状态缺失（首次或清理后）时以当前时间为起点新建空名单。branch 为 None 表示
     svn 不可用或不是工作副本。
+
+    Raises:
+        WorkspaceError: 工作区未初始化（见 require_initialized），此时不写入任何文件。
     """
     root, personal, _ = paths(root_arg, global_arg)
+    require_initialized(root)
     result, problems = {"root": str(root), "branch": svn_branch(root)}, []
     try:
         result["effective_config"] = masked_config(load_config(root_arg, global_arg))
@@ -762,7 +868,7 @@ def context(root_arg, global_arg):
         problems.append(f"追踪：{error}")
     try:
         stats, entries = refresh_index(root, personal)
-        recent = sorted(entries, key=lambda entry: (root / entry[1]).stat().st_mtime, reverse=True)
+        recent = sorted(entries, key=lambda entry: mtime(root / entry[1]) or 0, reverse=True)
         stats["recent"] = [f"{path}：{title}" for _, path, title, _ in recent[:INDEX_RECENT_LIMIT]]
         result["index"] = stats
     except (WorkspaceError, OSError) as error:
@@ -793,25 +899,30 @@ def claude_hook_change(root, script):
                         "hooks": [{"type": "command", "command": f"{prefix} index {root_arg}", "timeout": 30}]},
     }
 
-    def is_ours(entry):
-        commands = entry.get("hooks") if isinstance(entry, dict) else None
-        return isinstance(commands, list) and any(
-            isinstance(hook, dict) and HOOK_FLAG in str(hook.get("command", "")) and "workspace.py" in str(hook.get("command", ""))
-            for hook in commands)
+    def is_ours(hook):
+        command = str(hook.get("command", "")) if isinstance(hook, dict) else ""
+        return HOOK_FLAG in command and "workspace.py" in command
 
     new_hooks = dict(hooks)
     for event, ours in desired.items():
         entries = hooks.get(event, [])
         if not isinstance(entries, list):
             raise WorkspaceError(f"无法识别的 hooks 结构：{path}")
-        updated, placed = [], False
+        # 只移除本 skill 的命令对象；用户的命令与之同在一个条目时保留该条目和用户命令。
+        # 新条目放在第一次出现本 skill 命令的位置，没有出现过时追加到末尾。
+        updated, position = [], None
         for entry in entries:
-            if not is_ours(entry):
+            commands = entry.get("hooks") if isinstance(entry, dict) else None
+            kept = [hook for hook in commands if not is_ours(hook)] if isinstance(commands, list) else None
+            if kept is None or len(kept) == len(commands):
                 updated.append(entry)
-            elif not placed:
-                updated.append(ours)
-                placed = True
-        new_hooks[event] = updated if placed else updated + [ours]
+                continue
+            if position is None:
+                position = len(updated)
+            if kept:
+                updated.append({**entry, "hooks": kept})
+        updated.insert(len(updated) if position is None else position, ours)
+        new_hooks[event] = updated
     if new_hooks == hooks:
         return None
     return path, old, json_bytes({**settings, "hooks": new_hooks})
@@ -1042,7 +1153,11 @@ def main():
         elif args.action == "config":
             password = None
             if args.prompt_password:
-                if not sys.stdin.isatty():
+                if not args.apply:
+                    raise WorkspaceError("--prompt-password 需要同时加 --apply，否则输入的密码不会保存")
+                # Claude Code 等命令工具的 stdin 可能是 NUL（Windows 下是字符设备，isatty 为真），
+                # getpass 会一直等待；stderr 不是终端时同样视为没有交互终端。
+                if not (sys.stdin.isatty() and sys.stderr.isatty()):
                     raise WorkspaceError("隐藏输入密码需要交互终端")
                 password = getpass.getpass("OpenID password (save to user config): ")
             result = configure_global(args.global_config, args.set_global, password, args.apply)

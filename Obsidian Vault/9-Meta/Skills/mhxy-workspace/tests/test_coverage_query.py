@@ -11,6 +11,9 @@ import unittest
 from unittest.mock import patch
 from urllib.error import HTTPError
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+import corp_login  # noqa: E402
+
 spec = importlib.util.spec_from_file_location("coverage_query", Path(__file__).resolve().parents[1] / "scripts/coverage_query.py")
 q = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(q)
@@ -61,16 +64,43 @@ class QueryTests(unittest.TestCase):
         auth = types.SimpleNamespace(AuthError=ValueError)
         from unittest.mock import Mock
         auth.login = Mock(return_value=http.cookiejar.CookieJar())
-        argv = ["coverage_query.py", "--task-name", "test", "--branch", "branchs/dev/test"]
-        for extra, expected_password in (([], secret), (["--openid-user", "other"], None)):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        global_config = Path(directory.name) / "config.json"
+        global_config.write_text(json.dumps({key: config[key] for key in ("openid_username", "openid_password")}), encoding="utf-8")
+        argv = ["coverage_query.py", "--task-name", "test", "--branch", "branchs/dev/test", "--global-config", str(global_config)]
+        # 指定其他账号（大小写不同的同一账号仍复用）时不使用已存密码，改为交互输入。
+        for extra, expected_password in (([], secret), (["--openid-user", "Developer"], secret),
+                                         (["--openid-user", "other"], "synthetic-typed")):
             output = io.StringIO()
             with patch.dict(sys.modules, {"workspace": workspace, "coverage_auth": auth}), \
                  patch.object(sys, "argv", argv + extra), patch.object(sys, "stdout", output), \
+                 patch.object(corp_login, "interactive_terminal", return_value=True), \
+                 patch.object(corp_login.getpass, "getpass", return_value="synthetic-typed"), \
                  patch.dict(q.os.environ, {"MHXY_COVERAGE_AUTH_FILE": ""}), patch.object(q, "query", return_value={"status": "passed"}) as run:
                 self.assertEqual(q.main(), 0)
                 self.assertEqual(auth.login.call_args.kwargs["password"], expected_password)
                 self.assertEqual(run.call_args.args[4], "developer")
                 self.assertNotIn(secret, output.getvalue())
+
+    def test_cli_without_terminal_reports_auth_required_instead_of_prompting(self):
+        config = {"openid_username": "developer@corp.netease.com", "coder_name": "developer"}
+        workspace = types.SimpleNamespace(WorkspaceError=ValueError, load_config=lambda *args: dict(config),
+                                          svn_branch=lambda root: None)
+        auth = types.SimpleNamespace(AuthError=corp_login.LoginError, login=lambda *a, **k: self.fail("must not log in"))
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        global_config = Path(directory.name) / "config.json"
+        global_config.write_text(json.dumps({"openid_username": config["openid_username"], "openid_password": ""}), encoding="utf-8")
+        output = io.StringIO()
+        with patch.dict(sys.modules, {"workspace": workspace, "coverage_auth": auth}), \
+             patch.object(sys, "argv", ["coverage_query.py", "--task-name", "test", "--branch", "b", "--global-config", str(global_config)]), \
+             patch.object(sys, "stdout", output), patch.object(corp_login.sys.stdin, "isatty", return_value=True), \
+             patch.object(corp_login.sys.stderr, "isatty", return_value=False), \
+             patch.object(corp_login.getpass, "getpass", side_effect=AssertionError("must not prompt")), \
+             patch.dict(q.os.environ, {"MHXY_COVERAGE_AUTH_FILE": ""}):
+            self.assertEqual(q.main(), 3)
+        self.assertEqual(json.loads(output.getvalue())["status"], "auth_required")
 
     def test_cli_infers_branch_path_or_reports_input_error(self):
         config = {"coder_name": "developer"}

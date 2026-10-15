@@ -4,7 +4,8 @@
 规则见 references/exec-check.md「确定目标行」。只读，不执行任何 SVN 写操作。
 
 用法：python -X utf8 diff_lines.py --root <工作副本根目录> [相对路径 ...]
-不给路径时，取 svn status 中修改、新增或替换的 .py 文件（排除个人目录、入口文件和导表数据）。
+不给路径时，取 svn status 中修改、新增、替换或未纳入版本控制的 .py 文件（排除个人目录、入口文件和导表数据）。
+目标行按本机解释器的行号表计算，须用与客户端相同的 Python 3.11 运行，否则输出 warnings。
 
 退出码：0 成功；1 失败（svn 不可用、不是工作副本等）。
 """
@@ -24,12 +25,13 @@ import precommit  # noqa: E402
 CO_OPTIMIZED = 0x1  # 函数（含 lambda、推导式）的代码对象带此标志；模块和类体不带。
 # Python 把单独的 CR 也当换行，svn diff 只按 LF 计行；统一按 Python 规则计行，才能和客户端 f_lineno 对上。
 NEWLINE = re.compile(r"\r\n|\r|\n")
-CHANGED_ITEMS = {"modified", "added", "replaced"}
+CHANGED_ITEMS = {"modified", "added", "replaced", "unversioned"}  # 同 precommit 的遗留检查，含未纳入版本控制的文件（可能是忘了 svn add 的新文件），整个文件都算改动
+CLIENT_PYTHON = (3, 11)  # 客户端解释器版本：co_lines() 的行号表随版本变化，须一致才能和客户端 f_lineno 对上
 
 
 def split_py_lines(data):
-    """按 Python 的换行规则切分 UTF-8 源码字节，返回行列表（第 i 项对应第 i+1 行）。"""
-    return NEWLINE.split(data.decode("utf-8"))
+    """按 Python 的换行规则切分 UTF-8 源码字节（可带 BOM），返回行列表（第 i 项对应第 i+1 行）。"""
+    return NEWLINE.split(data.decode("utf-8-sig"))
 
 
 def changed_line_numbers(old, new):
@@ -68,18 +70,21 @@ def executable_lines(source, filename):
 
     with warnings.catch_warnings():  # 业务代码里的 SyntaxWarning 与目标行无关，不输出
         warnings.simplefilter("ignore")
-        code = compile(source.decode("utf-8"), filename, "exec", dont_inherit=True)
+        code = compile(source.decode("utf-8-sig"), filename, "exec", dont_inherit=True)
     walk(code)
     return result
 
 
 def changed_py_files(root):
-    """svn status 中待提交的 .py 文件相对路径（/ 分隔）。"""
+    """svn status 中待提交的 .py 文件相对路径（/ 分隔）；未纳入版本控制的目录展开为其中的 .py 文件。"""
     files = []
     for entry in precommit.svn_status(root):
-        path, first = entry["path"], entry["path"].split("/", 1)[0]
-        if (entry["item"] in CHANGED_ITEMS and path.endswith(".py")
-                and first not in precommit.LOCAL_ONLY and first != precommit.DATA_DIRECTORY):
+        path = entry["path"]
+        if entry["item"] not in CHANGED_ITEMS or not precommit.in_scope(entry):
+            continue
+        if entry["item"] == "unversioned" and (root / path).is_dir():
+            files.extend(p.relative_to(root).as_posix() for p in (root / path).rglob("*.py") if p.is_file())
+        elif path.endswith(".py"):
             files.append(path)
     return sorted(files)
 
@@ -88,6 +93,8 @@ def base_source(root, rel):
     """返回文件的 BASE 版本字节；新增或未纳入版本控制的文件返回 b""。"""
     try:
         return precommit.run_svn(root, "cat", "-r", "BASE", rel)
+    except precommit.SvnTimeout:
+        raise  # 超时不等于新文件，不能把整个文件当作改动
     except precommit.PrecheckError:
         return b""
 
@@ -96,8 +103,8 @@ def collect(root, rels):
     """计算各文件的目标行。
 
     Returns:
-        {"files": {相对路径: [行号]}, "total": 行数, "skipped": {相对路径: 原因}}
-        没有目标行的文件不出现在 files 中。
+        {"files": {相对路径: [行号]}, "total": 行数, "skipped": {相对路径: 原因}, "warnings": [说明]}
+        没有目标行的文件不出现在 files 中；本机不是 Python 3.11 时 warnings 说明行号可能和客户端不一致。
     """
     files, skipped = {}, {}
     for rel in rels:
@@ -113,7 +120,11 @@ def collect(root, rels):
             continue
         if lines:
             files[rel] = lines
-    return {"files": files, "total": sum(len(v) for v in files.values()), "skipped": skipped}
+    notes = []
+    if sys.version_info[:2] != CLIENT_PYTHON:
+        notes.append(f"本机 Python 为 {sys.version_info[0]}.{sys.version_info[1]}，客户端为 3.11："
+                     "行号表随版本变化，目标行可能和客户端不一致，请用 Python 3.11 重新运行")
+    return {"files": files, "total": sum(len(v) for v in files.values()), "skipped": skipped, "warnings": notes}
 
 
 def main(argv=None):

@@ -95,6 +95,40 @@ class IssueTests(unittest.TestCase):
                 p.issue_base(self.client, "835517")
         with self.assertRaises(w.WorkspaceError):
             p.issue_base(self.client, "../1")
+        for detail in ({"base": None}, {"base": []}, []):
+            self.client.api.return_value = detail
+            with self.assertRaisesRegex(p.QueryError, "格式已变化"):
+                p.issue_base(self.client, "835517")
+
+    def test_unassigned_or_malformed_rows_are_readable_errors(self):
+        for row in ({"id": 1, "is_closed": False, "assigned_to": None}, "not-a-row"):
+            self.client.api.return_value = {"list": [row], "total_count": 1, "page": 1}
+            with self.assertRaises(p.QueryError):
+                p.list_open_issues(self.client, "mhxy", 7, "*")
+
+    def test_cli_reports_unexpected_shapes_without_traceback(self):
+        err = io.StringIO()
+        with patch.object(p, "credentials", return_value=("test", "synthetic-password")), \
+             patch.object(p, "Client", return_value=self.client), \
+             patch.object(p, "issue_base", side_effect=AttributeError("x")), patch.object(sys, "stderr", err):
+            code = p.main(["--root", str(self.root), "--config", str(self.config), "--show", "1"])
+        self.assertEqual(code, 1)
+        self.assertIn("数据结构已变化", err.getvalue())
+
+    def test_missing_password_needs_both_stdin_and_stderr_terminal(self):
+        """Agent 命令工具：stdin 是 NUL（isatty 为 True），stderr 是管道；不得调用 getpass。"""
+        self.config.write_text(json.dumps({"openid_username": "test@corp.netease.com", "openid_password": ""}),
+                               encoding="utf-8")
+        with patch.object(p.corp_login.sys.stdin, "isatty", return_value=True), \
+             patch.object(p.corp_login.sys.stderr, "isatty", return_value=False), \
+             patch.object(p.corp_login.getpass, "getpass", side_effect=AssertionError("must not prompt")):
+            with self.assertRaisesRegex(p.corp_login.LoginError, "未配置密码"):
+                p.credentials(self.config)
+        with patch.object(p.corp_login.sys.stdin, "isatty", return_value=True), \
+             patch.object(p.corp_login.sys.stderr, "isatty", return_value=True), \
+             patch.object(p.corp_login.getpass, "getpass", return_value="synthetic-typed") as prompt:
+            self.assertEqual(p.credentials(self.config), ("test@corp.netease.com", "synthetic-typed"))
+            prompt.assert_called_once()
 
     def test_cli_show_outputs_issue_without_saving(self):
         self.client.login.return_value = {"id": 7}

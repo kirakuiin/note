@@ -70,10 +70,29 @@ class DiffLinesTests(unittest.TestCase):
     def test_changed_py_files_skips_local_and_data(self):
         entries = [{"path": p, "item": i, "props": "none", "tree_conflict": False, "changelist": None} for p, i in (
             ("gameplay/a.py", "modified"), ("gameplay/b.py", "added"), ("gameplay/c.txt", "modified"),
-            ("gameplay/d.py", "deleted"), ("gameplay/e.py", "unversioned"), ("data/t.py", "modified"),
-            (".mhxy-workspace/x.py", "added"))]
-        with patch.object(d.precommit, "svn_status", return_value=entries):
-            self.assertEqual(d.changed_py_files(Path(".")), ["gameplay/a.py", "gameplay/b.py"])
+            ("gameplay/d.py", "deleted"), ("gameplay/e.py", "unversioned"), ("gameplay/new", "unversioned"),
+            ("data/t.py", "modified"), (".mhxy-workspace/x.py", "added"))]
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            # 未纳入版本控制的目录在 svn status 中只有一条，要展开成其中的 .py 文件
+            (root / "gameplay" / "new" / "sub").mkdir(parents=True)
+            (root / "gameplay" / "new" / "sub" / "m.py").write_bytes(b"")
+            (root / "gameplay" / "new" / "readme.txt").write_bytes(b"")
+            with patch.object(d.precommit, "svn_status", return_value=entries):
+                self.assertEqual(d.changed_py_files(root), ["gameplay/a.py", "gameplay/b.py", "gameplay/e.py",
+                                                            "gameplay/new/sub/m.py"])
+
+    def test_bom_file_is_parsed(self):
+        source = b"\xef\xbb\xbfdef f():\n    return 1\n"
+        self.assertEqual(d.executable_lines(source, "bom.py"), {1, 2})
+        self.assertEqual(d.changed_line_numbers(b"\xef\xbb\xbfdef f():\n    return 0\n", source), {2})
+
+    def test_warns_when_not_client_python(self):
+        with tempfile.TemporaryDirectory() as temp:
+            with patch.object(d, "CLIENT_PYTHON", sys.version_info[:2]):
+                self.assertEqual(d.collect(Path(temp), [])["warnings"], [])
+            with patch.object(d, "CLIENT_PYTHON", (2, 7)):
+                self.assertIn("行号表随版本变化", d.collect(Path(temp), [])["warnings"][0])
 
 
 class ExecTraceTests(unittest.TestCase):
@@ -96,6 +115,13 @@ class ExecTraceTests(unittest.TestCase):
         self.assertEqual(result["missing"]["pkg/target_mod.py"], [4])  # 只走了 v 为真的分支
         self.assertEqual(result["covered"]["pkg/target_mod.py"], "5/6")
         self.assertIsNone(sys.gettrace())
+
+    def test_path_suffix_must_start_at_separator(self):
+        # et_mod.py 只是 target_mod.py 的字符串后缀，不是路径后缀，不能误配
+        result = t.exec_check_start({"et_mod.py": [1, 2]}, [("ok", lambda: self.mod.ok(True))])
+        self.assertEqual(result["missing"]["et_mod.py"], [1, 2])
+        result = t.exec_check_start({"target_mod.py": [1, 2]}, [("ok", lambda: self.mod.ok(True))])
+        self.assertEqual(result["missing"]["target_mod.py"], [])
 
     def test_aborts_when_another_tracer_is_active(self):
         previous = sys.gettrace()

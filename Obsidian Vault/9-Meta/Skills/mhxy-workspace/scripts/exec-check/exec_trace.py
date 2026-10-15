@@ -13,7 +13,7 @@ def exec_check_start(targets, cases):
     """运行用例并统计目标行。
 
     Args:
-        targets: {相对路径: [行号]}，取自 diff_lines.py 输出的 files；按路径后缀匹配代码对象的文件名。
+        targets: {相对路径: [行号]}，取自 diff_lines.py 输出的 files；按完整路径段的后缀匹配代码对象的文件名。
         cases: [(名称, 无参函数)]。每个用例单独捕获异常；用例负责在 finally 中恢复自己改动的状态。
 
     Returns:
@@ -35,7 +35,8 @@ def exec_check_start(targets, cases):
         # 不能假定 local 收到的代码对象一定先经过 tracer：缓存未命中时现场判断
         if code not in matched:
             name = code.co_filename.replace("\\", "/").lower()
-            matched[code] = next((key for key in keys if name.endswith(key)), None)
+            # 后缀必须落在路径分隔符上：ui/main.py 不能匹配 newui/main.py
+            matched[code] = next((key for key in keys if name == key or name.endswith("/" + key)), None)
         return matched[code]
 
     def local(frame, event, arg):

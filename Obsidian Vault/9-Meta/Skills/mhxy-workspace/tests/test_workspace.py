@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -37,7 +38,7 @@ class WorkspaceTests(unittest.TestCase):
         self.next_version = f"{major}.{minor}.{revision + 1}"
 
         # 默认把 svn 视为不可用，避免测试依赖本机 svn；需要时在用例中设置 return_value。
-        self.svn_patch = patch.object(w, "svn_local_changes", return_value=None)
+        self.svn_patch = patch.object(w, "svn_local_changes", return_value=("unavailable", set()))
         self.svn = self.svn_patch.start()
         self.branch_patch = patch.object(w, "svn_branch", return_value=None)
         self.branch = self.branch_patch.start()
@@ -115,7 +116,8 @@ class WorkspaceTests(unittest.TestCase):
                 suffix = "\r\n# 后置约定\r\n也保留\r\n".encode(encoding)
                 self.agents.write_bytes(self.agents.read_bytes() + suffix)
                 self.version()
-                self.sync()
+                warnings = self.sync()["warnings"]
+                self.assertEqual(any("AGENTS.md 的编码" in item for item in warnings), encoding != "utf-8")
                 self.assertTrue(self.agents.read_bytes().startswith(bom + prefix.encode(encoding)))
                 self.assertTrue(self.agents.read_bytes().endswith(suffix))
 
@@ -151,7 +153,13 @@ class WorkspaceTests(unittest.TestCase):
         self.assertNotIn("应用后", applied["notice"])
         unchanged = self.sync()
         self.assertEqual((unchanged["entry_rules_changed"], unchanged["notice"]), (False, ""))
-        self.version()
+        self.version()  # 只升版本：区段的元数据变了，规则没变
+        bumped = self.sync()
+        self.assertIn(str(self.agents), bumped["changes"])
+        self.assertEqual((bumped["entry_rules_changed"], bumped["notice"]), (False, ""))
+        template = self.skill / "assets/managed-block.md"
+        template.write_text(template.read_text(encoding="utf-8").replace("### 边界", "### 边界\n- 新规则"), encoding="utf-8")
+        self.version(f"{self.next_version[:-1]}{int(self.next_version[-1]) + 1}")
         self.assertTrue(self.sync()["entry_rules_changed"])
 
     def test_claude_full_block_migrates_to_import(self):
@@ -356,7 +364,7 @@ class WorkspaceTests(unittest.TestCase):
 
     def test_init_and_clean_start_with_empty_index(self):
         self.write_spec("他人/旧需求.md", age=3600)
-        self.svn.return_value = {"spec/他人/旧需求.md"}
+        self.svn.return_value = ("ok", {"spec/他人/旧需求.md"})
         self.initialize()
         self.assertEqual(self.members(), [])
         self.assertIn("共 0 篇", self.index_text())
@@ -374,17 +382,110 @@ class WorkspaceTests(unittest.TestCase):
         old_modified = self.write_spec("bugfix/旧但本地改过.md", age=3600)
         mine = self.write_spec("bugfix/新方案.md", "# 新方案\n内容\n")
         self.write_spec("bugfix/他人更新.md")  # svn update 拉下：时间新，但本地无改动
-        self.svn.return_value = {"spec/bugfix/旧但本地改过.md", "spec/bugfix/新方案.md"}
+        self.svn.return_value = ("ok", {"spec/bugfix/旧但本地改过.md", "spec/bugfix/新方案.md", "spec/bugfix/已消失.md"})
         result = w.context(self.root, self.global_config)
         self.assertEqual(result["index"]["svn"], "ok")
         self.assertEqual(self.members(), ["spec/bugfix/新方案.md"])
-        self.svn.return_value = set()  # 提交后本地无改动，仍保留在名单中
+        self.svn.return_value = ("ok", set())  # 提交后本地无改动，仍保留在名单中
         self.assertEqual(w.context(self.root, self.global_config)["index"]["specs"], 1)
-        self.svn.return_value = None  # svn 不可用时不报错，只是跳过
+        self.svn.return_value = ("unavailable", set())  # svn 不可用时不报错，只是跳过
         self.assertEqual(w.context(self.root, self.global_config)["index"]["svn"], "unavailable")
         mine.unlink()
         self.assertEqual(w.context(self.root, self.global_config)["index"]["specs"], 0)
         self.assertTrue(old_modified.exists())
+
+    def test_removed_spec_is_not_collected_again_until_added(self):
+        self.initialize()
+        mine = self.write_spec("bugfix/方案.md")
+        self.svn.return_value = ("ok", {"spec/bugfix/方案.md"})
+        self.assertEqual(w.context(self.root, self.global_config)["index"]["specs"], 1)
+        w.query_index(self.root, self.global_config, remove=["spec/bugfix/方案.md"])
+        state = json.loads((self.personal / "index-state.json").read_text(encoding="utf-8"))
+        self.assertEqual((state["specs"], state["excluded"]), ([], ["spec/bugfix/方案.md"]))
+        self.assertEqual(w.context(self.root, self.global_config)["index"]["specs"], 0)  # svn 扫描不再收录
+        w.record_hook_write(self.root, self.global_config, {"tool_input": {"file_path": str(mine)}})
+        self.assertEqual(self.members(), [])  # hook 也不再收录
+        w.query_index(self.root, self.global_config, add=["spec/bugfix/方案.md"])
+        state = json.loads((self.personal / "index-state.json").read_text(encoding="utf-8"))
+        self.assertEqual((state["specs"], state["excluded"]), (["spec/bugfix/方案.md"], []))
+
+    def test_index_state_without_excluded_is_still_accepted(self):
+        self.initialize()
+        self.write_spec("a.md")
+        state = self.personal / "index-state.json"
+        since = json.loads(state.read_text(encoding="utf-8"))["since"]
+        state.write_text(json.dumps({"since": since, "specs": ["spec/a.md"]}), encoding="utf-8")
+        self.assertEqual(w.context(self.root, self.global_config)["problems"], [])
+        self.assertEqual(json.loads(state.read_text(encoding="utf-8")),
+                         {"since": since, "specs": ["spec/a.md"], "excluded": []})
+        state.write_text(json.dumps({"since": since, "specs": [], "excluded": "spec/a.md"}), encoding="utf-8")
+        self.assertTrue(any(p.startswith("索引") for p in w.context(self.root, self.global_config)["problems"]))
+
+    def test_merge_pending_skips_svn_collection(self):
+        self.initialize()
+        self.write_spec("他人/合并来的.md")
+        self.svn.return_value = ("merge_pending", set())
+        result = w.context(self.root, self.global_config)
+        self.assertEqual((result["index"]["svn"], result["index"]["specs"]), ("merge_pending", 0))
+
+    @unittest.skipUnless(shutil.which("svn") and shutil.which("svnadmin"), "需要本机 svn 命令行")
+    def test_merge_pending_detected_in_real_working_copy(self):
+        """在临时仓库里真实合并一次，确认合并进来的他人 spec 不被当作本地改动收录。"""
+        self.svn_patch.stop()
+        try:
+            repo = self.base / "repo"
+            url = "file:///" + repo.as_posix().lstrip("/")
+            wc, other = self.base / "wc", self.base / "other"
+
+            def svn(*args, cwd=self.base):
+                subprocess.run(["svn", "-q", "--non-interactive", *args], cwd=cwd, check=True, capture_output=True)
+            subprocess.run(["svnadmin", "create", str(repo)], check=True, capture_output=True)
+            svn("mkdir", "-m", "init", "--parents", f"{url}/trunk/spec", f"{url}/branches")
+            svn("checkout", f"{url}/trunk", str(wc))
+            (wc / "spec/mine.md").write_text("# 我的\n", encoding="utf-8")
+            svn("add", str(wc / "spec/mine.md"))
+            svn("commit", "-m", "mine", str(wc))
+            svn("copy", "-m", "branch", f"{url}/trunk", f"{url}/branches/b")
+            svn("checkout", f"{url}/branches/b", str(other))
+            (other / "spec/theirs.md").write_text("# 他人\n", encoding="utf-8")
+            svn("add", str(other / "spec/theirs.md"))
+            svn("commit", "-m", "theirs", str(other))
+            svn("update", str(wc))
+            (wc / "spec/mine.md").write_text("# 我的\n改动\n", encoding="utf-8")
+            self.assertEqual(w.svn_local_changes(wc), ("ok", {"spec/mine.md"}))
+            svn("merge", f"{url}/branches/b", ".", cwd=wc)
+            self.assertEqual(w.svn_local_changes(wc), ("merge_pending", set()))
+            svn("revert", "-R", ".", cwd=wc)
+            self.assertEqual(w.svn_local_changes(wc)[0], "ok")
+        finally:
+            self.svn = self.svn_patch.start()
+
+    def test_context_and_index_refuse_uninitialized_root(self):
+        self.initialize()
+        sub = self.root / "spec" / "sub"
+        sub.mkdir(parents=True)
+        spec_file = self.write_spec("sub/spec/x.md")  # 在 sub 看来也是 spec/ 下的文件
+        before = self.snapshot()
+        for call in (lambda: w.context(sub, self.global_config),
+                     lambda: w.query_index(sub, self.global_config, ["x"]),
+                     lambda: w.record_hook_write(sub, self.global_config, {"tool_input": {"file_path": str(spec_file)}})):
+            with self.assertRaisesRegex(w.WorkspaceError, "不是已初始化的工作区"):
+                call()
+        self.assertEqual(before, self.snapshot())
+        self.assertFalse((sub / w.DIRECTORY).exists())
+        script = self.skill / "scripts/workspace.py"
+        common = ["--root", str(sub), "--global-config", str(self.global_config)]
+        completed = subprocess.run([sys.executable, str(script), "index", *common], capture_output=True)
+        self.assertEqual(completed.returncode, 1)
+        self.assertIn("不是已初始化的工作区", json.loads(completed.stderr)["error"])
+        completed = subprocess.run([sys.executable, str(script), "context", *common, w.HOOK_FLAG], capture_output=True)
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertIn("不是已初始化的工作区", json.loads(completed.stdout)["hookSpecificOutput"]["additionalContext"])
+        completed = subprocess.run([sys.executable, str(script), "index", *common, w.HOOK_FLAG],
+                                   input=json.dumps({"tool_input": {"file_path": str(spec_file)}}).encode(), capture_output=True)
+        self.assertEqual((completed.returncode, completed.stdout, completed.stderr), (0, b"", b""))
+        self.assertFalse((sub / w.DIRECTORY).exists())
+        self.assertEqual(before, self.snapshot())
 
     def test_manual_add_remove_and_query(self):
         self.write_spec("chat/群聊日志.md", "# 好友群聊加日志\n记录 groupchat 发送\n", age=3600)
@@ -422,7 +523,7 @@ class WorkspaceTests(unittest.TestCase):
         self.personal.mkdir()
         (self.personal / "index.md").write_text(
             "# 需求1：名称\n描述：一句话。\n- spec/功能/方案.md：说明。\n- spec/已删除.md：说明。\n", encoding="utf-8")
-        w.context(self.root, self.global_config)
+        self.initialize()
         self.assertEqual(self.members(), ["spec/功能/方案.md"])
         self.assertTrue(self.index_text().startswith(w.INDEX_HEADER))
 
@@ -439,13 +540,19 @@ class WorkspaceTests(unittest.TestCase):
                '</target></status>').encode("utf-8")
         self.svn_patch.stop()
         try:
-            with patch.object(w.subprocess, "run", return_value=subprocess.CompletedProcess([], 0, xml, b"")):
+            with patch.object(w.subprocess, "run", return_value=subprocess.CompletedProcess([], 0, xml, b"")) as run:
                 self.assertEqual(w.svn_local_changes(self.root),
-                                 {"spec/改过.md", "spec/新目录/a.md", "spec/新目录/sub/b.md"})
+                                 ("ok", {"spec/改过.md", "spec/新目录/a.md", "spec/新目录/sub/b.md"}))
+            # 第二次调用检查 svn:mergeinfo：项目根目录和属性有改动的条目
+            self.assertEqual(run.call_args.args[0][-2:], [".", "spec\\没改.md"])
+            merge_diff = b"Property changes on: .\n___\nAdded: svn:mergeinfo\n   Merged /branches/b:r3-4\n"
+            with patch.object(w.subprocess, "run", side_effect=[subprocess.CompletedProcess([], 0, xml, b""),
+                                                                subprocess.CompletedProcess([], 0, merge_diff, b"")]):
+                self.assertEqual(w.svn_local_changes(self.root), ("merge_pending", set()))
             with patch.object(w.subprocess, "run", side_effect=FileNotFoundError("svn")):
-                self.assertIsNone(w.svn_local_changes(self.root))
+                self.assertEqual(w.svn_local_changes(self.root), ("unavailable", set()))
             with patch.object(w.subprocess, "run", return_value=subprocess.CompletedProcess([], 1, b"", b"E155007")):
-                self.assertIsNone(w.svn_local_changes(self.root))
+                self.assertEqual(w.svn_local_changes(self.root), ("unavailable", set()))
         finally:
             self.svn_patch.start()
 
@@ -463,6 +570,7 @@ class WorkspaceTests(unittest.TestCase):
         self.assertEqual(w.branch_path(f"{base}/branchs/2026_ship/release3_2026_07_21/"), "branchs/2026_ship/release3_2026_07_21")
         self.assertEqual(w.branch_path(f"{base}/trunk"), "trunk")
         self.assertIsNone(w.branch_path("svn://example.invalid/other/trunk"))
+        self.assertEqual(w.branch_path(f"{base}/branchs/2026_dev/%E4%B8%AD%20x"), "branchs/2026_dev/中 x")
         self.branch_patch.stop()
         try:
             with patch.object(w.subprocess, "run", return_value=subprocess.CompletedProcess([], 0, (base + "/trunk" + chr(10)).encode(), b"")):
@@ -533,6 +641,12 @@ class WorkspaceTests(unittest.TestCase):
             with patch.object(w.subprocess, "run", side_effect=FileNotFoundError("svn")):
                 with self.assertRaises(w.WorkspaceError):
                     w.svn_changelist(self.root, "AGENTS.md")
+            gbk = subprocess.CompletedProcess([], 1, b"", "svn: E000005: 拒绝访问".encode("gbk"))
+            with patch.object(w.subprocess, "run", return_value=gbk), \
+                    patch.object(w.locale, "getpreferredencoding", return_value="cp936"):
+                with self.assertRaisesRegex(w.WorkspaceError, "拒绝访问"):
+                    w.svn_changelist(self.root, "AGENTS.md")
+            self.assertEqual(w.decode_output("中文".encode("utf-8")), "中文")
         finally:
             self.changelist = self.changelist_patch.start()
 
@@ -570,6 +684,20 @@ class WorkspaceTests(unittest.TestCase):
         value = json.loads(settings.read_text(encoding="utf-8"))
         self.assertEqual((len(value["hooks"]["SessionStart"]), len(value["hooks"]["PostToolUse"])), (2, 1))
         self.assertIn(self.skill.as_posix(), value["hooks"]["PostToolUse"][0]["hooks"][0]["command"])
+
+    def test_claude_hooks_keep_user_commands_sharing_our_entry(self):
+        self.initialize()
+        settings = self.root / ".claude/settings.local.json"
+        value = json.loads(settings.read_text(encoding="utf-8"))
+        ours = value["hooks"]["SessionStart"][0]["hooks"][0]
+        mine = {"type": "command", "command": "echo mine"}
+        stale = {**ours, "command": ours["command"].replace("workspace.py", "old/workspace.py")}
+        value["hooks"]["SessionStart"] = [{"hooks": [mine, stale]}]
+        settings.write_text(json.dumps(value), encoding="utf-8")
+        self.sync()
+        session = json.loads(settings.read_text(encoding="utf-8"))["hooks"]["SessionStart"]
+        self.assertEqual(session, [{"hooks": [ours]}, {"hooks": [mine]}])
+        self.assertEqual(self.sync()["changes"], [])
 
     def test_write_hook_records_spec_and_ignores_others(self):
         self.initialize()
@@ -698,6 +826,47 @@ class WorkspaceTests(unittest.TestCase):
             with self.assertRaises(w.WorkspaceError):
                 w.record_coverage_task(self.root, self.global_config, task, True)
         self.assertEqual(before, self.snapshot())
+
+    def test_read_only_target_is_refused_without_leftovers(self):
+        self.initialize()
+        self.version()
+        before = self.snapshot()
+        os.chmod(self.agents, stat.S_IREAD)
+        try:
+            with self.assertRaisesRegex(w.WorkspaceError, "只读"):
+                self.sync()
+            self.assertEqual(before, self.snapshot())
+            self.assertEqual(list(self.root.glob(".mhxy-write-*")), [])
+        finally:
+            os.chmod(self.agents, stat.S_IREAD | stat.S_IWRITE)
+
+    def test_atomic_write_cleanup_never_masks_error(self):
+        target = self.root / "x.txt"
+        target.write_text("old")
+
+        def fail(source, destination):
+            os.chmod(source, stat.S_IREAD)  # 模拟临时文件被设成只读后替换失败
+            raise PermissionError("simulated replace failure")
+        with patch.object(w.os, "replace", side_effect=fail):
+            with self.assertRaisesRegex(PermissionError, "simulated"):
+                w.atomic_write(target, b"new")
+        self.assertEqual(target.read_text(), "old")
+        self.assertEqual(list(self.root.glob(".mhxy-write-*")), [])
+
+    def test_prompt_password_requires_apply_and_real_terminal(self):
+        script = [sys.executable, str(self.skill / "scripts/workspace.py"), "config",
+                  "--global-config", str(self.global_config), "--prompt-password"]
+        # stdin 为 NUL（Windows 下 isatty 为真）、stderr 被捕获时，必须立即报错而不是等待输入。
+        for extra, message in (([], "--apply"), (["--apply"], "交互终端")):
+            completed = subprocess.run(script + extra, stdin=subprocess.DEVNULL, capture_output=True, timeout=60)
+            self.assertEqual(completed.returncode, 1)
+            self.assertIn(message, json.loads(completed.stderr)["error"])
+        self.assertFalse(self.global_config.exists())
+        argv = ["workspace.py", "config", "--global-config", str(self.global_config), "--prompt-password", "--apply"]
+        with patch.object(sys, "argv", argv), patch.object(w.getpass, "getpass") as prompt, \
+                patch.object(sys.stdin, "isatty", return_value=True), patch.object(sys.stderr, "isatty", return_value=False):
+            self.assertEqual(w.main(), 1)
+        prompt.assert_not_called()
 
     def test_legacy_name_updates_in_place(self):
         self.initialize()

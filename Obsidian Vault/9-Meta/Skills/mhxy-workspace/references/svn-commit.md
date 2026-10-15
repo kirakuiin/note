@@ -11,7 +11,7 @@
 
 ## 格式
 
-格式由分支类型决定，分支类型以 context 输出的 `branch.kind` 为准：
+格式由分支类型决定，分支类型以 context 输出的 `branch.kind` 为准（按 SVN URL 判定，规则在 `workspace.py` 的 `classify_branch`；周期分支一定带日期，即 `_ship` 下的 `<类型>_YYYY_MM_DD`）：
 
 | 分支类型 | 格式 |
 | --- | --- |
@@ -84,15 +84,16 @@ python "<skill>/scripts/precommit.py" --root "<项目根目录>"
 | 字段 | 内容 | 怎么处理 |
 | --- | --- | --- |
 | `commit` | 待提交的修改、新增、删除和属性修改 | 核对是否都属于本次任务；混入的无关改动要指出 |
-| `unversioned` | 未纳入版本控制的文件 | 判断哪些是本次新建、需要先加入版本控制的，列进待提交清单并标明 |
+| `unversioned` | 未纳入版本控制的文件或目录 | 判断哪些是本次新建、需要先加入版本控制的，列进待提交清单并标明；新目录（及其中的文件）交给用户自己提交 |
 | `excluded_local_only` | 不应提交的本地文件：`.mhxy-workspace/`、`.claude/`、`AGENTS.md`、`CLAUDE.md` | 不提交。受版本控制的入口文件已在 `ignore-on-commit` 变更列表中（见 workspace-management.md），提交对话框默认不勾选 |
+| `ignore_on_commit` | 其他在 `ignore-on-commit` 变更列表中的改动 | 默认不提交，不列进待提交清单；用户要提交时由用户先移出该列表 |
 | `excluded_data` | 导表数据（`data/`） | 默认不提交，见上一节 |
-| `property_changes` | 属性改动，常见于外链更新 | 建议单独提交并加 `[NO MERGE]` |
+| `property_changes` | 属性改动，常见于外链更新 | 建议单独提交并加 `[NO MERGE]`；目录上的属性（`svn:externals` 通常在目录上）交给用户自己提交 |
 | `blocking` | 冲突、缺失文件、编码错误、语法错误 | **必须先解决**，否则不能交付 |
 | `warnings` | 混用换行符、新增的 `print`／调试断点／写死的设备 ID 等 | 逐条判断：属于正常代码就说明理由，否则修改 |
 
 - **编码和语法**：项目有 `tools/check_py_source_encoding.py` 时，脚本用它检查（`--expect-utf8 --compile`）；没有时（例如 release2）用内置检查：UTF-8 字节、utf-8 编码声明、语法编译。客户端是 Python 3.11，与本机一致，语法检查结果可信。
-- **范围**：只检查主工作副本，不含外链。
+- **范围**：只检查主工作副本，不含外链。编码检查和调试残留扫描的范围相同：待提交的修改／新增源码，以及未纳管的源码（含未纳管目录中的）。
 - 自检发现的问题修改后，重新运行一次，直到没有阻断问题。
 
 ## 改动执行检查
@@ -110,7 +111,7 @@ python "<skill>/scripts/precommit.py" --root "<项目根目录>"
 ## 交给用户的内容
 
 1. **提交说明**：一行，可以直接复制。
-2. **待提交文件**：根据自检结果列出 `commit` 中的文件，并标出需要加入版本控制的新文件、已排除的本地文件和导表数据。
+2. **待提交文件**：根据自检结果列出 `commit` 中的文件，并标出需要加入版本控制的新文件、已排除的本地文件、`ignore-on-commit` 中的改动和导表数据。新目录、目录属性修改和目录删除单独列出，说明需由用户自己提交（见「本地 Python 脚本」）。
 3. **自检结果**：阻断问题已全部解决；对保留下来的警告逐条说明理由。
 4. **询问是否代为提交**：问用户要不要由 agent 按以上说明和清单提交，还是自己提交。
 
@@ -120,12 +121,12 @@ python "<skill>/scripts/precommit.py" --root "<项目根目录>"
 
 ### 选择入口
 
-- **trunk、周期分支**：使用本技能的 `scripts/svn_commit.py`，由 Python 直接调用本机 `svn.exe`。按实际 SVN URL 识别 `trunk` 及 `_ship` 下的已知周期分支，类型复用 `workspace.py` 的 `PERIODIC_TYPES`（如 test、release、release2、zlp、newbie）；同时支持直接类型名与带日期的名称。不要先试 openforge 的提交接口，也不要改写已确认的 `finish` 说明来适应它的旧格式校验。
+- **trunk、周期分支**：使用本技能的 `scripts/svn_commit.py`，由 Python 直接调用本机 `svn.exe`。脚本按实际 SVN URL 判定分支类型，规则与「格式」中的 `branch.kind` 相同（`workspace.py` 的 `classify_branch`），只接受 `trunk` 和周期分支。不要先试 openforge 的提交接口，也不要改写已确认的 `finish` 说明来适应它的旧格式校验。
 - **研发分支**：继续使用 openforge MCP 的 `svn` 工具。Claude Code 下可能需要先用 ToolSearch 加载 `openforge svn`；不可用时说明未接入，由用户自己提交。
 
 ### 本地 Python 脚本
 
-仅处理工作副本根目录内明确列出的文件。支持修改、新增、删除和文件属性修改；拒绝目录、跨工作副本或已切换的文件、本地辅助文件和导表数据。新文件的父目录必须已受版本控制。本脚本不执行更新、合并、relocate、冲突处理或自动重试。
+仅处理工作副本根目录内明确列出的文件。支持修改、新增、删除和文件属性修改；拒绝跨工作副本或已切换的文件、本地辅助文件、导表数据和 `ignore-on-commit` 变更列表中的文件。**目录相关的改动都交给用户自己提交**：新目录（包括其中的文件，即上级目录尚未提交或未纳管时）、目录属性修改（如 `svn:externals`）和目录删除，脚本会在预览时拒绝并说明原因。本脚本不执行更新、合并、relocate、冲突处理或自动重试。
 
 1. 把已确认的**完整说明**写到临时 UTF-8 文本文件。脚本校验首行 `finish #工单号 描述`，不会拼接或改写说明。
 2. **只读预览**（以下文件名仅作例子，以本次确认的清单为准）：
@@ -139,11 +140,10 @@ python "<skill>/scripts/svn_commit.py" --root "<项目根目录>" --message-file
 3. **提交**：使用完全相同的参数，仅追加 `--apply`。脚本只添加清单内的新文件，再以 UTF-8 消息文件提交，随后读取**指定的新修订**，核验完整日志与实际变更路径集合。
 4. `committed: true` 且 `verified: true` 时报告新版本号；两个字段分别表示“已提交”和“日志与路径核验通过”，不能混用。
 
-失败处理：
-- `committed: false`：未发起提交；如果新文件已添加，保留并说明其本地状态。
-- `committed: null`：提交结果不明，先只读查询仓库日志确认结果，不重复提交。
+失败处理（任何失败都报告 `error` 原文，不自动 update、resolve、cleanup 或重试）：
+- `committed: false`：没有提交。包括预览阶段的拒绝，以及 SVN 在提交前或钩子阶段拒绝（版本过旧、冲突、非法目标、pre-commit 钩子拒绝等，判定的错误码见脚本 `REJECTED_CODES`）。如果新文件已添加，保留并说明其本地状态。
+- `committed: null`：提交结果不明（超时、连接中断、未知错误）。先只读查询仓库日志确认结果，不重复提交；超时时提示用户工作副本可能需要 cleanup。
 - `committed: true` 但 `verified: false`：已提交，报告版本号与核验错误，先核对仓库日志，不重复提交。
-- 冲突、版本过旧等错误：报告错误原文，不自动 update、resolve 或重试。
 
 ### openforge（研发分支）
 

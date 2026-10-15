@@ -12,7 +12,6 @@
 
 import argparse
 import csv
-import getpass
 import hashlib
 from html.parser import HTMLParser
 import http.cookiejar
@@ -103,10 +102,11 @@ class Client:
         if urlsplit(login_url).netloc != urlsplit(LOGIN).netloc:
             raise QueryError("未到达已识别的 CORP 登录页")
         form = corp_login.fill_corp_form(corp_login.corp_form(html), html, prefix, password)
-        self.read(login_url, urlencode(form).encode(), {"Origin": LOGIN, "Referer": login_url})
-        form.clear()
-        info = self.api("/account/user_info")
-        user = info.get("user", {})
+        try:
+            self.read(login_url, urlencode(form).encode(), {"Origin": LOGIN, "Referer": login_url})
+        finally:
+            form.clear()
+        user = as_dict(as_dict(self.api("/account/user_info"), "用户信息").get("user"), "用户信息")
         if (user.get("mail") or "").lower() != prefix + "@corp.netease.com":
             raise QueryError("登录未完成或账号不匹配；可能需要二次验证，未自动重试")
         self.csrf = user.get("csrf_token")
@@ -144,6 +144,19 @@ class Client:
             return data, extension
         except (HTTPError, URLError, OSError):
             raise QueryError("图片下载失败，可能需要认证或网络不可用") from None
+
+
+def as_dict(value, label):
+    """接口数据应为对象；不是时报“格式已变化”，不让后续 .get 抛出难懂的异常。"""
+    if not isinstance(value, dict):
+        raise QueryError(f"{label}格式已变化")
+    return value
+
+
+def issue_detail(client, issue_id):
+    """读取工单详情接口中的 base 对象。"""
+    detail = as_dict(client.api("/issue_show/base", {"id": issue_id}, post=True), "工单详情")
+    return as_dict(detail.get("base"), "工单详情")
 
 
 def resolve_user(client, selector, current_user):
@@ -197,7 +210,7 @@ def list_open_issues(client, project, user_id, tracker, page_size=100, target_ve
             "v[assigned_to_id][]": str(user_id), "page": page, "per_page": page_size,
             "sort": "id:asc", "c[]": ["id", "tracker", "subject", "assigned_to", "status", "fixed_version"],
         }
-        data = client.api("/issues", params)
+        data = as_dict(client.api("/issues", params), "工单列表")
         rows = data.get("list")
         if not isinstance(rows, list):
             raise QueryError("工单列表格式已变化")
@@ -210,11 +223,13 @@ def list_open_issues(client, project, user_id, tracker, page_size=100, target_ve
             raise QueryError("查询期间工单数量发生变化，请重新运行以获取完整结果")
         total = count
         for row in rows:
+            row = as_dict(row, "工单列表")
             issue_id = row.get("id")
             if not isinstance(issue_id, int) or issue_id in seen:
                 raise QueryError("分页出现重复或无效工单，未输出不完整结果")
             seen.add(issue_id)
-            if row.get("is_closed") is not False or row.get("assigned_to", {}).get("id") != user_id:
+            assignee = row.get("assigned_to")  # 未指派时为 null。
+            if row.get("is_closed") is not False or not isinstance(assignee, dict) or assignee.get("id") != user_id:
                 raise QueryError("服务端返回了不符合负责人或未关闭条件的工单")
             if (tracker == "*" or row.get("tracker") == tracker or str(row.get("tracker_id")) == tracker) and matches_target_version(row, target_version):
                 issues.append(row)
@@ -332,8 +347,7 @@ def query_rows(client, project, user_id, tracker, page_size=100, raw_description
         # 先按列表标题筛选，避免为不匹配的工单请求详情。
         if not matches_title_tags(subject, tags, title_tags_mode):
             continue
-        detail = client.api("/issue_show/base", {"id": issue["id"]}, post=True)
-        base = detail.get("base", {})
+        base = issue_detail(client, issue["id"])
         # 详情中的 assigned_to 是展示字符串；负责人 ID 以列表接口为准。
         if base.get("id") != issue["id"] or base.get("is_closed") is not False:
             raise QueryError(f"#{issue['id']} 的详情标识不一致或已关闭，请重新查询")
@@ -353,7 +367,7 @@ def issue_base(client, issue_id):
         parent_id 是直接父单号（字符串），没有父单时为 None；created_on 为接口原值（ISO 8601）。
     """
     workspace.validate_issue_id(str(issue_id))
-    base = client.api("/issue_show/base", {"id": int(issue_id)}, post=True).get("base", {})
+    base = issue_detail(client, int(issue_id))
     if base.get("id") != int(issue_id):
         raise QueryError(f"#{issue_id} 的详情标识不一致或无权限读取")
     subject, parent = base.get("subject"), base.get("parent_id")
@@ -518,6 +532,9 @@ def main(argv=None):
     parser.add_argument("--raw-description", action="store_true", help="保留接口原始 HTML 正文")
     parser.add_argument("--timeout", type=float, default=30)
     args = parser.parse_args(argv)
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
     try:
         if args.timeout <= 0 or not args.user.strip() or not args.tracker.strip():
             raise QueryError("超时须大于零，用户和标签不能为空")
@@ -536,8 +553,6 @@ def main(argv=None):
         password = None
         if args.show is not None:
             output = json.dumps(issue_base(client, args.show), ensure_ascii=False, indent=2) + "\n"
-            if hasattr(sys.stdout, "reconfigure"):
-                sys.stdout.reconfigure(encoding="utf-8")
             sys.stdout.write(output)
             return 0
         user_id = resolve_user(client, args.user, current_user)
@@ -554,8 +569,6 @@ def main(argv=None):
                                   "tracker": args.tracker, "title_tags": sorted(normalize_title_tags(args.title_tags)),
                                   "title_tags_mode": args.title_tags_mode, "target_version": args.target_version})
             output = json.dumps(result, ensure_ascii=False, indent=2) + "\n"
-        if hasattr(sys.stdout, "reconfigure"):
-            sys.stdout.reconfigure(encoding="utf-8")
         sys.stdout.write(output)
         return 2 if result and result["image_failures"] else 0
     except corp_login.LoginError as error:
@@ -564,7 +577,7 @@ def main(argv=None):
     except (workspace.WorkspaceError, OSError) as error:
         print(f"本地保存失败：{error}", file=sys.stderr)
         return 1
-    except (KeyError, TypeError, ValueError):
+    except (AttributeError, KeyError, TypeError, ValueError):
         print("查询失败：接口数据结构已变化，未输出部分结果", file=sys.stderr)
         return 1
     except KeyboardInterrupt:

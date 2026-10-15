@@ -18,7 +18,7 @@
 - 要修改的业务源码不在当前工作区根目录下时，修改前先读该仓库根目录的 `AGENTS.md`，遵守其中的规定（例如先写 spec）。
 - 导表数据在 `data/`，导表生成逻辑在 `builder/`。当前分支的资源一般在 `../_test`，全局资源目录只作补充。
 - 查客户端 API 先看项目 `docs/`、`stub/`、`tutorial/`；注意区分 PC、互通和高清资源。
-- 运行日志在客户端目录的 `Log/` 下，文件名带进程号（`log_<pid>.txt`、`errorlog_<pid>.txt`）。同机多开时几个客户端共用这个目录，要按进程号区分。确认操作是否报错时，用 `game-debugging.md` 的方法收集报错，日志文件只作补充。
+- 确认客户端操作是否报错时，按 `game-debugging.md`「收集客户端报错」收集；客户端目录 `Log/` 下的运行日志只作补充。
 - 工作区文档只用于定位；行为以实际代码、spec 和验证结果为准。
 
 ### 配置字段
@@ -27,7 +27,7 @@
 ### 需求索引
 - `.mhxy-workspace/index.md` 只收录建立或清理工作区之后新建或修改的 spec，由脚本自动收录和刷新；不要手工编辑，保存 spec 后也不需要维护它。
 - 定位需求：`python "{{workspace_script}}" index --root "." --query 关键词`（`--query` 可重复，需全部命中；查询前会先刷新）。
-- 用户要求把某个旧 spec 加入或移出索引时，在同一命令中加 `--add spec/...md` 或 `--remove spec/...md`。
+- 用户要求把某个旧 spec 加入或移出索引时，在同一命令中加 `--add spec/...md` 或 `--remove spec/...md`；移出的 spec 不再自动收录，直到再次 `--add`。
 
 ### 追踪工单
 - context 里的 `tracked_tasks` 是后续开发的默认背景。处理相关工作前读取它的 `description_path` 和相关图片，不要一次读取全部工单正文。
@@ -42,12 +42,12 @@
 | GPT 顶层主会话：规划并委派已授权的 Mock、自测、跑测及覆盖率测试任务 | `cli-testing.md`；客户端操作同时遵循 `game-debugging.md`，覆盖率同时读取 `coverage.md` |
 | 解释代码流程、设计、新增、修改、重构或审查代码 | `engineering-principles.md` |
 | 代码修改完成、交付之前（审查循环，决定是否需要审查） | `code-review.md` |
-| Mock、调试、debug、运行时探测、自测、确认客户端操作是否报错（委派执行时也要提供此文件） | `game-debugging.md` |
+| Mock、调试、debug、运行时探测、自测、确认某个客户端操作是否报错（委派执行时也要提供此文件；逐行检查未提交改动属于改动执行检查） | `game-debugging.md` |
 | 覆盖率的创建、设置、跑测、补测、查询、提交、删除 | `coverage.md`，客户端操作同时遵循 `game-debugging.md` |
 | 获取当前任务，追踪、追加、替换或取消追踪工单 | `task-tracking.md` |
 | 更新 SVN 工作副本 | `svn-update.md` |
-| 完成代码修改并交付时；用户要求撰写或检查 SVN 提交说明，或要求提交时 | `svn-commit.md` |
-| 用户同意或要求做改动执行检查（确认未提交改动在客户端跑通、不报错；不是覆盖率） | `exec-check.md`，客户端操作同时遵循 `game-debugging.md` |
+| 完成代码修改并交付时（在审查和运行验证之后）；用户要求撰写或检查 SVN 提交说明，或要求提交时 | `svn-commit.md` |
+| 用户同意或要求做改动执行检查（逐行确认未提交改动在客户端跑通、不报错；不是覆盖率） | `exec-check.md`，客户端操作同时遵循 `game-debugging.md` |
 | 提测（提交测试）：填写并保存提测单 | `test-request.md` |
 | 用户要求提 CR、生成 CR diff、提交代码审查（把已提交改动上传到 reviewboard） | `cr-diff.md` |
 | 用户明确要求创建开发分支，或把分支（含周期分支）检出到本地 | `branch.md` |
@@ -56,5 +56,5 @@
 ### 边界
 - 配置文件、本区段、追踪文件和索引只由 skill 脚本写入。
 - `.mhxy-workspace/` 是可清理的本地辅助目录，不放业务数据。
-- 初始化、配置更新和清理只在用户明确要求时执行。用户确认分支检出或复用后，可按 `branch.md` 执行 checkout、cleanup、switch，以及删除与目标不在同一仓库的旧资源工作副本；用户确认本次提交说明和文件清单后，可按 `svn-commit.md` 指定的入口提交；其他流程不执行 SVN 写操作。入口文件放入本地 `ignore-on-commit` 变更列表不影响服务器。
+- 初始化、配置更新和清理只在用户明确要求时执行。用户确认分支检出或复用后，可按 `branch.md` 执行 checkout、cleanup、switch，以及删除与目标不在同一仓库的旧资源工作副本；用户明确要求更新工作副本时，可按 `svn-update.md` 执行 update、switch；用户确认本次提交说明和文件清单后，可按 `svn-commit.md` 指定的入口提交（包括先 add 清单中的新文件）；其他流程不执行 SVN 写操作。入口文件放入本地 `ignore-on-commit` 变更列表不影响服务器。
 <!-- mhxy-workspace:end -->

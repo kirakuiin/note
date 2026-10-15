@@ -39,13 +39,19 @@
    python "<skill>/scripts/cr_diff.py" upload --root "." --issue <工单号> --desc-file "<描述文件>"
    ```
 
-   把以下内容列给用户：工单号、revision 列表、文件清单（排除了哪些 `data/` 文件）、`others_in_range`、全部字段。
-4. **确认后上传**：上传是对外提交，必须等用户明确确认后，才在同一命令后加 `--apply`。脚本会跟踪本次触发的 Jenkins 构建，输出 `build_url`、`result`，能从构建日志里找到 review 链接时也输出 `review_url`。
+   把以下内容列给用户：工单号、revision 列表、文件清单（`files`；`excluded_data` 是排除的 `data/` 文件，`not_in_diff` 是提交改过但 diff 里没有的文件）、`others_in_range`、全部字段。`previous_uploads` 不为空说明这个工单已经上传过，要特别告诉用户。
+4. **确认后上传**：上传是对外提交，必须等用户明确确认后，才在同一命令后加 `--apply`。
+   - Jenkins 接受触发后，脚本立即把队列地址（`queue_url`）打印到标准错误，并在 `.mhxy-workspace/code-review/<工单号>/applied.json` 记下 `queue_url` 和触发时间，然后跟踪本次构建，输出 `build_url`、`result`，能从构建日志里找到 review 链接时也输出 `review_url`。
+   - 默认最多等 100 秒，低于命令工具默认的 120 秒超时。用 `--wait` 调大时，命令工具的超时也要相应调大（比 `--wait` 多留 30 秒以上），否则工具先超时，看不到结果。
+   - 已有 `applied.json` 时脚本拒绝再次上传，再传会生成重复的 review。同一工单有了新提交、需要再提一次时也会被拦住：比较预览里 `previous_uploads[].revisions` 与本次修订，告诉用户会生成一个新的 review，用户确认后再加 `--force`；其他情况只有用户明确要求重新上传时才加。
 5. **交付**：
    - `result` 为 `SUCCESS`：给出 `review_url`；没有链接时请用户查看 POPO 通知。
-   - 其他结果、或等待超时（退出码 2）：把 `build_url` 和 `console_tail` 告诉用户，不要自行重试。插件的说明提到，没有 CR 权限时构建也可能显示成功，所以最终以 POPO 通知为准。
+   - 其他结果、等待超时、或 `error` 写着“已上传、结果未确认”（退出码都是 2）：已经上传了。把 `queue_url`、`build_url` 和 `console_tail` 告诉用户，请用户到 Jenkins 或 POPO 通知里确认，**不要重试**。插件的说明提到，没有 CR 权限时构建也可能显示成功，所以最终以 POPO 通知为准。
+   - 标准错误里已经出现 `queue_url` 后，即使退出码是 1 或命令被中断，也已经上传了，同样不要重试。
 
 脚本报错时按提示处理，不要绕过：
 - 找不到提交：核对工单号和当前分支。
 - diff 在 prepare 之后被改动，或分支变了：重新运行 prepare。
 - 描述超长：精简后重新预览。
+- 描述文件不是 UTF-8：用 UTF-8 重新保存后再预览。
+- 已上传过（`applied.json`）：把 `previous_uploads` 告诉用户，由用户决定是否加 `--force`。

@@ -36,6 +36,10 @@ class PrecheckError(Exception):
     """自检无法完成（svn 不可用、不是工作副本等）。"""
 
 
+class SvnTimeout(PrecheckError):
+    """svn 命令超时：命令可能仍在执行或已部分生效，调用方不能把它当作“svn 不可用”。"""
+
+
 def decode_output(data):
     """解码 svn 输出：先按 UTF-8，失败再按 GB18030（中文 Windows 上 svn 的提示用系统代码页）。"""
     try:
@@ -50,11 +54,14 @@ def svn_process(cwd, *args, timeout=120):
     其他脚本需要自己解释失败原因时用它；只关心成功输出时用 run_svn。
 
     Raises:
-        PrecheckError: svn 不可用或超时。
+        SvnTimeout: 超过 timeout 秒未结束。
+        PrecheckError: svn 不可用。
     """
     try:
         return subprocess.run(["svn", *map(str, args), "--non-interactive"], cwd=cwd,
                               capture_output=True, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        raise SvnTimeout(f"svn {args[0] if args else ''} 超过 {timeout} 秒未结束") from None
     except (OSError, subprocess.SubprocessError) as error:
         raise PrecheckError(f"svn 不可用：{error}") from None
 
@@ -90,10 +97,17 @@ def svn_status(root):
     return entries
 
 
+def in_scope(entry):
+    """条目是否属于可能提交的范围：不是本地辅助文件、导表数据，也不在 ignore-on-commit 变更列表中。"""
+    first = entry["path"].split("/", 1)[0]
+    return (first not in LOCAL_ONLY and first != DATA_DIRECTORY
+            and entry.get("changelist") != workspace.IGNORE_ON_COMMIT)
+
+
 def classify(entries):
     """把状态条目分为待提交、排除、未纳入版本控制、属性改动和阻断问题。"""
-    result = {"commit": [], "excluded_local_only": [], "excluded_data": [], "unversioned": [],
-              "property_changes": [], "blocking": []}
+    result = {"commit": [], "excluded_local_only": [], "excluded_data": [], "ignore_on_commit": [],
+              "unversioned": [], "property_changes": [], "blocking": []}
     for entry in entries:
         path, item = entry["path"], entry["item"]
         first = path.split("/", 1)[0]
@@ -106,6 +120,9 @@ def classify(entries):
             result["excluded_local_only"].append(path)
         elif first == DATA_DIRECTORY:
             result["excluded_data"].append(path)
+        elif entry.get("changelist") == workspace.IGNORE_ON_COMMIT:
+            result["ignore_on_commit"].append(f"{path}（{item if item in CHANGED_ITEMS else '属性修改'}）")
+            continue
         elif item == "unversioned":
             result["unversioned"].append(path)
         elif item in CHANGED_ITEMS:
@@ -117,17 +134,26 @@ def classify(entries):
     return result
 
 
-def source_files(root, entries):
-    """需要检查编码和语法的源码：待提交的修改／新增文件，以及未纳入版本控制的源码。"""
-    files = []
+def source_targets(root, entries):
+    """待检查的源码：[(路径, 状态)]。包括待提交的修改／新增文件，以及未纳入版本控制的源码（含未纳管目录中的）。
+
+    编码检查和调试残留扫描共用这份清单，范围保持一致。已加入版本控制的目录中，子文件各自是独立的状态条目。
+    """
+    targets = {}
     for entry in entries:
-        first = entry["path"].split("/", 1)[0]
-        if first in LOCAL_ONLY or first == DATA_DIRECTORY or entry["item"] not in ("modified", "added", "replaced", "unversioned"):
+        if not in_scope(entry) or entry["item"] not in ("modified", "added", "replaced", "unversioned"):
             continue
         path = root / entry["path"]
-        candidates = path.rglob("*") if path.is_dir() else [path]
-        files += [p for p in candidates if p.is_file() and p.suffix in SOURCE_SUFFIXES]
-    return sorted(set(files))
+        candidates = path.rglob("*") if entry["item"] == "unversioned" and path.is_dir() else [path]
+        for candidate in candidates:
+            if candidate.is_file() and candidate.suffix in SOURCE_SUFFIXES:
+                targets[candidate] = entry["item"]
+    return sorted(targets.items())
+
+
+def source_files(root, entries):
+    """需要检查编码和语法的源码文件（见 source_targets）。"""
+    return [path for path, _ in source_targets(root, entries)]
 
 
 def check_sources(root, files):
@@ -146,8 +172,11 @@ def check_sources(root, files):
             warnings.append(f"{rel}：混用 CRLF 和 LF 换行")
     tool = root / ENCODING_TOOL
     if tool.is_file():
-        completed = subprocess.run([sys.executable, "-B", str(tool), "--root", ".", "--expect-utf8", "--compile", *relative],
-                                   cwd=root, capture_output=True, timeout=300)
+        try:
+            completed = subprocess.run([sys.executable, "-B", str(tool), "--root", ".", "--expect-utf8", "--compile",
+                                        *relative], cwd=root, capture_output=True, timeout=300)
+        except subprocess.TimeoutExpired:
+            raise PrecheckError(f"{ENCODING_TOOL} 超过 300 秒未结束") from None
         output = completed.stdout.decode("utf-8", "replace").splitlines()
         issues = [line for line in output if line.strip() and not line.startswith("OK")]
         if completed.returncode:
@@ -173,29 +202,49 @@ def check_sources(root, files):
     return blocking, warnings, "内置检查（项目没有编码检查工具）"
 
 
-def added_lines(root, entry):
+def decode_line(data):
+    """解码单行或单个文件：先 UTF-8，失败再按 GB18030（兼容系统代码页 cp936），无法解码的字节替换掉。"""
+    try:
+        return data.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        return data.decode("gb18030", "replace")
+
+
+def diff_added_lines(data):
+    """从 svn diff 的原始字节中取出新增行。
+
+    svn diff 的文件头（Index:、---、+++）用系统代码页输出，内容行是文件原始字节（通常 UTF-8），
+    整段解码会因编码混用而失败，因此逐行解码。只把 @@ 块内以 + 开头的行算作新增；
+    Index: 或 Property changes on: 开始新的头部，属性块（## 开头）中的行不算源码新增。
+    """
+    lines, in_hunk = [], False
+    for raw in data.splitlines():
+        if raw.startswith((b"Index: ", b"Property changes on: ")):
+            in_hunk = False
+        elif raw.startswith(b"@@"):
+            in_hunk = True
+        elif in_hunk and raw.startswith(b"+"):
+            lines.append(decode_line(raw[1:]))
+    return lines
+
+
+def added_lines(root, relative, item):
     """返回本次新增的行：修改的文件取 svn diff 的新增行，新文件取全文。"""
-    path = root / entry["path"]
-    if entry["item"] in ("added", "unversioned"):
-        if not path.is_file():
-            return []
-        return workspace.decode_document(path.read_bytes())[0].splitlines()
-    diff = workspace.decode_document(run_svn(root, "diff", "--internal-diff", entry["path"]))[0]
-    return [line[1:] for line in diff.splitlines() if line.startswith("+") and not line.startswith("+++")]
+    path = root / relative
+    if item in ("added", "unversioned"):
+        return decode_line(path.read_bytes()).splitlines() if path.is_file() else []
+    return diff_added_lines(run_svn(root, "diff", "--internal-diff", relative))
 
 
 def check_leftovers(root, entries):
-    """扫描待提交源码新增行中的疑似调试残留，只返回警告。"""
+    """扫描待提交源码新增行中的疑似调试残留，只返回警告；范围与编码检查相同（见 source_targets）。"""
     warnings = []
-    for entry in entries:
-        first = entry["path"].split("/", 1)[0]
-        if (first in LOCAL_ONLY or first == DATA_DIRECTORY or not entry["path"].endswith(SOURCE_SUFFIXES)
-                or entry["item"] not in ("modified", "added", "replaced", "unversioned")):
-            continue
-        for line in added_lines(root, entry):
+    for path, item in source_targets(root, entries):
+        relative = path.relative_to(root).as_posix()
+        for line in added_lines(root, relative, item):
             for pattern, label in LEFTOVERS:
                 if pattern.search(line):
-                    warnings.append(f"{entry['path']}：{label}：{line.strip()[:80]}")
+                    warnings.append(f"{relative}：{label}：{line.strip()[:80]}")
     return warnings
 
 
@@ -211,7 +260,8 @@ def precheck(root_arg):
         result["warnings"].append("有属性改动（可能是外链更新）：建议与代码分开提交，并在说明末尾加 [NO MERGE]")
     if result["excluded_data"]:
         result["warnings"].append("导表数据默认不提交，已从待提交清单排除，请自行处理")
-    for key in ("commit", "excluded_local_only", "excluded_data", "unversioned", "property_changes", "warnings"):
+    for key in ("commit", "excluded_local_only", "excluded_data", "ignore_on_commit", "unversioned", "property_changes",
+                "warnings"):
         if len(result[key]) > LIST_LIMIT:
             result[key] = result[key][:LIST_LIMIT] + [f"……另有 {len(result[key]) - LIST_LIMIT} 项未列出"]
     return {"root": str(root), "branch": workspace.svn_branch(root), "source_check": method, **result}
@@ -226,7 +276,8 @@ def main():
     args = parser.parse_args()
     try:
         result = precheck(args.root)
-    except (PrecheckError, OSError, ElementTree.ParseError) as error:
+    except (PrecheckError, workspace.WorkspaceError, OSError, ElementTree.ParseError,
+            subprocess.SubprocessError) as error:
         print(json.dumps({"error": str(error)}, ensure_ascii=False), file=sys.stderr)
         return 1
     print(json.dumps(result, ensure_ascii=False, indent=2))

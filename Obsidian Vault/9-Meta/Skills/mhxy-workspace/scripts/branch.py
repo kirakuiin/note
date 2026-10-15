@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """创建开发分支，并预览或检出开发分支和周期分支到本地。流程说明见 references/branch.md。"""
 import argparse
+from collections import Counter
 from datetime import date, datetime
 import json
 import os
@@ -32,7 +33,7 @@ GET_BRANCH_API = "https://artrestrans.eros.nie.netease.com/api/getbranch"
 POLL_INTERVAL = 2
 POLL_ATTEMPTS = 20
 HTTP_TIMEOUT = 30
-SVN_TIMEOUT = 3600
+SVN_TIMEOUT = 3600  # checkout、switch、cleanup 和工作副本状态检查：资源工作副本很大，可能很慢。
 INFO_TIMEOUT = 120
 CONFIG_PATH = Path.home() / ".mhxy-workspace" / "config.json"
 # svn info 明确表示目标不存在的错误码：路径不存在、URL 在该版本不存在、部分目标不存在、
@@ -88,6 +89,8 @@ def run_svn(*args, cwd=None, timeout=SVN_TIMEOUT):
     """运行 SVN 命令并返回 CompletedProcess，失败时保留输出供调用方解释（见 precommit.svn_process）。"""
     try:
         return precommit.svn_process(cwd, *args, timeout=timeout)
+    except precommit.SvnTimeout as error:
+        raise BranchError(f"SVN 命令超时：{error}；命令可能仍未完成，先检查工作副本状态再决定是否重试") from None
     except precommit.PrecheckError as error:
         raise BranchError(f"SVN 命令无法执行：{error}") from None
 
@@ -259,13 +262,21 @@ def row_matches_resource(row, name):
         url.endswith(f"/{name}/{folder}") for folder in RES_SUBDIRS)
 
 
-def poll_creation(name, include_resources):
-    """按服务端约定轮询最新 20 条记录并给出最终状态。"""
+def relevant_rows(rows, name, include_resources):
+    """最新 20 条记录中与本分支相关的记录，按完整内容计数，用于区分创建前已有的记录。"""
+    return Counter(json.dumps(row, sort_keys=True, ensure_ascii=False) for row in rows[:20]
+                   if row_matches_script(row, name) or (include_resources and row_matches_resource(row, name)))
+
+
+def poll_creation(name, include_resources, before=None):
+    """按服务端约定轮询最新 20 条记录并给出最终状态。
+
+    before 是发送创建请求前的 relevant_rows 快照；只看之后新出现的记录，以免把以前同名创建失败的旧记录当作本次结果。
+    """
     urls = branch_urls(name, include_resources)
+    before = before or Counter()
     for attempt in range(POLL_ATTEMPTS):
-        rows = branch_rows()[:20]
-        relevant = [row for row in rows if row_matches_script(row, name) or
-                    (include_resources and row_matches_resource(row, name))]
+        relevant = [json.loads(row) for row in (relevant_rows(branch_rows(), name, include_resources) - before).elements()]
         failed = next((row for row in relevant if row.get("msg") != "ok"), None)
         if failed:
             return {"status": "failed", "msg": failed.get("msg"), "urls": urls}
@@ -290,16 +301,24 @@ def create_preview(purpose, base="release", no_res=False, config=None, today=Non
             "author": author, "create_resources": not no_res, "parameters": parameters, "urls": urls}
 
 
-def create(purpose, base="release", no_res=False, apply=False, config=None, today=None):
-    """预览或执行服务端分支创建并返回创建状态。"""
+def create(purpose, base="release", no_res=False, apply=False, config=None, today=None, expected=None):
+    """预览或执行服务端分支创建并返回创建状态。
+
+    执行时必须用 expected 传入预览确认的分支名：分支名含当天日期，跨日后重新计算的名称会不同，不一致时拒绝创建。
+    """
     result = create_preview(purpose, base, no_res, config, today)
+    if expected is not None and expected != result["branch"]:
+        raise BranchError(f"确认的分支名 {expected} 与当前计算的 {result['branch']} 不一致（日期可能已变化），请重新预览并确认")
     if apply:
+        if expected is None:
+            raise BranchError("创建时必须用 --branch 传入预览中确认的完整分支名")
+        before = relevant_rows(branch_rows(), result["branch"], not no_res)
         # 请求超时等网络错误时服务端可能已经执行了创建，因此仍以轮询结果为准，并附上请求错误。
         try:
             create_branch_request(result["parameters"])
         except BranchError as error:
             result["request_error"] = str(error)
-        result.update(poll_creation(result["branch"], not no_res))
+        result.update(poll_creation(result["branch"], not no_res, before))
     result["preview"] = not apply
     result["applied"] = apply
     return result
@@ -376,26 +395,37 @@ def validate_root(root):
     return root.resolve()
 
 
+def working_copy_url(directory):
+    """目录是可复用工作区（普通目录，含普通目录 mhimage 且是 SVN 工作副本）时返回 mhimage 的 URL，否则返回 None。
+
+    reusable 和 --reuse 共用这一标准；svn 的其他错误（网络、超时等）抛出 BranchError。
+    """
+    image = directory / "mhimage"
+    if (not directory.is_dir() or has_reparse_attribute(directory)
+            or not image.is_dir() or has_reparse_attribute(image)):
+        return None
+    try:
+        return svn_info(image, item="url") or None
+    except BranchError as error:
+        if "working copy" in str(error).lower() or "155007" in str(error):
+            return None
+        raise
+
+
 def reusable(root):
     """列出总目录下含 mhimage SVN 工作副本的直接子目录，不扫描状态。"""
     root = validate_root(Path(root))
     candidates = []
     warnings = []
     for directory in sorted(root.iterdir(), key=lambda item: item.name.lower()):
-        if not directory.is_dir() or has_reparse_attribute(directory):
-            continue
-        image = directory / "mhimage"
-        if not image.is_dir() or has_reparse_attribute(image):
-            continue
         try:
-            url = svn_info(image, item="url")
+            url = working_copy_url(directory)
         except BranchError as error:
-            if "working copy" in str(error).lower() or "155007" in str(error):
-                continue
             warnings.append(f"{directory.name}：{error}")
             continue
         if not url:
             continue
+        image = directory / "mhimage"
         modified = datetime.fromtimestamp(image.stat().st_mtime).astimezone().isoformat(timespec="seconds")
         candidates.append({"directory": directory.name, "mhimage_url": url, "last_modified": modified})
     return {"action": "reusable", "root": str(root), "candidates": candidates, "warnings": warnings}
@@ -465,7 +495,7 @@ def resolve_branch_urls(name, rows=None):
 
 
 def resolve_reuse(root, reuse_arg):
-    """校验复用目录并拒绝当前会话目录及其祖先目录。"""
+    """校验复用目录：必须是总目录的直接子目录并含 mhimage 工作副本（同 reusable），且不是当前会话目录或其祖先。"""
     candidate = Path(reuse_arg).expanduser()
     if not candidate.is_absolute():
         candidate = root / candidate
@@ -477,6 +507,10 @@ def resolve_reuse(root, reuse_arg):
     session = Path.cwd().resolve()
     if selected == session or selected in session.parents:
         raise BranchError(f"拒绝复用当前会话目录或其祖先目录：{selected}")
+    if selected.parent != root:
+        raise BranchError(f"复用目录必须是分支总目录 {root} 的直接子目录：{selected}")
+    if not working_copy_url(selected):
+        raise BranchError(f"复用目录中没有 mhimage SVN 工作副本，不是可复用的工作区：{selected}")
     return selected
 
 
@@ -551,9 +585,20 @@ def validate_checkout_target(target, reuse=None):
     raise BranchError(f"目标目录已存在：{target}")
 
 
+def local_only(path):
+    """mhimage 下的入口文件和本地辅助目录（sync 写入，不会被提交）不算阻止复用的改动。"""
+    parts = path.strip().replace("\\", "/").split("/")
+    return len(parts) > 1 and parts[1] in precommit.LOCAL_ONLY
+
+
 def inspect_reuse(reuse):
-    """用安静模式检查每个现有工作副本，有任何输出就拒绝复用。"""
+    """检查每个现有工作副本，有本地修改、未纳管文件（?）或其他输出就拒绝复用。
+
+    不用 -q：switch --force 会把未纳管文件原样带进新分支。被忽略的文件（I，如构建产物）不显示，不阻止复用；
+    mhimage 顶层的 AGENTS.md、CLAUDE.md、.claude、.mhxy-workspace 由 sync 维护，随工作副本保留，不阻止复用。
+    """
     changed = []
+    unversioned = []
     checked = []
     for folder in ("mhimage", *RES_SUBDIRS):
         local = reuse / folder
@@ -564,21 +609,30 @@ def inspect_reuse(reuse):
                 raise BranchError(f"复用子路径必须是普通目录：{local}")
         if not local.is_dir():
             continue
-        completed = run_svn("status", "-q", "--ignore-externals", folder, cwd=reuse, timeout=INFO_TIMEOUT)
+        completed = run_svn("status", "--ignore-externals", folder, cwd=reuse, timeout=SVN_TIMEOUT)
         if completed.returncode:
             raise BranchError(svn_error(completed, "status"))
-        output = precommit.decode_output(completed.stdout) + precommit.decode_output(completed.stderr)
+        # 不加 -q 时外链定义总会显示为 X 行（即使 --ignore-externals），不算本地改动。
+        lines = [line for line in (precommit.decode_output(completed.stdout)
+                                   + "\n" + precommit.decode_output(completed.stderr)).splitlines()
+                 if line.strip() and not line.startswith("X ") and not line.startswith("--- Changelist")
+                 and not (folder == "mhimage" and local_only(line[8:]))]
         checked.append(folder)
-        if output:
+        unversioned += [line[8:].strip() for line in lines if line.startswith("?")]
+        if any(not line.startswith("?") for line in lines):
             changed.append(folder)
     if changed:
         raise BranchError("复用目录状态检查有输出，拒绝切换：" + ", ".join(changed))
+    if unversioned:
+        listed = unversioned[:20] + ([f"……另有 {len(unversioned) - 20} 项"] if len(unversioned) > 20 else [])
+        raise BranchError("复用目录中有未纳入版本控制的文件，switch 会把它们带进新分支，拒绝切换；"
+                          "请先由用户处理：" + ", ".join(listed))
     return checked
 
 
 def full_status(path, cwd):
     """返回工作副本完整状态（含未纳管、被忽略的文件和外链）的输出；空字符串表示干净，可以安全删除。"""
-    completed = run_svn("status", "--no-ignore", str(path), cwd=cwd, timeout=INFO_TIMEOUT)
+    completed = run_svn("status", "--no-ignore", str(path), cwd=cwd, timeout=SVN_TIMEOUT)
     if completed.returncode:
         raise BranchError(svn_error(completed, "status"))
     return (precommit.decode_output(completed.stdout) + precommit.decode_output(completed.stderr)).strip()
@@ -589,8 +643,8 @@ def cross_repository_folders(reuse, urls):
 
     开发分支资源在 svn 仓库，周期分支资源在 xyq-res 仓库，两个方向的复用都可能跨仓库，因此检查每个已存在的
     资源子目录。按仓库 UUID 判断，不比较 URL，以免协议不同（svn:// 与 https://）被误判；任一侧查不到 UUID 时
-    无法判断，直接报错。跨仓库的子目录会被挪开后删除，因此要求它的完整状态为空：inspect_reuse 的 status -q
-    不显示未纳管、被忽略的文件。
+    无法判断，直接报错。跨仓库的子目录会被挪开后删除，因此要求它的完整状态为空：inspect_reuse 的 status
+    不显示被忽略的文件。
     """
     folders = []
     for folder, url in urls["resources"].items():
@@ -640,7 +694,8 @@ def stale_resource_warnings(reuse, urls):
     for folder in RES_SUBDIRS:
         if folder not in urls["resources"] and (reuse / folder).is_dir():
             current = svn_info(folder, item="url", cwd=reuse)
-            warnings.append(f"复用目录中的 {folder} 不在本次检出范围，保持原样，仍指向：{current}")
+            where = f"仍指向：{current}" if current else "未能读取其 SVN URL（可能不是工作副本）"
+            warnings.append(f"复用目录中的 {folder} 不在本次检出范围，保持原样，{where}")
     return warnings
 
 
@@ -692,8 +747,7 @@ def execute_steps(result):
             elif step["type"] == "remove":
                 outcome = remove_set_aside(step["path"])
             else:
-                timeout = SVN_TIMEOUT if step["args"][0] in ("checkout", "switch") else INFO_TIMEOUT
-                completed_process = run_svn(*step["args"], cwd=step["cwd"], timeout=timeout)
+                completed_process = run_svn(*step["args"], cwd=step["cwd"], timeout=SVN_TIMEOUT)
                 if completed_process.returncode:
                     raise BranchError(svn_error(completed_process, step["args"][0]))
                 outcome = "ok"
@@ -735,6 +789,7 @@ def main(argv=None):
     create_parser.add_argument("--purpose", required=True)
     create_parser.add_argument("--base", default="release")
     create_parser.add_argument("--no-res", action="store_true")
+    create_parser.add_argument("--branch", help="预览中确认的完整分支名；--apply 时必填，与当前计算结果不一致则拒绝")
     create_parser.add_argument("--apply", action="store_true")
 
     reusable_parser = commands.add_parser("reusable", parents=[common], help="列出可复用的本地工作区")
@@ -752,7 +807,7 @@ def main(argv=None):
         if args.action == "name":
             result = {"action": "name", **name_result(args.purpose, config)}
         elif args.action == "create":
-            result = create(args.purpose, args.base, args.no_res, args.apply, config)
+            result = create(args.purpose, args.base, args.no_res, args.apply, config, expected=args.branch)
         elif args.action == "reusable":
             result = reusable(resolve_root(args.root, config))
         else:

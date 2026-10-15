@@ -81,9 +81,12 @@ class Client:
         """读取已有提测单的全部字段。"""
         try:
             value = json.loads(self._read("/testreport/getTestRequest", {"testRequestID": request_id}))
-            return json.loads(value) if isinstance(value, str) else value
+            value = json.loads(value) if isinstance(value, str) else value
         except ValueError:
             raise TestReportError("提测单数据不是 JSON，接口可能已变化") from None
+        if not isinstance(value, dict):
+            raise TestReportError(f"读不到提测单 {request_id}，ID 可能有误或接口已变化")
+        return value
 
     def save(self, fields):
         """保存提测单，返回提测单 ID。"""
@@ -170,6 +173,22 @@ def attention_issues(html):
     return issues
 
 
+def existing_request(client, request_id, redmine_id):
+    """读取要更新的提测单，并核对它确实是该总单下的这张单；不符时报错，不退回新建。"""
+    record = client.get_request(request_id)
+    if str(record.get("_id") or "") != request_id or str(record.get("redmineId") or "") != redmine_id:
+        raise TestReportError(f"提测单 {request_id} 不存在或不属于总单 {redmine_id}，未保存")
+    return record
+
+
+def read_text(path):
+    """读取用户提供的 UTF-8 文本文件（允许 BOM）。"""
+    try:
+        return path.read_text(encoding="utf-8-sig")
+    except UnicodeDecodeError:
+        raise TestReportError(f"{path} 不是 UTF-8 编码，请用 UTF-8 保存后重试") from None
+
+
 def connect(config):
     username, password = corp_login.load_credentials(config)
     try:
@@ -195,7 +214,7 @@ def prepare(client, issue_id):
             "output_type": info.get("output_type", ""), "version": info.get("version", ""), "existing": existing}
 
 
-def main():
+def main(argv=None):
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8")
@@ -209,22 +228,29 @@ def main():
     parser.add_argument("--attention-file", type=Path, help="save：“测试需特别注意”HTML 文件（UTF-8）")
     parser.add_argument("--apply", action="store_true", help="save：确认后实际保存")
     parser.add_argument("--config", type=Path, default=Path.home() / ".mhxy-workspace/config.json")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     try:
+        # 先检查参数和本地文件，再登录。
+        if args.action == "prepare":
+            if not args.issue_id or not re.fullmatch(r"\d+", args.issue_id):
+                raise TestReportError("prepare 需要 --issue-id（纯数字单号）")
+        else:
+            if not args.redmine_id or not re.fullmatch(r"\d+", args.redmine_id):
+                raise TestReportError("save 需要 --redmine-id（纯数字总单号）")
+            if args.test_request_id is not None and not re.fullmatch(r"\d+", args.test_request_id):
+                raise TestReportError("--test-request-id 必须是纯数字")
+            attention = read_text(args.attention_file).strip() if args.attention_file else ""
         client = connect(args.config)
         if args.action == "prepare":
-            if not args.issue_id:
-                raise TestReportError("prepare 需要 --issue-id")
             result = prepare(client, args.issue_id)
         else:
-            if not args.redmine_id:
-                raise TestReportError("save 需要 --redmine-id")
-            attention = args.attention_file.read_text(encoding="utf-8").strip() if args.attention_file else ""
-            existing = client.get_request(args.test_request_id) if args.test_request_id else None
+            existing = existing_request(client, args.test_request_id, args.redmine_id) if args.test_request_id else None
             fields = build_fields(args.redmine_id, client.redmine_info(args.redmine_id), existing,
                                   args.patch, args.cli_cover, attention)
+            if args.test_request_id:
+                fields["testRequestID"] = args.test_request_id
             issues = attention_issues(fields["attition"])
-            result = {"applied": args.apply, "mode": "更新" if existing else "新建", "fields": fields,
+            result = {"applied": args.apply, "mode": "更新" if args.test_request_id else "新建", "fields": fields,
                       "attention_issues": issues}
             if args.apply and issues:
                 raise TestReportError("“测试需特别注意”内容有问题，未保存：" + "；".join(issues))
@@ -235,6 +261,9 @@ def main():
         return 0
     except (LoginError, OSError) as error:
         print(json.dumps({"error": str(error)}, ensure_ascii=False), file=sys.stderr)
+        return 1
+    except (AttributeError, KeyError, TypeError):
+        print(json.dumps({"error": "提测系统返回的数据结构已变化，未保存"}, ensure_ascii=False), file=sys.stderr)
         return 1
 
 

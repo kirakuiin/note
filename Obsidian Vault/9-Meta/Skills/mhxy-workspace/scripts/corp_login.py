@@ -128,11 +128,20 @@ def fill_corp_form(form, html, prefix, password):
     return form
 
 
+def interactive_terminal():
+    """能否隐藏输入密码：标准输入和标准错误（getpass 的提示写在这里）都要连着终端。
+
+    Windows 上 agent 命令工具的标准输入是 NUL，属于字符设备，`stdin.isatty()` 也为 True；
+    只看标准输入时 getpass 会一直等待输入。这类工具的标准错误是管道，据此排除。
+    """
+    return all(stream is not None and stream.isatty() for stream in (sys.stdin, sys.stderr))
+
+
 def load_credentials(config_path, username=None):
     """从用户级配置读取 CORP 账号和密码；显式切换账号时不复用其他账号的密码。
 
-    配置中没有密码时只在交互终端隐藏输入（不保存）；没有交互终端时报错，由用户先通过
-    workspace.py config --prompt-password 保存密码。
+    配置中没有密码（或为空串）时只在交互终端（见 interactive_terminal）隐藏输入（不保存）；
+    没有交互终端时报错，由用户先通过 workspace.py config --prompt-password 保存密码。
 
     Args:
         config_path: 用户级配置文件路径（Path）。
@@ -159,7 +168,7 @@ def load_credentials(config_path, username=None):
     if username and (not saved_user or account_prefix(username) != account_prefix(saved_user)):
         password = None
     if not password:
-        if not sys.stdin.isatty():
+        if not interactive_terminal():
             raise LoginError("未配置密码，请在交互终端输入或填写全局配置")
         password = getpass.getpass("CORP password (not saved): ")
     if not isinstance(password, str) or not password:

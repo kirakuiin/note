@@ -1,8 +1,11 @@
 """提测脚本与 eros 登录的隔离测试；不访问网络。"""
+import io
+import json
 from pathlib import Path
 import sys
+import tempfile
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
@@ -81,6 +84,47 @@ class TestReportTests(unittest.TestCase):
         self.assertEqual(result["refreshed"]["sysName"], "单838743")
         self.assertEqual([e["testRequestID"] for e in result["existing"]], ["222"])
         self.assertEqual(result["existing"][0]["link"], t.preview_link("222"))
+
+    def run_main(self, argv, client=None):
+        """运行命令行；connect 被替换，返回 (退出码, 标准输出 JSON, 标准错误 JSON, connect mock)。"""
+        out, err = io.StringIO(), io.StringIO()
+        with patch.object(t, "connect", return_value=client) as connect, \
+             patch.object(sys, "stdout", out), patch.object(sys, "stderr", err):
+            code = t.main(argv)
+        return (code, json.loads(out.getvalue()) if out.getvalue() else None,
+                json.loads(err.getvalue()) if err.getvalue() else None, connect)
+
+    def test_cli_validates_arguments_and_files_before_login(self):
+        with tempfile.TemporaryDirectory() as directory:
+            gbk = Path(directory) / "attention.html"
+            gbk.write_bytes("<p>重点</p>".encode("gbk"))
+            for argv, message in ((["prepare"], "--issue-id"), (["prepare", "--issue-id", "abc"], "--issue-id"),
+                                  (["save"], "--redmine-id"), (["save", "--redmine-id", "8387a"], "--redmine-id"),
+                                  (["save", "--redmine-id", "838743", "--test-request-id", "x"], "--test-request-id"),
+                                  (["save", "--redmine-id", "838743", "--attention-file", str(gbk)], "UTF-8")):
+                code, _, error, connect = self.run_main(argv)
+                self.assertEqual(code, 1, argv)
+                self.assertIn(message, error["error"])
+                connect.assert_not_called()
+
+    def test_update_requires_matching_request_and_never_falls_back_to_new(self):
+        client = MagicMock()
+        client.redmine_info.return_value = INFO
+        argv = ["save", "--redmine-id", "838743", "--test-request-id", "1790135449544", "--patch", "模板"]
+        for record in ({**EXISTING, "_id": "999"}, {**EXISTING, "redmineId": "1"}, {}):
+            client.get_request.return_value = record
+            code, _, error, _ = self.run_main(argv, client)
+            self.assertEqual(code, 1)
+            self.assertIn("1790135449544", error["error"])
+        client.get_request.return_value = EXISTING
+        code, result, _, _ = self.run_main(argv, client)
+        self.assertEqual(code, 0)
+        self.assertEqual((result["mode"], result["fields"]["testRequestID"]), ("更新", "1790135449544"))
+        client.save.assert_not_called()
+        api = t.Client(MagicMock())
+        api._read = MagicMock(return_value="null")
+        with self.assertRaises(t.TestReportError):
+            api.get_request("1")
 
     def test_attention_html_check(self):
         self.assertEqual(t.attention_issues("<p>回归慧根<br/>测一下<strong>蓝耗</strong></p><ul><li>a</li></ul>"), [])

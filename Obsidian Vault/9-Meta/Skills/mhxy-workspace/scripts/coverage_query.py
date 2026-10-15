@@ -215,6 +215,9 @@ def query(client, task_name, branch, revision=None, coder_name=None, submitted_a
 
 
 def main():
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--task-name", required=True)
     parser.add_argument("--branch", help="仓库相对路径（如 branchs/2026_dev/x）；省略时从 svn 推断")
@@ -247,18 +250,19 @@ def main():
             raise QueryError("config_error", "缺少 coder_name 或可推导的 OpenID 账号")
         auth_file = args.auth_file or (None if args.openid_user else os.environ.get("MHXY_COVERAGE_AUTH_FILE"))
         client = Client(auth_file, args.timeout)
+        config.pop("openid_password", None)  # 密码只经 corp_login.load_credentials 读取。
         if username and not auth_file:
             from coverage_auth import AuthError, login
-            password = config.get("openid_password")
-            if args.openid_user and args.openid_user.split("@", 1)[0] != (config.get("openid_username") or "").split("@", 1)[0]:
-                password = None  # Never send a saved password to a different account.
+            from corp_login import load_credentials
+            password = None
             try:
+                # 指定其他账号时不复用已存密码；规则见 corp_login.load_credentials。
+                username, password = load_credentials(Path(args.global_config).expanduser(), args.openid_user)
                 client.opener = build_opener(HTTPCookieProcessor(login(username, args.timeout, password=password)), NoRedirect())
             except AuthError as error:
                 raise QueryError("auth_required", str(error)) from None
             finally:
                 password = None
-                config.pop("openid_password", None)
         result = query(client, args.task_name, branch,
                        args.revision, coder_name, args.submitted_after)
     except QueryError as error:

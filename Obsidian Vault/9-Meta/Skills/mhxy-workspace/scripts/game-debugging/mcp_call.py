@@ -1,37 +1,41 @@
 # -*- coding: utf-8 -*-
 """mh-game-mcp HTTP 直连调用助手（MCP 工具未注册时的兜底通道）
 
-用法:
-    echo '{"ip":""}' | python mcp_call.py get_devices_by_ip
-    '{"devid":"xxx","command":"$at fightN 5"}' | python mcp_call.py execute_command
+用法（Bash 语法；JSON 参数写进 UTF-8 文件，从 stdin 重定向读取）:
+    python mcp_call.py get_devices_by_ip < args.json        # args.json: {"ip":""}
+    python mcp_call.py execute_command < args.json          # args.json: {"devid":"xxx","command":"$at fightN 5"}
 
 说明:
-    - mh-game-mcp 为无状态 streamableHttp 服务，直接 POST JSON-RPC 即可，无需 session id
-    - JSON 参数从 stdin 读取（PowerShell 管道会带 BOM/转义问题，stdin + utf-8-sig 最稳）
+    - 不要用 PowerShell 管道传 JSON（会带 BOM／转义问题）；文件 + stdin 重定向 + utf-8-sig 最稳
+    - 没有 stdin 输入时参数为 {}
+    - 退出码：0 成功取到 result；1 参数错误、返回 JSON-RPC error 或响应无法识别（见 mcp_http.call_tool）
 """
-import json, sys, io, urllib.request
+import io
+import json
+import sys
 
-URL = "https://mh-game-mcp.eros.nie.netease.com/mcp"
+import mcp_http
 
-def post(payload):
-	req = urllib.request.Request(
-		URL, data=json.dumps(payload).encode("utf-8"),
-		headers={"Content-Type": "application/json", "Accept": "application/json, text/event-stream"})
-	with urllib.request.urlopen(req, timeout=300) as r:
-		body = r.read().decode("utf-8")
-	for line in body.splitlines():
-		if line.startswith("data: "):
-			return json.loads(line[6:])
-	return {"raw": body}
 
-post({"jsonrpc": "2.0", "id": 0, "method": "initialize", "params": {
-	"protocolVersion": "2024-11-05", "capabilities": {},
-	"clientInfo": {"name": "claude-code-cli", "version": "1.0"}}})
-post({"jsonrpc": "2.0", "method": "notifications/initialized"})
+def main(argv=None):
+    argv = sys.argv[1:] if argv is None else argv
+    if len(argv) != 1:
+        print("usage: python mcp_call.py <工具名> < <UTF-8参数.json>", file=sys.stderr)
+        return 1
+    if sys.stdin.isatty():
+        args = {}
+    else:
+        text = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8-sig", errors="replace").read()
+        try:
+            args = json.loads(text) if text.strip() else {}
+        except ValueError as error:
+            print(f"参数不是合法 JSON：{error}", file=sys.stderr)
+            return 1
+    if not isinstance(args, dict):
+        print("参数必须是 JSON 对象", file=sys.stderr)
+        return 1
+    return mcp_http.call_tool(argv[0], args)
 
-tool = sys.argv[1]
-stdin = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8-sig", errors="replace")
-args = json.loads(stdin.read()) if not sys.stdin.isatty() else {}
-res = post({"jsonrpc": "2.0", "id": 1, "method": "tools/call",
-			"params": {"name": tool, "arguments": args}})
-print(json.dumps(res.get("result") or res.get("error"), ensure_ascii=False, indent=1))
+
+if __name__ == "__main__":
+    sys.exit(main())

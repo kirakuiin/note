@@ -77,21 +77,45 @@ class CreateTests(unittest.TestCase):
     def test_create_polls_until_second_response_succeeds(self):
         with patch.object(b, "svn_info", return_value=None), \
                 patch.object(b, "create_branch_request") as create_request, \
-                patch.object(b, "branch_rows", side_effect=[[], ROWS]) as rows, \
+                patch.object(b, "branch_rows", side_effect=[[], [], ROWS]) as rows, \
                 patch.object(b.time, "sleep") as sleep:
-            result = b.create("qixi", apply=True, config=CONFIG, today=date(2026, 10, 10))
+            result = b.create("qixi", apply=True, config=CONFIG, today=date(2026, 10, 10), expected=NAME)
         self.assertEqual(result["status"], "created")
         self.assertEqual(result["urls"], URLS)
         create_request.assert_called_once()
-        self.assertEqual(rows.call_count, 2)
+        self.assertEqual(rows.call_count, 3)  # 请求前取一次快照，之后轮询两次。
         sleep.assert_called_once_with(2)
+
+    def test_create_apply_requires_confirmed_branch_name(self):
+        with patch.object(b, "svn_info", return_value=None), \
+                patch.object(b, "create_branch_request") as create_request, \
+                patch.object(b, "branch_rows", return_value=[]):
+            with self.assertRaisesRegex(b.BranchError, "--branch"):
+                b.create("qixi", apply=True, config=CONFIG, today=date(2026, 10, 10))
+            # 预览在 10 日，确认后跨日才执行：重新计算的名称不同，拒绝创建。
+            with self.assertRaisesRegex(b.BranchError, "不一致"):
+                b.create("qixi", apply=True, config=CONFIG, today=date(2026, 10, 11), expected=NAME)
+        create_request.assert_not_called()
+
+    def test_poll_ignores_failure_records_from_before_the_request(self):
+        old_failure = {"url": SCRIPT_URL, "msg": "permission denied"}
+        with patch.object(b, "svn_info", return_value=None), \
+                patch.object(b, "create_branch_request"), \
+                patch.object(b, "branch_rows", side_effect=[[old_failure], [old_failure], [*ROWS, old_failure]]), \
+                patch.object(b.time, "sleep"):
+            result = b.create("qixi", apply=True, config=CONFIG, today=date(2026, 10, 10), expected=NAME)
+        self.assertEqual(result["status"], "created")
+        new_failure = {"url": SCRIPT_URL, "msg": "permission denied"}
+        with patch.object(b, "branch_rows", return_value=[new_failure, old_failure]):
+            result = b.poll_creation(NAME, True, b.relevant_rows([old_failure], NAME, True))
+        self.assertEqual(result["status"], "failed")
 
     def test_create_request_error_still_polls(self):
         with patch.object(b, "svn_info", return_value=None), \
                 patch.object(b, "create_branch_request", side_effect=b.BranchError("网络请求失败：timed out")), \
-                patch.object(b, "branch_rows", return_value=ROWS), \
+                patch.object(b, "branch_rows", side_effect=[[], ROWS]), \
                 patch.object(b.time, "sleep"):
-            result = b.create("qixi", apply=True, config=CONFIG, today=date(2026, 10, 10))
+            result = b.create("qixi", apply=True, config=CONFIG, today=date(2026, 10, 10), expected=NAME)
         self.assertEqual(result["status"], "created")
         self.assertIn("timed out", result["request_error"])
 
@@ -207,7 +231,7 @@ class PeriodicBranchTests(unittest.TestCase):
 
         def run(*args, **kwargs):
             self.calls.append(args)
-            return subprocess.CompletedProcess(args, 0, b"" if "-q" in args else status, b"")
+            return subprocess.CompletedProcess(args, 0, b"" if "--ignore-externals" in args else status, b"")
 
         with patch.object(b.Path, "cwd", return_value=self.root / "session"), \
                 patch.object(b, "resolve_branch_urls", return_value=(urls or self.ZLP_URLS, [])), \
@@ -372,7 +396,8 @@ class CheckoutTests(unittest.TestCase):
         target.mkdir()
         outside = self.root / "other"
         outside.mkdir()
-        with patch.object(b, "resolve_branch_urls", side_effect=self.resolve_urls):
+        with patch.object(b, "resolve_branch_urls", side_effect=self.resolve_urls), \
+                patch.object(b, "working_copy_url", return_value=SCRIPT_URL):
             with self.assertRaisesRegex(b.BranchError, "目标目录已存在"):
                 b.build_checkout(NAME, str(self.root), str(outside))
 
@@ -393,6 +418,7 @@ class CheckoutTests(unittest.TestCase):
 
         with patch.object(Path, "resolve", autospec=True, side_effect=junction_resolve), \
                 patch.object(b, "has_reparse_attribute", side_effect=reparse), \
+                patch.object(b, "working_copy_url", return_value=SCRIPT_URL), \
                 patch.object(b, "resolve_branch_urls", side_effect=self.resolve_urls):
             with self.assertRaisesRegex(b.BranchError, "目标目录不能是符号链接或目录联接"):
                 b.build_checkout(NAME, str(self.root), str(reuse))
@@ -415,6 +441,77 @@ class CheckoutTests(unittest.TestCase):
         self.assertEqual(args[3], ["switch", "-q", URLS["resources"]["_test"], "_test", "--force", "--ignore-ancestry"])
         self.assertEqual(args[4], ["checkout", "-q", URLS["resources"]["_testhd"], "_testhd"])
         self.assertEqual(run.call_count, 2)  # mhimage、_test 状态检查各一次；_test 与目标同仓库，不做完整状态检查。
+
+    def test_reuse_rejects_unversioned_files_but_not_externals(self):
+        reuse = self.root / "old"
+        (reuse / "mhimage").mkdir(parents=True)
+        calls = []
+
+        def run(*args, **kwargs):
+            calls.append((args, kwargs))
+            return subprocess.CompletedProcess(args, 0, b"X       mhimage\\prot\r\n?       mhimage\\new.py\r\n"
+                                                        b"?       mhimage\\tmp\r\n", b"")
+
+        with patch.object(b, "run_svn", side_effect=run):
+            with self.assertRaisesRegex(b.BranchError, r"未纳入版本控制.*mhimage\\new\.py, mhimage\\tmp"):
+                b.inspect_reuse(reuse)
+        args, kwargs = calls[0]
+        self.assertNotIn("-q", args)
+        self.assertIn("--ignore-externals", args)
+        self.assertEqual(kwargs["timeout"], b.SVN_TIMEOUT)
+        externals_only = subprocess.CompletedProcess([], 0, b"X       mhimage\\prot\r\n", b"")
+        with patch.object(b, "run_svn", return_value=externals_only):
+            self.assertEqual(b.inspect_reuse(reuse), ["mhimage"])
+
+    def test_reuse_ignores_workspace_local_files(self):
+        reuse = self.root / "old"
+        (reuse / "mhimage").mkdir(parents=True)
+        initialized = subprocess.CompletedProcess([], 0, b"?       mhimage\\.claude\r\n?       mhimage\\.mhxy-workspace\r\n"
+                                                         b"?       mhimage\\CLAUDE.md\r\n\r\n"
+                                                         b"--- Changelist 'ignore-on-commit':\r\n"
+                                                         b"M       mhimage\\AGENTS.md\r\n", b"")
+        with patch.object(b, "run_svn", return_value=initialized):
+            self.assertEqual(b.inspect_reuse(reuse), ["mhimage"])
+        nested = subprocess.CompletedProcess([], 0, b"M       mhimage\\sub\\AGENTS.md\r\n", b"")
+        with patch.object(b, "run_svn", return_value=nested):
+            with self.assertRaisesRegex(b.BranchError, "拒绝切换"):
+                b.inspect_reuse(reuse)
+
+    def test_reuse_must_be_direct_child_with_mhimage_working_copy(self):
+        nested = self.root / "group" / "old"
+        (nested / "mhimage").mkdir(parents=True)
+        plain = self.root / "plain"
+        plain.mkdir()
+        not_working_copy = self.root / "copy"
+        (not_working_copy / "mhimage").mkdir(parents=True)
+        missing = subprocess.CompletedProcess([], 1, b"", b"svn: E155007: not a working copy")
+        with patch.object(b.Path, "cwd", return_value=self.root / "session"), \
+                patch.object(b, "svn_info", return_value=SCRIPT_URL):
+            with self.assertRaisesRegex(b.BranchError, "直接子目录"):
+                b.resolve_reuse(self.root, str(nested))
+            with self.assertRaisesRegex(b.BranchError, "没有 mhimage"):
+                b.resolve_reuse(self.root, "plain")
+        with patch.object(b.Path, "cwd", return_value=self.root / "session"), \
+                patch.object(b, "run_svn", return_value=missing):
+            with self.assertRaisesRegex(b.BranchError, "没有 mhimage"):
+                b.resolve_reuse(self.root, "copy")
+        with patch.object(b.Path, "cwd", return_value=self.root / "session"), \
+                patch.object(b, "svn_info", return_value=SCRIPT_URL):
+            self.assertEqual(b.resolve_reuse(self.root, "copy"), not_working_copy)
+
+    def test_svn_timeout_is_reported_distinctly(self):
+        with patch.object(b.precommit.subprocess, "run", side_effect=subprocess.TimeoutExpired(["svn"], 3600)):
+            with self.assertRaisesRegex(b.BranchError, "SVN 命令超时"):
+                b.run_svn("status", "mhimage", timeout=3600)
+
+    def test_stale_resource_warning_without_url(self):
+        reuse = self.root / "old"
+        (reuse / "_test").mkdir(parents=True)
+        with patch.object(b, "svn_info", return_value=None):
+            warnings = b.stale_resource_warnings(reuse, {"script": SCRIPT_URL, "resources": {}})
+        self.assertEqual(len(warnings), 1)
+        self.assertNotIn("None", warnings[0])
+        self.assertIn("未能读取", warnings[0])
 
     def test_reuse_rejects_link_or_file_child_and_status_stderr(self):
         reuse = self.root / "old"
@@ -442,6 +539,7 @@ class CheckoutTests(unittest.TestCase):
         (target / "mhimage").mkdir(parents=True)
         with patch.object(b.Path, "cwd", return_value=self.root / "session"):
             with patch.object(b, "run_svn", return_value=subprocess.CompletedProcess([], 0, b"", b"")) as run, \
+                    patch.object(b, "working_copy_url", return_value=SCRIPT_URL), \
                     patch.object(b, "resolve_branch_urls", side_effect=self.resolve_urls):
                 preview = b.checkout(NAME, str(self.root), str(target))
                 self.assertEqual(preview["steps"][0]["type"], "same_directory")

@@ -87,6 +87,15 @@ class CommitTests(unittest.TestCase):
         self.assertIn("--stop-on-copy", search)
         self.assertIn(("diff", "--internal-diff", "-r", "9:12", URL), calls)
 
+    def test_branch_info_decodes_relative_url(self):
+        info = (f'<info><entry><url>{URL}/%E4%B8%AD%20x</url>'
+                f'<relative-url>^{BRANCH}/%E4%B8%AD%20x/</relative-url></entry></info>').encode()
+        with patch.object(c.precommit, "run_svn", return_value=info):
+            branch = c.branch_info(Path("."))
+        self.assertEqual(branch["path"], BRANCH + "/中 x")
+        self.assertEqual(branch["url"], URL + "/%E4%B8%AD%20x")
+        self.assertEqual(c.branch_relative(BRANCH + "/中 x/gameplay/a.py", branch["path"]), "gameplay/a.py")
+
     def test_collect_without_commits_fails(self):
         info = f'<info><entry><url>{URL}</url><relative-url>^{BRANCH}</relative-url></entry></info>'.encode()
         with patch.object(c.precommit, "run_svn", side_effect=lambda root, *a: info if a[0] == "info" else log()):
@@ -194,6 +203,26 @@ class JenkinsTests(unittest.TestCase):
         self.assertEqual(result["result"], "SUCCESS")
         self.assertEqual(result["review_url"], "http://reviewboard.mhxy.netease.com/r/123/")
 
+    def test_follow_timeout_and_errors_keep_urls_and_console_tail(self):
+        queue, build = "http://ci.example.test/queue/item/5/", "http://ci.example.test/job/post/7/"
+        lines = "\n".join(f"line {n}" for n in range(20)).encode()
+        clock = iter([0, 0, 1000])  # deadline、第一次构建检查、第二次构建检查时超时
+        with patch.object(c.time, "monotonic", side_effect=lambda: next(clock)):
+            jenkins = c.Jenkins(self.endpoint, opener=FakeOpener([
+                Response(json.dumps({"executable": {"url": build}}).encode()),
+                Response(json.dumps({"building": True}).encode()),
+                Response(json.dumps({"building": True}).encode()),
+                Response(lines)]))
+            result = jenkins.follow(queue, wait=10, sleep=lambda s: None)
+        self.assertEqual((result["queue_url"], result["build_url"], result["result"]), (queue, build, None))
+        self.assertEqual(result["console_tail"], [f"line {n}" for n in range(5, 20)])
+        self.assertNotIn("error", result)
+        jenkins = c.Jenkins(self.endpoint, opener=FakeOpener([
+            Response(json.dumps({"executable": {"url": build}}).encode()), Response(b"<html>")]))
+        result = jenkins.follow(queue, sleep=lambda s: None)
+        self.assertEqual((result["queue_url"], result["build_url"], result["result"]), (queue, build, None))
+        self.assertIn("已上传、结果未确认", result["error"])
+
     def test_rejects_foreign_hosts_and_missing_queue(self):
         jenkins = c.Jenkins(self.endpoint, opener=FakeOpener([Response()]))
         with self.assertRaises(c.CrError):
@@ -248,6 +277,65 @@ class FlowTests(unittest.TestCase):
         self.assertEqual(fake.sent[0], "tok")
         self.assertEqual(fake.sent[2], self.diff)
         self.assertEqual(applied["build"]["result"], "SUCCESS")
+
+    def test_preview_lists_exclusions_and_apply_records_upload_against_duplicates(self):
+        extra = {"excluded_data": ["data/t.py"], "not_in_diff": ["gameplay/gone.py"],
+                 "others_in_range": [{"revision": 9, "author": "other", "files": ["gameplay/a.py"]}]}
+        with patch.object(c, "collect", side_effect=lambda *a: {"branch": URL, "revisions": [10], "range": "9:10",
+                                                                 "files": ["gameplay/a.py"], **extra, "diff": self.diff}):
+            c.prepare(self.root, self.config, "835520", lookup=lambda config, issue_id: ISSUE)
+        preview = c.upload(self.root, self.config, "835520", "1. 改动")
+        for key, value in extra.items():
+            self.assertEqual(preview[key], value)
+        self.assertEqual(preview["previous_uploads"], [])
+
+        class FailingJenkins:
+            triggered = 0
+
+            def trigger(self, token, fields, diff):
+                self.triggered += 1
+                return "http://ci.example.test/queue/item/1/"
+
+            def follow(self, queue, wait):
+                raise RuntimeError("boom")
+
+        fake, notified = FailingJenkins(), []
+        applied = c.upload(self.root, self.config, "835520", "1. 改动", apply=True, endpoint={"token": "tok"},
+                           jenkins=fake, notify=notified.append)
+        self.assertEqual(notified, ["http://ci.example.test/queue/item/1/"])
+        self.assertEqual(applied["build"]["queue_url"], "http://ci.example.test/queue/item/1/")
+        self.assertIsNone(applied["build"]["result"])
+        self.assertIn("已上传、结果未确认", applied["build"]["error"])
+        marker = self.root / w.DIRECTORY / c.OUTPUT_DIRECTORY / "835520" / c.APPLIED_FILE
+        self.assertEqual(json.loads(marker.read_text(encoding="utf-8"))["uploads"][0]["queue_url"],
+                         "http://ci.example.test/queue/item/1/")
+        with self.assertRaisesRegex(c.CrError, "--force"):
+            c.upload(self.root, self.config, "835520", "1. 改动", apply=True, endpoint={"token": "tok"},
+                     jenkins=fake, notify=notified.append)
+        self.assertEqual(fake.triggered, 1)
+        self.assertEqual(len(c.upload(self.root, self.config, "835520", "1. 改动")["previous_uploads"]), 1)
+        c.upload(self.root, self.config, "835520", "1. 改动", apply=True, endpoint={"token": "tok"},
+                 jenkins=fake, notify=notified.append, force=True)
+        self.assertEqual(len(json.loads(marker.read_text(encoding="utf-8"))["uploads"]), 2)
+
+    def test_cli_unconfirmed_build_exits_2_and_bad_desc_encoding_is_readable(self):
+        c.prepare(self.root, self.config, "835520", lookup=lambda config, issue_id: ISSUE)
+        desc = self.base / "desc.txt"
+        desc.write_bytes("1. 改动".encode("gbk"))
+        argv = ["upload", "--root", str(self.root), "--config", str(self.config), "--issue", "835520",
+                "--desc-file", str(desc)]
+        err = io.StringIO()
+        with patch.object(sys, "stderr", err):
+            self.assertEqual(c.main(argv), 1)
+        self.assertIn("UTF-8", json.loads(err.getvalue())["error"])
+        desc.write_text("﻿1. 改动", encoding="utf-8")
+        build = {"queue_url": "q", "build_url": None, "result": None, "review_url": None, "error": "已上传、结果未确认：x"}
+        out = io.StringIO()
+        with patch.object(c, "upload", return_value={"build": build}) as run, patch.object(sys, "stdout", out):
+            self.assertEqual(c.main(argv + ["--apply"]), 2)
+        self.assertEqual(run.call_args.args[3], "1. 改动")
+        self.assertEqual(run.call_args.kwargs["wait"], c.WAIT_SECONDS)
+        self.assertEqual(json.loads(out.getvalue())["build"]["queue_url"], "q")
 
     def test_upload_rejects_stale_or_missing_prepare(self):
         with self.assertRaises(c.CrError):

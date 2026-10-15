@@ -36,7 +36,7 @@ python -X utf8 "<skill>/scripts/game-debugging/mcp_call.py" <工具名> < "<UTF-
 - `mcp_eval.py` 调用 `execute_code`；`mcp_call.py` 用于其他工具，如 `init_client`、`execute_command`、`get_devices_by_ip`。参数 JSON 示例：`{"devid":"<devid>","command":"$at ..."}`。
 - 第二条命令是 Bash 语法（stdin 重定向）。其他 shell 用等价的 UTF-8 文件输入，避免手拼引号和美元符号。
 - 脚本的握手不能代替 `init_client`。
-- 脚本只解析 SSE 返回中的 `data: ` 行，不能只凭进程退出码判断成功。
+- 脚本从普通 JSON 或 SSE 响应中取出与请求 id 对应的结果；返回 JSON-RPC error 或找不到结果时以非 0 退出，后者会打印原始响应。退出码 0 只说明取到了工具的 `result`，业务是否成功仍按「读取结果与处理失败」检查。
 - 网络故障或执行结果不明时，不要换另一个通道重复执行。
 
 服务入口是 `https://mh-game-mcp.eros.nie.netease.com/mcp`，配置连接时使用这个完整地址：

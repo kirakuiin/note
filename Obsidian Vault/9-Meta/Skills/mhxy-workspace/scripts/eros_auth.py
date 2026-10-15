@@ -11,7 +11,9 @@ from urllib.request import HTTPCookieProcessor, HTTPRedirectHandler, Request, bu
 import corp_login
 from corp_login import LOGIN, LoginError
 
-AUTH_HOST = "auth.eros.nie.netease.com"  # eros 统一认证中转站；该站使用 http 跳转。
+# eros 统一认证中转站。它发出的跳转是 http（由服务端决定），这一段的 OpenID 回调参数以明文
+# 传输；这里只把 http 限定在该主机，不改协议。密码只提交给 https 的 CORP 登录页。
+AUTH_HOST = "auth.eros.nie.netease.com"
 
 
 def _redirects(site):
@@ -41,7 +43,8 @@ def login(site, username, password, timeout=30):
         timeout: 单次请求超时秒数。
 
     Returns:
-        urllib opener，Cookie 仅在内存中；调用方不得输出或持久化。
+        urllib opener，Cookie 仅在内存中；调用方不得输出或持久化。只确认回到了站点，
+        不核对登录后的账号：目前没有已知的 eros 通用用户信息接口。
 
     Raises:
         LoginError: 跳转异常、需要验证码／二次验证、凭据错误或协议变化。不自动重试密码。

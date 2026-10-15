@@ -4,7 +4,8 @@
 流程说明见 references/cr-diff.md。复刻 MHCoder 插件「生成 CR DIFF」，但自动选择 revision：
   prepare  只读：查工单（标题、父单号），找出本人提交，生成 diff 和清单，存到
            .mhxy-workspace/code-review/<工单号>/，输出预览。
-  upload   组装上传参数；默认只预览，加 --apply 才上传，并跟踪本次触发的构建。
+  upload   组装上传参数；默认只预览，加 --apply 才上传，并跟踪本次触发的构建。触发后
+           立即在同一目录写 applied.json，之后再上传同一工单要加 --force。
 
 Jenkins 地址和凭据在上传时从本机已安装的 MHCoder 插件中读取，不保存、不输出。
 退出码：0 成功；1 失败；2 已上传但构建未成功或结果未确认。
@@ -34,6 +35,7 @@ import workspace  # noqa: E402
 OUTPUT_DIRECTORY = "code-review"  # 个人目录下的子目录，每个工单一个文件夹。
 DIFF_FILE = "crDiff.diff"  # 与插件上传的文件名一致。
 MANIFEST_FILE = "manifest.json"
+APPLIED_FILE = "applied.json"  # 触发上传后立即写入，记录 queue_url，防止重复上传。
 DESC_LIMIT = 200  # review_desc 的最大字符数；与 references/cr-diff.md 一致，修改时两处同步。
 # MHCoder 插件的安装位置和实现 CR 上传的文件；插件升级改了结构时，plugin_endpoint 会报错。
 PLUGIN_DIRS = ("~/.vscode/extensions", "~/.cursor/extensions")
@@ -41,6 +43,8 @@ PLUGIN_NAME = re.compile(r"mhxy2\.mhcoder-(\d+)\.(\d+)\.(\d+)")
 PLUGIN_FILE = "client/out/modules/MHToolsWebview/MHToolsWebviewManager.js"
 REVIEW_URL = re.compile(r"https?://reviewboard\.mhxy\.netease\.com/r/\d+/?")
 POLL_SECONDS = 2
+# 等待构建的默认秒数；低于 agent 命令工具默认的 120 秒超时。与 references/cr-diff.md 一致，修改时两处同步。
+WAIT_SECONDS = 100
 
 
 class CrError(Exception):
@@ -56,7 +60,8 @@ def branch_info(root):
     url, relative = tree.findtext("entry/url"), tree.findtext("entry/relative-url")
     if not url or not relative or not relative.startswith("^/"):
         raise CrError("无法读取工作副本的仓库地址")
-    return {"url": url, "path": relative[1:].rstrip("/")}
+    # relative-url 是 URI 编码的（中文、空格为 %XX），svn log 里的路径是解码后的，先解码再比较。
+    return {"url": url, "path": unquote(relative[1:]).rstrip("/")}
 
 
 def branch_relative(repo_path, branch_path):
@@ -295,32 +300,48 @@ class Jenkins:
             raise CrError("Jenkins 没有返回队列地址，无法确认是否已触发")
         return location.rstrip("/") + "/"
 
-    def follow(self, queue_url, wait=300, sleep=time.sleep):
-        """等本次触发的构建结束，返回构建结果；超时时 result 为 None。"""
-        deadline = time.monotonic() + wait
-        build_url = None
-        while build_url is None:
-            item = self.json(queue_url + "api/json")
-            if item.get("cancelled"):
-                raise CrError("Jenkins 队列中的构建已被取消")
-            build_url = (item.get("executable") or {}).get("url")
-            if build_url is None:
-                if time.monotonic() > deadline:
-                    return {"queue_url": queue_url, "build_url": None, "result": None, "review_url": None}
-                sleep(POLL_SECONDS)
-        build_url = build_url.rstrip("/") + "/"
-        while True:
-            build = self.json(build_url + "api/json?tree=number,result,building")
-            if not build.get("building") and build.get("result"):
-                break
-            if time.monotonic() > deadline:
-                return {"queue_url": queue_url, "build_url": build_url, "result": None, "review_url": None}
-            sleep(POLL_SECONDS)
+    def console_tail(self, build_url):
+        """构建日志全文和最后 15 行。"""
         console = self.open(build_url + "consoleText")[1].decode("utf-8", "replace")
-        review = REVIEW_URL.findall(console)
-        return {"queue_url": queue_url, "build_url": build_url, "result": build["result"],
-                "review_url": review[-1] if review else None,
-                "console_tail": console.splitlines()[-15:] if build["result"] != "SUCCESS" else []}
+        return console, console.splitlines()[-15:]
+
+    def follow(self, queue_url, wait=WAIT_SECONDS, sleep=time.sleep):
+        """等本次触发的构建结束，返回构建结果。
+
+        已经触发，所以不抛异常：超时时 result 为 None；查询出错时 result 为 None，并在 error
+        中写明“已上传、结果未确认”。两种情况都保留已知的 queue_url、build_url。
+        """
+        status = {"queue_url": queue_url, "build_url": None, "result": None, "review_url": None, "console_tail": []}
+        deadline = time.monotonic() + wait
+        try:
+            build_url = None
+            while build_url is None:
+                item = self.json(queue_url + "api/json")
+                if item.get("cancelled"):
+                    raise CrError("Jenkins 队列中的构建已被取消")
+                build_url = (item.get("executable") or {}).get("url")
+                if build_url is None:
+                    if time.monotonic() > deadline:
+                        return status  # 还在排队，没有构建日志。
+                    sleep(POLL_SECONDS)
+            status["build_url"] = build_url = build_url.rstrip("/") + "/"
+            while True:
+                build = self.json(build_url + "api/json?tree=number,result,building")
+                if not build.get("building") and build.get("result"):
+                    break
+                if time.monotonic() > deadline:
+                    status["console_tail"] = self.console_tail(build_url)[1]
+                    return status
+                sleep(POLL_SECONDS)
+            console, tail = self.console_tail(build_url)
+            review = REVIEW_URL.findall(console)
+            status.update(result=build["result"], review_url=review[-1] if review else None,
+                          console_tail=tail if build["result"] != "SUCCESS" else [])
+            return status
+        except (CrError, AttributeError, KeyError, TypeError, ValueError) as error:
+            reason = str(error) if isinstance(error, CrError) else "Jenkins 返回的构建信息格式已变化"
+            status.update(result=None, error=f"已上传、结果未确认：{reason}")
+            return status
 
 
 # ---------------------------------------------------------------- 命令
@@ -381,18 +402,60 @@ def load_prepared(root_arg, config, issue_id):
     return manifest, diff
 
 
+def previous_upload(folder):
+    """读取上传记录（APPLIED_FILE）；没有上传过时返回 None。"""
+    raw = workspace.read_bytes(folder / APPLIED_FILE)
+    if raw is None:
+        return None
+    value = workspace.parse_json(raw, folder / APPLIED_FILE)
+    if not isinstance(value, dict) or not isinstance(value.get("uploads"), list):
+        raise CrError(f"{APPLIED_FILE} 格式不对，请检查后再上传")
+    return value
+
+
+def record_upload(folder, queue_url, manifest):
+    """触发成功后立即写入上传记录；多次上传时保留每一次。"""
+    path = folder / APPLIED_FILE
+    old = workspace.read_bytes(path)
+    records = (previous_upload(folder) or {"uploads": []})["uploads"]
+    records.append({"queue_url": queue_url, "triggered_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+                    "revisions": manifest["revisions"], "diff_sha256": manifest["diff_sha256"]})
+    workspace.apply_changes([(path, old, workspace.json_bytes({"uploads": records}))])
+
+
 def upload(root_arg, config, issue_id, desc, title=None, testing_done=None, apply=False,
-           endpoint=None, jenkins=None, wait=300):
-    """预览或上传；endpoint、jenkins 用于测试替换。"""
+           endpoint=None, jenkins=None, wait=WAIT_SECONDS, force=False, notify=None):
+    """预览或上传；endpoint、jenkins 用于测试替换。
+
+    触发成功后不再抛异常（避免调用方以为没上传而重试）：先通过 notify 报出 queue_url、
+    写上传记录，再跟踪构建；之后的任何失败都放进 build.error。已有上传记录时，不加 force 拒绝上传。
+    """
     manifest, diff = load_prepared(root_arg, config, issue_id)
     fields = form_fields(manifest, desc, title, testing_done)
+    folder = output_dir(workspace.paths(root_arg, config)[1], issue_id)
+    previous = previous_upload(folder)
     result = {"applied": apply, "fields": fields, "revisions": manifest["revisions"], "files": manifest["files"],
-              "diff_bytes": len(diff)}
+              **{key: manifest.get(key, []) for key in ("excluded_data", "not_in_diff", "others_in_range")},
+              "diff_bytes": len(diff), "previous_uploads": (previous or {}).get("uploads", [])}
     if not apply:
         return result
+    if previous and not force:
+        raise CrError(f"该工单已上传过（见 {APPLIED_FILE}），再次上传会生成重复的 review；确需重新上传时加 --force")
     endpoint = endpoint or plugin_endpoint()
     jenkins = jenkins or Jenkins(endpoint)
-    result["build"] = jenkins.follow(jenkins.trigger(endpoint["token"], fields, diff), wait)
+    queue_url = jenkins.trigger(endpoint["token"], fields, diff)
+    (notify or (lambda url: print(f"已触发 Jenkins 构建（不要重复上传）：{url}", file=sys.stderr, flush=True)))(queue_url)
+    build = {"queue_url": queue_url, "build_url": None, "result": None, "review_url": None, "console_tail": []}
+    try:
+        record_upload(folder, queue_url, manifest)
+    except (CrError, OSError, ValueError, workspace.WorkspaceError):
+        build["record_warning"] = f"上传记录 {APPLIED_FILE} 写入失败，请手动记下 queue_url"
+    try:
+        build.update(jenkins.follow(queue_url, wait))
+    except Exception as error:  # noqa: BLE001  已触发，任何失败都只能报告为“结果未确认”。
+        reason = str(error) if isinstance(error, CrError) else type(error).__name__
+        build.update(result=None, error=f"已上传、结果未确认：{reason}")
+    result["build"] = build
     return result
 
 
@@ -409,7 +472,9 @@ def main(argv=None):
     parser.add_argument("--title", help="upload：覆盖默认标题「#工单号 工单名」")
     parser.add_argument("--testing-done", help="upload：工单没有父单时指定")
     parser.add_argument("--apply", action="store_true", help="upload：确认后实际上传")
-    parser.add_argument("--wait", type=int, default=300, help="upload：等待构建结束的最长秒数")
+    parser.add_argument("--force", action="store_true", help="upload：该工单已上传过时仍再次上传（会生成新的 review）")
+    parser.add_argument("--wait", type=int, default=WAIT_SECONDS,
+                        help="upload：等待构建结束的最长秒数；调大时命令工具的超时也要相应调大")
     parser.add_argument("--config", type=Path, default=Path.home() / ".mhxy-workspace/config.json")
     args = parser.parse_args(argv)
     try:
@@ -418,9 +483,12 @@ def main(argv=None):
         else:
             if not args.desc_file:
                 raise CrError("upload 需要 --desc-file")
-            desc = args.desc_file.read_text(encoding="utf-8-sig")
+            try:
+                desc = args.desc_file.read_text(encoding="utf-8-sig")
+            except UnicodeDecodeError:
+                raise CrError(f"{args.desc_file} 不是 UTF-8 编码，请用 UTF-8 保存后重试") from None
             result = upload(args.root, args.config, args.issue, desc, args.title, args.testing_done,
-                            args.apply, wait=args.wait)
+                            args.apply, wait=args.wait, force=args.force)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         build = result.get("build")
         return 2 if build and build["result"] != "SUCCESS" else 0

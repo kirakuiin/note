@@ -19,6 +19,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import precommit  # noqa: E402
 import workspace  # noqa: E402
 
+COMMIT_TIMEOUT = 3600  # 大文件提交可能很慢，与 branch.py 的 SVN_TIMEOUT 一致。
+# 事务在本地检查、服务端校验或 pre-commit 钩子阶段被拒绝、确定没有生效的错误码：工作副本被锁、不是工作副本、
+# 节点不存在、版本过旧、冲突、仓库路径不存在／已存在、事务冲突、钩子拒绝、非法目标。
+# 只有错误输出中的错误码全部属于此列时才报告 committed: false；超时、连接中断和其他错误一律视为结果不明。
+REJECTED_CODES = {"E155004", "E155007", "E155010", "E155011", "E155015", "E160013", "E160020", "E160024",
+                  "E160028", "E165001", "E170004", "E200009"}
+DIRECTORY_ERROR = "只允许文件目标；新目录、目录属性修改和目录删除由用户自行提交"
+
 
 def run_svn(root, *args):
     """通过 Python 直接调用 svn.exe，返回标准输出字节；失败立即停止。"""
@@ -29,16 +37,17 @@ def run_svn(root, *args):
     return completed.stdout
 
 
+def commit_process(root, *args):
+    """运行 svn commit，使用较长的超时；结果由 run_commit 解释。"""
+    return precommit.svn_process(root, "commit", *args, timeout=COMMIT_TIMEOUT)
+
+
 def branch_kind(url):
-    """识别 trunk 和 _ship 下的已知周期分支，不按名称子串推断研发分支。"""
-    path = workspace.branch_path(url)
-    if path == "trunk":
-        return "trunk"
-    parent, _, name = (path or "").rpartition("/")
-    if (re.fullmatch(r"branchs/\d{4}_ship", parent)
-            and (name in workspace.PERIODIC_TYPES or workspace.PERIODIC_NAME.fullmatch(name))):
-        return "周期分支"
-    raise ValueError("本脚本只用于 trunk 和 _ship 下的已知周期分支；研发分支使用 openforge")
+    """只接受 trunk 和带日期的周期分支，判定规则复用 workspace.classify_branch，不按名称子串推断研发分支。"""
+    kind = workspace.classify_branch(url)
+    if kind in ("trunk", "周期分支"):
+        return kind
+    raise ValueError("本脚本只用于 trunk 和周期分支（<类型>_YYYY_MM_DD）；研发分支使用 openforge")
 
 
 def info(root, target):
@@ -49,10 +58,45 @@ def info(root, target):
     return entry
 
 
-def prepare(root, paths, message):
-    """只读核对分支、说明和每个文件的状态，拒绝目录与跨工作副本目标。
+def node_status(root, relative):
+    """返回单个节点的 (wc-status 元素, 变更列表名)；svn 没有给出该节点状态时返回 (None, None)。"""
+    tree = ElementTree.fromstring(run_svn(root, "status", "--xml", "--verbose", "--no-ignore", "--depth", "empty",
+                                          "./" + relative + "@"))
+    nodes = []
+    for parent in list(tree.iter("target")) + list(tree.iter("changelist")):
+        changelist = parent.get("name") if parent.tag == "changelist" else None
+        nodes += [(entry.find("wc-status"), changelist) for entry in parent.findall("entry")]
+    if len(nodes) != 1 or nodes[0][0] is None:
+        return None, None
+    return nodes[0]
 
-    新文件要求其父目录已被版本控制，预览不会自动 svn add。
+
+def check_ancestors(root, relative):
+    """从上往下检查目标的每级上级目录都已提交到仓库。
+
+    上级目录是新目录时 `--depth empty` 提交必然失败（E200009）；位于未纳管目录中时 svn 查不到文件状态。
+    这两种情况和目录删除一样，交给用户自己提交。
+    """
+    parts = relative.split("/")[:-1]
+    for depth in range(1, len(parts) + 1):
+        ancestor = "/".join(parts[:depth])
+        status, _ = node_status(root, ancestor)
+        item = status.get("item") if status is not None else None
+        if item == "normal":
+            continue
+        if item == "unversioned":
+            raise ValueError(f"{relative} 位于未纳入版本控制的目录 {ancestor}/ 中；新目录由用户自行提交")
+        if item in ("added", "replaced"):
+            raise ValueError(f"{relative} 的上级目录 {ancestor}/ 是尚未提交的新目录；新目录由用户自行提交")
+        if item == "deleted":
+            raise ValueError(f"{relative} 的上级目录 {ancestor}/ 已被删除；目录删除由用户自行提交")
+        raise ValueError(f"{relative} 的上级目录 {ancestor}/ 状态为 {item}，不能定向提交")
+
+
+def prepare(root, paths, message):
+    """只读核对分支、说明和每个文件的状态，拒绝目录、跨工作副本目标和 ignore-on-commit 中的文件。
+
+    新文件要求其各级上级目录都已提交到仓库，预览不会自动 svn add。
     """
     if not paths:
         raise ValueError("必须明确列出待提交文件，不能提交整个工作副本")
@@ -76,18 +120,20 @@ def prepare(root, paths, message):
             raise ValueError(f"不支持符号链接目标：{value}")
         relative = path.resolve().relative_to(root).as_posix()
         if relative == "." or path.is_dir():
-            raise ValueError(f"只允许文件目标，不能递归提交目录：{value}")
+            raise ValueError(f"{DIRECTORY_ERROR}：{value}")
         identity = str(path.resolve()).casefold()
         if identity in seen:
             raise ValueError(f"文件清单存在重复路径：{value}")
         seen.add(identity)
         if relative.split("/", 1)[0] in precommit.LOCAL_ONLY | {precommit.DATA_DIRECTORY}:
             raise ValueError(f"本地辅助文件和导表数据不由本脚本提交：{relative}")
-        status_xml = run_svn(root, "status", "--xml", "--verbose", "--no-ignore", "--depth", "empty", "./" + relative + "@")
-        nodes = ElementTree.fromstring(status_xml).findall(".//entry")
-        if len(nodes) != 1 or nodes[0].find("wc-status") is None:
+        check_ancestors(root, relative)
+        status, changelist = node_status(root, relative)
+        if status is None:
             raise ValueError(f"无法确定文件状态：{relative}")
-        status = nodes[0].find("wc-status")
+        if changelist == workspace.IGNORE_ON_COMMIT:
+            raise ValueError(f"{relative} 在 {workspace.IGNORE_ON_COMMIT} 变更列表中（提交时默认排除），不由本脚本提交；"
+                             "确需提交时由用户先移出该列表")
         item, props = status.get("item"), status.get("props")
         if (item in precommit.BLOCKING_ITEMS or props == "conflicted"
                 or status.get("tree-conflicted") == "true" or status.get("switched") == "true"):
@@ -102,14 +148,39 @@ def prepare(root, paths, message):
             raise ValueError(f"文件没有可提交改动或被忽略：{relative}（{item} / {props}）")
         node_info = info(root, node_relative)
         expected_url = url if node_relative == "." else url.rstrip("/") + "/" + quote(node_relative, safe="/")
-        if (node_info.findtext("wc-info/wcroot-abspath") != wc_root
-                or unquote(node_info.findtext("url") or "") != unquote(expected_url)
-                or (item != "unversioned" and node_info.get("kind") != "file")):
-            raise ValueError(f"目标不属于本分支的文件，或新文件父目录未被版本控制：{relative}")
-        entries.append({"path": relative, "status": item, "props": props})
+        if node_info.findtext("wc-info/wcroot-abspath") != wc_root:
+            raise ValueError(f"目标位于其他工作副本（如外链）中，不由本脚本提交：{relative}")
+        if item != "unversioned" and node_info.get("kind") != "file":
+            raise ValueError(f"{DIRECTORY_ERROR}：{relative}")
+        if unquote(node_info.findtext("url") or "") != unquote(expected_url):
+            raise ValueError(f"目标已切换或不属于本分支：{relative}")
+        entries.append({"path": relative, "status": item, "props": props, "changelist": changelist})
     return {"root": str(root), "branch": {"url": url, "kind": kind}, "message": message,
             "entries": entries, "changed_count": len(entries),
             "will_add": [entry["path"] for entry in entries if entry["status"] == "unversioned"]}
+
+
+def run_commit(root, targets, message_path):
+    """执行一次提交，返回 (committed, revision, error)；committed 的含义见 submit。"""
+    try:
+        completed = commit_process(root, "--depth", "empty", "--encoding", "UTF-8", "-F", str(message_path), *targets)
+    except precommit.SvnTimeout:
+        return None, None, "提交超时，结果不明，可能需要 cleanup；先只读查询仓库日志确认是否已提交，不能重复提交"
+    except precommit.PrecheckError as error:
+        return False, None, str(error)  # svn 无法启动，没有发起提交。
+    output = precommit.decode_output(completed.stdout)
+    match = re.search(r"(?:Committed revision|提交后的版本为)\s+([0-9]+)", output)
+    if match:
+        # 已有新修订号就算已提交；post-commit 钩子等告警不改变这一事实，交给后续日志核验。
+        return True, int(match[1]), None
+    detail = (precommit.decode_output(completed.stderr).strip() or output.strip()
+              or f"svn commit 退出码 {completed.returncode}")
+    if not completed.returncode:
+        return None, None, f"无法从 SVN 返回值确认提交修订；先查仓库日志，不能重复提交：{detail}"
+    codes = set(re.findall(r"\bE\d{6}\b", detail))
+    if codes and codes <= REJECTED_CODES:
+        return False, None, f"提交被拒绝，没有生效：{detail}"
+    return None, None, f"提交结果不明；先只读查询仓库日志确认是否已提交，不能重复提交：{detail}"
 
 
 def verify_log(root, url, revision, message, paths):
@@ -132,7 +203,7 @@ def submit(root_arg, paths, message_file, apply=False):
     """预览或执行一次定向提交；返回结果中的 error 表示失败，不能自动重试。
 
     Returns:
-        dict: committed 为 False 表示未提交，None 表示提交结果不明，True 表示已提交。
+        dict: committed 为 False 表示未提交（含提交被拒绝），None 表示提交结果不明，True 表示已提交。
             verified 单独表示仓库日志与路径核验是否通过；核验失败也不能重复提交。
     """
     result = {"dry_run": not apply, "committed": False, "verified": False}
@@ -149,17 +220,17 @@ def submit(root_arg, paths, message_file, apply=False):
             message_path = Path(handle.name)
             handle.write(message)
         try:
-            # 事务发起后的任何通信失败都可能已经提交；留下未知状态，禁止自动重试。
-            result["committed"] = None
-            output = precommit.decode_output(run_svn(root, "commit", "--depth", "empty", "--encoding", "UTF-8",
-                                                     "-F", str(message_path), *targets))
-            match = re.search(r"(?:Committed revision|提交后的版本为)\s+([0-9]+)", output)
-            if not match:
-                raise ValueError(f"无法从 SVN 返回值确认提交修订；先查仓库日志，不能重复提交：{output}")
-            result["committed"] = True
-            result["revision"] = int(match[1])
+            committed, revision, error = run_commit(root, targets, message_path)
         finally:
-            message_path.unlink()
+            # 提交结果已定，临时文件被占用删不掉也不能改变 committed。
+            try:
+                message_path.unlink()
+            except OSError:
+                pass
+        result["committed"] = committed
+        if error:
+            raise ValueError(error)
+        result["revision"] = revision
         verify_log(root, result["branch"]["url"], result["revision"], message,
                    [entry["path"] for entry in result["entries"]])
         result["verified"] = True
