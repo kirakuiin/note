@@ -8,10 +8,30 @@
 
 1. 用户指定了 `devid`（包括 Hunter 链接参数）就用它；不可用时报告，不要擅自换角色。
 2. 未指定时用 `get_devices_by_ip` 查找，参数传 `{"ip": ""}`（空字符串表示查找本机发起请求的 IP 上的设备；同机多开的实例也会列出）。只有 1 台就直接用；有多台时问用户，若其中有配置的 `default_devid`，作为推荐选项。
-3. 查找失败或结果为空时（例如网络环境导致按 IP 匹配不到），才用配置里的 `default_devid`。它明确离线、未连接或 Hunter 初始化失败时，依次尝试同一 ID 加 `_i1`、`_i2`（同机多开的实例）。都失败或没有配置时，向用户报告并询问设备 ID。
-   - 找不到设备通常说明客户端没有启动。客户端由用户自己通过 Sunshine 启动：请用户启动并登录后告知，再重新查找。agent 不要自行运行客户端程序，也不要用打包服务（mh-patch-mcp 的 `control_aluba_client`）代替。
-4. 同一任务一直用同一台成功的设备；遇到代码异常、业务状态问题或普通超时，不要换设备。
-5. 设备确定后，每个新的客户端操作任务或切换设备时调用一次 `init_client`。它会清除旧事件，同一任务内不要重复调用。
+3. 结果为空时，由主会话按「自动启动客户端」启动一个，用它返回的 `devid`。
+4. 按 IP 查找本身失败（例如网络环境导致匹配不到）时，才用配置里的 `default_devid`。它明确离线、未连接或 Hunter 初始化失败时，依次尝试同一 ID 加 `_i1`、`_i2`（同机多开的实例）。都失败或没有配置时，向用户报告并询问设备 ID。
+5. 同一任务一直用同一台成功的设备；遇到代码异常、业务状态问题或普通超时，不要换设备。
+6. 设备确定后，每个新的客户端操作任务或切换设备时调用一次 `init_client`。它会清除旧事件，同一任务内不要重复调用。
+
+## 自动启动客户端
+
+客户端以管理员身份运行，由用户安装一次的计划任务代为启动，之后不再弹 UAC。只由主会话执行（测试执行者不启动客户端），用 `scripts/client_launch.py`：
+
+```text
+python -X utf8 "<skill>/scripts/client_launch.py" launch --root "<项目>" [--platform pc|ht] [--server <服务器名>] [--dry-run]
+python -X utf8 "<skill>/scripts/client_launch.py" doctor --root "<项目>"
+```
+
+- **launch 做什么**：用项目根的上一级作为 workspace（加载当前工作副本的 `mhimage/` 和 `_test/`）；查本机在线设备当前登录的账号（`loginenter.Account`），选账号池中第一个空闲账号；触发计划任务启动 `mhmain.exe` 并自动登录第一个角色；等新设备以该账号上线后输出 `devid`。默认等 240 秒，用 Bash 工具的 `run_in_background` 运行。
+- **服务器**：取工作区配置 `login_server`，`--server` 只覆盖本次。名字以“模拟”开头时用大区 `刘强98服`；其他名字在内服服务器列表中精确匹配，再做唯一的模糊匹配。没配置（`need_server`）时问用户这个分支用哪个服务器，按 workspace-management.md 保存到工作区配置；有多个候选（`server_ambiguous`）时把候选给用户选。
+- **其他失败**按输出的 `code` 处理，不要重试或换方式启动：
+  - `all_occupied`：账号池都被本机在线客户端占用，报告各账号所在设备，请用户关掉一个或添加账号。
+  - `need_accounts`、`task_failed`、`task_no_result`、`launcher_error`：运行 `doctor`，把其中的 `fix` 交给用户（`install` 和录入密码要用户在管理员终端或交互终端执行）。
+  - `bad_workspace`：例如 workspace 的 `_test/mhimage.wdf` 存在，客户端会加载打包脚本而不是源码。告诉用户，由用户决定是否移走，不要自行删除。
+  - `device_timeout`：客户端已启动但没等到登录，查对应进程号的日志，报告用户。
+- 只查得到本机的设备；账号在其他机器上登录时会被顶下线或登录失败。读不出账号的设备列在 `unknown_devices` 中。
+- 用完不自动关闭客户端。不要用打包服务（mh-patch-mcp 的 `control_aluba_client`）代替：它拉起的是 aluba 自我验证循环，不能指定 workspace 和账号。
+- **部署**（新电脑或重装后）：先把 skill 链接到位，再在管理员 PowerShell 运行 `client_launch.py install`（全机一次，与工作区无关，可重复执行；客户端目录变化或 skill 更新启动器后要重新运行），然后按 workspace-management.md 录入账号池。`doctor` 列出还缺什么；`uninstall` 删除计划任务。
 
 ## 找到并调用工具
 

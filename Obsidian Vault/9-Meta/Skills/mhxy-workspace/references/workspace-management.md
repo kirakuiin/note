@@ -21,6 +21,8 @@
 | `coder_name` | 覆盖率开发者名，用于 diff 过滤 | 否 | 邮箱前缀；为 null 时自动取 `openid_username` 的前缀 |
 | `default_devid` | 按 IP 查找不到调试设备时的兜底设备 ID，见 game-debugging.md「选择设备」 | 否 | 设备 ID 或 null |
 | `branches_root` | 开发分支总目录，创建或检出分支时使用，见 branch.md | 否 | 绝对路径或 null |
+| `login_accounts` | 自动启动客户端用的游戏账号池，按优先顺序排列，只存在用户级配置中，见「账号池」 | 否 | 只能用 `login-account` 维护；输出中只显示账号 |
+| `login_server` | 自动启动客户端登录的服务器名（如 `王卓为-trunk`、`模拟14`），每个分支通常固定，一般放工作区级 | 否 | 单行服务器名或 null |
 
 null 表示明确不配置；用到该项时再请用户补齐。只有五个路径是初始化的必填项。
 
@@ -55,6 +57,17 @@ python "<skill>/scripts/workspace.py" config --set-global "openid_username=<CORP
 - **其他情况**：把完整命令交给用户在自己的终端运行，完成后再继续。
 
 不要用其他方式绕过。清空密码用 `config --set-global "openid_password=null" --apply`。工单查询和覆盖率脚本在没有已存密码时也只在交互终端询问，处理方式相同。
+
+## 账号池
+
+自动启动客户端（game-debugging.md「自动启动客户端」）按顺序选第一个没被本机在线客户端占用的账号，登录第一个角色。账号和密码只存在用户级配置中，密码只能隐藏输入，交互终端的要求和处理方式同「密码」：
+
+```text
+python "<skill>/scripts/workspace.py" login-account --account <游戏账号> --apply                    # 新增（排在最后）或更新密码
+python "<skill>/scripts/workspace.py" login-account --account <游戏账号> --remove-account --apply   # 移除
+```
+
+服务器名由用户说出即可，保存到当前工作区：`sync --root "<项目>" --set-local "login_server=<服务器名>" --apply`。
 
 ## sync 做什么
 

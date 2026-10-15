@@ -8,5 +8,7 @@
   "openid_username": null,
   "openid_password": null,
   "default_devid": null,
-  "branches_root": null
+  "branches_root": null,
+  "login_accounts": null,
+  "login_server": null
 }

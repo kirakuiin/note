@@ -35,7 +35,7 @@
 
 Claude 主会话在第 2、4、6 步完成后和开始另一项功能前检查是否交接会话，用户确认提交后整理记忆，见 `session.md`。
 
-需要用户决策的只有：真正需要决策的问题（用 `grilling`）、确认方案流程图、重要的 review 分歧、开好客户端并确认设备、确认提交。其余步骤自动完成，不逐步请示。细节见 `engineering-principles.md`、`code-review.md`、`cli.md`。
+需要用户决策的只有：真正需要决策的问题（用 `grilling`）、确认方案流程图、重要的 review 分歧、有多台设备时确认用哪台、确认提交。其余步骤自动完成，不逐步请示。细节见 `engineering-principles.md`、`code-review.md`、`cli.md`。
 
 ### 配置字段
 - 各字段的含义和取值见 `workspace-management.md`「配置」。值为 null 表示未配置，用到时再问用户。

@@ -819,6 +819,44 @@ class WorkspaceTests(unittest.TestCase):
         self.assertNotIn(secret, str(result.exception))
         self.assertFalse(self.global_config.exists())
 
+    def test_login_account_pool_keeps_order_and_stays_masked(self):
+        secret, newer = "synthetic-Secret-1", "synthetic-Secret-2"
+        preview = w.configure_login_account(self.global_config, "a@163.com", secret)
+        self.assertFalse(self.global_config.exists())
+        self.assertNotIn(secret, json.dumps(preview))
+        w.configure_login_account(self.global_config, "a@163.com", secret, apply=True)
+        w.configure_login_account(self.global_config, "b@163.com", secret, apply=True)
+        result = w.configure_login_account(self.global_config, "A@163.com", newer, apply=True)
+        self.assertEqual(result["login_accounts"], ["a@163.com", "b@163.com"])
+        self.assertNotIn(newer, json.dumps(result))
+        pool = json.loads(self.global_config.read_text(encoding="utf-8"))["login_accounts"]
+        self.assertEqual([item["password"] for item in pool], [newer, secret])
+        self.initialize()
+        self.assertEqual(w.context(self.root, self.global_config)["effective_config"]["login_accounts"],
+                         ["a@163.com", "b@163.com"])
+        w.configure_login_account(self.global_config, "a@163.com", remove=True, apply=True)
+        w.configure_login_account(self.global_config, "b@163.com", remove=True, apply=True)
+        self.assertIsNone(json.loads(self.global_config.read_text(encoding="utf-8"))["login_accounts"])
+        with self.assertRaises(w.WorkspaceError):
+            w.configure_login_account(self.global_config, "b@163.com", remove=True, apply=True)
+        with self.assertRaises(w.WorkspaceError):
+            w.configure_login_account(self.global_config, "bad account", secret, apply=True)
+
+    def test_login_accounts_rejected_outside_login_account_command(self):
+        with self.assertRaisesRegex(w.WorkspaceError, "login-account"):
+            w.configure_global(self.global_config, ['login_accounts=[{"account":"a","password":"x"}]'], apply=True)
+        with self.assertRaises(w.WorkspaceError):
+            w.effective_values({}, {"login_accounts": [{"account": "a", "password": "x"}]})
+        with self.assertRaises(w.WorkspaceError):
+            w.validate_config({"login_accounts": [{"account": "a", "password": "x"}] * 2}, {"login_accounts": None}, "t")
+
+    def test_login_server_is_workspace_local(self):
+        self.initialize()
+        w.sync(self.root, self.global_config, (), True, self.skill, local_assignments=["login_server=王卓为-trunk"])
+        self.assertEqual(w.load_config(self.root, self.global_config)["login_server"], "王卓为-trunk")
+        with self.assertRaises(w.WorkspaceError):
+            w.sync(self.root, self.global_config, (), True, self.skill, local_assignments=['login_server=a"b'])
+
     def test_coverage_write_failure_preserves_previous_state(self):
         (self.root / "CLAUDE.md").write_text("manual\n")
         self.initialize()

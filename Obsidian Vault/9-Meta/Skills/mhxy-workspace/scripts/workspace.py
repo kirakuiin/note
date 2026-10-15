@@ -205,9 +205,40 @@ def validate_config(config, keys, label):
             if value is not None and (not isinstance(value, str) or not re.fullmatch(r"[A-Za-z0-9_]+", value)):
                 raise WorkspaceError(f"{label} 的 default_devid 必须是设备 ID 或 null")
             continue
+        if key == "login_accounts":
+            validate_login_accounts(value, label)
+            continue
+        if key == "login_server":
+            if value is not None and (not isinstance(value, str) or not value.strip() or len(value) > 64
+                                      or any(c in value for c in "\r\n\x00\"")):
+                raise WorkspaceError(f"{label} 的 login_server 必须是单行服务器名或 null")
+            continue
         if value is not None and (not isinstance(value, str) or not value or
                                   not Path(value).is_absolute() or any(c in value for c in "\r\n\x00")):
             raise WorkspaceError(f"{label} 的 {key} 必须是绝对路径或 null")
+
+
+def valid_login_account(account):
+    """游戏账号只接受不含空白和引号的单行文本（如 xxx@163.com）。"""
+    return isinstance(account, str) and bool(re.fullmatch(r"[^\s\"'\\]{1,64}", account))
+
+
+def validate_login_accounts(value, label):
+    """账号池：null，或按优先顺序排列、账号不重复的 [{"account", "password"}]。"""
+    if value is None:
+        return
+    if not isinstance(value, list) or not value:
+        raise WorkspaceError(f"{label} 的 login_accounts 必须是非空列表或 null")
+    seen = set()
+    for item in value:
+        if (not isinstance(item, dict) or set(item) != {"account", "password"}
+                or not valid_login_account(item["account"])
+                or not isinstance(item["password"], str) or not item["password"]
+                or any(c in item["password"] for c in "\r\n\x00")):
+            raise WorkspaceError(f"{label} 的 login_accounts 条目无效")
+        if item["account"].lower() in seen:
+            raise WorkspaceError(f"{label} 的 login_accounts 账号重复：{item['account']}")
+        seen.add(item["account"].lower())
 
 
 def paths(root_arg, global_arg):
@@ -314,6 +345,8 @@ def apply_settings(values, assignments, option):
             raise WorkspaceError(f"{option} 应为 键=值 或 键=null")
         if key == "openid_password" and value != "null":
             raise WorkspaceError("密码通过 config --prompt-password 隐藏输入，不放在命令行参数中")
+        if key == "login_accounts" and value != "null":
+            raise WorkspaceError("账号池用 login-account 命令维护，密码隐藏输入，不放在命令行参数中")
         if key == "openid_username" and result.get(key) != (None if value == "null" else value):
             result.pop("openid_password", None)  # An old password must not follow an account change.
         result[key] = None if value == "null" else value
@@ -324,6 +357,8 @@ def effective_values(global_values, local):
     """Merge non-secret overrides and derive the coder without duplicating state."""
     if set(local) & {"openid_username", "openid_password"}:
         raise WorkspaceError("OpenID 账密仅允许存放在用户级配置")
+    if "login_accounts" in local:
+        raise WorkspaceError("账号池仅允许存放在用户级配置")
     values = {**global_values, **local}
     if not values.get("coder_name") and values.get("openid_username"):
         values["coder_name"] = values["openid_username"].split("@", 1)[0]
@@ -331,9 +366,17 @@ def effective_values(global_values, local):
 
 
 def masked_config(values):
-    """Return a display-only configuration; never disclose the saved password."""
-    return {key: ("***" if value is not None else None) if key == "openid_password" else value
-            for key, value in values.items()}
+    """Return a display-only configuration; never disclose the saved passwords.
+
+    账号池只显示账号（按优先顺序），不显示密码。
+    """
+    def mask(key, value):
+        if key == "openid_password":
+            return "***" if value is not None else None
+        if key == "login_accounts" and value is not None:
+            return [item["account"] for item in value]
+        return value
+    return {key: mask(key, value) for key, value in values.items()}
 
 
 def load_config(root_arg, global_arg):
@@ -365,6 +408,52 @@ def configure_global(global_arg, assignments=(), password=None, apply=False):
         apply_changes(changes)
     return {"action": "config", "applied": apply, "changes": [str(item[0]) for item in changes],
             "effective_config": masked_config(effective_values({**defaults, **values}, {}))}
+
+
+def configure_login_account(global_arg, account, password=None, remove=False, apply=False):
+    """在用户级账号池中新增、更新密码或移除一个游戏账号，保留其他设置。
+
+    新账号追加到末尾（优先级最低）；已有账号只更新密码，位置不变。移除最后一个账号后
+    账号池为 null。
+    """
+    if not valid_login_account(account):
+        raise WorkspaceError("账号必须是不含空白和引号的单行文本")
+    path = absolute(global_arg)
+    old = read_bytes(path)
+    values = parse_json(old, path) if old is not None else {}
+    pool = [dict(item) for item in values.get("login_accounts") or []]
+    position = next((i for i, item in enumerate(pool) if item.get("account", "").lower() == account.lower()), None)
+    if remove:
+        if position is None:
+            raise WorkspaceError(f"账号池中没有 {account}")
+        pool.pop(position)
+    else:
+        if not password:
+            raise WorkspaceError("新增或更新账号需要隐藏输入密码")
+        if position is None:
+            pool.append({"account": account, "password": password})
+        else:
+            pool[position]["password"] = password
+    values["login_accounts"] = pool or None
+    defaults = parse_json((SKILL / "config/defaults.json").read_bytes(), "配置模板")
+    validate_config(values, defaults, path)
+    new = json_bytes(values)
+    changes = [(path, old, new)] if old != new else []
+    if apply:
+        apply_changes(changes)
+    return {"action": "login-account", "applied": apply, "changes": [str(item[0]) for item in changes],
+            "login_accounts": masked_config({"login_accounts": values["login_accounts"]})["login_accounts"]}
+
+
+def prompt_password(label, apply):
+    """在交互终端隐藏输入密码；没有交互终端时报错，不等待。"""
+    if not apply:
+        raise WorkspaceError("隐藏输入密码需要同时加 --apply，否则输入的密码不会保存")
+    # Claude Code 等命令工具的 stdin 可能是 NUL（Windows 下是字符设备，isatty 为真），
+    # getpass 会一直等待；stderr 不是终端时同样视为没有交互终端。
+    if not (sys.stdin.isatty() and sys.stderr.isatty()):
+        raise WorkspaceError("隐藏输入密码需要交互终端")
+    return getpass.getpass(label)
 
 
 def sync(root_arg, global_arg, assignments=(), apply=False, skill=SKILL, local_assignments=()):
@@ -1135,7 +1224,9 @@ def main():
             stream.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("sync", "context", "index", "clean", "coverage-task", "config",
-                                           "show-config", "track", "untrack"))
+                                           "show-config", "track", "untrack", "login-account"))
+    parser.add_argument("--account", help="login-account：游戏账号；新增或更新时隐藏输入密码")
+    parser.add_argument("--remove-account", action="store_true", help="login-account：从账号池移除 --account")
     parser.add_argument("--query", action="append", default=[], help="index：按关键词过滤，可重复，全部命中")
     parser.add_argument("--add", action="append", default=[], help="index：手动收录 spec，可重复")
     parser.add_argument("--remove", action="append", default=[], help="index：移出 spec，可重复")
@@ -1163,6 +1254,8 @@ def main():
             raise WorkspaceError("此操作不接受 --set-global 或 --set-local")
         if args.action != "config" and args.prompt_password:
             raise WorkspaceError("--prompt-password 仅用于 config")
+        if args.action != "login-account" and (args.account or args.remove_account):
+            raise WorkspaceError("--account、--remove-account 仅用于 login-account")
         if args.action == "config" and args.set_local:
             raise WorkspaceError("config 仅更新用户级配置")
         if (args.query or args.add or args.remove) and args.action != "index":
@@ -1200,14 +1293,17 @@ def main():
         elif args.action == "config":
             password = None
             if args.prompt_password:
-                if not args.apply:
-                    raise WorkspaceError("--prompt-password 需要同时加 --apply，否则输入的密码不会保存")
-                # Claude Code 等命令工具的 stdin 可能是 NUL（Windows 下是字符设备，isatty 为真），
-                # getpass 会一直等待；stderr 不是终端时同样视为没有交互终端。
-                if not (sys.stdin.isatty() and sys.stderr.isatty()):
-                    raise WorkspaceError("隐藏输入密码需要交互终端")
-                password = getpass.getpass("OpenID password (save to user config): ")
+                password = prompt_password("OpenID password (save to user config): ", args.apply)
             result = configure_global(args.global_config, args.set_global, password, args.apply)
+            password = None
+        elif args.action == "login-account":
+            if not args.account:
+                raise WorkspaceError("login-account 需要 --account")
+            password = None
+            if not args.remove_account:
+                password = prompt_password(f"Game password for {args.account} (save to user config): ", args.apply)
+            result = configure_login_account(args.global_config, args.account, password,
+                                             args.remove_account, args.apply)
             password = None
         elif args.action == "coverage-task":
             require_initialized(paths(args.root, args.global_config)[0])
