@@ -18,8 +18,8 @@ import uuid
 SKILL = Path(__file__).resolve().parents[1]
 TERMINAL = {"completed", "failed", "timed_out", "cancelled"}
 KINDS = ("investigate", "review", "test")
-MODEL = "gpt-6.1-sol"
-EFFORT = "high"
+MODEL = "gemini-4-argon"
+EFFORT = "medium"
 IDLE_SECONDS = 600
 START_SECONDS = 10
 RELEASE_GRACE = 5  # release 等待监控、CLI 进程退出的秒数；正常结束时监控写完终态后很快退出。
@@ -146,6 +146,22 @@ def matches(value, schema):
             and all(matches(value[k], s) for k, s in schema["properties"].items()))
 
 
+def parse_result(text):
+    """解析最终回复中的 JSON；非 GPT 模型没有强制结构化输出，可能包一层 Markdown 代码块。"""
+    try:
+        return json.loads(text)
+    except ValueError:
+        start, end = text.find("{"), text.rfind("}")
+        if start < 0 or end < start:
+            raise
+        return json.loads(text[start:end + 1])
+
+
+def strict_schema(model):
+    """只有 GPT 系列经代理支持 --output-schema；Gemini 带上会被上游以 400 拒绝，其他模型靠提示约束。"""
+    return model.startswith("gpt-")
+
+
 def child_env(environ=None):
     """子 Codex 的环境：去掉继承的 CODEX_*（保留 CODEX_HOME），加上防递归标记。"""
     environ = dict(os.environ if environ is None else environ)
@@ -174,6 +190,31 @@ def user_config():
     return tomllib.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
 
 
+def pick_model(model, effort, config, previous=None):
+    """确定模型和推理强度：显式指定优先，review 续接沿用上一轮，否则用默认值。
+
+    用户配置了 model_catalog_json 时按目录校验：模型必须在目录中，推理强度必须是该模型支持的档位；
+    未指定强度时用默认强度，该模型不支持则用目录给的默认档位。
+    """
+    previous = previous or {}
+    model = model or previous.get("model") or MODEL
+    if effort is None and model == previous.get("model"):
+        effort = previous.get("effort")
+    path = config.get("model_catalog_json")
+    if not path or not Path(path).is_file():
+        return model, effort or EFFORT
+    models = read_json(path).get("models", [])
+    entry = next((m for m in models if m.get("slug") == model), None)
+    if entry is None:
+        raise ValueError("模型目录中没有 " + model + "，可选：" + "、".join(m.get("slug", "") for m in models))
+    levels = [level.get("effort") for level in entry.get("supported_reasoning_levels") or []]
+    if effort is None:
+        effort = EFFORT if not levels or EFFORT in levels else entry.get("default_reasoning_level") or levels[-1]
+    elif levels and effort not in levels:
+        raise ValueError(model + " 不支持推理强度 " + effort + "，可选：" + "、".join(levels))
+    return model, effort
+
+
 def mcp_servers(task, config):
     """只接入任务列出的 MCP 工具并自动批准；未列出的服务一律不加载。"""
     servers = {}
@@ -192,25 +233,28 @@ def mcp_servers(task, config):
 
 
 def cli_command(job, task, state):
-    """构造固定模型、按类型限制沙箱和 MCP、禁用子代理的执行命令。
+    """构造按任务状态选模型、按类型限制沙箱和 MCP、禁用子代理的执行命令。
 
     Args:
         job: 任务目录。
         task: 任务文件内容。
-        state: 任务状态，提供 kind、root 和 resume 的会话 ID。
+        state: 任务状态，提供 kind、root、model、effort 和 resume 的会话 ID。
 
     Returns:
         参数列表；可能含认证配置，不得写入日志或输出。
     """
     config = user_config()
     kind = state["kind"]
+    model = state.get("model", MODEL)
     sandbox = "workspace-write" if kind == "test" else "read-only"
-    options = ["--ignore-user-config", "--skip-git-repo-check", "-m", MODEL,
-               "-c", f'model_reasoning_effort="{EFFORT}"', "-c", 'approval_policy="never"',
+    options = ["--ignore-user-config", "--skip-git-repo-check", "-m", model,
+               "-c", f'model_reasoning_effort="{state.get("effort", EFFORT)}"', "-c", 'approval_policy="never"',
                "-c", f'sandbox_mode="{sandbox}"', "-c", "agents.enabled=false",
                "-c", "features.multi_agent=false", "-c", "features.hooks=false", "-c", "plugins={}",
                "-c", "mcp_servers=" + toml_value(mcp_servers(task, config) if kind != "review" else {}),
-               "--json", "--output-schema", str(job / "schema.json"), "-o", str(job / "result.json")]
+               "--json", "-o", str(job / "result.json")]
+    if strict_schema(model):
+        options += ["--output-schema", str(job / "schema.json")]
     if os.name == "nt":
         # 用户配置的 elevated 沙箱在非交互后台进程里初始化失败，不设置时命令一律被策略拒绝。
         options += ["-c", 'windows.sandbox="unelevated"']
@@ -268,7 +312,7 @@ def finish(job, state, returncode):
     """CLI 正常退出后校验结构化结果；退出码为 0 但结果不完整仍是 failed。"""
     state["exit_code"] = returncode
     try:
-        result = read_json(job / "result.json")
+        result = parse_result(retry(lambda: (job / "result.json").read_text(encoding="utf-8-sig")))
         valid = matches(result, SCHEMAS[state["kind"]])
     except (OSError, ValueError):
         valid = False
@@ -438,7 +482,7 @@ def prepare(root, kind, task, resume):
     return task, session
 
 
-def start(root, kind, task_file, resume=None):
+def start(root, kind, task_file, resume=None, model=None, effort=None):
     """创建任务目录，test 任务独占设备，启动脱离控制台的后台 worker 后立即返回。"""
     if os.environ.get(GUARD):
         raise ValueError("当前进程是被委派的子 Codex，不得再委派")
@@ -446,6 +490,7 @@ def start(root, kind, task_file, resume=None):
     if not root.is_dir():
         raise ValueError("项目根目录不存在")
     task, session = prepare(root, kind, read_json(task_file), resume)
+    model, effort = pick_model(model, effort, user_config(), read_json(Path(resume) / "state.json") if resume else None)
     base = root / ".mhxy-workspace"
     jobs = checked_directory(base / "codex-cli", base)
     jobs.mkdir(parents=True, exist_ok=True)
@@ -463,11 +508,13 @@ def start(root, kind, task_file, resume=None):
         write_json(job / "task.json", task)
         write_json(job / "schema.json", SCHEMAS[kind])
         payload = {**task, "root": str(root), "kind": kind, "references": refs}
-        prompt = COMMON + ROLE[kind] + "\n" + json.dumps(payload, ensure_ascii=False, indent=2)
+        prompt = (COMMON + ROLE[kind] + "\n" + json.dumps(payload, ensure_ascii=False, indent=2)
+                  + "\n\n最终回复只输出一个符合以下 JSON Schema 的 JSON 对象，不加 Markdown 代码块或其他文字：\n"
+                  + json.dumps(SCHEMAS[kind], ensure_ascii=False))
         if session:
             prompt = "这是同一审查会话的下一轮。按新的任务说明重新审查，重点检查上轮意见的处理。\n" + prompt
         (job / "prompt.txt").write_text(prompt, encoding="utf-8")
-        state = {"job": str(job), "kind": kind, "status": "starting", "model": MODEL, "effort": EFFORT,
+        state = {"job": str(job), "kind": kind, "status": "starting", "model": model, "effort": effort,
                  "root": str(root), "cwd": str(job if kind == "test" else root),
                  "idle_seconds": IDLE_SECONDS, "started_at": time.time()}
         if session:
@@ -708,12 +755,14 @@ def main():
     parser.add_argument("--timeout", type=float, default=None)
     parser.add_argument("--restored", action="store_true")
     parser.add_argument("--devid")
+    parser.add_argument("--model")
+    parser.add_argument("--effort")
     args = parser.parse_args()
     try:
         if args.command == "start":
             if not args.root or not args.kind or not args.task_file:
                 raise ValueError("start 需要 --root、--kind 和 --task-file")
-            result = start(args.root, args.kind, args.task_file, args.resume)
+            result = start(args.root, args.kind, args.task_file, args.resume, args.model, args.effort)
         elif args.command == "lock":
             if not args.root:
                 raise ValueError("lock 需要 --root 和 --devid")

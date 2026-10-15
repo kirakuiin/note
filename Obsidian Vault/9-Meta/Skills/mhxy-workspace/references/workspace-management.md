@@ -35,7 +35,7 @@ python "<skill>/scripts/workspace.py" context --root "<项目>"
 ```
 
 - `sync`：初始化或更新工作区，可同时设置配置。
-- `config`：只改用户级配置，不碰工作区。
+- `config`：用 `--set-global` 只改用户级配置；用 `--root` 加 `--set-local` 只改工作区级配置。都不碰入口文件。
 - `context`：查看合并后的配置（已脱敏），以及追踪工单和索引状态。
 - 值写 `键=null` 表示不配置。
 
@@ -60,14 +60,14 @@ python "<skill>/scripts/workspace.py" config --set-global "openid_username=<CORP
 
 ## 账号池
 
-自动启动客户端（game-debugging.md「自动启动客户端」）按顺序选第一个没被本机在线客户端占用的账号，登录第一个角色。账号和密码只存在用户级配置中，密码只能隐藏输入，交互终端的要求和处理方式同「密码」：
+自动启动客户端（game-debugging.md「自动启动客户端」）按顺序选第一个没被本机在线客户端占用的账号，登录第一个角色。账号和密码只存在用户级配置中，密码只能隐藏输入（输两遍核对，不一致不保存），交互终端的要求和处理方式同「密码」：
 
 ```text
 python "<skill>/scripts/workspace.py" login-account --account <游戏账号> --apply                    # 新增（排在最后）或更新密码
 python "<skill>/scripts/workspace.py" login-account --account <游戏账号> --remove-account --apply   # 移除
 ```
 
-服务器名由用户说出即可，保存到当前工作区：`sync --root "<项目>" --set-local "login_server=<服务器名>" --apply`。
+服务器名由用户说出即可，保存到当前工作区：`config --root "<项目>" --set-local "login_server=<服务器名>" --apply`（只写工作区级配置，不动入口文件）。
 
 ## sync 做什么
 

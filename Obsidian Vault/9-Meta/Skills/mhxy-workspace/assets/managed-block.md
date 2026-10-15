@@ -35,7 +35,7 @@
 
 Claude 主会话在第 2、4、6 步完成后和开始另一项功能前检查是否交接会话，用户确认提交后整理记忆，见 `session.md`。
 
-需要用户决策的只有：真正需要决策的问题（用 `grilling`）、确认方案流程图、重要的 review 分歧、有多台设备时确认用哪台、确认提交。其余步骤自动完成，不逐步请示。细节见 `engineering-principles.md`、`code-review.md`、`cli.md`。
+需要用户决策的只有：真正需要决策的问题（用 `grilling`）、确认方案流程图、重要的 review 分歧、确认提交。其余步骤（包括选择测试设备、没有设备时启动客户端）自动完成，不逐步请示；只有脚本或规则判断不了、或必须由用户本人完成的操作（如管理员安装、录入密码）才找用户。细节见 `engineering-principles.md`、`code-review.md`、`cli.md`。
 
 ### 配置字段
 - 各字段的含义和取值见 `workspace-management.md`「配置」。值为 null 表示未配置，用到时再问用户。
@@ -74,5 +74,6 @@ Claude 主会话在第 2、4、6 步完成后和开始另一项功能前检查�
 ### 边界
 - 配置文件、本区段、追踪文件和索引只由 skill 脚本写入。
 - `.mhxy-workspace/` 是可清理的本地辅助目录，不放业务数据。
+- 写记忆前先判断：跨分支有用的梦幻西游经验，先问用户，再按 `session.md` 写进 lessons；其余按工具默认的记忆规则处理。
 - 初始化、配置更新和清理只在用户明确要求时执行。用户确认分支检出或复用后，可按 `branch.md` 执行 checkout、cleanup、switch，以及删除与目标不在同一仓库的旧资源工作副本；用户明确要求更新工作副本时，可按 `svn-update.md` 执行 update、switch；用户确认本次提交说明和文件清单后，可按 `svn-commit.md` 指定的入口提交（包括先 add 清单中的新文件）；其他流程不执行 SVN 写操作。入口文件放入本地 `ignore-on-commit` 变更列表不影响服务器。
 <!-- mhxy-workspace:end -->

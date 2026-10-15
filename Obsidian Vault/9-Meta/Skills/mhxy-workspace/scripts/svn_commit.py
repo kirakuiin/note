@@ -245,6 +245,7 @@ def submit(root_arg, paths, message_file, apply=False):
         verify_log(root, result["branch"]["url"], result["revision"], message,
                    [entry["path"] for entry in result["entries"]])
         result["verified"] = True
+        result["next_steps"] = ["按 session.md 整理记忆，再检查上下文占用（仅 Claude 主会话）"]
     except (precommit.PrecheckError, OSError, ValueError, ElementTree.ParseError) as error:
         result["error"] = str(error)
     return result

@@ -410,6 +410,25 @@ def configure_global(global_arg, assignments=(), password=None, apply=False):
             "effective_config": masked_config(effective_values({**defaults, **values}, {}))}
 
 
+def configure_local(root_arg, global_arg, assignments, apply=False):
+    """只改工作区级配置（如每个分支的 login_server），不碰用户级配置和入口文件。"""
+    root, personal, _ = paths(root_arg, global_arg)
+    require_initialized(root)
+    path = personal / "config.json"
+    old = read_bytes(path)
+    local = apply_settings(parse_json(old, path) if old is not None else {}, assignments, "--set-local")
+    defaults = parse_json((SKILL / "config/defaults.json").read_bytes(), "配置模板")
+    validate_config(local, defaults, path)
+    effective = load_config(root_arg, global_arg)
+    effective = effective_values({**effective, **local}, local)
+    new = json_bytes(local)
+    changes = [(path, old, new)] if old != new else []
+    if apply:
+        apply_changes(changes)
+    return {"action": "config", "applied": apply, "changes": [str(item[0]) for item in changes],
+            "effective_config": masked_config(effective)}
+
+
 def configure_login_account(global_arg, account, password=None, remove=False, apply=False):
     """在用户级账号池中新增、更新密码或移除一个游戏账号，保留其他设置。
 
@@ -1256,8 +1275,8 @@ def main():
             raise WorkspaceError("--prompt-password 仅用于 config")
         if args.action != "login-account" and (args.account or args.remove_account):
             raise WorkspaceError("--account、--remove-account 仅用于 login-account")
-        if args.action == "config" and args.set_local:
-            raise WorkspaceError("config 仅更新用户级配置")
+        if args.action == "config" and args.set_local and (args.set_global or args.prompt_password):
+            raise WorkspaceError("config 的 --set-local 不能与 --set-global、--prompt-password 同时使用")
         if (args.query or args.add or args.remove) and args.action != "index":
             raise WorkspaceError("--query、--add、--remove 仅用于 index")
         if args.from_hook and args.action not in ("context", "index"):
@@ -1290,6 +1309,8 @@ def main():
                           local_assignments=args.set_local)
         elif args.action == "show-config":  # 兼容 0.2.x 入口；新入口统一使用 context。
             result = {"effective_config": masked_config(load_config(args.root, args.global_config))}
+        elif args.action == "config" and args.set_local:
+            result = configure_local(args.root, args.global_config, args.set_local, args.apply)
         elif args.action == "config":
             password = None
             if args.prompt_password:
@@ -1301,7 +1322,10 @@ def main():
                 raise WorkspaceError("login-account 需要 --account")
             password = None
             if not args.remove_account:
+                # 隐藏输入没有回显，输两遍核对，避免存下打错的密码
                 password = prompt_password(f"Game password for {args.account} (save to user config): ", args.apply)
+                if prompt_password("Repeat password: ", args.apply) != password:
+                    raise WorkspaceError("两次输入的密码不一致，未保存")
             result = configure_login_account(args.global_config, args.account, password,
                                              args.remove_account, args.apply)
             password = None

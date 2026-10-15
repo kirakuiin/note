@@ -16,6 +16,10 @@
 - **部署**：`install` 可重复执行，`doctor` 列出缺什么和怎么补，`uninstall` 删除。
 - 不使用 mh-patch-mcp 的 `control_aluba_client`：它拉起的是 aluba 自我验证循环，不能指定 workspace 和账号。
 
+## 自动选设备
+
+`client_launch.py select`：用户指定 devid 就用它；否则在本机在线设备中取第一台加载当前工作区源码（`mainmenu.__file__` 在项目根下）、已登录、没有设备锁的；没有就 `launch`。整个过程不需要用户确认，开发流程中用户只做真正的决策和只有本人能完成的操作。
+
 ## 风险
 
 - 计划任务让本用户的普通权限进程可以免确认地以管理员身份启动登记目录下的 `mhmain.exe`；客户端目录和 Python 解释器本身普通权限可写，这一点不能完全防住。

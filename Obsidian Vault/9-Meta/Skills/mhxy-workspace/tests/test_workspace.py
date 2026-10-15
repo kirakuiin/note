@@ -856,6 +856,14 @@ class WorkspaceTests(unittest.TestCase):
         self.assertEqual(w.load_config(self.root, self.global_config)["login_server"], "王卓为-trunk")
         with self.assertRaises(w.WorkspaceError):
             w.sync(self.root, self.global_config, (), True, self.skill, local_assignments=['login_server=a"b'])
+        agents = self.agents.read_bytes()
+        result = w.configure_local(self.root, self.global_config, ["login_server=模拟14"], apply=True)
+        self.assertEqual(result["effective_config"]["login_server"], "模拟14")
+        self.assertEqual(self.agents.read_bytes(), agents)
+        self.assertEqual(json.loads((self.personal / "config.json").read_text(encoding="utf-8")),
+                         {"login_server": "模拟14"})
+        with self.assertRaises(w.WorkspaceError):
+            w.configure_local(self.root, self.global_config, ["openid_username=a@corp.netease.com"], apply=True)
 
     def test_coverage_write_failure_preserves_previous_state(self):
         (self.root / "CLAUDE.md").write_text("manual\n")

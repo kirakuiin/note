@@ -299,7 +299,8 @@ def mark_reviewed(root_arg):
     path = root / workspace.DIRECTORY / REVIEW_MARK
     workspace.apply_changes([(path, workspace.read_bytes(path),
                               workspace.json_bytes({"marked_at": marked_at, "files": files}))])
-    return {"root": str(root), "review_mark": marked_at, "files": len(files), "path": str(path)}
+    return {"root": str(root), "review_mark": marked_at, "files": len(files), "path": str(path),
+            "next_steps": ["按 session.md 检查上下文占用（仅 Claude 主会话）", "委派真机自检，见 cli.md"]}
 
 
 def forget_reviewed(root, paths):
@@ -351,6 +352,8 @@ def precheck(root_arg):
     result["warnings"] = warnings + check_leftovers(root, entries)
     result["review_mark"], result["changed_since_review"], mark_warnings = review_delta(root, entries)
     result["warnings"] += mark_warnings
+    if result["review_mark"] is None and result["commit"]:
+        result["warnings"].append("没有 Codex review 记录：不是小改动时，先按 code-review.md 做 review")
     if result["property_changes"]:
         result["warnings"].append("有属性改动（可能是外链更新）：建议与代码分开提交，并在说明末尾加 [NO MERGE]")
     if result["excluded_data"]:

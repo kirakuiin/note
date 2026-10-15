@@ -34,7 +34,12 @@ def caps(password):
 
 
 def build_payload(request, password):
-    """生成传给 mhmain.exe 的启动 JSON（含密码，只用于进程参数）。"""
+    """生成传给 mhmain.exe 的启动 JSON（含密码，只用于进程参数）。
+
+    引擎从原始命令行中按空白切出 __start_by_mh_launcher__ 之后的一段，直接当 JSON 解析
+    （xymain/myapp.cpp check_launcher），所以整段不能含空白，也不能被加引号或转义；
+    workspace 必须是第一个键。
+    """
     payload = {
         "workspace": request["workspace"],
         "account": request["account"],
@@ -45,7 +50,10 @@ def build_payload(request, password):
     }
     if caps(password):
         payload["caps"] = caps(password)
-    return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    text = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    if any(c.isspace() for c in text):
+        raise LaunchError("启动参数（workspace、服务器名或密码）含空白，引擎无法解析")
+    return text
 
 
 def validate_request(request, allowed):
@@ -83,11 +91,15 @@ def account_password(config_path, account):
 
 
 def start(exe, payload):
-    """脱离计划任务启动客户端，任务结束不影响客户端；返回进程号。"""
+    """脱离计划任务启动客户端，任务结束不影响客户端；返回进程号。
+
+    命令行手工拼接：payload 原样跟在标志后面，不能经过 list2cmdline（会给引号加反斜杠）。
+    """
+    command = f'"{exe}" {LAUNCH_FLAG} {payload}'
     flags = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS
     for extra in (CREATE_BREAKAWAY_FROM_JOB, 0):  # 所在作业不允许脱离时退回普通启动
         try:
-            process = subprocess.Popen([str(exe), LAUNCH_FLAG, payload], cwd=str(exe.parent),
+            process = subprocess.Popen(command, cwd=str(exe.parent),
                                        creationflags=flags | extra, close_fds=True)
             return process.pid
         except OSError:

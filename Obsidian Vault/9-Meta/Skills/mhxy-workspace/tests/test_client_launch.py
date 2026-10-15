@@ -90,6 +90,16 @@ class ClientLaunchTests(unittest.TestCase):
         payload = json.loads(t.build_payload(request, "aBc"))
         self.assertEqual((payload["pwd"], payload["caps"]), ("aBc", "1"))
         self.assertNotIn("caps", json.loads(t.build_payload(request, "abc")))
+        self.assertTrue(t.build_payload(request, "abc").startswith('{"workspace":'))
+        with self.assertRaises(t.LaunchError):
+            t.build_payload({**request, "svrname": "a b"}, "abc")
+
+    def test_task_passes_payload_unquoted(self):
+        exe = self.base / "mhmain.exe"
+        with patch.object(t.subprocess, "Popen") as popen:
+            popen.return_value.pid = 7
+            self.assertEqual(t.start(exe, '{"workspace":"D:/w"}'), 7)
+        self.assertEqual(popen.call_args.args[0], f'"{exe}" __start_by_mh_launcher__ {{"workspace":"D:/w"}}')
 
     def test_task_validates_request_and_allowlist(self):
         client = self.base / "client"
@@ -120,6 +130,46 @@ class ClientLaunchTests(unittest.TestCase):
         self.assertIsNone(result["pid"])
         self.assertFalse(request_path.exists())
         self.assertNotIn("synthetic-Pw", json.dumps(result))
+
+    def test_no_online_device_is_empty_list(self):
+        error = c.LaunchError(f"get_devices_by_ip 返回错误：IP=1.2.3.4 {c.NO_DEVICE}", "mcp_error")
+        with patch.object(c, "mcp", side_effect=error):
+            self.assertEqual(c.list_devices(), [])
+        with patch.object(c, "mcp", side_effect=c.LaunchError("其他错误", "mcp_error")):
+            with self.assertRaises(c.LaunchError):
+                c.list_devices()
+
+    def test_loads_workspace_ignores_case_and_separators(self):
+        root = self.base / "Branch" / "mhimage"
+        root.mkdir(parents=True)
+        source = str(root).lower().replace("\\", "/") + "/xlogin\\mainmenu.py"
+        self.assertTrue(c.loads_workspace(source, root))
+        self.assertFalse(c.loads_workspace(str(self.base / "Branch" / "mhimage2" / "mainmenu.py"), root))
+        self.assertFalse(c.loads_workspace(None, root))
+
+    def test_select_prefers_unlocked_device_with_workspace_source(self):
+        root = self.base / "w" / "mhimage"
+        root.mkdir(parents=True)
+        mine = (root / "xlogin" / "mainmenu.py").as_posix()
+        devices = [{"devid": "locked"}, {"devid": "other"}, {"devid": "idle"}, {"devid": "mine"}, {"devid": "mine2"}]
+        infos = {"other": {"account": "a@163.com", "source": "D:/other/mhimage/xlogin/mainmenu.py"},
+                 "idle": {"account": None, "source": mine},
+                 "mine": {"account": "b@163.com", "source": mine},
+                 "mine2": {"account": "c@163.com", "source": mine}}
+        with patch.object(c, "list_devices", return_value=devices), \
+                patch.object(c, "locked", side_effect=lambda devid: devid == "locked"), \
+                patch.object(c, "device_info", side_effect=lambda devid: infos[devid]), \
+                patch.object(c, "launch") as launch:
+            result = c.select(root, self.base / "config.json")
+        launch.assert_not_called()
+        self.assertEqual((result["how"], result["devid"]), ("online", "mine"))
+        self.assertEqual([item["devid"] for item in result["skipped"]], ["locked", "other", "idle"])
+        with patch.object(c, "list_devices", return_value=devices[:2]), \
+                patch.object(c, "locked", side_effect=lambda devid: devid == "locked"), \
+                patch.object(c, "device_info", side_effect=lambda devid: infos[devid]), \
+                patch.object(c, "launch", return_value={"action": "launch", "devid": "new"}):
+            result = c.select(root, self.base / "config.json")
+        self.assertEqual((result["how"], result["devid"]), ("launched", "new"))
 
     def test_task_arguments_quote_paths(self):
         arguments = c.task_arguments(Path(r"C:\Program Data\x.py"), Path(r"C:\Users\u\cfg.json"),

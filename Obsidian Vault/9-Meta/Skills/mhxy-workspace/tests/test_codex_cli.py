@@ -48,12 +48,12 @@ def test_read_only_kinds_use_project_root_and_no_mcp(tmp_path, kind):
     assert command[:2] == ["codex", "exec"] and command[-1] == "-"
     assert command[command.index("--sandbox") + 1] == "read-only"
     assert command[command.index("-C") + 1] == "R"
-    assert command[command.index("-m") + 1] == "gpt-6.1-sol"
-    for value in ('model_reasoning_effort="high"', "agents.enabled=false", "features.multi_agent=false",
+    assert command[command.index("-m") + 1] == "gemini-4-argon"
+    for value in ('model_reasoning_effort="medium"', "agents.enabled=false", "features.multi_agent=false",
                   "features.hooks=false", "plugins={}", "mcp_servers={}", 'approval_policy="never"',
                   'model_provider="p"'):
         assert option(command, value), value
-    assert "--ignore-user-config" in command and "--output-schema" in command and "--add-dir" not in command
+    assert "--ignore-user-config" in command and "-o" in command and "--add-dir" not in command
 
 
 def test_test_kind_whitelists_mcp_and_write_dirs(tmp_path):
@@ -97,6 +97,52 @@ def test_resume_command_continues_session(tmp_path):
     assert option(command, 'sandbox_mode="read-only"') and option(command, "agents.enabled=false")
 
 
+def test_command_uses_state_model(tmp_path):
+    command = c.cli_command(tmp_path, {}, {"kind": "review", "root": "R", "model": "gemini-4-argon", "effort": "medium"})
+    assert command[command.index("-m") + 1] == "gemini-4-argon"
+    assert option(command, 'model_reasoning_effort="medium"')
+    # Gemini 带 --output-schema 会被上游拒绝，只有 GPT 系列传。
+    assert "--output-schema" not in command
+    assert "--output-schema" in c.cli_command(tmp_path, {}, {"kind": "review", "root": "R", "model": "gpt-6-sol"})
+
+
+# ---- 模型选择 ----
+
+CATALOG = {"models": [
+    {"slug": "gpt-6.1-sol", "default_reasoning_level": "high",
+     "supported_reasoning_levels": [{"effort": "high"}, {"effort": "xhigh"}]},
+    {"slug": "gemini-4-argon", "default_reasoning_level": "medium",
+     "supported_reasoning_levels": [{"effort": "low"}, {"effort": "medium"}]}]}
+
+
+def catalog_config(tmp_path):
+    c.write_json(tmp_path / "catalog.json", CATALOG)
+    return {"model_catalog_json": str(tmp_path / "catalog.json")}
+
+
+def test_pick_model_defaults_without_catalog():
+    assert c.pick_model(None, None, {}) == (c.MODEL, c.EFFORT)
+    assert c.pick_model("any-model", "low", {}) == ("any-model", "low")
+
+
+def test_pick_model_validates_against_catalog(tmp_path):
+    config = catalog_config(tmp_path)
+    assert c.pick_model(None, None, config) == ("gemini-4-argon", "medium")
+    # 默认强度不受支持时退回目录给的默认档位。
+    assert c.pick_model("gpt-6.1-sol", None, config) == ("gpt-6.1-sol", "high")
+    with pytest.raises(ValueError, match="模型目录中没有"):
+        c.pick_model("nope", None, config)
+    with pytest.raises(ValueError, match="不支持推理强度"):
+        c.pick_model("gemini-4-argon", "high", config)
+
+
+def test_pick_model_resume_inherits_previous(tmp_path):
+    previous = {"model": "gemini-4-argon", "effort": "low"}
+    assert c.pick_model(None, None, {}, previous) == ("gemini-4-argon", "low")
+    # 换模型时不沿用上一轮的强度。
+    assert c.pick_model("gpt-6.1-sol", None, catalog_config(tmp_path), previous) == ("gpt-6.1-sol", "high")
+
+
 # ---- 环境与防递归 ----
 
 def test_child_env_strips_codex_vars_and_sets_guard():
@@ -137,9 +183,11 @@ def test_prompt_keeps_default_references_and_no_delegation(tmp_path):
     with patch.object(c.subprocess, "Popen", side_effect=publish_worker):
         job = Path(c.start(root, "investigate", task)["job"])
     prompt = (job / "prompt.txt").read_text(encoding="utf-8")
-    payload = json.loads(prompt[prompt.index("{"):])
+    payload, end = json.JSONDecoder().raw_decode(prompt, prompt.index("{"))
     assert payload["references"] == [str(root / "AGENTS.md"), "extra.md"]
     assert "不得派生、调用或者请求新的子代理" in prompt
+    # 非 GPT 模型没有 --output-schema，schema 写进提示末尾约束最终回复。
+    assert prompt.endswith(json.dumps(c.SCHEMAS["investigate"], ensure_ascii=False))
     assert job.parent == root / ".mhxy-workspace" / "codex-cli"
 
 
@@ -171,6 +219,17 @@ def test_start_resume_records_session(tmp_path):
         job = Path(c.start(root, "review", task, previous)["job"])
     state = c.read_json(job / "state.json")
     assert state["resume_session"] == "S" and state["kind"] == "review"
+    assert (state["model"], state["effort"]) == (c.MODEL, c.EFFORT)
+
+
+def test_start_records_chosen_model(tmp_path):
+    root = make_root(tmp_path)
+    task = tmp_path / "t.json"
+    c.write_json(task, {"instructions": "q"})
+    with patch.object(c.subprocess, "Popen", side_effect=publish_worker):
+        job = Path(c.start(root, "investigate", task, model="gemini-4-argon", effort="low")["job"])
+    state = c.read_json(job / "state.json")
+    assert (state["model"], state["effort"]) == ("gemini-4-argon", "low")
 
 
 # ---- 并发读写 ----
@@ -390,6 +449,13 @@ def test_review_result_is_formatted(tmp_path):
     state = run_probe(tmp_path, result_code(result), kind="review", idle=EXITS)
     assert state["status"] == "completed" and state["must_fix"] == 1
     assert state["formatted"] == ["[必须修改] a.py:3 —— p；b；fix"]
+
+
+def test_fenced_json_result_is_accepted(tmp_path):
+    text = "```json\n" + json.dumps({"conclusion": "c", "evidence": ["a:1"], "uncertainties": []}) + "\n```"
+    code = "from pathlib import Path; Path('result.json').write_text(" + repr(text) + ", encoding='utf-8')"
+    state = run_probe(tmp_path, code, kind="investigate", idle=EXITS)
+    assert state["status"] == "completed" and state["result"]["conclusion"] == "c"
 
 
 def test_zero_exit_without_valid_result_is_failed(tmp_path):

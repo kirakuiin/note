@@ -40,7 +40,7 @@
 }
 ```
 
-- 设备按 game-debugging.md「选择设备」先由主会话确定；没有在线设备时主会话按其中「自动启动客户端」启动。
+- 设备按 game-debugging.md「选择设备」由主会话用 `client_launch.py select` 自动确定（没有合适的在线设备时会自动启动客户端），不需要用户确认。
 - `mcp_tools` 按计划列出实际要用的工具，不照抄示例；其他 MCP 一律不接入。
 - `write_dirs` 必须是 `.mhxy-workspace/` 内的子目录，不能经过链接。执行者可写测试和 Mock 脚本，不改业务源码；发现业务缺陷、需要改变测试目标或 Mock 方案、状态不明或无法恢复时停止并返回证据。
 - 执行者不能写 `.mhxy-workspace/tracking.json`。覆盖率跑测的本地登记由主会话按结果完成，任务要返回的内容见 [coverage.md](coverage.md)「跑测流程」第 2 步。
@@ -65,10 +65,10 @@
 
 ## Claude 主会话
 
-用本 skill 的 `scripts/codex_cli.py`，需要 Python 3.11+（标准库 `tomllib`）和已安装的 Codex CLI。模型固定为 `gpt-6.1-sol`，推理强度 `high`。
+用本 skill 的 `scripts/codex_cli.py`，需要 Python 3.11+（标准库 `tomllib`）和已安装的 Codex CLI。默认模型 `gemini-4-argon`、推理强度 `medium`；`start` 可用 `--model`、`--effort` 指定其他模型和强度。
 
 ```text
-python -X utf8 "<skill>/scripts/codex_cli.py" start --root "<项目>" --kind <investigate|review|test> --task-file "<任务.json>" [--resume "<上一轮 review 任务目录>"]
+python -X utf8 "<skill>/scripts/codex_cli.py" start --root "<项目>" --kind <investigate|review|test> --task-file "<任务.json>" [--resume "<上一轮 review 任务目录>"] [--model <模型>] [--effort <强度>]
 python -X utf8 "<skill>/scripts/codex_cli.py" wait --job "<任务目录>" --timeout 3600
 python -X utf8 "<skill>/scripts/codex_cli.py" status --job "<任务目录>"
 python -X utf8 "<skill>/scripts/codex_cli.py" cancel --job "<任务目录>"
@@ -76,6 +76,8 @@ python -X utf8 "<skill>/scripts/codex_cli.py" release --job "<任务目录>" --r
 ```
 
 - `start` 启动后台进程后立即返回任务目录（`<项目>/.mhxy-workspace/codex-cli/<任务>/`）。随后用 Bash 工具的 `run_in_background` 运行 `wait`，主会话继续其他工作，任务结束时会收到通知；`wait` 到时仍未结束就再运行一次。各命令都输出 JSON，状态有 starting、running、completed、failed、timed_out、cancelled。
+- 模型走用户 Codex 配置里的模型连接（如 CodeMaker 代理），可选模型名取自其 `model_catalog_json`（如 `gemini-4-argon`、`claude-opus-5-5`、`glm-5.3`）。配置了目录时，`start` 会校验模型名和强度，填错直接报错并列出可选项；不指定强度时用 `medium`，该模型不支持就用它的默认档位。review 续接（`--resume`）不指定模型时沿用上一轮的。实际用的模型和强度记在任务 `state.json` 的 `model`、`effort`。
+- 结果格式：提示末尾总会附上结果的 JSON Schema。只有 `gpt-*` 模型另加 `--output-schema` 强制结构化输出，因为 Gemini 带上这个参数会被上游以 400 拒绝，GLM 等模型也不会执行它。非 GPT 模型的结果允许外面包一层代码块，字段校验不放宽。Claude 系列受公司高价模型额度限制，未验证。
 - 连续 600 秒没有任何 CLI 输出时，杀掉进程树并标记 `timed_out`；没有总时长上限。`cancel` 只停止，不自动重跑。
 - 子 Codex 带环境变量 `MHXY_CODEX_CHILD=1`，在这个环境里 `start` 会拒绝运行；同时关闭子代理、hooks 和插件，不加载任务未列出的 MCP。
 

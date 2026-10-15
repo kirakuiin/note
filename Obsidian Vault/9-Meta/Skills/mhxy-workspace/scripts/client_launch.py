@@ -7,6 +7,8 @@
   doctor     普通权限：检查部署和配置，列出缺什么、怎么补。
   launch     普通权限：查本机在线设备占用的账号，选账号池中第一个空闲账号，触发计划任务启动客户端，
              等新设备登录上线后返回 devid。
+  select     普通权限：为当前工作区确定测试设备。在线设备中选第一台加载当前工作区源码、没有设备锁的；
+             没有就 launch 一台。不需要用户确认。
 
 客户端以管理员身份运行，agent 的普通权限进程直接启动会弹 UAC；计划任务由用户安装一次，之后
 触发不再弹窗。账号密码只在用户级配置（workspace.py login-account 维护），不出现在输出和请求文件中。
@@ -41,7 +43,11 @@ MOCK_FIELD = "刘强98服"  # 模拟服所在大区
 MORE_SERVER = "more_server"  # 客户端按名字在内服服务器列表中查找
 EXE = "mhmain.exe"
 PROBE_TIMEOUT = 20  # 秒；单次 MCP 调用
-ACCOUNT_PROBE = 'getattr(__import__("sys").modules.get("loginenter"), "Account", None)'
+NO_DEVICE = "未找到任何在线设备"  # get_devices_by_ip 在本机没有设备时的报错文本
+# 读设备当前登录的账号和加载的脚本位置（mainmenu 是登录流程必然加载的模块）
+DEVICE_PROBE = ('(lambda s: {"account": getattr(s.modules.get("loginenter"), "Account", None), '
+                '"source": getattr(s.modules.get("mainmenu"), "__file__", None)})(__import__("sys"))')
+LOCKS = Path(os.environ.get("LOCALAPPDATA", str(Path.home() / ".cache"))) / "mhxy-cli-testing/locks"
 
 
 class LaunchError(Exception):
@@ -67,6 +73,19 @@ def choose_account(pool, occupied):
         if normalize_account(item["account"]) not in occupied:
             return item["account"]
     return None
+
+
+def loads_workspace(source, root):
+    """设备加载的脚本（mainmenu.__file__）是否在项目根目录下；客户端返回的路径大小写和分隔符不统一。"""
+    if not isinstance(source, str) or not source:
+        return False
+    prefix = Path(root).resolve().as_posix().lower().rstrip("/") + "/"
+    return source.replace("\\", "/").lower().startswith(prefix)
+
+
+def locked(devid):
+    """设备是否有 codex_cli.py 的全机设备锁（正在测试或待恢复）。"""
+    return (LOCKS / (hashlib.sha256(devid.encode()).hexdigest() + ".json")).exists()
 
 
 def resolve_server(name, names):
@@ -139,20 +158,29 @@ def mcp(name, arguments, timeout=PROBE_TIMEOUT):
 
 
 def list_devices():
-    value = mcp("get_devices_by_ip", {"ip": ""})
+    try:
+        value = mcp("get_devices_by_ip", {"ip": ""})
+    except LaunchError as error:
+        if NO_DEVICE in str(error):  # 没有在线设备时工具报错，而不是返回空列表
+            return []
+        raise
     devices = value.get("result", value) if isinstance(value, dict) else value
     if not isinstance(devices, list):
         raise LaunchError(f"设备列表无法识别：{value}", "mcp_error")
     return [item for item in devices if isinstance(item, dict) and item.get("devid")]
 
 
-def device_account(devid):
-    """读取设备当前登录的账号；未登录时为 None。读取失败抛 LaunchError。"""
-    value = mcp("execute_code", {"devid": devid, "code": ACCOUNT_PROBE, "need_loginfo": False})
+def device_info(devid):
+    """读取设备当前登录的账号（未登录为 None）和加载的脚本路径。读取失败抛 LaunchError。"""
+    value = mcp("execute_code", {"devid": devid, "code": DEVICE_PROBE, "need_loginfo": False})
     value = value.get("result", value) if isinstance(value, dict) and "ret" not in value else value
-    if not isinstance(value, dict) or value.get("error"):
-        raise LaunchError(f"读取 {devid} 的账号失败：{value}", "mcp_error")
-    return normalize_account(value.get("ret"))
+    if not isinstance(value, dict) or value.get("error") or not isinstance(value.get("ret"), dict):
+        raise LaunchError(f"读取 {devid} 的状态失败：{value}", "mcp_error")
+    return {"account": normalize_account(value["ret"].get("account")), "source": value["ret"].get("source")}
+
+
+def device_account(devid):
+    return device_info(devid)["account"]
 
 
 def scan_accounts():
@@ -311,7 +339,7 @@ def doctor(root, global_config, platform="pc"):
     server = config.get("login_server")
     if not server:
         problems.append({"item": "服务器", "problem": "当前工作区未配置 login_server",
-                         "fix": f'python "{SCRIPTS / "workspace.py"}" sync --root "<项目>" '
+                         "fix": f'python "{SCRIPTS / "workspace.py"}" config --root "<项目>" '
                                 '--set-local "login_server=<服务器名>" --apply'})
     else:
         try:
@@ -343,8 +371,8 @@ def launch(root, global_config, platform="pc", server=None, timeout=240, dry_run
     work = workspace_dir(root)
     server = server or config.get("login_server")
     if not server:
-        raise LaunchError("当前工作区未配置服务器：问用户这个分支用哪个服务器，用 sync --set-local "
-                          "\"login_server=<名字>\" --apply 保存后重试", "need_server")
+        raise LaunchError("当前工作区未配置服务器：问用户这个分支用哪个服务器，用 workspace.py config --root "
+                          "<项目> --set-local \"login_server=<名字>\" --apply 保存后重试", "need_server")
     svrfield, svrname = resolve_server(server, [] if server.strip().startswith(MOCK_PREFIX) else server_names())
     pool = config.get("login_accounts")
     if not pool:
@@ -394,12 +422,40 @@ def launch(root, global_config, platform="pc", server=None, timeout=240, dry_run
                       f"日志见 {client}/Log/ 中进程号 {plan['pid']} 对应的文件", "device_timeout", **plan)
 
 
+def select(root, global_config, platform="pc", timeout=240):
+    """为当前工作区确定测试设备，不需要用户确认。
+
+    在线设备按列表顺序，取第一台加载当前工作区源码、没有设备锁的；没有就自动启动一台。
+    其余设备和跳过原因放在 skipped 里，供交付时说明。
+    """
+    skipped = []
+    for device in list_devices():
+        devid = device["devid"]
+        if locked(devid):
+            skipped.append({"devid": devid, "reason": "有设备锁（其他测试正在使用或待恢复）"})
+            continue
+        try:
+            info = device_info(devid)
+        except (LaunchError, OSError) as error:
+            skipped.append({"devid": devid, "reason": f"无法读取状态：{str(error)[:120]}"})
+            continue
+        if not info["account"]:
+            skipped.append({"devid": devid, "reason": "未登录"})
+        elif not loads_workspace(info["source"], root):
+            skipped.append({"devid": devid, "reason": f"加载的不是当前工作区源码：{info['source']}"})
+        else:
+            return {"action": "select", "how": "online", "devid": devid, "name": device.get("name"),
+                    "account": info["account"], "skipped": skipped}
+    result = launch(root, global_config, platform, timeout=timeout)
+    return {**result, "action": "select", "how": "launched", "skipped": skipped}
+
+
 def main():
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("action", choices=("install", "uninstall", "doctor", "launch"))
+    parser.add_argument("action", choices=("install", "uninstall", "doctor", "launch", "select"))
     parser.add_argument("--root", default=os.getcwd())
     parser.add_argument("--global-config", default=str(Path.home() / workspace.DIRECTORY / "config.json"))
     parser.add_argument("--platform", choices=("pc", "ht"), default="pc")
@@ -413,6 +469,8 @@ def main():
             result = install(args.global_config, args.user)
         elif args.action == "uninstall":
             result = uninstall()
+        elif args.action == "select":
+            result = select(args.root, args.global_config, args.platform, args.timeout)
         elif args.action == "doctor":
             result = doctor(args.root, args.global_config, args.platform)
         else:
