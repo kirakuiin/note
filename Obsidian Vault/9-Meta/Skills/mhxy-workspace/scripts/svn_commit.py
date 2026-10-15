@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""正式分支的定向 SVN 提交：默认只读预览，--apply 才添加新文件并提交。
+"""trunk、周期分支和研发分支的定向 SVN 提交：默认只读预览，--apply 才添加新文件并提交。
 
 仅接收明确的文件清单和 UTF-8 消息文件；不执行更新、合并、冲突处理或重试。
 工作流及授权要求见 references/svn-commit.md。
@@ -26,6 +26,7 @@ COMMIT_TIMEOUT = 3600  # 大文件提交可能很慢，与 branch.py 的 SVN_TIM
 REJECTED_CODES = {"E155004", "E155007", "E155010", "E155011", "E155015", "E160013", "E160020", "E160024",
                   "E160028", "E165001", "E170004", "E200009"}
 DIRECTORY_ERROR = "只允许文件目标；新目录、目录属性修改和目录删除由用户自行提交"
+DEV_BRANCH = re.compile(r"/wzimage/branchs/\d{4}_dev/[^/]+/?$")  # 研发分支的位置，与 branch.py 创建的路径一致。
 
 
 def run_svn(root, *args):
@@ -43,11 +44,11 @@ def commit_process(root, *args):
 
 
 def branch_kind(url):
-    """只接受 trunk 和带日期的周期分支，判定规则复用 workspace.classify_branch，不按名称子串推断研发分支。"""
+    """分支类型复用 workspace.classify_branch；它把其余 URL 都算作研发分支，这里只接受 <年份>_dev 下的研发分支。"""
     kind = workspace.classify_branch(url)
-    if kind in ("trunk", "周期分支"):
+    if kind in ("trunk", "周期分支") or DEV_BRANCH.search(url):
         return kind
-    raise ValueError("本脚本只用于 trunk 和周期分支（<类型>_YYYY_MM_DD）；研发分支使用 openforge")
+    raise ValueError("本脚本只用于 trunk、周期分支（<类型>_YYYY_MM_DD）和研发分支（branchs/<年份>_dev/<名称>）")
 
 
 def info(root, target):
@@ -100,13 +101,18 @@ def prepare(root, paths, message):
     """
     if not paths:
         raise ValueError("必须明确列出待提交文件，不能提交整个工作副本")
-    if not re.match(r"^finish #[0-9]+\s+\S", message.splitlines()[0] if message else ""):
-        raise ValueError("正式分支说明必须以 `finish #工单号 描述` 开头")
+    first = message.splitlines()[0] if message else ""
+    if not re.match(r"^(?:finish )?#[0-9]+\s+\S", first):
+        raise ValueError("说明首行必须是 `finish #工单号 …`（trunk、周期分支）或 `#工单号 …`（研发分支），"
+                         "见 svn-commit.md「格式」")
     if "auto commit:" in message.lower():
         raise ValueError("本脚本处理人工提交，不接受 auto commit: 日志")
     root_info = info(root, ".")
     url = root_info.findtext("url")
     kind = branch_kind(url or "")
+    if (kind != "研发分支") != first.startswith("finish "):
+        raise ValueError("trunk、周期分支的说明必须以 `finish #工单号` 开头" if kind != "研发分支"
+                         else "研发分支的说明不加 finish，以 `#工单号` 开头")
     wc_root = root_info.findtext("wc-info/wcroot-abspath")
     if not wc_root or Path(wc_root).resolve() != root:
         raise ValueError("--root 必须是工作副本根目录")

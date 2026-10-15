@@ -592,9 +592,17 @@ class WorkspaceTests(unittest.TestCase):
         result = w.context(self.root, self.global_config)
         self.assertEqual(result["branch"]["kind"], "周期分支")
         self.assertEqual(result["index"]["recent"], ["spec/b/新.md：新方案", "spec/a/旧.md：旧方案"])
+        self.assertEqual(result["handoffs"], [])
+        handoff = self.personal / w.HANDOFF / "20261015-120000.md"
+        handoff.parent.mkdir()
+        handoff.write_text("交接", encoding="utf-8")
+        handoffs = w.context(self.root, self.global_config)["handoffs"]
+        self.assertEqual([item["path"] for item in handoffs], [str(handoff)])
+        self.assertTrue(handoffs[0]["modified"])
         w.clean(self.root, self.global_config, True)
         result = w.context(self.root, self.global_config)
         self.assertEqual(result["index"]["recent"], [])
+        self.assertEqual(result["handoffs"], [])
         self.assertEqual(result["branch"]["name"], "test_2026_10_13")
         self.assertTrue(newer.exists() and older.exists())
 

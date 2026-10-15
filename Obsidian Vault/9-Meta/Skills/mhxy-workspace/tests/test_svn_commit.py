@@ -95,9 +95,11 @@ class CommitTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertEqual(commit.branch_kind(f"svn://example.test/wzimage/branchs/2026_ship/{name}_2026_10_13"),
                                  "周期分支")
-        # 周期分支一定带日期：_ship 下不带日期的类型名不是周期分支。
-        for path in ("branchs/2026_dev/test", "branchs/2026_ship/test_bugfix", "branchs/2026_ship/research",
-                     "branchs/2026_ship/test", "branchs/2026_ship/zlp", "branchs/2026_ship/release2"):
+        self.assertEqual(commit.branch_kind("svn://example.test/wzimage/branchs/2026_dev/test"), "研发分支")
+        # 周期分支一定带日期：_ship 下不带日期的类型名不是周期分支；_dev 之外的其他位置也不接受。
+        for path in ("branchs/2026_ship/test_bugfix", "branchs/2026_ship/research", "branchs/2026_ship/test",
+                     "branchs/2026_ship/zlp", "branchs/2026_ship/release2", "branchs/other/x", "tags/x",
+                     "branchs/2026_dev/a/b"):
             with self.subTest(path=path), self.assertRaises(ValueError):
                 commit.branch_kind("svn://example.test/wzimage/" + path)
 
@@ -148,12 +150,38 @@ class CommitTests(unittest.TestCase):
         self.assertIn("重复", result["error"])
 
     def test_rejects_invalid_messages_without_any_svn_call(self):
-        for message in ("", "#844233 title", "finish #844233", "refs #844233 title", "finish #844233 auto commit: title"):
+        for message in ("", "finish #844233", "refs #844233 title", "finish #844233 auto commit: title"):
             with self.subTest(message=message):
                 self.message_file.write_text(message, encoding="utf-8")
                 result = self.submit(apply=True)
                 self.assertIn("error", result)
                 self.assertFalse(self.calls)
+
+    def test_message_format_must_match_branch_kind(self):
+        dev = "svn://example.test/products/wzimage/branchs/2026_dev/feature"
+        cases = ((URL, "#844233 指挥系统：调整留白", "finish"),
+                 (dev, MESSAGE, "不加 finish"))
+        for url, message, expected in cases:
+            with self.subTest(url=url), patch.dict(globals(), {"URL": url}):
+                self.calls = []
+                self.message_file.write_text(message, encoding="utf-8")
+                result = self.submit(apply=True)
+                self.assertIn(expected, result["error"])
+                self.assertFalse(any(call[0] in ("add", "commit") for call in self.calls))
+
+    def test_dev_branch_preview_and_apply(self):
+        dev = "svn://example.test/products/wzimage/branchs/2026_dev/feature"
+        message = "#844233 指挥系统设置界面描述优化：保留字体并调整留白"
+        self.message_file.write_text(message, encoding="utf-8")
+        with patch.dict(globals(), {"URL": dev, "PREFIX": "/products/wzimage/branchs/2026_dev/feature/",
+                                    "MESSAGE": message}):
+            preview = self.submit()
+            self.assertNotIn("error", preview)
+            self.assertEqual(preview["branch"]["kind"], "研发分支")
+            result = self.submit(apply=True)
+        self.assertNotIn("error", result)
+        self.assertTrue(result["committed"] and result["verified"])
+        self.assertEqual(self.commit_message_bytes, message.encode("utf-8"))
 
     def test_rejects_conflicts_missing_ignored_and_unchanged_files(self):
         for item in ("conflicted", "missing", "obstructed", "ignored", "normal"):
@@ -245,6 +273,35 @@ class CommitTests(unittest.TestCase):
 
 @unittest.skipUnless(shutil.which("svn") and shutil.which("svnadmin"), "需要本机 svn 和 svnadmin")
 class LocalRepositoryTests(unittest.TestCase):
+    def test_real_dev_branch_commit(self):
+        with tempfile.TemporaryDirectory(prefix="svn dev commit ") as directory:
+            base = Path(directory).resolve()
+            repository, seed, root = base / "repository", base / "seed", base / "working copy"
+            seed.mkdir()
+            (seed / "a.py").write_text("x = 1", encoding="utf-8")
+            subprocess.run(["svnadmin", "create", str(repository)], check=True, capture_output=True)
+            url = repository.as_uri() + "/wzimage/branchs/2026_dev/feature"
+            subprocess.run(["svn", "import", str(seed), url, "-m", "seed", "--non-interactive"],
+                           check=True, capture_output=True)
+            subprocess.run(["svn", "checkout", url, str(root), "--non-interactive"], check=True, capture_output=True)
+            (root / "a.py").write_text("x = 2", encoding="utf-8")
+            message_file = base / "message.txt"
+            message_file.write_text(MESSAGE, encoding="utf-8")
+            rejected = commit.submit(root, ["a.py"], message_file, apply=True)
+            self.assertIn("不加 finish", rejected["error"])
+            self.assertIs(rejected["committed"], False)
+            message = "#844233 指挥系统：调整留白"
+            message_file.write_text(message, encoding="utf-8")
+            preview = commit.submit(root, ["a.py"], message_file)
+            self.assertNotIn("error", preview, preview)
+            self.assertEqual(preview["branch"]["kind"], "研发分支")
+            result = commit.submit(root, ["a.py"], message_file, apply=True)
+            self.assertNotIn("error", result, result)
+            self.assertTrue(result["committed"] and result["verified"])
+            log = subprocess.run(["svn", "log", "--xml", "-r", str(result["revision"]), url, "--non-interactive"],
+                                 check=True, capture_output=True).stdout
+            self.assertEqual(ET.fromstring(log).findtext(".//msg"), message)
+
     def test_real_preview_commit_delete_and_unselected_changes(self):
         with tempfile.TemporaryDirectory(prefix="svn commit integration ") as directory:
             base = Path(directory).resolve()

@@ -37,6 +37,7 @@ sync 会写入用户级配置、AGENTS.md 和 CLAUDE.md 的受管区段、Claude
 | 禁止自动调用本 skill | `agents/openai.yaml` | 头部 `disable-model-invocation`，需用 `/mhxy-workspace` 手动调用 |
 | MCP 工具 | 直接可见 | 可能需要先用 ToolSearch 加载，见 game-debugging.md |
 | 委派（调查、review、真机自检） | 原生子代理 investigator／reviewer／verifier，见 cli.md「Codex 主会话」 | `scripts/codex_cli.py`，见 cli.md「Claude 主会话」 |
+| 会话交接、记忆整理 | 不适用 | 见 session.md |
 | 隐藏输入密码 | 取决于终端 | 命令工具没有交互终端，见 workspace-management.md「密码」 |
 
 ## 维护本 skill

@@ -14,6 +14,7 @@ spec.loader.exec_module(c)
 
 CONFIG = {"model_provider": "p", "model_providers": {"p": {"base_url": "http://x"}},
           "mcp_servers": {"mh-game-mcp": {"url": "https://game/mcp", "disabled_tools": ["x"]},
+                          "codeviewer-mcp": {"url": "https://cv/mcp", "http_headers": {"X-Access-Token": "secret"}},
                           "other": {"url": "http://other"}}}
 TEST_RESULT = {"status": "passed", "cases": ["local probe"], "errors": [],
                "unverified": [], "restoration": "not_needed"}
@@ -64,6 +65,23 @@ def test_test_kind_whitelists_mcp_and_write_dirs(tmp_path):
     servers = [b for a, b in zip(command, command[1:]) if a == "-c" and b.startswith("mcp_servers=")]
     assert "execute_code" in servers[0] and '"approve"' in servers[0]
     assert "other" not in servers[0] and "disabled_tools" not in servers[0]
+
+
+def test_investigate_gets_only_listed_read_only_mcp(tmp_path):
+    task = {"instructions": "x", "mcp_tools": {"codeviewer-mcp": ["get_commit_info_by_rid"]}}
+    c.prepare(tmp_path, "investigate", task, None)
+    command = c.cli_command(tmp_path, task, {"kind": "investigate", "root": "R"})
+    servers = [b for a, b in zip(command, command[1:]) if a == "-c" and b.startswith("mcp_servers=")][0]
+    assert "get_commit_info_by_rid" in servers and "X-Access-Token" in servers and '"approve"' in servers
+    assert "other" not in servers and command[command.index("--sandbox") + 1] == "read-only"
+
+
+@pytest.mark.parametrize("kind,tools", [("investigate", {"mh-game-mcp": ["execute_code"]}),
+                                        ("investigate", ["codeviewer-mcp"]),
+                                        ("review", {"codeviewer-mcp": ["read_file"]})])
+def test_mcp_outside_read_only_allowlist_rejected(tmp_path, kind, tools):
+    with pytest.raises(ValueError, match="只读 MCP"):
+        c.prepare(tmp_path, kind, {"instructions": "x", "mcp_tools": tools}, None)
 
 
 def test_unconfigured_mcp_rejected(tmp_path):
@@ -244,7 +262,7 @@ def test_status_persists_failure_when_monitor_gone(tmp_path):
 
 def test_status_detects_dead_worker_before_publish(tmp_path):
     c.write_json(tmp_path / "state.json", {"status": "starting"})
-    (tmp_path / "worker.pid").write_text("99", encoding="utf-8")
+    c.write_json(tmp_path / "worker.json", {"pid": 99, "started": 1})
     with patch.object(c, "alive", return_value=False):
         assert c.status(tmp_path)["status"] == "failed"
 
@@ -489,3 +507,78 @@ def test_lock_failure_before_state_removes_lock_and_job(tmp_path):
         c.lock(root, "dev")
     assert list((root / ".mhxy-workspace/codex-cli").iterdir()) == []
     assert not list((tmp_path / "local/mhxy-cli-testing/locks").iterdir())
+
+
+# ---- 启动记录、PID 复用与 release 竞争 ----
+
+def test_worker_record_failure_keeps_job_and_lock(tmp_path):
+    original = c.write_json
+
+    def failing(path, value):
+        if Path(path).name == "worker.json":
+            raise OSError("disk")
+        original(path, value)
+
+    root = make_root(tmp_path)
+    with patch.object(c.subprocess, "Popen", side_effect=silent_worker(exited=False)),             patch.object(c, "write_json", side_effect=failing), patch.object(c, "stop_tree") as stop,             pytest.raises(OSError):
+        c.start(root, "test", device_task(tmp_path))
+    stop.assert_called_once()
+    job = next((root / ".mhxy-workspace/codex-cli").iterdir())
+    state = c.read_json(job / "state.json")
+    assert state["status"] == "failed" and Path(state["lock"]).exists()
+
+
+def test_starting_fallback_detects_worker_pid_reuse(tmp_path):
+    c.write_json(tmp_path / "state.json", {"status": "starting"})
+    c.write_json(tmp_path / "worker.json", {"pid": c.os.getpid(), "started": -1})
+    assert c.status(tmp_path)["status"] == "failed"
+    c.write_json(tmp_path / "state.json", {"status": "starting"})
+    c.write_json(tmp_path / "worker.json", {"pid": c.os.getpid(), "started": c.started_at(c.os.getpid())})
+    assert c.status(tmp_path)["status"] == "starting"
+
+
+def released_job(tmp_path, name="a"):
+    job = tmp_path / name
+    job.mkdir()
+    lock = tmp_path / "lock.json"
+    c.write_json(job / "state.json", {"kind": "test", "status": "completed", "lock": str(lock), "released": False})
+    return job, lock
+
+
+def test_release_is_idempotent(tmp_path):
+    job, lock = released_job(tmp_path)
+    c.write_json(lock, {"job": str(job)})
+    assert c.release(job)["released"] is True and not lock.exists()
+    c.write_json(lock, {"job": "other"})  # 之后其他任务加的锁不受影响。
+    assert c.release(job)["released"] is True and c.read_json(lock) == {"job": "other"}
+
+
+def test_release_does_not_delete_lock_taken_over_during_check(tmp_path):
+    job, lock = released_job(tmp_path)
+    c.write_json(lock, {"job": str(job)})
+    original = c.os.rename
+
+    def racing(src, dst):
+        c.write_json(lock, {"job": "new"})  # 核对归属之后、改名之前，锁换成了新任务的。
+        original(src, dst)
+
+    with patch.object(c.os, "rename", racing), pytest.raises(ValueError, match="不属于本任务"):
+        c.release(job)
+    assert c.read_json(lock) == {"job": "new"} and [p.name for p in tmp_path.iterdir()] == ["a", "lock.json"]
+    assert c.read_json(job / "state.json")["released"] is False
+
+
+def test_release_keeps_moved_lock_when_device_reacquired(tmp_path):
+    job, lock = released_job(tmp_path)
+    c.write_json(lock, {"job": str(job)})
+    original = c.os.rename
+
+    def racing(src, dst):
+        c.write_json(lock, {"job": "new"})
+        original(src, dst)
+        c.write_json(lock, {"job": "third"})  # 改名后原位置又被另一个任务占用。
+
+    with patch.object(c.os, "rename", racing), pytest.raises(ValueError, match="原锁文件保留"):
+        c.release(job)
+    assert c.read_json(lock) == {"job": "third"}
+    assert [c.read_json(p) for p in tmp_path.glob("lock.json.*.releasing")] == [{"job": "new"}]

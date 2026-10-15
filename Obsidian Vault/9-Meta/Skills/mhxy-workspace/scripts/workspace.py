@@ -50,6 +50,7 @@ INDEX_SUMMARY_LIMIT = 60  # 索引中每篇 spec 摘要的最大字符数。
 HOOK_FLAG = "--from-hook"  # 标识本 skill 写入 Claude Code 设置的 hooks（context 与 index）。
 CODEX_JOBS = "codex-cli"  # codex_cli.py 在个人目录下的任务目录，每个任务一个子目录，含 state.json。
 CODEX_ACTIVE = ("starting", "running")  # 仍在运行、清理会破坏其输出的任务状态。
+HANDOFF = "handoff"  # 个人目录下的会话交接文件目录（见 references/session.md），新会话接手后删除。
 
 
 class WorkspaceError(Exception):
@@ -846,7 +847,7 @@ def record_hook_write(root_arg, global_arg, payload):
 
 
 def context(root_arg, global_arg):
-    """会话开始时一次性加载：当前分支、脱敏配置、追踪工单、覆盖率身份和最近的 spec。
+    """会话开始时一次性加载：当前分支、脱敏配置、追踪工单、覆盖率身份、最近的 spec 和遗留的交接文件。
 
     各部分独立读取，某部分失败只记入 problems，不影响其余部分。不创建配置或追踪文件；
     索引状态缺失（首次或清理后）时以当前时间为起点新建空名单。branch 为 None 表示
@@ -875,6 +876,14 @@ def context(root_arg, global_arg):
         result["index"] = stats
     except (WorkspaceError, OSError) as error:
         problems.append(f"索引：{error}")
+    try:
+        handoffs = personal / HANDOFF
+        no_links(handoffs)
+        files = sorted(handoffs.glob("*.md")) if handoffs.is_dir() else []
+        result["handoffs"] = [{"path": str(path), "modified": datetime.fromtimestamp(path.stat().st_mtime)
+                               .astimezone().isoformat(timespec="seconds")} for path in files]
+    except (WorkspaceError, OSError) as error:
+        problems.append(f"交接文件：{error}")
     result["problems"] = problems
     return result
 

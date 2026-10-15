@@ -8,8 +8,8 @@
 
 | 类型 | 用在 | 权限 |
 | --- | --- | --- |
-| investigate | 讨论需求时读代码、还原执行路径、确认影响范围 | 只读 |
-| review | 第 4 步 Codex review，审查清单、收敛条件和 3 轮上限见 [code-review.md](code-review.md) | 只读 |
+| investigate | 讨论需求时读代码、还原执行路径、确认影响范围 | 只读，可开放列出的只读 MCP 工具 |
+| review | 第 4 步 Codex review，审查清单、收敛条件和 3 轮上限见 [code-review.md](code-review.md) | 只读，不接入 MCP |
 | test | 第 5 步真机自检，默认做改动执行检查（[exec-check.md](exec-check.md)）；客户端操作、Mock 和恢复按 [game-debugging.md](game-debugging.md) | 只写 `.mhxy-workspace/` 内的测试目录，只开放列出的 MCP 工具 |
 
 - 受委派方是执行者：不得派生、调用或者请求新的子代理，不与用户核对需求。需要用户判断的事项写进结果返回，由主会话处理。
@@ -23,7 +23,9 @@
 - `instructions`（必填）：要做什么、判断标准和停止条件。
 - `references`（可选）：额外要读的文件的绝对路径，追加在默认列表之后。默认列表：项目 `AGENTS.md`；review 加 `code-review.md`、`engineering-principles.md`；test 加本文件、`game-debugging.md`、`exec-check.md`。
 
-**investigate**：`instructions` 写清问题和已知线索，需要的话限定范围（模块、分支）。例如迭代已有功能时查找原 spec：写明要改的代码文件和工单号，要求按 engineering-principles.md「迭代已有功能」的查找顺序返回候选 spec 及依据。investigate 不接入 MCP，codeviewer 查询由主会话完成，结果写进 `instructions`。
+**investigate**：`instructions` 写清问题和已知线索，需要的话限定范围（模块、分支）。可选 `mcp_tools` 按服务列出要用的只读工具，例如 `{"codeviewer-mcp": ["get_commit_info_by_rid"]}`；只允许 `codeviewer-mcp`、`expert_knowledge`，服务定义（含认证头）从用户 Codex 配置复制，只开放列出的工具。
+
+例如迭代已有功能时查找原 spec：写明要改的代码文件和工单号，`mcp_tools` 列出 codeviewer 的 `get_commit_info_by_rid`，要求按 engineering-principles.md「迭代已有功能」的查找顺序返回候选 spec 及依据。
 
 **review**：`instructions` 提供哪些信息、不提供什么、各轮如何续接，见 [code-review.md](code-review.md)「委派与审查信息」。续接时 Claude 主会话加 `--resume "<上一轮 review 任务目录>"`，Codex 主会话继续发给同一个 reviewer。
 
@@ -58,7 +60,7 @@
 
 - 同一设备同时只允许一个测试执行者，跨工作区也一样。test 任务启动时加全机设备锁（Codex 主会话用 `lock`，见「Codex 主会话」），任务结束后锁仍保留。
 - 任务结束（包括取消、超时）后，主会话核对并恢复 Mock、监听器、追踪器和报错收集器，再执行 `release --restored` 释放；杀进程不等于恢复了客户端。中断留下的状态默认未知。
-- `release` 会复核后台监控和 CLI 进程都已退出（按记录的进程创建时间排除 PID 复用），否则拒绝并保留锁。监控异常退出而 CLI 仍在运行时，`status` 记为 failed 并给出 `orphan_cli_pid`，此时 `cancel` 已无效：确认是该任务的 Codex 进程后手动结束其进程树，再核对恢复并 release。
+- `release` 可以重复执行，只删除属于本任务的锁；它会复核后台监控和 CLI 进程都已退出（按记录的进程创建时间排除 PID 复用），否则拒绝并保留锁。监控异常退出而 CLI 仍在运行时，`status` 记为 failed 并给出 `orphan_cli_pid`，此时 `cancel` 已无效：确认是该任务的 Codex 进程后手动结束其进程树，再核对恢复并 release。
 - 测试期间主会话可以做独立工作，但不改被测文件、不操作该设备。
 
 ## Claude 主会话
@@ -75,7 +77,7 @@ python -X utf8 "<skill>/scripts/codex_cli.py" release --job "<任务目录>" --r
 
 - `start` 启动后台进程后立即返回任务目录（`<项目>/.mhxy-workspace/codex-cli/<任务>/`）。随后用 Bash 工具的 `run_in_background` 运行 `wait`，主会话继续其他工作，任务结束时会收到通知；`wait` 到时仍未结束就再运行一次。各命令都输出 JSON，状态有 starting、running、completed、failed、timed_out、cancelled。
 - 连续 600 秒没有任何 CLI 输出时，杀掉进程树并标记 `timed_out`；没有总时长上限。`cancel` 只停止，不自动重跑。
-- 子 Codex 带环境变量 `MHXY_CODEX_CHILD=1`，在这个环境里 `start` 会拒绝运行；同时关闭子代理、hooks 和插件，不加载用户配置中的其他 MCP。
+- 子 Codex 带环境变量 `MHXY_CODEX_CHILD=1`，在这个环境里 `start` 会拒绝运行；同时关闭子代理、hooks 和插件，不加载任务未列出的 MCP。
 
 ## Codex 主会话
 

@@ -26,6 +26,7 @@ RELEASE_GRACE = 5  # release 等待监控、CLI 进程退出的秒数；正常�
 NATIVE = "native"  # lock 建立的设备锁任务：原生 verifier 占用设备，没有监控和 CLI 进程。
 GUARD = "MHXY_CODEX_CHILD"
 GAME_URL = "https://mh-game-mcp.eros.nie.netease.com/mcp"
+READ_ONLY_MCP = ("codeviewer-mcp", "expert_knowledge")  # investigate 可接入的只读 MCP 服务；review 不接入 MCP。
 PROVIDER_KEYS = ("model_provider", "model_providers", "model_catalog_json")
 LEVELS = ["必须修改", "建议修改", "疑问"]
 STRINGS = {"type": "array", "items": {"type": "string"}}
@@ -55,7 +56,7 @@ ROLE = {
                     "conclusion 直接回答问题，evidence 每条写成“文件:行号 —— 说明”，"
                     "uncertainties 列出未确认的事项和最快的验证方法，严格区分事实与推断。"),
     "review": ("你是代码审查者。只读：不修改任何文件。按 code-review.md 的审查清单逐条审查，"
-               "items 每条给出级别、文件:行号、问题、依据、建议的改法；"
+               "items 每条给出级别（按 code-review.md 的级别定义）、文件:行号、问题、依据、建议的改法；"
                "没有必须修改的问题时 summary 写明“没有必须修改的问题”。"),
     "test": ("你是测试执行者。只写任务目录和允许的测试目录，不修改业务源码；需要用户判断时返回 blocked。"
              "默认按 exec-check.md 做改动执行检查。测试结束尽力恢复；结果按 schema 返回证据，"
@@ -208,7 +209,7 @@ def cli_command(job, task, state):
                "-c", f'model_reasoning_effort="{EFFORT}"', "-c", 'approval_policy="never"',
                "-c", f'sandbox_mode="{sandbox}"', "-c", "agents.enabled=false",
                "-c", "features.multi_agent=false", "-c", "features.hooks=false", "-c", "plugins={}",
-               "-c", "mcp_servers=" + toml_value(mcp_servers(task, config) if kind == "test" else {}),
+               "-c", "mcp_servers=" + toml_value(mcp_servers(task, config) if kind != "review" else {}),
                "--json", "--output-schema", str(job / "schema.json"), "-o", str(job / "result.json")]
     if os.name == "nt":
         # 用户配置的 elevated 沙箱在非交互后台进程里初始化失败，不设置时命令一律被策略拒绝。
@@ -427,8 +428,13 @@ def prepare(root, kind, task, resume):
             raise ValueError("test 任务必须有已选定的非空 devid")
         base = root / ".mhxy-workspace"
         task["write_dirs"] = [str(checked_directory(Path(p), base)) for p in task.get("write_dirs", [])]
-    elif task.get("write_dirs") or task.get("mcp_tools") or task.get("devid"):
-        raise ValueError("只有 test 任务可以设置 devid、mcp_tools 和 write_dirs")
+    elif task.get("write_dirs") or task.get("devid"):
+        raise ValueError("只有 test 任务可以设置 devid 和 write_dirs")
+    else:
+        tools = task.get("mcp_tools") or {}
+        allowed = READ_ONLY_MCP if kind == "investigate" else ()
+        if not isinstance(tools, dict) or any(server not in allowed for server in tools):
+            raise ValueError("investigate 只能接入只读 MCP（" + "、".join(READ_ONLY_MCP) + "），review 不接入 MCP")
     return task, session
 
 
@@ -449,6 +455,7 @@ def start(root, kind, task_file, resume=None):
     job.mkdir()
     lock = None
     published = False
+    launched = None
     try:
         if kind == "test":
             lock = acquire_lock(task["devid"], job)
@@ -470,12 +477,13 @@ def start(root, kind, task_file, resume=None):
         write_json(job / "state.json", state)
         cli_command(job, task, state)  # 启动前检查 CLI 与服务配置，不输出可能含认证头的 argv。
         with open(job / "monitor.log", "ab") as log:
-            process = subprocess.Popen([sys.executable, "-X", "utf8", str(Path(__file__).resolve()),
+            launched = process = subprocess.Popen([sys.executable, "-X", "utf8", str(Path(__file__).resolve()),
                                         "_worker", "--job", str(job)], stdin=subprocess.DEVNULL,
                                        stdout=log, stderr=log, start_new_session=os.name != "nt",
                                        creationflags=(subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
                                                       | subprocess.CREATE_NO_WINDOW) if os.name == "nt" else 0)
-        (job / "worker.pid").write_text(str(process.pid), encoding="utf-8")
+        # 启动记录带创建时间，status 在 worker 发布前据此判断存活，避免 PID 复用让任务永远停在 starting。
+        write_json(job / "worker.json", {"pid": process.pid, "started": started_at(process.pid)})
         deadline = time.monotonic() + START_SECONDS
         while time.monotonic() < deadline:
             state = read_json(job / "state.json")
@@ -498,11 +506,21 @@ def start(root, kind, task_file, resume=None):
             result["note"] = "后台 worker 尚未接手，用 status／wait 继续查询"
         return result
     except Exception:
-        if not published and not (job / "worker.pid").exists():
+        if launched is None:
             # worker 未启动（含设备已被占用）：删除半成品目录和本任务加的锁，不留下没有 state.json 的目录。
             if lock:
                 lock.unlink(missing_ok=True)
             shutil.rmtree(job, ignore_errors=True)
+        elif not published:
+            # worker 已启动但未接手：终止它并记为 failed；目录和锁保留，由 status／release 按常规恢复，
+            # 不能删锁留下无锁运行的 worker。终止失败时保持原状，由 status 判断。
+            try:
+                stop_tree(launched)
+                if read_json(job / "state.json")["status"] not in TERMINAL:
+                    update_state(job, status="failed", error="后台 worker 启动后记录失败，已终止",
+                                 finished_at=time.time())
+            except Exception:
+                pass
         raise
 
 
@@ -512,13 +530,14 @@ def status(job):
     state = read_json(job / "state.json")
     if state["status"] in TERMINAL:
         return state
-    pid = state.get("monitor_pid")
+    pid, started = state.get("monitor_pid"), state.get("monitor_started")
     if not pid and state["status"] == "starting":
         try:
-            pid = int((job / "worker.pid").read_text(encoding="utf-8"))
-        except (OSError, ValueError):
+            record = read_json(job / "worker.json")
+            pid, started = int(record["pid"]), record.get("started")
+        except (OSError, ValueError, KeyError, TypeError):
             pid = None
-    if pid and not alive(pid, state.get("monitor_started")):
+    if pid and not alive(pid, started):
         # 监控已经不在，没有并发写者，可以安全写回，避免 clean 永远等待。
         state = read_json(job / "state.json")
         if state["status"] not in TERMINAL:
@@ -598,11 +617,44 @@ def pid_exists(pid):
         return True
 
 
+def release_lock(lock, job):
+    """删除属于 job 的设备锁；锁已不存在视为已释放。
+
+    先把锁原子地改名为本次独有的名字再核对归属，避免核对之后、删除之前被其他任务重新加的锁被误删。
+    不属于本任务时用硬链接放回原位（原位已有新锁时失败，不覆盖），并报错。
+    """
+    try:
+        if read_json(lock).get("job") != str(job):
+            raise ValueError("设备锁不属于本任务")
+    except FileNotFoundError:
+        return
+    claimed = lock.with_name(lock.name + "." + uuid.uuid4().hex + ".releasing")
+    try:
+        os.rename(lock, claimed)
+    except FileNotFoundError:
+        return
+    try:
+        owner = read_json(claimed).get("job")
+    except (OSError, ValueError):
+        owner = None
+    if owner == str(job):
+        claimed.unlink()
+        return
+    try:
+        os.link(claimed, lock)
+    except FileExistsError:
+        raise ValueError(f"设备锁在核对期间被其他任务占用；原锁文件保留在 {claimed}，请核实") from None
+    claimed.unlink()
+    raise ValueError("设备锁不属于本任务")
+
+
 def release(job):
     """test 任务终止并由主线程核对恢复后，删除设备锁并标记 released；监控或 CLI 进程仍在时拒绝。"""
     state = status(job)
     if state.get("kind") != "test":
         raise ValueError("只有 test 任务需要 release")
+    if state.get("released") is True:
+        return state
     if state["status"] not in TERMINAL and state["status"] != NATIVE:
         raise ValueError("任务终止并核对恢复后才可 release --restored")
     deadline = time.monotonic() + RELEASE_GRACE
@@ -611,11 +663,7 @@ def release(job):
             raise ValueError("任务进程仍在运行（PID " + "、".join(map(str, running))
                              + "）：确认是本任务的进程并结束后再 release，设备锁保留")
         time.sleep(0.2)
-    lock = Path(state["lock"])
-    if lock.exists():
-        if read_json(lock)["job"] != str(job):
-            raise ValueError("设备锁不属于本任务")
-        lock.unlink()
+    release_lock(Path(state["lock"]), job)
     state.update(restoration="restored", released=True)
     write_json(job / "state.json", state)
     return state
