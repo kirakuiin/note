@@ -25,6 +25,7 @@ python -X utf8 "<skill>/scripts/client_launch.py" doctor --root "<项目>"
 ```
 
 - **launch 做什么**：用项目根的上一级作为 workspace（加载当前工作副本的 `mhimage/` 和 `_test/`）；查本机在线设备当前登录的账号（`loginenter.Account`），选账号池中第一个空闲账号；触发计划任务启动 `mhmain.exe` 并自动登录第一个角色；等新设备以该账号上线后输出 `devid`。默认等 240 秒，用 Bash 工具的 `run_in_background` 运行。
+- **客户端类型（PC／互通）**：由客户端目录当前同步的版本决定，与 `xy1.ini` 的 `mobile_user`、分辨率无关。两个目录里的 `mhmain.exe` 是同一个启动壳，引擎是否按互通运行在编译期就定了（`C_app.get_platform()` 返回 `mobile` 还是 `win32`）。按约定 `pc_client_dir`（一般是 `mhxy_dev`）是 PC，`ht_client_dir`（一般是 `mhxy_mini`）是互通；但目录一旦放了指向 `xyq_ht` 的 `cloud_inner.json` 再同步，就会变成互通版。启动前看该目录 `update.ini` 的 `[Setting]`：PC 有 `Arch = X64`／`X86`，互通有 `Platform = HT`。类型与要求的 `--platform` 不符时停止并报告用户，不要改 ini 硬切；把目录同步回 PC 版按 mhxy-client-sync-launch 处理，需要用户确认。启动后用 `C_app.get_platform()` 复核。
 - **服务器**：取工作区配置 `login_server`，`--server` 只覆盖本次。名字以“模拟”开头时用大区 `刘强98服`；其他名字在内服服务器列表中精确匹配，再做唯一的模糊匹配。没配置（`need_server`）时问用户这个分支用哪个服务器，按 workspace-management.md 保存到工作区配置；有多个候选（`server_ambiguous`）时把候选给用户选。
 - **其他失败**按输出的 `code` 处理，不要重试或换方式启动：
   - `all_occupied`：账号池都被本机在线客户端占用，报告各账号所在设备，请用户关掉一个或添加账号。
