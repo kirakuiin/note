@@ -5,16 +5,18 @@
   install    在管理员终端运行一次：把启动器复制到受保护目录，注册以最高权限运行的计划任务。可重复执行。
   uninstall  在管理员终端运行：删除计划任务和启动器。
   doctor     普通权限：检查部署和配置，列出缺什么、怎么补。
-  launch     普通权限：查本机在线设备占用的账号，选账号池中第一个空闲账号，触发计划任务启动客户端，
+  launch     普通权限：确认客户端目录的类型（update.ini）与 --platform 一致；查本机在线设备占用的账号，
+             选账号池中第一个空闲账号，触发计划任务启动客户端，
              等新设备登录上线后返回 devid。
-  select     普通权限：为当前工作区确定测试设备。在线设备中选第一台加载当前工作区源码、没有设备锁的；
-             没有就 launch 一台。不需要用户确认。
+  select     普通权限：为当前工作区确定指定类型（PC／互通）的测试设备。在线设备中选第一台类型相符、
+             加载当前工作区源码、没有设备锁的；没有就 launch 一台。不需要用户确认。
 
 客户端以管理员身份运行，agent 的普通权限进程直接启动会弹 UAC；计划任务由用户安装一次，之后
 触发不再弹窗。账号密码只在用户级配置（workspace.py login-account 维护），不出现在输出和请求文件中。
 """
 import argparse
 import base64
+import configparser
 import ctypes
 import hashlib
 import json
@@ -44,9 +46,13 @@ MORE_SERVER = "more_server"  # 客户端按名字在内服服务器列表中查�
 EXE = "mhmain.exe"
 PROBE_TIMEOUT = 20  # 秒；单次 MCP 调用
 NO_DEVICE = "未找到任何在线设备"  # get_devices_by_ip 在本机没有设备时的报错文本
-# 读设备当前登录的账号和加载的脚本位置（mainmenu 是登录流程必然加载的模块）
+# 读设备当前登录的账号、加载的脚本位置（mainmenu 是登录流程必然加载的模块）和客户端类型
 DEVICE_PROBE = ('(lambda s: {"account": getattr(s.modules.get("loginenter"), "Account", None), '
-                '"source": getattr(s.modules.get("mainmenu"), "__file__", None)})(__import__("sys"))')
+                '"source": getattr(s.modules.get("mainmenu"), "__file__", None), '
+                '"platform": getattr(s.modules.get("C_app") or __import__("C_app"), "get_platform", lambda: None)()'
+                '})(__import__("sys"))')
+PLATFORMS = {"win32": "pc", "mobile": "ht"}  # C_app.get_platform() 的返回值 → --platform
+PLATFORM_NAMES = {"pc": "PC", "ht": "互通"}
 LOCKS = Path(os.environ.get("LOCALAPPDATA", str(Path.home() / ".cache"))) / "mhxy-cli-testing/locks"
 
 
@@ -121,6 +127,45 @@ def workspace_dir(root):
     return root.parent.as_posix()
 
 
+def client_platform(client_dir):
+    """按客户端目录 update.ini 的 [Setting] 判断类型：Platform = HT 为 ht，Arch = X64／X86 为 pc。
+
+    类型由目录当前同步的版本决定，与 xy1.ini、分辨率无关。读不到或判断不了返回 None。只读，不修改 ini。
+    """
+    try:
+        raw = (Path(client_dir) / "update.ini").read_bytes()
+    except OSError:
+        return None
+    if raw.startswith(b"\xef\xbb\xbf"):
+        raw = raw[3:]
+    parser = configparser.ConfigParser(strict=False, interpolation=None)
+    try:
+        parser.read_string(raw.decode("gbk", errors="replace"))  # 其他段可能有 GBK 中文
+    except configparser.Error:
+        return None
+    if not parser.has_section("Setting"):
+        return None
+    setting = parser["Setting"]
+    if setting.get("Platform", "").strip().upper() == "HT":
+        return "ht"
+    if setting.get("Arch", "").strip().upper() in ("X64", "X86"):
+        return "pc"
+    return None
+
+
+def check_client_platform(client, platform):
+    """客户端目录的类型必须与要求的 platform 一致，否则抛 LaunchError。"""
+    detected = client_platform(client)
+    if detected is None:
+        raise LaunchError(f"无法从 {Path(client) / 'update.ini'} 的 [Setting] 判断客户端类型"
+                          "（PC 有 Arch = X64／X86，互通有 Platform = HT）", "platform_unknown", client_dir=str(client))
+    if detected != platform:
+        raise LaunchError(f"{client} 当前是{PLATFORM_NAMES[detected]}客户端，与要求的 {platform} 不符：报告用户，"
+                          "不要改 ini 硬切", "platform_mismatch", client_dir=str(client), expected=platform,
+                          detected=detected)
+    return detected
+
+
 def task_arguments(script, config, allowed):
     """计划任务的参数：启动器、请求文件、用户级配置和允许启动的客户端目录。"""
     parts = ["-X", "utf8", str(script), "--request", str(STATE_DIR / "request.json"), "--config", str(config)]
@@ -171,12 +216,17 @@ def list_devices():
 
 
 def device_info(devid):
-    """读取设备当前登录的账号（未登录为 None）和加载的脚本路径。读取失败抛 LaunchError。"""
+    """读取设备当前登录的账号（未登录为 None）、加载的脚本路径和类型（pc／ht，无法识别为 None）。
+
+    读取失败抛 LaunchError。
+    """
     value = mcp("execute_code", {"devid": devid, "code": DEVICE_PROBE, "need_loginfo": False})
     value = value.get("result", value) if isinstance(value, dict) and "ret" not in value else value
     if not isinstance(value, dict) or value.get("error") or not isinstance(value.get("ret"), dict):
         raise LaunchError(f"读取 {devid} 的状态失败：{value}", "mcp_error")
-    return {"account": normalize_account(value["ret"].get("account")), "source": value["ret"].get("source")}
+    ret = value["ret"]
+    return {"account": normalize_account(ret.get("account")), "source": ret.get("source"),
+            "platform": PLATFORMS.get(ret.get("platform"))}
 
 
 def device_account(devid):
@@ -332,6 +382,20 @@ def doctor(root, global_config, platform="pc"):
                          "fix": "从 http://alubaserver.eros.nie.netease.com/static/mhxy.key 下载放到客户端根目录"})
     elif task and str(Path(client)).lower() not in task.get("arguments", "").lower():
         problems.append({"item": "计划任务", "problem": f"{client} 不在安装时登记的客户端目录中", "fix": fix_install})
+    info["clients"] = {}
+    for expected in PLATFORM_NAMES:
+        key = f"{expected}_client_dir"
+        if not config.get(key) or not Path(config[key]).is_dir():
+            continue
+        detected = client_platform(config[key])
+        info["clients"][key] = {"path": config[key], "detected": detected}
+        if detected is None:
+            problems.append({"item": "客户端类型", "problem": f"{key}（{config[key]}）的 update.ini 无法判断类型",
+                             "fix": "检查该目录是否完整同步过客户端"})
+        elif detected != expected:
+            problems.append({"item": "客户端类型",
+                             "problem": f"{key}（{config[key]}）当前是{PLATFORM_NAMES[detected]}客户端",
+                             "fix": f"由用户决定：把目录同步回{PLATFORM_NAMES[expected]}版，或把 {key} 改到正确的目录"})
     try:
         info["workspace"] = workspace_dir(root)
     except LaunchError as error:
@@ -368,6 +432,7 @@ def launch(root, global_config, platform="pc", server=None, timeout=240, dry_run
     client = config.get(f"{platform}_client_dir")
     if not client or not (Path(client) / EXE).is_file():
         raise LaunchError(f"{platform}_client_dir 未配置或缺少 {EXE}", "need_config")
+    check_client_platform(client, platform)
     work = workspace_dir(root)
     server = server or config.get("login_server")
     if not server:
@@ -379,7 +444,7 @@ def launch(root, global_config, platform="pc", server=None, timeout=240, dry_run
         raise LaunchError("账号池为空：请用户在交互终端运行 workspace.py login-account 添加账号", "need_accounts")
     devices, occupied, unknown = scan_accounts()
     account = choose_account(pool, occupied)
-    plan = {"client_dir": client, "workspace": work, "svrfield": svrfield, "svrname": svrname,
+    plan = {"client_dir": client, "platform": platform, "workspace": work, "svrfield": svrfield, "svrname": svrname,
             "occupied": occupied, "unknown_devices": unknown}
     if account is None:
         raise LaunchError("账号池中的账号都已被本机在线客户端占用，停止自动启动", "all_occupied", **plan)
@@ -422,11 +487,11 @@ def launch(root, global_config, platform="pc", server=None, timeout=240, dry_run
                       f"日志见 {client}/Log/ 中进程号 {plan['pid']} 对应的文件", "device_timeout", **plan)
 
 
-def select(root, global_config, platform="pc", timeout=240):
-    """为当前工作区确定测试设备，不需要用户确认。
+def select(root, global_config, platform="pc", timeout=240, dry_run=False):
+    """为当前工作区确定 platform 类型的测试设备，不需要用户确认。
 
-    在线设备按列表顺序，取第一台加载当前工作区源码、没有设备锁的；没有就自动启动一台。
-    其余设备和跳过原因放在 skipped 里，供交付时说明。
+    在线设备按列表顺序，取第一台类型相符、加载当前工作区源码、没有设备锁的；没有就自动启动一台
+    （dry_run 时只返回启动计划，how 为 would_launch）。其余设备和跳过原因放在 skipped 里，供交付时说明。
     """
     skipped = []
     for device in list_devices():
@@ -439,15 +504,19 @@ def select(root, global_config, platform="pc", timeout=240):
         except (LaunchError, OSError) as error:
             skipped.append({"devid": devid, "reason": f"无法读取状态：{str(error)[:120]}"})
             continue
-        if not info["account"]:
+        if info["platform"] is None:
+            skipped.append({"devid": devid, "reason": "无法识别客户端类型（C_app.get_platform() 返回值未知）"})
+        elif info["platform"] != platform:
+            skipped.append({"devid": devid, "reason": f"是{PLATFORM_NAMES[info['platform']]}客户端，需要 {platform}"})
+        elif not info["account"]:
             skipped.append({"devid": devid, "reason": "未登录"})
         elif not loads_workspace(info["source"], root):
             skipped.append({"devid": devid, "reason": f"加载的不是当前工作区源码：{info['source']}"})
         else:
             return {"action": "select", "how": "online", "devid": devid, "name": device.get("name"),
-                    "account": info["account"], "skipped": skipped}
-    result = launch(root, global_config, platform, timeout=timeout)
-    return {**result, "action": "select", "how": "launched", "skipped": skipped}
+                    "platform": platform, "account": info["account"], "skipped": skipped}
+    result = launch(root, global_config, platform, timeout=timeout, dry_run=dry_run)
+    return {**result, "action": "select", "how": "would_launch" if dry_run else "launched", "skipped": skipped}
 
 
 def main():
@@ -461,7 +530,8 @@ def main():
     parser.add_argument("--platform", choices=("pc", "ht"), default="pc")
     parser.add_argument("--server", help="launch：本次使用的服务器名，省略时用工作区配置 login_server")
     parser.add_argument("--timeout", type=int, default=240, help="launch：等待设备上线的秒数")
-    parser.add_argument("--dry-run", action="store_true", help="launch：只检查并给出将使用的账号和服务器，不启动")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="launch／select：只检查并给出将选用的设备或启动计划，不启动客户端")
     parser.add_argument("--user", help="install：计划任务的运行用户，默认当前用户")
     args = parser.parse_args()
     try:
@@ -470,7 +540,7 @@ def main():
         elif args.action == "uninstall":
             result = uninstall()
         elif args.action == "select":
-            result = select(args.root, args.global_config, args.platform, args.timeout)
+            result = select(args.root, args.global_config, args.platform, args.timeout, args.dry_run)
         elif args.action == "doctor":
             result = doctor(args.root, args.global_config, args.platform)
         else:
