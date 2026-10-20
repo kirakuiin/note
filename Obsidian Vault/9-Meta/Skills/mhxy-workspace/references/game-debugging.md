@@ -6,28 +6,30 @@
 
 ## 选择设备
 
-设备由主会话确定，不需要用户确认：
+设备由主会话确定，不需要用户确认，也不需要用户打开客户端：
 
 1. 用户指定了 `devid`（包括 Hunter 链接参数）就用它；不可用时报告，不要擅自换角色。
-2. 未指定时运行 `client_launch.py select --root "<项目>"`（用 Bash 工具的 `run_in_background`）。它在本机在线设备（`get_devices_by_ip`，同机多开的实例也会列出）中，按顺序取第一台**加载当前工作区源码**（`mainmenu.__file__` 在项目根目录下）、已登录且没有设备锁的；没有就按「自动启动客户端」启动一台。输出 `devid` 和 `how`（`online` 或 `launched`），跳过的设备和原因在 `skipped` 里，交付时一并说明。加载其他工作区或打包脚本的设备测不到本次改动，不选用。
-3. `select` 报 `mcp_error`、按 IP 查找本身失败（例如网络环境导致匹配不到）时，才用配置里的 `default_devid`。它明确离线、未连接或 Hunter 初始化失败时，依次尝试同一 ID 加 `_i1`、`_i2`（同机多开的实例）。都失败或没有配置时，向用户报告并询问设备 ID。其他失败按「自动启动客户端」的 `code` 处理。
-4. 同一任务一直用同一台成功的设备；遇到代码异常、业务状态问题或普通超时，不要换设备。唯一例外是客户端没加载到最新代码，处理见 `exec-check.md`「准备客户端」。
-5. 设备确定后，每个新的客户端操作任务或切换设备时调用一次 `init_client`。它会清除旧事件，同一任务内不要重复调用。
+2. 未指定时，先按 spec 和本次改动决定测哪几端，不问用户：只有 PC 走得到的改动（如 `win32/` 下的文件）测 `pc`；只有互通走得到的（如 `mobile/` 下的文件）测 `ht`；PC 与互通两端都会走到的公共逻辑，或判断不了时，两端都测。每一端各运行一次 `client_launch.py select --root "<项目>" --platform <pc|ht>`（用 Bash 工具的 `run_in_background`），各得一台设备；两次要依次运行，前一次结束再运行后一次，同时运行会选中同一个空闲账号、争用同一个启动请求；两端分别委派 test 任务，一台设备一个执行者（见 cli.md「设备锁」）。
+3. `select` 在本机在线设备（`get_devices_by_ip`，同机多开的实例也会列出）中，按顺序取第一台**类型相符**（`C_app.get_platform()`：`win32` 为 PC，`mobile` 为互通）、**加载当前工作区源码**（`mainmenu.__file__` 在项目根目录下）、已登录且没有设备锁的；没有就按「自动启动客户端」启动一台。输出 `devid` 和 `how`（`online` 或 `launched`），跳过的设备和原因在 `skipped` 里，交付时一并说明。加载其他工作区或打包脚本的设备测不到本次改动，不选用。加 `--dry-run` 只扫描，给出会选用的设备或启动计划（`how` 为 `would_launch`），不启动客户端。
+4. `select` 报 `mcp_error`、按 IP 查找本身失败（例如网络环境导致匹配不到）时，才用配置里的 `default_devid`，并用 `C_app.get_platform()` 确认类型相符。它明确离线、未连接或 Hunter 初始化失败时，依次尝试同一 ID 加 `_i1`、`_i2`（同机多开的实例）。都失败或没有配置时，向用户报告并询问设备 ID。其他失败按「自动启动客户端」的 `code` 处理。
+5. 同一任务一直用同一台成功的设备；遇到代码异常、业务状态问题或普通超时，不要换设备。唯一例外是客户端没加载到最新代码，处理见 `exec-check.md`「准备客户端」。
+6. 设备确定后，每个新的客户端操作任务或切换设备时调用一次 `init_client`。它会清除旧事件，同一任务内不要重复调用。
 
 ## 自动启动客户端
 
 客户端以管理员身份运行，由用户安装一次的计划任务代为启动，之后不再弹 UAC。只由主会话执行（测试执行者不启动客户端），用 `scripts/client_launch.py`：
 
 ```text
-python -X utf8 "<skill>/scripts/client_launch.py" select --root "<项目>" [--platform pc|ht]
+python -X utf8 "<skill>/scripts/client_launch.py" select --root "<项目>" [--platform pc|ht] [--dry-run]
 python -X utf8 "<skill>/scripts/client_launch.py" launch --root "<项目>" [--platform pc|ht] [--server <服务器名>] [--dry-run]
 python -X utf8 "<skill>/scripts/client_launch.py" doctor --root "<项目>"
 ```
 
-- **launch 做什么**：用项目根的上一级作为 workspace（加载当前工作副本的 `mhimage/` 和 `_test/`）；查本机在线设备当前登录的账号（`loginenter.Account`），选账号池中第一个空闲账号；触发计划任务启动 `mhmain.exe` 并自动登录第一个角色；等新设备以该账号上线后输出 `devid`。默认等 240 秒，用 Bash 工具的 `run_in_background` 运行。
-- **客户端类型（PC／互通）**：由客户端目录当前同步的版本决定，与 `xy1.ini` 的 `mobile_user`、分辨率无关。两个目录里的 `mhmain.exe` 是同一个启动壳，引擎是否按互通运行在编译期就定了（`C_app.get_platform()` 返回 `mobile` 还是 `win32`）。按约定 `pc_client_dir`（一般是 `mhxy_dev`）是 PC，`ht_client_dir`（一般是 `mhxy_mini`）是互通；但目录一旦放了指向 `xyq_ht` 的 `cloud_inner.json` 再同步，就会变成互通版。启动前看该目录 `update.ini` 的 `[Setting]`：PC 有 `Arch = X64`／`X86`，互通有 `Platform = HT`。类型与要求的 `--platform` 不符时停止并报告用户，不要改 ini 硬切；把目录同步回 PC 版按 mhxy-client-sync-launch 处理，需要用户确认。启动后用 `C_app.get_platform()` 复核。
+- **launch 做什么**：确认客户端目录的类型与 `--platform` 相符；用项目根的上一级作为 workspace（加载当前工作副本的 `mhimage/` 和 `_test/`）；查本机在线设备当前登录的账号（`loginenter.Account`），选账号池中第一个空闲账号；触发计划任务启动 `mhmain.exe` 并自动登录第一个角色；等新设备以该账号上线后输出 `devid`。默认等 240 秒，用 Bash 工具的 `run_in_background` 运行。
+- **客户端类型（PC／互通）**：由客户端目录当前同步的版本决定，与 `xy1.ini` 的 `mobile_user`、分辨率无关。两个目录里的 `mhmain.exe` 是同一个启动壳，引擎是否按互通运行在编译期就定了（`C_app.get_platform()` 返回 `mobile` 还是 `win32`）。按约定 `pc_client_dir`（一般是 `mhxy_dev`）是 PC，`ht_client_dir`（一般是 `mhxy_mini`）是互通；但目录一旦放了指向 `xyq_ht` 的 `cloud_inner.json` 再同步，就会变成互通版。`launch` 启动前读该目录 `update.ini` 的 `[Setting]`（PC 有 `Arch = X64`／`X86`，互通有 `Platform = HT`），只读不改；`doctor` 在 `clients` 中列出每个客户端目录的实际类型，与配置项不符时列为问题。
 - **服务器**：取工作区配置 `login_server`，`--server` 只覆盖本次。名字以“模拟”开头时用大区 `刘强98服`；其他名字在内服服务器列表中精确匹配，再做唯一的模糊匹配。没配置（`need_server`）时问用户这个分支用哪个服务器，按 workspace-management.md 保存到工作区配置；有多个候选（`server_ambiguous`）时把候选给用户选。
 - **其他失败**按输出的 `code` 处理，不要重试或换方式启动：
+  - `platform_mismatch`：客户端目录的实际类型（`detected`）与要求不符。报告用户，不要改 ini 硬切；把目录同步回 PC 版按 mhxy-client-sync-launch 处理，需要用户确认。`platform_unknown`：`update.ini` 读不出类型，请用户检查该目录是否完整同步。
   - `all_occupied`：账号池都被本机在线客户端占用，报告各账号所在设备，请用户关掉一个或添加账号。
   - `need_accounts`、`task_failed`、`task_no_result`、`launcher_error`：运行 `doctor`，把其中的 `fix` 交给用户（`install` 和录入密码要用户在管理员终端或交互终端执行）。
   - `bad_workspace`：例如 workspace 的 `_test/mhimage.wdf` 存在，客户端会加载打包脚本而不是源码。告诉用户，由用户决定是否移走，不要自行删除。

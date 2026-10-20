@@ -20,6 +20,8 @@ def load(name):
 sys.path.insert(0, str(SOURCE / "scripts"))
 c = load("client_launch")
 t = load("client_launch_task")
+PC_INI = "[Setting]\r\nVersion = 3.0.635\r\nArch = X64\r\n\r\n[Richman]\r\nResName = \"梦幻大富翁\"\r\n"
+HT_INI = "[Setting]\r\nVersion = 3.0.635\r\nPlatform = HT\r\n"
 
 
 class ClientLaunchTests(unittest.TestCase):
@@ -68,6 +70,7 @@ class ClientLaunchTests(unittest.TestCase):
         config = {"pc_client_dir": str(self.base), "login_server": "模拟14",
                   "login_accounts": [{"account": "a@163.com", "password": "synthetic-secret"}]}
         (self.base / "mhmain.exe").write_bytes(b"")
+        (self.base / "update.ini").write_bytes(PC_INI.encode("gbk"))
         root = self.base / "w" / "mhimage"
         root.mkdir(parents=True)
         with patch.object(c.workspace, "load_config", return_value=config), \
@@ -152,10 +155,10 @@ class ClientLaunchTests(unittest.TestCase):
         root.mkdir(parents=True)
         mine = (root / "xlogin" / "mainmenu.py").as_posix()
         devices = [{"devid": "locked"}, {"devid": "other"}, {"devid": "idle"}, {"devid": "mine"}, {"devid": "mine2"}]
-        infos = {"other": {"account": "a@163.com", "source": "D:/other/mhimage/xlogin/mainmenu.py"},
-                 "idle": {"account": None, "source": mine},
-                 "mine": {"account": "b@163.com", "source": mine},
-                 "mine2": {"account": "c@163.com", "source": mine}}
+        infos = {"other": {"account": "a@163.com", "source": "D:/other/mhimage/xlogin/mainmenu.py", "platform": "pc"},
+                 "idle": {"account": None, "source": mine, "platform": "pc"},
+                 "mine": {"account": "b@163.com", "source": mine, "platform": "pc"},
+                 "mine2": {"account": "c@163.com", "source": mine, "platform": "pc"}}
         with patch.object(c, "list_devices", return_value=devices), \
                 patch.object(c, "locked", side_effect=lambda devid: devid == "locked"), \
                 patch.object(c, "device_info", side_effect=lambda devid: infos[devid]), \
@@ -170,6 +173,89 @@ class ClientLaunchTests(unittest.TestCase):
                 patch.object(c, "launch", return_value={"action": "launch", "devid": "new"}):
             result = c.select(root, self.base / "config.json")
         self.assertEqual((result["how"], result["devid"]), ("launched", "new"))
+
+    def test_select_filters_platform_and_dry_run(self):
+        root = self.base / "w" / "mhimage"
+        root.mkdir(parents=True)
+        mine = (root / "xlogin" / "mainmenu.py").as_posix()
+        devices = [{"devid": "pc1"}, {"devid": "ht1"}, {"devid": "odd"}]
+        infos = {"pc1": {"account": "a@163.com", "source": mine, "platform": "pc"},
+                 "ht1": {"account": "b@163.com", "source": mine, "platform": "ht"},
+                 "odd": {"account": "c@163.com", "source": mine, "platform": None}}
+        common = (patch.object(c, "list_devices", return_value=devices),
+                  patch.object(c, "locked", return_value=False),
+                  patch.object(c, "device_info", side_effect=lambda devid: infos[devid]))
+        with common[0], common[1], common[2], patch.object(c, "launch") as launch:
+            result = c.select(root, self.base / "config.json", "ht")
+        launch.assert_not_called()
+        self.assertEqual((result["devid"], result["platform"]), ("ht1", "ht"))
+        self.assertEqual([item["devid"] for item in result["skipped"]], ["pc1"])
+        infos["ht1"]["platform"] = "pc"
+        with common[0], common[1], common[2], \
+                patch.object(c, "launch", return_value={"action": "launch", "dry_run": True}) as launch:
+            result = c.select(root, self.base / "config.json", "ht", dry_run=True)
+        self.assertTrue(launch.call_args.kwargs["dry_run"])
+        self.assertEqual(result["how"], "would_launch")
+        self.assertEqual([item["devid"] for item in result["skipped"]], ["pc1", "ht1", "odd"])
+        self.assertIn("无法识别", result["skipped"][2]["reason"])
+
+    def test_device_info_maps_platform(self):
+        with patch.object(c, "mcp", return_value={"ret": {"account": "A", "source": "x", "platform": "mobile"}}):
+            self.assertEqual(c.device_info("d"), {"account": "a@163.com", "source": "x", "platform": "ht"})
+        with patch.object(c, "mcp", return_value={"ret": {"account": None, "source": None, "platform": "ios"}}):
+            self.assertIsNone(c.device_info("d")["platform"])
+
+    def test_client_platform_from_update_ini(self):
+        pc, ht, odd, empty = (self.base / name for name in ("pc", "ht", "odd", "empty"))
+        for folder in (pc, ht, odd, empty):
+            folder.mkdir()
+        (pc / "update.ini").write_bytes(PC_INI.encode("gbk"))
+        (ht / "update.ini").write_bytes(b"\xef\xbb\xbf" + HT_INI.encode())
+        (odd / "update.ini").write_text("[Setting]\nVersion = 1\n", encoding="utf-8")
+        before = (pc / "update.ini").read_bytes()
+        self.assertEqual([c.client_platform(item) for item in (pc, ht, odd, empty)], ["pc", "ht", None, None])
+        self.assertEqual((pc / "update.ini").read_bytes(), before)
+        self.assertEqual(c.check_client_platform(ht, "ht"), "ht")
+        with self.assertRaises(c.LaunchError) as error:
+            c.check_client_platform(ht, "pc")
+        self.assertEqual((error.exception.code, error.exception.detail["detected"]), ("platform_mismatch", "ht"))
+        with self.assertRaises(c.LaunchError) as error:
+            c.check_client_platform(odd, "pc")
+        self.assertEqual(error.exception.code, "platform_unknown")
+
+    def test_launch_stops_on_platform_mismatch(self):
+        (self.base / "mhmain.exe").write_bytes(b"")
+        (self.base / "update.ini").write_text(HT_INI, encoding="utf-8")
+        config = {"pc_client_dir": str(self.base), "login_server": "模拟14",
+                  "login_accounts": [{"account": "a@163.com", "password": "synthetic-secret"}]}
+        with patch.object(c.workspace, "load_config", return_value=config), \
+                patch.object(c, "scan_accounts") as scan, patch.object(c.subprocess, "run") as run:
+            with self.assertRaises(c.LaunchError) as error:
+                c.launch(self.base / "w" / "mhimage", self.base / "config.json", "pc", dry_run=True)
+        self.assertEqual(error.exception.code, "platform_mismatch")
+        scan.assert_not_called()
+        run.assert_not_called()
+
+    def test_doctor_reports_client_types(self):
+        pc, ht = self.base / "mhxy_dev", self.base / "mhxy_mini"
+        for folder in (pc, ht):
+            folder.mkdir()
+            (folder / "mhmain.exe").write_bytes(b"")
+            (folder / "mhxy.key").write_bytes(b"")
+            (folder / "update.ini").write_text(HT_INI, encoding="utf-8")  # PC 目录被同步成了互通版
+        root = self.base / "w" / "mhimage"
+        root.mkdir(parents=True)
+        config = {"pc_client_dir": str(pc), "ht_client_dir": str(ht), "login_server": "模拟14",
+                  "login_accounts": [{"account": "a@163.com", "password": "synthetic-secret"}]}
+        with patch.object(c, "query_task", return_value=None), \
+                patch.object(c.workspace, "load_config", return_value=config):
+            result = c.doctor(root, self.base / "config.json")
+        self.assertEqual(result["clients"], {"pc_client_dir": {"path": str(pc), "detected": "ht"},
+                                             "ht_client_dir": {"path": str(ht), "detected": "ht"}})
+        kinds = [item for item in result["problems"] if item["item"] == "客户端类型"]
+        self.assertEqual(len(kinds), 1)
+        self.assertIn("pc_client_dir", kinds[0]["problem"])
+        self.assertNotIn("synthetic-secret", json.dumps(result, ensure_ascii=False))
 
     def test_task_arguments_quote_paths(self):
         arguments = c.task_arguments(Path(r"C:\Program Data\x.py"), Path(r"C:\Users\u\cfg.json"),

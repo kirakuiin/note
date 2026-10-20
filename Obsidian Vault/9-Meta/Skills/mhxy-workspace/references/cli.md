@@ -40,7 +40,7 @@
 }
 ```
 
-- 设备按 game-debugging.md「选择设备」由主会话用 `client_launch.py select` 自动确定（没有合适的在线设备时会自动启动客户端），不需要用户确认。
+- 设备按 game-debugging.md「选择设备」由主会话用 `client_launch.py select` 自动确定（没有合适的在线设备时会自动启动客户端），不需要用户确认。一个 test 任务只对应一台设备；PC 和互通都要测时分成两个任务。
 - `mcp_tools` 按计划列出实际要用的工具，不照抄示例；其他 MCP 一律不接入。
 - `write_dirs` 必须是 `.mhxy-workspace/` 内的子目录，不能经过链接。执行者可写测试和 Mock 脚本，不改业务源码；发现业务缺陷、需要改变测试目标或 Mock 方案、状态不明或无法恢复时停止并返回证据。
 - 执行者不能写 `.mhxy-workspace/tracking.json`。覆盖率跑测的本地登记由主会话按结果完成，任务要返回的内容见 [coverage.md](coverage.md)「跑测流程」第 2 步。
