@@ -27,13 +27,24 @@ python -X utf8 "<skill>/scripts/client_launch.py" doctor --root "<项目>"
 
 - **launch 做什么**：确认客户端目录的类型与 `--platform` 相符；用项目根的上一级作为 workspace（加载当前工作副本的 `mhimage/` 和 `_test/`）；查本机在线设备当前登录的账号（`loginenter.Account`），选账号池中第一个空闲账号；触发计划任务启动 `mhmain.exe` 并自动登录第一个角色；等新设备以该账号上线后输出 `devid`。默认等 240 秒，用 Bash 工具的 `run_in_background` 运行。
 - **客户端类型（PC／互通）**：由客户端目录当前同步的版本决定，与 `xy1.ini` 的 `mobile_user`、分辨率无关。两个目录里的 `mhmain.exe` 是同一个启动壳，引擎是否按互通运行在编译期就定了（`C_app.get_platform()` 返回 `mobile` 还是 `win32`）。按约定 `pc_client_dir`（一般是 `mhxy_dev`）是 PC，`ht_client_dir`（一般是 `mhxy_mini`）是互通；但目录一旦放了指向 `xyq_ht` 的 `cloud_inner.json` 再同步，就会变成互通版。`launch` 启动前读该目录 `update.ini` 的 `[Setting]`（PC 有 `Arch = X64`／`X86`，互通有 `Platform = HT`），只读不改；`doctor` 在 `clients` 中列出每个客户端目录的实际类型，与配置项不符时列为问题。
-- **服务器**：取工作区配置 `login_server`，`--server` 只覆盖本次。名字以“模拟”开头时按模拟服处理：大区 `刘强98服` → 服务器 `模拟<编号>`（如 `模拟15`），必须带编号；“模拟服”“模拟”这类不带编号的名字不是服务器名，脚本报 `server_invalid`，向用户问具体编号，不要替用户编。其他名字在内服服务器列表中精确匹配，再做唯一的模糊匹配。账号池的账号要在该服务器上有角色，否则停在选角，超时报 `device_timeout`（见 workspace-management.md「账号池」）。没配置（`need_server`）时问用户这个分支用哪个服务器，按 workspace-management.md 保存到工作区配置；有多个候选（`server_ambiguous`）时把候选给用户选。
+- **服务器**：取工作区配置 `login_server`，`--server` 只覆盖本次。名字以“模拟”开头时按模拟服处理：大区 `刘强98服` → 服务器 `模拟<编号>`（如 `模拟15`），必须带编号；“模拟服”“模拟”这类不带编号的名字不是服务器名，脚本报 `server_invalid`，向用户问具体编号，不要替用户编。其他名字在内服服务器列表中精确匹配，再做唯一的模糊匹配。账号池的账号要在该服务器上有角色，客户端版本也要与该服务器匹配，否则只会超时报 `device_timeout`，原因查日志（见 workspace-management.md「账号池」）。没配置（`need_server`）时问用户这个分支用哪个服务器，按 workspace-management.md 保存到工作区配置；有多个候选（`server_ambiguous`）时把候选给用户选。
 - **其他失败**按输出的 `code` 处理，不要重试或换方式启动：
   - `platform_mismatch`：客户端目录的实际类型（`detected`）与要求不符。报告用户，不要改 ini 硬切；把目录同步回 PC 版按 mhxy-client-sync-launch 处理，需要用户确认。`platform_unknown`：`update.ini` 读不出类型，请用户检查该目录是否完整同步。
   - `all_occupied`：账号池都被本机在线客户端占用，报告各账号所在设备，请用户关掉一个或添加账号。
   - `need_accounts`、`task_failed`、`task_no_result`、`launcher_error`：运行 `doctor`，把其中的 `fix` 交给用户（`install` 和录入密码要用户在管理员终端或交互终端执行）。
   - `bad_workspace`：例如 workspace 的 `_test/mhimage.wdf` 存在，客户端会加载打包脚本而不是源码。告诉用户，由用户决定是否移走，不要自行删除。
-  - `device_timeout`：客户端已启动但没等到登录，查对应进程号的日志，报告用户。
+  - `device_timeout`：客户端已启动但没等到登录。查对应客户端目录 `Log/log_<pid>.txt` 里的 `CDlgError`、`S_LOGIN_ERROR`、`S_MOBILE_ERROR` 定位原因，按下表处理；表里没有的报告用户。失败的客户端不会自动关闭，交付时告诉用户进程号。
+
+    | 日志 | 原因 | 处理 |
+    | --- | --- | --- |
+    | `CDlgError:服务器信息不正确` | `login_server` 不是真实的服务器名（如写成“模拟服”） | 问用户具体服务器名，重设 `login_server` |
+    | `S_LOGIN_ERROR 9`、`CDlgError:版本号不匹配` | 客户端版本与服务器不符，且没打开跳过版本检查 | 见下方「跳过版本检查」 |
+    | 握手成功（`S_HANDSHAKE_OK`、`auth_and_get_roles`）后几分钟无进展，最后 `S_MOBILE_ERROR:105` 断线 | 未查清；可能是账号在该服务器上没有角色 | 问用户该服务器上哪个账号有角色，或换用已能登录的服务器 |
+
+- **跳过版本检查**（同 Sunshine 登录页“高级设置”的“跳过版本检查”和“覆盖标准 mhedit.wdf”）：
+  - 原理：客户端 `xlogin/login.py` 在 `xy1.ini` 的 `[Net] inner_test` 不为 0 时调用 `wizard/anyversion.py` 的 `LoginAnywhere()`；其中 `[Net] no_anywhere` 为 0 时把脚本、引擎和 exe 版本号改成万能版本，服务器就不再报版本不匹配。`no_anywhere = 1` 时不跳过。
+  - 标准 `mhedit.wdf`：来源是 `<Sunshine>/SunshineStarter/Plugins/Aluba/_Res/toClient/mhedit.wdf`（本机常见 `D:/sunshine/...`），复制到客户端根目录；先比对 MD5，一致就不用动。
+  - 操作：只在内服测试客户端上做，首次需用户同意。改之前备份 `xy1.ini`，只把 `no_anywhere` 的值改成 0（按字节替换，保持原编码和换行），其他键不动；改完重新运行 `select`／`launch`。PC 和互通目录各有自己的 `xy1.ini`，分别检查。
 - 只查得到本机的设备；账号在其他机器上登录时会被顶下线或登录失败。读不出账号的设备列在 `unknown_devices` 中。
 - 用完不自动关闭客户端。不要用打包服务（mh-patch-mcp 的 `control_aluba_client`）代替：它拉起的是 aluba 自我验证循环，不能指定 workspace 和账号。
 - **部署**（新电脑或重装后）：先把 skill 链接到位，再在管理员 PowerShell 运行 `client_launch.py install`（全机一次，与工作区无关，可重复执行；客户端目录变化或 skill 更新启动器后要重新运行），然后按 workspace-management.md 录入账号池。`doctor` 列出还缺什么；`uninstall` 删除计划任务。
