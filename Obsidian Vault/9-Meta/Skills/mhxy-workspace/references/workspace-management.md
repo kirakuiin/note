@@ -22,7 +22,7 @@
 | `default_devid` | 按 IP 查找不到调试设备时的兜底设备 ID，见 game-debugging.md「选择设备」 | 否 | 设备 ID 或 null |
 | `branches_root` | 开发分支总目录，创建或检出分支时使用，见 branch.md | 否 | 绝对路径或 null |
 | `login_accounts` | 自动启动客户端用的游戏账号池，按优先顺序排列，只存在用户级配置中，见「账号池」 | 否 | 只能用 `login-account` 维护；输出中只显示账号 |
-| `login_server` | 自动启动客户端登录的服务器名（如 `王卓为-trunk`、`模拟14`），每个分支通常固定，一般放工作区级 | 否 | 单行服务器名或 null |
+| `login_server` | 自动启动客户端登录的服务器名（如 `王卓为-trunk`、`模拟15`），每个分支通常固定，一般放工作区级；写法见「账号池」末尾 | 否 | 单行服务器名或 null |
 
 null 表示明确不配置；用到该项时再请用户补齐。只有五个路径是初始化的必填项。
 
@@ -76,8 +76,10 @@ python "<skill>/scripts/workspace.py" login-account --account <游戏账号> --a
 python "<skill>/scripts/workspace.py" login-account --account <游戏账号> --remove-account --apply   # 移除
 ```
 
-服务器名由用户说出即可，保存到当前工作区：`config --root "<项目>" --set-local "login_server=<服务器名>" --apply`（只写工作区级配置，不动入口文件）。
+服务器名由用户说出，保存到当前工作区：`config --root "<项目>" --set-local "login_server=<服务器名>" --apply`（只写工作区级配置，不动入口文件）。
 
+- **必须是具体的服务器名**，不能是类别。“模拟服”不是服务器名：模拟服都在大区 `刘强98服` 下，名字是 `模拟<编号>`（如 `模拟14`、`模拟15`），`login_server` 要填完整的 `模拟<编号>`。用户只说“模拟服”时问具体编号，不要替用户编，也不要把“模拟服”当选项。
+- **账号池的账号要在这台服务器上有角色**：自动登录只进第一个角色，没有角色时会停在选角／建角，等到超时后报 `device_timeout`。换服务器前先确认账号在新服务器上有角色，或沿用其他工作区已经能登录的服务器。
 ## sync 做什么
 
 - **配置**：写入通过 `--set-global`／`--set-local` 传入的值；第一次运行时，工作区级配置创建为空对象。

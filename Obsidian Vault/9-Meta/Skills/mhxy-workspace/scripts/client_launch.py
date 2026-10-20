@@ -105,6 +105,9 @@ def resolve_server(name, names):
     """
     name = name.strip()
     if name.startswith(MOCK_PREFIX):
+        # 模拟服必须带编号（如 模拟15）；“模拟服”是类别不是服务器名，登录时只会报“服务器信息不正确”。
+        if not name[len(MOCK_PREFIX):].isdigit():
+            raise LaunchError(f"“{name}”不是具体的模拟服名，请写成 模拟<编号>（如 模拟15）", "server_invalid")
         return MOCK_FIELD, name
     if name in names:
         return MORE_SERVER, name
