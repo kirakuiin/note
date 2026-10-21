@@ -53,6 +53,31 @@ class ClientLaunchTests(unittest.TestCase):
         with self.assertRaises(c.LaunchError):
             c.resolve_server("不存在", names)
 
+    def test_resolve_server_from_server_ini(self):
+        text = ("-26 1 1 刘强98服\r\n-32 3 7 孙锐贤\r\n-40 1 1 孙锐贤-test\r\n"
+                "26 1 2 模拟15 10.0.0.1 1 1 10.0.0.1 1 2 0 0 0 0 欢迎 2\r\n"
+                "32 2 2 test_branch 10.0.0.2 4377 1 10.0.0.2 4377 2 0 0 0 0 欢迎 4378\r\n"
+                "32 2 1 test 10.0.0.2 9991 1 10.0.0.2 9991 2 0 0 0 0 欢迎 9992\r\n"
+                "40 1 2 branch 10.0.0.3 1 1 10.0.0.3 1 2 0 0 0 0 欢迎 2\r\n"
+                "50 3 1 test_branch 10.0.0.4 1 1 10.0.0.4 1 2 0 0 0 0 欢迎 2\r\n")
+        areas = c.parse_server_ini(text)
+        self.assertEqual(areas["孙锐贤"], ["test_branch", "test"])
+        self.assertEqual(c.resolve_server("孙锐贤-test", [], areas), ("孙锐贤", "test"))
+        self.assertEqual(c.resolve_server("孙锐贤-test-branch", [], areas), ("孙锐贤-test", "branch"))
+        self.assertEqual(c.resolve_server("王卓为-rel", ["王卓为-rel"], areas), ("more_server", "王卓为-rel"))
+        with self.assertRaises(c.LaunchError) as error:
+            c.resolve_server("孙锐贤-test-branch", [], {**areas, "孙锐贤": ["test-branch"]})
+        self.assertEqual(error.exception.code, "server_ambiguous")
+        with self.assertRaises(c.LaunchError) as error:
+            c.resolve_server("孙锐贤-nope", [], areas)
+        self.assertEqual(error.exception.code, "server_not_found")
+        client = self.base / "client"
+        (client / "common").mkdir(parents=True)
+        (client / "common" / "server.ini").write_bytes(text.encode("gb18030"))
+        config = {"pc_client_dir": str(self.base / "missing"), "ht_client_dir": str(client)}
+        self.assertEqual(c.server_areas(config, "pc"), areas)
+        self.assertEqual(c.server_areas({}, "pc"), {})
+
     def test_workspace_dir(self):
         root = self.base / "branch" / "mhimage"
         root.mkdir(parents=True)

@@ -43,6 +43,7 @@ SERVER_LIST = "http://mhxy.update.inner.netease.com/serverlist/serverlist.txt"
 MOCK_PREFIX = "模拟"
 MOCK_FIELD = "刘强98服"  # 模拟服所在大区
 MORE_SERVER = "more_server"  # 客户端按名字在内服服务器列表中查找
+SERVER_INI = Path("common") / "server.ini"  # 客户端选服界面的大区和服务器，xlogin/serverlist.py 下载写入
 EXE = "mhmain.exe"
 PROBE_TIMEOUT = 20  # 秒；单次 MCP 调用
 NO_DEVICE = "未找到任何在线设备"  # get_devices_by_ip 在本机没有设备时的报错文本
@@ -94,11 +95,41 @@ def locked(devid):
     return (LOCKS / (hashlib.sha256(devid.encode()).hexdigest() + ".json")).exists()
 
 
-def resolve_server(name, names):
+def parse_server_ini(text):
+    """解析客户端 common/server.ini，返回 {大区名: [服务器名, ...]}。
+
+    大区行为“-<大区id> <x> <y> <大区名>”，服务器行以所属大区 id 开头：“<大区id> <x> <y> <服务器名> <ip> ...”。
+    """
+    fields, servers = {}, {}
+    for line in text.splitlines():
+        parts = line.split()
+        if len(parts) < 4:
+            continue
+        if parts[0].startswith("-") and parts[0][1:].isdigit():
+            fields[parts[0][1:]] = " ".join(parts[3:])
+        elif parts[0].isdigit():
+            servers.setdefault(parts[0], []).append(parts[3])
+    areas = {}
+    for field_id, field in fields.items():
+        areas.setdefault(field, []).extend(servers.get(field_id, []))
+    return areas
+
+
+def resolve_field_server(name, areas):
+    """按“大区名-服务器名”在 server.ini 的大区（areas）中精确匹配，返回所有候选 [(大区名, 服务器名), ...]。
+
+    大区名本身可能含“-”，所以按已知大区名前缀切分；多个大区都能切出存在的服务器时有多个候选。
+    """
+    return sorted({(field, name[len(field) + 1:]) for field, servers in areas.items()
+                   if name.startswith(field + "-") and name[len(field) + 1:] in servers})
+
+
+def resolve_server(name, names, areas=None):
     """把用户说的服务器名解析成 (svrfield, svrname)。
 
-    模拟服在大区 刘强98服；其他服务器按内服服务器列表（names）精确匹配，匹配不到再做不区分大小写
-    的子串匹配，只有唯一候选才采用。
+    模拟服在大区 刘强98服；其他服务器先按内服服务器列表（names）精确匹配，再按客户端 server.ini 的
+    “大区名-服务器名”（areas，见 parse_server_ini）精确匹配，都匹配不到再在 names 中做不区分大小写的
+    子串匹配。只有唯一候选才采用。
 
     Raises:
         LaunchError: 找不到或有多个候选（detail 带 candidates）。
@@ -111,13 +142,19 @@ def resolve_server(name, names):
         return MOCK_FIELD, name
     if name in names:
         return MORE_SERVER, name
+    matches = resolve_field_server(name, areas or {})
+    if len(matches) == 1:
+        return matches[0]
+    if matches:
+        raise LaunchError(f"服务器名“{name}”在 server.ini 中有多个大区候选", "server_ambiguous",
+                          candidates=[f"{field}/{server}" for field, server in matches])
     candidates = [item for item in names if name.lower() in item.lower()]
     if len(candidates) == 1:
         return MORE_SERVER, candidates[0]
     if candidates:
         raise LaunchError(f"服务器名“{name}”有多个候选，请指定完整名称", "server_ambiguous",
                           candidates=candidates[:20])
-    raise LaunchError(f"内服服务器列表中找不到“{name}”", "server_not_found")
+    raise LaunchError(f"内服服务器列表和客户端 server.ini 的“大区名-服务器名”中都找不到“{name}”", "server_not_found")
 
 
 def workspace_dir(root):
@@ -248,6 +285,29 @@ def scan_accounts():
         if account:
             occupied[account] = device["devid"]
     return devices, occupied, unknown
+
+
+def server_areas(config, platform="pc"):
+    """读取客户端目录下的 common/server.ini（GB18030），优先 platform 对应的目录；都读不到返回 {}。"""
+    keys = [f"{platform}_client_dir"] + [f"{item}_client_dir" for item in PLATFORM_NAMES if item != platform]
+    for key in keys:
+        if not config.get(key):
+            continue
+        try:
+            raw = (Path(config[key]) / SERVER_INI).read_bytes()
+        except OSError:
+            continue
+        areas = parse_server_ini(raw.decode("gb18030", errors="replace"))
+        if areas:
+            return areas
+    return {}
+
+
+def lookup_server(name, config, platform="pc"):
+    """解析服务器名；模拟服不访问内服服务器列表和 server.ini。"""
+    if name.strip().startswith(MOCK_PREFIX):
+        return resolve_server(name, [])
+    return resolve_server(name, server_names(), server_areas(config, platform))
 
 
 def server_names():
@@ -410,7 +470,7 @@ def doctor(root, global_config, platform="pc"):
                                 '--set-local "login_server=<服务器名>" --apply'})
     else:
         try:
-            info["server"] = resolve_server(server, [] if server.startswith(MOCK_PREFIX) else server_names())
+            info["server"] = lookup_server(server, config, platform)
         except (LaunchError, OSError, ValueError) as error:
             problems.append({"item": "服务器", "problem": str(error), "fix": "改用完整的服务器名"})
     return {"ok": not problems, "problems": problems, **info}
@@ -441,7 +501,7 @@ def launch(root, global_config, platform="pc", server=None, timeout=240, dry_run
     if not server:
         raise LaunchError("当前工作区未配置服务器：问用户这个分支用哪个服务器，用 workspace.py config --root "
                           "<项目> --set-local \"login_server=<名字>\" --apply 保存后重试", "need_server")
-    svrfield, svrname = resolve_server(server, [] if server.strip().startswith(MOCK_PREFIX) else server_names())
+    svrfield, svrname = lookup_server(server, config, platform)
     pool = config.get("login_accounts")
     if not pool:
         raise LaunchError("账号池为空：请用户在交互终端运行 workspace.py login-account 添加账号", "need_accounts")
@@ -490,7 +550,7 @@ def launch(root, global_config, platform="pc", server=None, timeout=240, dry_run
                       f"日志见 {client}/Log/ 中进程号 {plan['pid']} 对应的文件", "device_timeout", **plan)
 
 
-def select(root, global_config, platform="pc", timeout=240, dry_run=False):
+def select(root, global_config, platform="pc", timeout=240, dry_run=False, server=None):
     """为当前工作区确定 platform 类型的测试设备，不需要用户确认。
 
     在线设备按列表顺序，取第一台类型相符、加载当前工作区源码、没有设备锁的；没有就自动启动一台
@@ -518,7 +578,7 @@ def select(root, global_config, platform="pc", timeout=240, dry_run=False):
         else:
             return {"action": "select", "how": "online", "devid": devid, "name": device.get("name"),
                     "platform": platform, "account": info["account"], "skipped": skipped}
-    result = launch(root, global_config, platform, timeout=timeout, dry_run=dry_run)
+    result = launch(root, global_config, platform, server=server, timeout=timeout, dry_run=dry_run)
     return {**result, "action": "select", "how": "would_launch" if dry_run else "launched", "skipped": skipped}
 
 
@@ -531,7 +591,8 @@ def main():
     parser.add_argument("--root", default=os.getcwd())
     parser.add_argument("--global-config", default=str(Path.home() / workspace.DIRECTORY / "config.json"))
     parser.add_argument("--platform", choices=("pc", "ht"), default="pc")
-    parser.add_argument("--server", help="launch：本次使用的服务器名，省略时用工作区配置 login_server")
+    parser.add_argument("--server", help="launch／select：本次启动使用的服务器名（模拟<编号>、内服服务器列表名或 大区名-服务器名），"
+                        "省略时用工作区配置 login_server")
     parser.add_argument("--timeout", type=int, default=240, help="launch：等待设备上线的秒数")
     parser.add_argument("--dry-run", action="store_true",
                         help="launch／select：只检查并给出将选用的设备或启动计划，不启动客户端")
@@ -543,7 +604,7 @@ def main():
         elif args.action == "uninstall":
             result = uninstall()
         elif args.action == "select":
-            result = select(args.root, args.global_config, args.platform, args.timeout, args.dry_run)
+            result = select(args.root, args.global_config, args.platform, args.timeout, args.dry_run, args.server)
         elif args.action == "doctor":
             result = doctor(args.root, args.global_config, args.platform)
         else:

@@ -48,8 +48,8 @@ def test_read_only_kinds_use_project_root_and_no_mcp(tmp_path, kind):
     assert command[:2] == ["codex", "exec"] and command[-1] == "-"
     assert command[command.index("--sandbox") + 1] == "read-only"
     assert command[command.index("-C") + 1] == "R"
-    assert command[command.index("-m") + 1] == "gemini-4-argon"
-    for value in ('model_reasoning_effort="medium"', "agents.enabled=false", "features.multi_agent=false",
+    assert command[command.index("-m") + 1] == "deepseek-flash"
+    for value in ('model_reasoning_effort="max"', "agents.enabled=false", "features.multi_agent=false",
                   "features.hooks=false", "plugins={}", "mcp_servers={}", 'approval_policy="never"',
                   'model_provider="p"'):
         assert option(command, value), value
@@ -109,6 +109,8 @@ def test_command_uses_state_model(tmp_path):
 # ---- 模型选择 ----
 
 CATALOG = {"models": [
+    {"slug": "deepseek-flash", "default_reasoning_level": "high",
+     "supported_reasoning_levels": [{"effort": "none"}, {"effort": "high"}, {"effort": "max"}]},
     {"slug": "gpt-6.1-sol", "default_reasoning_level": "high",
      "supported_reasoning_levels": [{"effort": "high"}, {"effort": "xhigh"}]},
     {"slug": "gemini-4-argon", "default_reasoning_level": "medium",
@@ -127,7 +129,8 @@ def test_pick_model_defaults_without_catalog():
 
 def test_pick_model_validates_against_catalog(tmp_path):
     config = catalog_config(tmp_path)
-    assert c.pick_model(None, None, config) == ("gemini-4-argon", "medium")
+    assert c.pick_model(None, None, config) == ("deepseek-flash", "max")
+    assert c.pick_model("gemini-4-argon", None, config) == ("gemini-4-argon", "medium")
     # 默认强度不受支持时退回目录给的默认档位。
     assert c.pick_model("gpt-6.1-sol", None, config) == ("gpt-6.1-sol", "high")
     with pytest.raises(ValueError, match="模型目录中没有"):

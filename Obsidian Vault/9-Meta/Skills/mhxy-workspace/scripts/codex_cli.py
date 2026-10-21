@@ -18,8 +18,8 @@ import uuid
 SKILL = Path(__file__).resolve().parents[1]
 TERMINAL = {"completed", "failed", "timed_out", "cancelled"}
 KINDS = ("investigate", "review", "test")
-MODEL = "gemini-4-argon"
-EFFORT = "medium"
+MODEL = "deepseek-flash"
+EFFORT = "max"
 IDLE_SECONDS = 600
 START_SECONDS = 10
 RELEASE_GRACE = 5  # release 等待监控、CLI 进程退出的秒数；正常结束时监控写完终态后很快退出。
