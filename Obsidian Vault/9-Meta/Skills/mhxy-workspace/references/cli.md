@@ -65,7 +65,7 @@
 
 ## Claude 主会话
 
-用本 skill 的 `scripts/codex_cli.py`，需要 Python 3.11+（标准库 `tomllib`）和已安装的 Codex CLI。默认模型 `deepseek-flash`、推理强度 `max`；`start` 可用 `--model`、`--effort` 指定其他模型和强度。
+用本 skill 的 `scripts/codex_cli.py`，需要 Python 3.11+（标准库 `tomllib`）和已安装的 Codex CLI。默认模型 `gemini-4-argon`、推理强度 `high`（2026-11-02 review 基准：效果与 deepseek-flash max 持平、耗时约 40%、输出 token 约 1/9；同模型 medium 曾两次未输出结构化结果，不要用）；需要深挖时可指定 `--model deepseek-flash --effort max`。`start` 可用 `--model`、`--effort` 指定其他模型和强度。
 
 ```text
 python -X utf8 "<skill>/scripts/codex_cli.py" start --root "<项目>" --kind <investigate|review|test> --task-file "<任务.json>" [--resume "<上一轮 review 任务目录>"] [--model <模型>] [--effort <强度>]
