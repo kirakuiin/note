@@ -48,8 +48,8 @@ def test_read_only_kinds_use_project_root_and_no_mcp(tmp_path, kind):
     assert command[:2] == ["codex", "exec"] and command[-1] == "-"
     assert command[command.index("--sandbox") + 1] == "read-only"
     assert command[command.index("-C") + 1] == "R"
-    assert command[command.index("-m") + 1] == "deepseek-flash"
-    for value in ('model_reasoning_effort="max"', "agents.enabled=false", "features.multi_agent=false",
+    assert command[command.index("-m") + 1] == c.MODEL
+    for value in (f'model_reasoning_effort="{c.EFFORT}"', "agents.enabled=false", "features.multi_agent=false",
                   "features.hooks=false", "plugins={}", "mcp_servers={}", 'approval_policy="never"',
                   'model_provider="p"'):
         assert option(command, value), value
@@ -136,7 +136,8 @@ def test_pick_model_defaults_without_catalog():
 
 def test_pick_model_validates_against_catalog(tmp_path):
     config = catalog_config(tmp_path)
-    assert c.pick_model(None, None, config) == ("deepseek-flash", "max")
+    # 目录里的默认模型不支持默认强度 high，退回目录给的默认档位。
+    assert c.pick_model(None, None, config) == (c.MODEL, "medium")
     assert c.pick_model("gemini-4-argon", None, config) == ("gemini-4-argon", "medium")
     # 默认强度不受支持时退回目录给的默认档位。
     assert c.pick_model("gpt-6.1-sol", None, config) == ("gpt-6.1-sol", "high")
@@ -471,6 +472,90 @@ def test_fenced_json_result_is_accepted(tmp_path):
 def test_zero_exit_without_valid_result_is_failed(tmp_path):
     state = run_probe(tmp_path, result_code({"conclusion": "x"}), kind="investigate", idle=EXITS)
     assert state["status"] == "failed" and state["exit_code"] == 0
+
+
+INVESTIGATE = {"conclusion": "c", "evidence": ["war.py:1 —— 说明"], "uncertainties": []}
+
+
+def finish_with(tmp_path, kind, text=None, events=(), returncode=0):
+    """写入 result.json／事件流后直接调用 finish，返回状态。"""
+    if text is not None:
+        (tmp_path / "result.json").write_text(text, encoding="utf-8")
+    (tmp_path / "stdout.jsonl").write_text("\n".join(json.dumps(e) for e in events), encoding="utf-8")
+    state = {"kind": kind}
+    c.finish(tmp_path, state, returncode)
+    return state
+
+
+def test_result_after_reasoning_with_other_json(tmp_path):
+    # 来自真实输出：约 29KB 推理文字，其中有用例步骤的小 JSON，最后才是结果对象
+    prefix = ("Now let's review all 4 questions in the prompt carefully.\n"
+              '- `{"act": "perform_gm", "skill": "惊天动地", "target": "e0"}`（GM 直放）\n'
+              '- `{"act": "perform", "id": 1073, "target": "e0"}`\n' + "推理 { 未闭合\n" * 50)
+    state = finish_with(tmp_path, "investigate", prefix + json.dumps(INVESTIGATE, ensure_ascii=False))
+    assert state["status"] == "completed" and state["result"] == INVESTIGATE
+    assert "raw_result" not in state and "repaired_quotes" not in state
+
+
+def test_last_valid_result_wins():
+    first = dict(INVESTIGATE, conclusion="草稿")
+    text = json.dumps(first) + "\n修正后：\n```json\n" + json.dumps(INVESTIGATE) + "\n```\n"
+    assert c.parse_result(text, c.SCHEMAS["investigate"]) == (INVESTIGATE, 0)
+
+
+def test_unescaped_quotes_in_string_are_repaired(tmp_path):
+    # 来自真实输出：正文里的函数签名带未转义引号，json.loads 报 Expecting ',' delimiter
+    text = ('{"conclusion": "法术：`netwar.DO_S_WAR_PERFORM(attacker_id, victims, magic_id, magic_desc=0, '
+            'name="", info="")`。\\n继续", "evidence": ["a.py:1 —— 用 "引号" 说明", "b.py:2"], '
+            '"uncertainties": []}')
+    with pytest.raises(ValueError):
+        json.loads(text)
+    state = finish_with(tmp_path, "investigate", "前置说明\n" + text)
+    assert state["status"] == "completed"
+    assert 'name="", info="")`。\n继续' in state["result"]["conclusion"]
+    assert state["result"]["evidence"] == ['a.py:1 —— 用 "引号" 说明', "b.py:2"]
+    assert state["repaired_quotes"] == 6 and state["raw_result"].endswith("result.json")
+
+
+def test_raw_control_characters_are_accepted(tmp_path):
+    text = '{"conclusion": "第一行\n第二行\t缩进", "evidence": [], "uncertainties": []}'
+    state = finish_with(tmp_path, "investigate", text)
+    assert state["status"] == "completed" and state["result"]["conclusion"] == "第一行\n第二行\t缩进"
+
+
+def test_reasoning_only_result_is_failed(tmp_path):
+    # 来自真实输出：模型中途停止，只有推理文字和代码片段，没有结果对象
+    text = ("再来看 `war.py` 中 `push_war_cmd` 中的 `WarFlag`！\n```python\ndef push_war_cmd(func):\n"
+            "\tif WarFlag and func:\n\t\tcmd = CCmd()\n\t\td = {\"summary\": 1}\n```")
+    state = finish_with(tmp_path, "review", text, events=[{"type": "turn.completed"}])
+    assert state["status"] == "failed" and "result" not in state
+    assert state["error"] == "CLI 未返回完整的结构化结果" and state["raw_result"].endswith("result.json")
+
+
+def test_schema_is_not_relaxed():
+    extra = dict(INVESTIGATE, note="多余字段")
+    missing = {"conclusion": "c", "evidence": []}
+    for value in (extra, missing, dict(INVESTIGATE, evidence="不是列表")):
+        assert c.parse_result("说明\n" + json.dumps(value), c.SCHEMAS["investigate"]) == (None, 0)
+    review = {"summary": "s", "items": [{"level": "随便", "location": "a:1", "problem": "p",
+                                         "basis": "b", "suggestion": "s"}]}
+    assert c.parse_result(json.dumps(review), c.SCHEMAS["review"]) == (None, 0)
+
+
+def test_truncated_result_is_failed():
+    text = json.dumps(INVESTIGATE, ensure_ascii=False)[:-20]
+    assert c.parse_result(text, c.SCHEMAS["investigate"]) == (None, 0)
+
+
+def test_turn_failure_is_reported(tmp_path):
+    # 来自真实输出：上游 400 让回合失败，没有 result.json，不能报成“未返回结构化结果”
+    events = [{"type": "thread.started", "thread_id": "T"},
+              {"type": "error", "message": "Reconnecting... 5/5"},
+              {"type": "turn.failed", "error": {"message": "stream disconnected before completion: 400"}}]
+    state = finish_with(tmp_path, "test", events=events, returncode=1)
+    assert state["status"] == "failed"
+    assert state["error"] == "CLI 回合失败：stream disconnected before completion: 400"
+    assert "raw_result" not in state
 
 
 def test_nonzero_exit_cannot_pass(tmp_path):

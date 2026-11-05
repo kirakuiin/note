@@ -148,15 +148,78 @@ def matches(value, schema):
             and all(matches(value[k], s) for k, s in schema["properties"].items()))
 
 
-def parse_result(text):
-    """解析最终回复中的 JSON；非 GPT 模型没有强制结构化输出，可能包一层 Markdown 代码块。"""
+REPAIR_LIMIT = 200  # 单个候选对象最多补转义的引号数，防止对截断输出无限尝试。
+DECODER = json.JSONDecoder(strict=False)  # 允许字符串里出现未转义的换行、制表符等控制字符。
+
+
+def decode_repaired(text, start):
+    """从 start 处解码一个 JSON 值；遇到字符串内未转义的双引号时逐个补转义后重试。
+
+    出错位置之前最近的未转义引号视为提前闭合字符串的那个引号。补错时结构会变，
+    由调用方的 schema 校验兜住；仍解析不了就抛出 ValueError。
+
+    Returns:
+        (值, 补转义的引号数)。
+    """
+    text = text[start:]
+    for repairs in range(REPAIR_LIMIT + 1):
+        try:
+            return DECODER.raw_decode(text)[0], repairs
+        except json.JSONDecodeError as error:
+            quote = text.rfind('"', 0, error.pos)
+            while quote > 0 and (len(text[:quote]) - len(text[:quote].rstrip("\\"))) % 2:
+                quote = text.rfind('"', 0, quote)
+            if quote <= 0 or repairs == REPAIR_LIMIT:
+                raise
+            text = text[:quote] + "\\" + text[quote:]
+    raise AssertionError("unreachable")
+
+
+def parse_result(text, schema):
+    """在最终回复中找最后一个符合 schema 的 JSON 对象。
+
+    非 GPT 模型没有强制结构化输出：结果前可能有推理文字、外面可能包代码块，推理文字里也可能有别的 JSON。
+    先按标准 JSON 从后往前找；找不到再对以 schema 字段开头的候选补转义字符串内的双引号。字段校验不放宽。
+
+    Returns:
+        (结果, 补转义的引号数)；找不到时为 (None, 0)。
+    """
+    starts = [i for i, ch in enumerate(text) if ch == "{"][::-1]
+    for start in starts:
+        try:
+            value = DECODER.raw_decode(text, start)[0]
+        except ValueError:
+            continue
+        if matches(value, schema):
+            return value, 0
+    keys = tuple('"' + key + '"' for key in schema["properties"])
+    for start in starts:
+        if not text[start + 1:].lstrip().startswith(keys):
+            continue
+        try:
+            value, repairs = decode_repaired(text, start)
+        except ValueError:
+            continue
+        if matches(value, schema):
+            return value, repairs
+    return None, 0
+
+
+def turn_error(job):
+    """从 --json 事件流取最后一条 turn.failed 的错误信息，区分上游失败和模型没给结果。"""
     try:
-        return json.loads(text)
-    except ValueError:
-        start, end = text.find("{"), text.rfind("}")
-        if start < 0 or end < start:
-            raise
-        return json.loads(text[start:end + 1])
+        lines = (job / "stdout.jsonl").read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return None
+    for line in reversed(lines):
+        try:
+            event = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(event, dict) and event.get("type") == "turn.failed":
+            message = (event.get("error") or {}).get("message") if isinstance(event.get("error"), dict) else None
+            return str(message or "未知错误")[:300]
+    return None
 
 
 def strict_schema(model):
@@ -316,21 +379,27 @@ def format_review(result):
 def finish(job, state, returncode):
     """CLI 正常退出后校验结构化结果；退出码为 0 但结果不完整仍是 failed。"""
     state["exit_code"] = returncode
+    raw = job / "result.json"
     try:
-        result = parse_result(retry(lambda: (job / "result.json").read_text(encoding="utf-8-sig")))
-        valid = matches(result, SCHEMAS[state["kind"]])
-    except (OSError, ValueError):
-        valid = False
+        result, repairs = parse_result(retry(lambda: raw.read_text(encoding="utf-8-sig")), SCHEMAS[state["kind"]])
+    except OSError:
+        result, repairs = None, 0
+    valid = result is not None
     state["status"] = "completed" if returncode == 0 and valid else "failed"
     if valid:
         state["result"] = result
+        if repairs:
+            state["repaired_quotes"] = repairs
         if state["kind"] == "test":
             state["restoration"] = result["restoration"]
         if state["kind"] == "review":
             state["formatted"] = format_review(result)
             state["must_fix"] = sum(i["level"] == "必须修改" for i in result["items"])
     else:
-        state["error"] = "CLI 未返回完整的结构化结果"
+        failed = turn_error(job)
+        state["error"] = "CLI 回合失败：" + failed if failed else "CLI 未返回完整的结构化结果"
+    if (not valid or repairs) and raw.exists():
+        state["raw_result"] = str(raw)
 
 
 def monitor(job, command, idle_seconds=IDLE_SECONDS):
@@ -514,7 +583,8 @@ def start(root, kind, task_file, resume=None, model=None, effort=None):
         write_json(job / "schema.json", SCHEMAS[kind])
         payload = {**task, "root": str(root), "kind": kind, "references": refs}
         prompt = (COMMON + ROLE[kind] + "\n" + json.dumps(payload, ensure_ascii=False, indent=2)
-                  + "\n\n最终回复只输出一个符合以下 JSON Schema 的 JSON 对象，不加 Markdown 代码块或其他文字：\n"
+                  + "\n\n最终回复只输出一个符合以下 JSON Schema 的 JSON 对象，不加 Markdown 代码块或其他文字；"
+                  "字符串值里的双引号写成 \\\"，换行写成 \\n：\n"
                   + json.dumps(SCHEMAS[kind], ensure_ascii=False))
         if session:
             prompt = "这是同一审查会话的下一轮。按新的任务说明重新审查，重点检查上轮意见的处理。\n" + prompt
