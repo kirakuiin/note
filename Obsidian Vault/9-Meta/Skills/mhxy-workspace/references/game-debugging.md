@@ -123,6 +123,7 @@ python -X utf8 "<skill>/scripts/game-debugging/case_runner.py" run --root "<项�
 **格式要点**：
 - `mocks`：`{"name", "patch": "模块.属性", "value": "表达式，可用 orig"}` 由执行器备份和还原；其他情况用 `{"name", "install", "restore"}`，`restore` 最后一行返回核对结果 `True`。
 - `steps` 每步一个类型：`exec`（可 `save_as`）、`gm`、`mcp`（工具名 + `args`，可 `save_as`）、`wait_for`（`expr` 或 `preset`，`timeout` 默认 30 秒）、`assert`（可 `message`）、`exec_check`（`cases` 为定义 `CASES` 的代码，`files` 可选，规则同 `exec-check.md`）。
+- `ignore_errors`（可选，正则列表）：已确认与被测内容无关的客户端既有报错（如退出战斗时的 `NSRank 的size不对`），命中的报错移到 `ignored_errors`，不判失败。正则要具体，先确认无关再加，加了要在汇报里说明。
 - 占位符：`{devid}`、`{root}`、`{vars.名字}`、`{args.名字}`；代码里 vars 以 `repr()` 代入。客户端代码写法同「找到并调用工具」的 `execute_code`。
 - 等待预设（`case_runner.py` 的 `PRESETS`）：战斗 `war_in`、`war_out`、`war_turn`（`args.n`）、`war_idle`。缺少的判断先用 `expr` 写，在真机验证可靠后再加进预设表。
 

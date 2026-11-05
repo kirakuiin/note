@@ -22,6 +22,7 @@
 {
   "name": "用例名",
   "settle": 2,
+  "ignore_errors": ["NSRank 的size不对"],
   "mocks": [
     {"name": "固定随机", "patch": "模块.属性", "value": "替换值表达式，可用 orig 引用原值"},
     {"name": "自定义", "install": "代码", "restore": "代码，最后一行返回核对结果 True"}
@@ -37,6 +38,7 @@
 }
 ```
 
+- **ignore_errors**：可选，正则列表。收集到的报错命中任一条时移入用例报告的 `ignored_errors`，不计入 `errors`、不判失败，并在 `unverified` 注明忽略了几条。只用于已确认与被测内容无关的客户端既有报错，例如每次退出战斗都会出现的 NSRank 图标尺寸告警。正则写得越具体越好，避免把真正的报错一起吞掉。
 - **占位符**：`{devid}`、`{root}` 原样代入；`{vars.名字}`（前面 `save_as` 保存的值）、`{args.名字}`（预设参数）在客户端代码里代入 `repr()`，在 GM 指令和 mcp 参数里代入文本。其他花括号不动。
 - **步骤**：每步恰好一个类型键：`exec`、`gm`（`execute_command`）、`mcp`（其他 mh-game-mcp 工具）、`wait_for`、`assert`、`exec_check`。任一步失败即停止后续步骤，转入收尾。
 - **wait_for**：本机轮询客户端表达式直到为真（不在客户端主线程等待），`timeout` 默认 30 秒、`interval` 默认 0.5 秒；表达式报错或超时即失败。executed 只记第一次轮询。

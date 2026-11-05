@@ -249,6 +249,25 @@ class RunTests(Base):
         self.assertEqual(report["status"], "failed")
         self.assertTrue(any("boom" in text for text in report["errors"]))
 
+    def test_ignore_errors_keeps_text_but_passes(self):
+        code = ("(lambda l: (l.error('图标 NSRank 的size不对'), l.error('真的出错')))"
+                "(__import__('logging').getLogger('MHXY'))")
+        report = self.run_case({"name": "i", "ignore_errors": ["NSRank 的size不对"], "steps": [{"exec": code}]})
+        result = report["results"][0]
+        self.assertEqual(report["status"], "failed")  # 没被声明的报错仍判失败
+        self.assertEqual(len(result["ignored_errors"]), 1)
+        self.assertTrue(all("NSRank" not in text for text in report["errors"]))
+        report = self.run_case({"name": "j", "ignore_errors": ["NSRank"], "steps": [
+            {"exec": "__import__('logging').getLogger('MHXY').error('图标 NSRank 的size不对')"}]})
+        self.assertEqual(report["status"], "passed", report)
+        self.assertTrue(any("ignore_errors" in text for text in report["unverified"]))
+
+    def test_ignore_errors_validated(self):
+        self.assertIn("ignore_errors 必须是正则表达式字符串列表",
+                      runner.validate({"name": "a", "ignore_errors": "x", "steps": [{"exec": "1"}]}))
+        self.assertTrue(any("无效" in p for p in runner.validate({"name": "a", "ignore_errors": ["("],
+                                                                    "steps": [{"exec": "1"}]})))
+
     def test_invalid_case_blocks_without_connecting(self):
         report = self.run_case({"name": "x", "steps": []})
         self.assertEqual(report["status"], "blocked")

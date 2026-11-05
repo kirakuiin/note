@@ -182,7 +182,7 @@ def validate(case):
     if not isinstance(case, dict):
         return ["用例必须是对象"]
     problems = []
-    unknown = set(case) - {"name", "mocks", "steps", "settle"}
+    unknown = set(case) - {"name", "mocks", "steps", "settle", "ignore_errors"}
     if unknown:
         problems.append(f"未知字段：{sorted(unknown)}")
     if not isinstance(case.get("name"), str) or not case["name"].strip():
@@ -218,6 +218,15 @@ def validate(case):
         problems += [f"steps[{index}]：{problem}" for problem in validate_step(step)]
     if "settle" in case and not number_ok(case["settle"]):
         problems.append("settle 必须是秒数")
+    ignores = case.get("ignore_errors", [])
+    if not isinstance(ignores, list) or not all(text_ok(item) for item in ignores):
+        problems.append("ignore_errors 必须是正则表达式字符串列表")
+    else:
+        for pattern in ignores:
+            try:
+                re.compile(pattern)
+            except re.error as error:
+                problems.append(f"ignore_errors 的正则 {pattern!r} 无效：{error}")
     return problems
 
 
@@ -620,7 +629,13 @@ def finish(client, case, context, report, state, settle_default):
                 if grown:
                     report["unverified"].append(f"事件监听比基线多（前后数量，可能是被测代码正常注册，也可能是 Mock 残留）：{grown}")
         if isinstance(collected, dict):
-            report["errors"] = [item.get("text", str(item)) for item in collected.get("errors", [])]
+            texts = [item.get("text", str(item)) for item in collected.get("errors", [])]
+            # 用例声明的已知无关报错（如客户端既有的资源告警）：仍写进报告备查，但不计入 errors、不判失败
+            ignores = [re.compile(pattern) for pattern in case.get("ignore_errors", [])]
+            report["ignored_errors"] = [text for text in texts if any(p.search(text) for p in ignores)]
+            report["errors"] = [text for text in texts if text not in report["ignored_errors"]]
+            if report["ignored_errors"]:
+                report["unverified"].append(f"按 ignore_errors 忽略了 {len(report['ignored_errors'])} 条报错，原文见 ignored_errors")
             if collected.get("dropped"):
                 report["unverified"].append(f"报错过多，另有 {collected['dropped']} 条被丢弃")
 
