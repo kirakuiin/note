@@ -111,7 +111,10 @@ python -X utf8 "<skill>/scripts/game-debugging/mcp_call.py" <工具名> < "<UTF-
 
 ```text
 python -X utf8 "<skill>/scripts/game-debugging/case_runner.py" run --root "<项目>" --devid "<devid>" [--no-init] [--settle 秒] <用例.json | spec.md> ...
+python -X utf8 "<skill>/scripts/game-debugging/case_runner.py" search --root "<项目>" 关键词 ...
 ```
+
+**先找模板**：写新用例前先 `search`。模板在 `<skill>/assets/cases/`（战斗普攻、技能出手 + 帧数据 + 录像、通用属性 + Mock），全部关键词命中名字、说明或关键词才算匹配；没有模板命中时按技能名查导表，返回技能编号和战斗用例骨架。在模板或骨架上改，不要从头写。
 
 **标准骨架**：每个用例按 清场 → 造局 → 执行 → 收集证据 → 恢复 组织。
 - 清场：确认前置状态干净（不在战斗中、目标界面没开等），用 `assert` 或 `wait_for`。
@@ -125,7 +128,10 @@ python -X utf8 "<skill>/scripts/game-debugging/case_runner.py" run --root "<项�
 - `steps` 每步一个类型：`exec`（可 `save_as`）、`gm`、`mcp`（工具名 + `args`，可 `save_as`）、`wait_for`（`expr` 或 `preset`，`timeout` 默认 30 秒）、`assert`（可 `message`）、`exec_check`（`cases` 为定义 `CASES` 的代码，`files` 可选，规则同 `exec-check.md`）。
 - `ignore_errors`（可选，正则列表）：已确认与被测内容无关的客户端既有报错（如退出战斗时的 `NSRank 的size不对`），命中的报错移到 `ignored_errors`，不判失败。正则要具体，先确认无关再加，加了要在汇报里说明。
 - 占位符：`{devid}`、`{root}`、`{vars.名字}`、`{args.名字}`；代码里 vars 以 `repr()` 代入。客户端代码写法同「找到并调用工具」的 `execute_code`。
-- 等待预设（`case_runner.py` 的 `PRESETS`）：战斗 `war_in`、`war_out`、`war_turn`（`args.n`）、`war_idle`。缺少的判断先用 `expr` 写，在真机验证可靠后再加进预设表。
+- 等待预设（`case_runner.py` 的 `PRESETS`）：战斗 `war_in`、`war_out`、`war_turn`（`args.n`）、`war_idle`、`war_action`（`args.magic_id`、`args.n`：该技能已播完的出手次数，需要 `frames: true`）。缺少的判断先用 `expr` 写，在真机验证可靠后再加进预设表。
+- `war_act`（战斗回合指令）：`{"role": {"act", "id", "target", "item"}, "pet": {...}, "wait": true, "timeout": 90}`，前置是 `war_idle`。人物 `act`：`attack`、`magic`（`id` 为法术编号）、`sp`（`id` 为特技编号）、`guard`、`protect`（必须写 `target`）、`item`（`item` 写道具名或造型编号）、`fabao`（`id` 为法宝造型编号）；召唤兽 `act`：`attack`、`magic`、`guard`、`protect`、`item`，不写 `pet` 时所有在场召唤兽防御。目标写 `e0`/`e1`（敌方按站位）、`f0`（其他友方）、`self`、`pet` 或 wid。一次调用发完所有指令并收起指令面板，默认等到下一回合可下指令或战斗结束，不用再干等回合超时。步骤记录附场面映射 `roster`（label、wid、名字、阵营、主人、站位、`sid`、血量百分比）。身外化身、奇袭召唤兽等额外单位不支持，遇到时步骤失败。
+- `setup`（用例字段，步骤前执行）：`school: [门派, 流派]`（已一致就跳过；不一致时必须写 `allow_destructive: true`，转门派会清空经脉）、`teji`（特技名）、`items`（背包已有就跳过）、`gm`（其他造局指令）。
+- 证据（按需开，默认不做）：`record: true` 录整个用例的 mp4；`frames: true` 开帧采集（必须在用例开始时不在战斗中），收尾导出本场帧数据 JSON；`screenshot` 步骤（值为说明）截当前画面。文件在 `.mhxy-workspace/cases/reports/<运行编号>/`，路径写在用例报告的 `media` 里。只需要确认某个瞬间画面时用截图，要看过程（技能表现、受击、回合流程）才录像。录像、帧数据拿不到只记入 `unverified`，不判失败。
 
 **执行器负责**：校验全部用例（不合法时 blocked，不连接客户端）→ `init_client` 一次 → 每个用例自动开始报错收集、记录监听基线、安装 Mock → 依次执行步骤，失败即停 → finally 中等待 `settle`、逆序还原 Mock、核对监听、结束报错收集。报告在 stdout 和 `.mhxy-workspace/cases/reports/`，字段即 test 结果字段加 `results`（步骤明细）和 `executed`（实际下发的调用，用于复现）。
 

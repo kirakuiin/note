@@ -330,6 +330,243 @@ class ExecCheckTests(Base):
         self.assertEqual(self.target.value, 1)
 
 
+class Warrior:
+    """假的战斗单位，只有 _case_war_act 用到的属性。"""
+
+    def __init__(self, wid, allied, place, owner=0, name=None):
+        self.type, self.id, self.allied, self.place, self.owner = "WARRIOR", wid, allied, place, owner
+        self.name, self.sid = name or f"u{wid}", 1000 + wid
+
+    def get_member(self, key):
+        return 100
+
+
+class WarBase(Base):
+    """在 Base 之上加一场假战斗：人物 1、召唤兽 2、友方 3、敌方 11/12（站位倒序，验证按站位排序）。"""
+
+    def setUp(self):
+        super().setUp()
+        self.sent = []
+        self.war.Turn, self.war.RoleID, self.war.WarriorCmdOkSet = 1, 1, set()
+        units = [Warrior(1, 1, 0), Warrior(2, 1, 5, owner=1), Warrior(3, 1, 1), Warrior(11, 0, 3), Warrior(12, 0, 2)]
+        world = types.ModuleType("world")
+        world.Objects = {unit.id: unit for unit in units}
+        self.war.summon_find_list = lambda wid: [u.id for u in units if u.owner == wid]
+
+        def recorder(name):
+            def send(*args):
+                self.sent.append((name, args))
+            send.__name__ = name
+            return send
+        netwar = types.ModuleType("netwar")
+        for name in ("c_war_attack", "c_war_perform", "c_war_guard", "c_war_protect", "c_war_item",
+                     "c_war_summ_attack", "c_war_summ_perform", "c_war_summ_guard", "c_war_summ_protect", "c_war_summ_item"):
+            setattr(netwar, name, recorder(name))
+        netskill = types.ModuleType("netskill")
+        netskill.c_sp_perform = recorder("c_sp_perform")
+        netfabao = types.ModuleType("netfabao")
+        netfabao.C_USE_FIGHT = recorder("C_USE_FIGHT")
+        dlgfabao = types.ModuleType("dlgfabao")
+        dlgfabao.FABAO_INFO = {4: 6023}
+        dlgitem = types.ModuleType("dlgitem")
+        item = types.SimpleNamespace(nOID=777)
+        dlgitem.item_find_by_name = lambda name: item if name == "金创药" else 0
+        dlgitem.item_find_by_type = lambda shape: 0
+        self.dlgwar = types.ModuleType("dlgwar")
+        self.dlgwar.SelfID = 1
+
+        def wait():  # 收起面板；假服务端立即结算本回合
+            self.dlgwar.SelfID = None
+            self.war.ActualTurn += 1
+        self.dlgwar.wait = wait
+        modules = {"world": world, "netwar": netwar, "netskill": netskill, "netfabao": netfabao,
+                   "dlgfabao": dlgfabao, "dlgitem": dlgitem, "dlgwar": self.dlgwar}
+        patcher = patch.dict(sys.modules, modules)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+
+class WarActTests(WarBase):
+    def test_sends_role_and_pet_then_waits_next_turn(self):
+        report = self.run_case({"name": "a", "steps": [
+            {"war_act": {"role": {"act": "magic", "id": 1073, "target": "e0"}, "pet": {"act": "attack", "target": "e1"}}}]})
+        self.assertEqual(report["status"], "passed", report)
+        self.assertEqual(self.sent, [("c_war_perform", (12, 1073)), ("c_war_summ_attack", (2, 11))])
+        step = report["results"][0]["steps"][0]
+        labels = {item["wid"]: item["label"] for item in step["roster"]}
+        self.assertEqual(labels, {1: "self", 2: "pet", 3: "f0", 11: "e1", 12: "e0"})
+        self.assertEqual(self.war.WarriorCmdOkSet, {1, 2})
+        self.assertEqual(self.war.ActualTurn, 2)
+
+    def test_pet_defaults_to_guard_and_item_fabao_resolved(self):
+        report = self.run_case({"name": "b", "steps": [{"war_act": {"role": {"act": "item", "item": "金创药"}}},
+                                                       {"war_act": {"role": {"act": "fabao", "id": 6023}}}]})
+        self.assertEqual(report["status"], "passed", report)
+        self.assertEqual(self.sent, [("c_war_item", (1, 777)), ("c_war_summ_guard", (2,)),
+                                     ("C_USE_FIGHT", (12, 4)), ("c_war_summ_guard", (2,))])
+
+    def test_bad_target_sends_nothing(self):
+        report = self.run_case({"name": "c", "steps": [
+            {"war_act": {"role": {"act": "attack", "target": "e0"}, "pet": {"act": "attack", "target": "e5"}}}]})
+        self.assertIn("下指令失败", report["results"][0]["failure"])
+        self.assertIn("e5", report["results"][0]["failure"])
+        self.assertEqual(self.sent, [])
+
+    def test_not_waiting_state_fails(self):
+        self.war.Cmds = ["cmd"]
+        report = self.run_case({"name": "d", "steps": [{"war_act": {"role": {"act": "guard"}}}]})
+        self.assertIn("不在等待下指令阶段", report["results"][0]["failure"])
+        self.assertEqual(self.sent, [])
+
+    def test_pending_units_fail(self):
+        self.dlgwar.wait = lambda: None  # 还有身外化身等单位要下指令：wait 提前返回，SelfID 不清
+        report = self.run_case({"name": "e", "steps": [{"war_act": {"role": {"act": "guard"}, "wait": False}}]})
+        self.assertIn("还有单位等指令", report["results"][0]["failure"])
+
+    def test_validation(self):
+        problems = "；".join(runner.validate({"name": "v", "steps": [
+            {"war_act": {"pet": {"act": "guard"}}},
+            {"war_act": {"role": {"act": "fly"}}},
+            {"war_act": {"role": {"act": "magic", "target": "x1"}, "wait": 1}},
+            {"war_act": {"role": {"act": "protect"}, "pet": {"act": "item"}}}]}))
+        for word in ("必须有 role", "act 只能是", "magic 需要 id", "target 写 e0", "wait 必须是", "protect 必须写 target",
+                     "item 需要 item"):
+            self.assertIn(word, problems)
+
+
+class SetupTests(WarBase):
+    def setUp(self):
+        super().setUp()
+        sdata = types.ModuleType("sdata")
+        sdata.hero = types.SimpleNamespace(Prop={"nSchool": 1, "nSect": 1})
+        patcher = patch.dict(sys.modules, {"sdata": sdata})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def commands(self):
+        return [args["command"] for name, args in self.game.calls if name == "execute_command"]
+
+    def test_school_change_needs_allow_destructive(self):
+        report = self.run_case({"name": "s", "setup": {"school": [2, 1]}, "steps": [{"exec": "1"}]})
+        self.assertIn("allow_destructive", report["results"][0]["failure"])
+        self.assertEqual(self.commands(), [])
+        self.assertEqual(report["results"][0]["steps"], [])
+
+    def test_skips_satisfied_and_sends_rest(self):
+        report = self.run_case({"name": "s", "setup": {"school": [1, 1], "teji": "琴音三叠", "items": ["金创药", "佛光舍利子"],
+                                                      "gm": ["$at full"]}, "steps": [{"exec": "1"}]})
+        self.assertEqual(report["status"], "passed", report)
+        self.assertEqual(self.commands(), ["$at teji 1 琴音三叠", "$at cloneobj 佛光舍利子", "$at full"])
+        report = self.run_case({"name": "t", "setup": {"school": [3, 2], "allow_destructive": True}, "steps": [{"exec": "1"}]})
+        self.assertEqual(self.commands()[-1], "$at cs 3 2")
+
+    def test_validation(self):
+        problems = "；".join(runner.validate({"name": "v", "setup": {"school": [1], "items": [], "x": 1},
+                                              "steps": [{"exec": "1"}]}))
+        for word in ("未知字段", "school 写成", "items 必须是非空字符串列表"):
+            self.assertIn(word, problems)
+
+
+class MediaTests(WarBase):
+    def setUp(self):
+        super().setUp()
+        self.war.Turn = 0  # 用例开始时不在战斗中
+        battle = types.SimpleNamespace(turns=[])
+        collector = types.SimpleNamespace(_battle=None, _last_battle=None, _cur_turn=None, _enabled=False)
+        collector._notify_export_done = lambda path: self.popups.append(path)
+        self.popups, self.battle, self.collector = [], battle, collector
+        fc = types.ModuleType("frame_collector")
+        fc.g_collector = collector
+        fc.get_instance = lambda: collector
+
+        def start_collect():
+            collector._enabled = True
+        def stop_collect():
+            collector._enabled = False
+        fc.start_collect, fc.stop_collect = start_collect, stop_collect
+        self.recording = None
+        app = types.ModuleType("C_app")
+
+        def start_record_screen(path, mouse=1, audio=1):
+            self.recording = path
+        def stop_record_screen():
+            Path(self.recording).write_bytes(b"mp4")
+            self.recording = None
+        app.start_record_screen, app.stop_record_screen = start_record_screen, stop_record_screen
+        app.is_record_screen = lambda: int(self.recording is not None)
+        utils = types.ModuleType("utils")
+        utils.screenshot = lambda callback, params, path: Path(path).write_bytes(b"png")
+        sdata = types.ModuleType("sdata")
+        sdata.env = types.SimpleNamespace(SCREENW=1024, SCREENH=768)
+        patcher = patch.dict(sys.modules, {"frame_collector": fc, "C_app": app, "utils": utils, "sdata": sdata})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def finish_war(self):
+        """假战斗：一次 magic_id 1073 的出手播完、战斗结束（导出时会弹窗）。"""
+        action = types.SimpleNamespace(magic_id=1073, end_frame=10)
+        self.battle.turns.append(types.SimpleNamespace(actions=[action]))
+        self.collector._last_battle = self.battle
+        self.collector._notify_export_done("frame.json")
+
+    def test_record_frames_and_screenshot(self):
+        self.target.finish = self.finish_war
+        with patch("dataclasses.asdict", lambda data: {"turns": len(data.turns)}):  # 假 battle 不是 dataclass
+            report = self.run_case({"name": "m", "record": True, "frames": True, "steps": [
+                {"exec": "__import__('fake_target').finish()"},
+                {"wait_for": {"preset": "war_action", "args": {"magic_id": 1073, "n": 1}, "timeout": 0}},
+                {"screenshot": "出手后"}]})
+        self.assertEqual(report["status"], "passed", report)
+        media = report["results"][0]["media"]
+        self.assertTrue(media["video"].endswith("case1.mp4") and Path(media["video"]).exists())
+        self.assertEqual(json.loads(Path(media["frames"]).read_text(encoding="utf-8")), {"turns": 1})
+        self.assertEqual(media["frame_actions"], 1)
+        self.assertEqual(media["screenshots"][0]["label"], "出手后")
+        self.assertEqual(self.popups, [])  # 导出弹窗被内部 Mock 挡住
+        self.collector._notify_export_done("x")  # 已还原为原函数：再调用会记录弹窗
+        self.assertEqual(self.popups, ["x"])
+        self.assertIsNone(self.recording)
+        self.assertEqual(report["restoration"], "restored")
+
+    def test_frames_in_war_fails_and_preset_needs_frames(self):
+        self.war.Turn = 1
+        report = self.run_case({"name": "f", "frames": True, "steps": [{"exec": "1"}]})
+        self.assertIn("帧采集要在进入战斗前开启", report["results"][0]["failure"])
+        self.assertTrue(any("frames: true" in p for p in runner.validate(
+            {"name": "g", "steps": [{"wait_for": {"preset": "war_action", "args": {"magic_id": 1, "n": 1}}}]})))
+
+    def test_missing_video_is_unverified_not_failure(self):
+        sys.modules["C_app"].stop_record_screen = lambda: None
+        with patch.object(runner, "VIDEO_WAIT", 0):
+            report = self.run_case({"name": "v", "record": True, "steps": [{"exec": "1"}]})
+        self.assertEqual(report["status"], "passed", report)
+        self.assertTrue(any("mp4" in text for text in report["unverified"]))
+
+
+class SearchTests(unittest.TestCase):
+    def test_templates_are_valid(self):
+        templates = runner.load_templates()
+        self.assertGreaterEqual(len(templates), 3)
+        for item in templates:
+            self.assertEqual(runner.validate(item["case"]), [], item["path"])
+
+    def test_template_match_and_skill_fallback(self):
+        with tempfile.TemporaryDirectory() as temp:
+            data = Path(temp) / "data"
+            data.mkdir()
+            (data / "infoskillperform2021.py").write_text(
+                '# -*- coding: utf-8 -*-\nPerformInfo = {\n1073 : ( "龙卷雨击", 1073, "x"),\n11949 : ( "龙卷雨击", 1073, "x"),\n}\n',
+                encoding="utf-8")
+            (data / "infosp.py").write_text('# -*- coding: utf-8 -*-\nSPInfo = {\n2010:( "琴音三叠", "x"),\n}\n',
+                                            encoding="utf-8")
+            self.assertTrue(runner.search(temp, ["战斗", "普攻"])["templates"])
+            result = runner.search(temp, ["琴音三叠"])
+            self.assertEqual(result["skills"], [{"name": "琴音三叠", "kind": "sp", "id": 2010, "magic_id": 5010}])
+            self.assertEqual(runner.validate(result["skeletons"][0]), [])
+            result = runner.search(temp, ["龙卷雨击", "不存在的词"])
+            self.assertEqual([s["id"] for s in result["skills"]], [1073])
+
+
 class MainTests(Base):
     def test_saves_report_and_exit_code(self):
         path = self.temp / "c.json"

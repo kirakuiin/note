@@ -1,0 +1,17 @@
+{
+ "description": "进入机器人测试战斗，人物普攻 e0、召唤兽防御，一回合后退出战斗；报告附场面映射。改 role 动作即可测法术、特技、道具、法宝。",
+ "keywords": ["战斗", "普攻", "回合指令", "war_act", "场面映射", "roster", "进战斗", "退战"],
+ "case": {
+  "name": "战斗_普攻一回合",
+  "ignore_errors": ["图标 NSRank 的size不对"],
+  "steps": [
+   {"assert": "not __import__('utils3').is_in_war()", "message": "开始前不在战斗中"},
+   {"gm": "$at fightN 2"},
+   {"wait_for": {"preset": "war_idle", "timeout": 60}},
+   {"war_act": {"role": {"act": "attack", "target": "e0"}, "pet": {"act": "guard"}}},
+   {"assert": "__import__('war').ActualTurn >= 2 or not __import__('utils3').is_in_war()", "message": "已进入下一回合或战斗已结束"},
+   {"gm": "$at kill"},
+   {"wait_for": {"preset": "war_out", "timeout": 30}}
+  ]
+ }
+}

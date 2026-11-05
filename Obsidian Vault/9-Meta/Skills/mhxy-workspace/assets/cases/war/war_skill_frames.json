@@ -1,0 +1,20 @@
+{
+ "description": "放一个门派法术并用帧采集器确认出手播完，同时录像；帧数据 JSON 和 mp4 写进报告目录。把 id、magic_id 换成要测的技能（search 技能名可查编号），角色不会该技能时在 setup 里补。",
+ "keywords": ["战斗", "技能", "法术", "出手", "帧数据", "frame_collector", "war_action", "录像", "record", "龙卷雨击"],
+ "case": {
+  "name": "战斗_龙卷雨击出手表现",
+  "frames": true,
+  "record": true,
+  "ignore_errors": ["图标 NSRank 的size不对"],
+  "steps": [
+   {"assert": "not __import__('utils3').is_in_war()", "message": "开始前不在战斗中"},
+   {"gm": "$at fightN 2"},
+   {"wait_for": {"preset": "war_idle", "timeout": 60}},
+   {"war_act": {"role": {"act": "magic", "id": 1073, "target": "e0"}}},
+   {"wait_for": {"preset": "war_action", "args": {"magic_id": 1073, "n": 1}, "timeout": 10}},
+   {"screenshot": "龙卷雨击出手后"},
+   {"gm": "$at kill"},
+   {"wait_for": {"preset": "war_out", "timeout": 30}}
+  ]
+ }
+}

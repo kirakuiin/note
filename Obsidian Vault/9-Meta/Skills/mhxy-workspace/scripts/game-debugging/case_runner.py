@@ -18,6 +18,7 @@ from pathlib import Path
 import re
 import sys
 import time
+import tokenize
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
@@ -27,11 +28,23 @@ import mcp_http  # noqa: E402
 ERROR_WATCH = HERE / "error_watch.py"
 EXEC_TRACE = HERE.parent / "exec-check" / "exec_trace.py"
 REPORT_DIR = Path(".mhxy-workspace") / "cases" / "reports"
+TEMPLATE_DIR = HERE.parent.parent / "assets" / "cases"  # 用例模板，见 search
 TEXT_LIMIT = 2000  # 报告中每个返回值、报错保留的字符数
-STEP_TYPES = ("exec", "gm", "mcp", "wait_for", "assert", "exec_check")
+STEP_TYPES = ("exec", "gm", "mcp", "wait_for", "assert", "exec_check", "war_act", "screenshot")
 # 每种步骤除类型键外允许的选项
 STEP_OPTIONS = {"exec": {"save_as"}, "gm": set(), "mcp": {"args", "save_as"}, "wait_for": set(),
-                "assert": {"message"}, "exec_check": set()}
+                "assert": {"message"}, "exec_check": set(), "war_act": set(), "screenshot": set()}
+CASE_FIELDS = {"name", "mocks", "steps", "settle", "ignore_errors", "setup", "record", "frames"}
+# war_act 的动作：动作 → (必填字段, 默认目标)。默认目标 None 表示必须写 target；不需要目标的动作不在乎这一项。
+# 与 WAR_HELPERS 中 _case_war_act 的发包分支一一对应，增删动作两处同步。
+ROLE_ACTS = {"attack": ((), "e0"), "magic": (("id",), "e0"), "sp": (("id",), "e0"), "guard": ((), "self"),
+             "protect": ((), None), "item": (("item",), "self"), "fabao": (("id",), "e0")}
+PET_ACTS = {"attack": ((), "e0"), "magic": (("id",), "e0"), "guard": ((), "pet"), "protect": ((), None),
+            "item": (("item",), "pet")}
+VIDEO_WAIT = 30  # 停止录屏后等 mp4 写完的最长秒数
+SHOT_WAIT = 10  # 截图异步写文件，等文件出现的最长秒数
+FRAMES_NOTIFY = {"name": "帧采集导出弹窗", "patch": "frame_collector.g_collector._notify_export_done",
+                 "value": "lambda *args, **kwargs: None"}  # frames: true 时内部安装，见 begin
 SPEC_HEADING = re.compile(r"^(#+)\s*测试用例\s*$")
 PLACEHOLDER = re.compile(r"\{(devid|root|(?:vars|args)\.[A-Za-z_]\w*)\}")
 
@@ -48,8 +61,15 @@ PRESETS = {
         "war_turn": "{waiting} and __import__('war').ActualTurn >= {{args.n}}",
         # 本场已进入某回合、表演播完、在等玩家下指令
         "war_idle": "{waiting}",
+        # 帧采集器里 magic_id 相同、已播完（FRAME_ACTION_END 后归档进回合）的出手次数达到 n。需要用例 frames: true。
+        # 战斗中看 _battle（已归档回合 + 当前回合），战斗结束后看 _last_battle
+        "war_action": ("(lambda c: sum(1 for t in ((c._battle.turns + ([c._cur_turn] if c._cur_turn else []))"
+                       " if c._battle else (c._last_battle.turns if c._last_battle else []))"
+                       " for a in t.actions if a.magic_id == {{args.magic_id}} and a.end_frame >= 0))"
+                       "(__import__('frame_collector').get_instance()) >= {{args.n}}"),
     },
 }
+FRAME_PRESETS = {"war_action"}  # 依赖帧采集，用例必须 frames: true
 # 本场战斗已执行过 war.turn()（war.start() 把 PlayerTurn 清零，war.turn() 加 1）、命令队列为空（连续战斗时
 # 上一场的 war.end／本场 war.start 还在队列里，此条排除它们）、当前处理函数是 wait_cmd
 WAR_WAITING = ("__import__('utils3').is_in_war() and __import__('war').PlayerTurn >= 1 and not __import__('war').Cmds"
@@ -119,6 +139,172 @@ def _case_listeners():
 		return {k: len(v.listeners) for k, v in vars(event).items() if isinstance(getattr(v, "listeners", None), list)}
 	except Exception:
 		return {"error": traceback.format_exc()[-2000:]}
+
+
+def _case_media_start(video, frames):
+	"""开始录屏（video 为 mp4 绝对路径）、开启帧采集。各项失败写进 *_error，不影响其他项。"""
+	import sys
+	import traceback
+	out = {}
+	if video:
+		try:
+			import C_app
+			C_app.start_record_screen(video, 1, 0)  # mouse=1：录 UI 且同步绘制，0 会首帧黑屏（见 war_excellent）
+			out["video"] = bool(C_app.is_record_screen())
+			if not out["video"]:
+				out["video_error"] = "start_record_screen 后 is_record_screen() 为假"
+		except Exception:
+			out["video_error"] = traceback.format_exc()[-2000:]
+	if frames:
+		try:
+			import frame_collector
+			import utils3
+			if utils3.is_in_war():
+				out["frames_error"] = "用例开始时已在战斗中：帧采集要在进入战斗前开启"
+			else:
+				sys._mhxy_case_frames_prev = id(frame_collector.get_instance()._last_battle)  # 收尾时排除开始前的上一场
+				frame_collector.start_collect()
+				out["frames"] = True
+		except Exception:
+			out["frames_error"] = traceback.format_exc()[-2000:]
+	return out
+
+
+def _case_media_finish(video, frames_path):
+	"""停止录屏；把本场帧数据写到 frames_path 并停止采集。各项失败写进 *_error，不影响其他项。"""
+	import sys
+	import traceback
+	out = {}
+	if video:
+		try:
+			import C_app
+			C_app.stop_record_screen()
+			out["video"] = True
+		except Exception:
+			out["video_error"] = traceback.format_exc()[-2000:]
+	if frames_path:
+		try:
+			import dataclasses
+			import json
+			import frame_collector
+			c = frame_collector.get_instance()
+			if c._battle:
+				data = c._snapshot_battle()
+			elif c._last_battle is not None and id(c._last_battle) != getattr(sys, "_mhxy_case_frames_prev", None):
+				data = c._last_battle
+			else:
+				data = None
+			if c._enabled:  # 用例结束时仍在战斗中：停止采集，避免影响之后的战斗
+				frame_collector.stop_collect()
+			if data is None:
+				out["frames_error"] = "没有采集到本用例的战斗数据"
+			else:
+				with open(frames_path, "w", encoding="utf-8") as f:
+					json.dump(dataclasses.asdict(data), f, ensure_ascii=False)
+				out["frames"] = sum(len(t.actions) for t in data.turns)
+		except Exception:
+			out["frames_error"] = traceback.format_exc()[-2000:]
+		finally:
+			sys.__dict__.pop("_mhxy_case_frames_prev", None)
+	return out
+'''
+
+# war_act 用的客户端辅助函数，只在 war_act 步骤发送。动作分支与 ROLE_ACTS／PET_ACTS 一一对应，增删动作两处同步。
+# 先解析全部目标、道具和法宝位置，再统一发包：解析失败时一个包都不发，不会只下了人物指令卡在召唤兽。
+WAR_HELPERS = '''def _case_war_act(role, pet):
+	import traceback
+	try:
+		import dlgwar
+		import netfabao
+		import netskill
+		import netwar
+		import utils3
+		import war
+		import world
+		if not (utils3.is_in_war() and war.PlayerTurn >= 1 and not war.Cmds and war.ProcessFunc == war.wait_cmd):
+			return {"error": "不在等待下指令阶段，先用预设 war_idle 等待"}
+		units = [obj for obj in list(world.Objects.values()) if getattr(obj, "type", None) == "WARRIOR"]
+		pets = list(war.summon_find_list(war.RoleID))
+		labels = {war.RoleID: "self"}
+		for i, wid in enumerate(pets):
+			labels[wid] = "pet" if i == 0 else "pet%d" % i
+		order = lambda obj: (obj.place, obj.id)
+		for i, obj in enumerate(sorted([o for o in units if o.allied == 0], key=order)):
+			labels[obj.id] = "e%d" % i
+		for i, obj in enumerate(sorted([o for o in units if o.allied == 1 and o.id not in labels], key=order)):
+			labels[obj.id] = "f%d" % i
+		wids = {label: wid for wid, label in labels.items()}
+
+		def hp(obj):
+			try:
+				return obj.get_member("hp_per")
+			except Exception:
+				return None
+
+		roster = [{"label": labels.get(obj.id), "wid": obj.id, "name": obj.name, "allied": obj.allied, "owner": obj.owner,
+			"place": obj.place, "sid": getattr(obj, "sid", None), "hp_per": hp(obj)} for obj in sorted(units, key=lambda o: o.id)]
+
+		def target(spec, default):
+			value = spec.get("target", default)
+			if isinstance(value, int):
+				return value
+			if value not in wids:
+				raise ValueError("目标 %r 不在场上，可用：%s" % (value, sorted(wids)))
+			return wids[value]
+
+		def item_oid(value):
+			import dlgitem
+			item = dlgitem.item_find_by_name(value) if isinstance(value, str) else dlgitem.item_find_by_type(value)
+			if not item:
+				raise ValueError("背包里没有道具 %r" % (value,))
+			return item.nOID
+
+		def fabao_pos(shape):
+			import dlgfabao
+			for pos, value in dlgfabao.FABAO_INFO.items():
+				if value == shape:
+					return pos
+			raise ValueError("没有装备法宝 %r" % (shape,))
+
+		calls = []
+		act = role["act"]
+		if act == "attack":
+			calls.append((netwar.c_war_attack, (target(role, "e0"),)))
+		elif act == "magic":
+			calls.append((netwar.c_war_perform, (target(role, "e0"), role["id"])))
+		elif act == "sp":
+			calls.append((netskill.c_sp_perform, (target(role, "e0"), role["id"])))
+		elif act == "guard":
+			calls.append((netwar.c_war_guard, ()))
+		elif act == "protect":
+			calls.append((netwar.c_war_protect, (target(role, None),)))
+		elif act == "item":
+			calls.append((netwar.c_war_item, (target(role, "self"), item_oid(role["item"]))))
+		elif act == "fabao":
+			calls.append((netfabao.C_USE_FIGHT, (target(role, "e0"), fabao_pos(role["id"]))))
+		for wid in pets:
+			spec = pet or {"act": "guard"}
+			wids["pet"], act = wid, spec["act"]  # 每只召唤兽的 "pet" 指它自己
+			if act == "attack":
+				calls.append((netwar.c_war_summ_attack, (wid, target(spec, "e0"))))
+			elif act == "magic":
+				calls.append((netwar.c_war_summ_perform, (wid, target(spec, "e0"), spec["id"])))
+			elif act == "guard":
+				calls.append((netwar.c_war_summ_guard, (wid,)))
+			elif act == "protect":
+				calls.append((netwar.c_war_summ_protect, (wid, target(spec, None))))
+			elif act == "item":
+				calls.append((netwar.c_war_summ_item, (wid, target(spec, "pet"), item_oid(spec["item"]))))
+
+		turn = war.ActualTurn
+		for func, args in calls:
+			func(*args)
+		war.WarriorCmdOkSet.update([war.RoleID] + pets)  # 与 PC 指令面板一致：本回合已下指令
+		dlgwar.wait()
+		return {"turn": turn, "sent": ["%s%r" % (func.__name__, args) for func, args in calls], "roster": roster,
+			"pending": dlgwar.SelfID is not None}  # wait() 因身外化身、奇袭召唤兽等还要下指令而提前返回
+	except Exception:
+		return {"error": traceback.format_exc()[-2000:]}
 '''
 
 
@@ -182,7 +368,7 @@ def validate(case):
     if not isinstance(case, dict):
         return ["用例必须是对象"]
     problems = []
-    unknown = set(case) - {"name", "mocks", "steps", "settle", "ignore_errors"}
+    unknown = set(case) - CASE_FIELDS
     if unknown:
         problems.append(f"未知字段：{sorted(unknown)}")
     if not isinstance(case.get("name"), str) or not case["name"].strip():
@@ -216,6 +402,15 @@ def validate(case):
         steps = []
     for index, step in enumerate(steps, 1):
         problems += [f"steps[{index}]：{problem}" for problem in validate_step(step)]
+        wait = step.get("wait_for") if isinstance(step, dict) else None
+        preset = wait.get("preset") if isinstance(wait, dict) else None
+        if isinstance(preset, str) and preset in FRAME_PRESETS and case.get("frames") is not True:
+            problems.append(f"steps[{index}]：预设 {preset} 依赖帧采集，用例要写 frames: true")
+    for flag in ("record", "frames"):
+        if flag in case and not isinstance(case[flag], bool):
+            problems.append(f"{flag} 必须是 true 或 false")
+    if "setup" in case:
+        problems += [f"setup：{problem}" for problem in validate_setup(case["setup"])]
     if "settle" in case and not number_ok(case["settle"]):
         problems.append("settle 必须是秒数")
     ignores = case.get("ignore_errors", [])
@@ -249,7 +444,7 @@ def validate_step(step):
     extra = set(step) - {kind} - STEP_OPTIONS[kind]
     if extra:
         problems.append(f"{kind} 不支持选项 {sorted(extra)}")
-    if kind in ("exec", "gm", "mcp", "assert") and not text_ok(value):
+    if kind in ("exec", "gm", "mcp", "assert", "screenshot") and not text_ok(value):
         problems.append(f"{kind} 的值必须是非空字符串")
     for option in ("save_as", "message"):
         if option in step and not text_ok(step[option]):
@@ -258,6 +453,8 @@ def validate_step(step):
         problems.append("mcp 的 args 必须是对象")
     if kind == "wait_for":
         problems += validate_wait(value)
+    if kind == "war_act":
+        problems += validate_war_act(value)
     if kind == "exec_check":
         if not isinstance(value, dict) or not text_ok(value.get("cases")) or set(value) - {"cases", "files"}:
             problems.append("exec_check 只能有 cases（定义 CASES 的客户端代码）和可选的 files")
@@ -290,6 +487,66 @@ def validate_wait(value):
     for option in ("timeout", "interval"):
         if option in value and not number_ok(value[option]):
             problems.append(f"wait_for 的 {option} 必须是非负秒数")
+    return problems
+
+
+def validate_war_act(value):
+    """war_act：role 必填、pet 可选，动作和必填字段见 ROLE_ACTS／PET_ACTS；wait 布尔，timeout 秒数。"""
+    if not isinstance(value, dict) or "role" not in value:
+        return ["war_act 需要对象，且必须有 role"]
+    problems = []
+    if set(value) - {"role", "pet", "wait", "timeout"}:
+        problems.append(f"war_act 未知字段 {sorted(set(value) - {'role', 'pet', 'wait', 'timeout'})}")
+    for who, acts in (("role", ROLE_ACTS), ("pet", PET_ACTS)):
+        if who not in value:
+            continue
+        spec = value[who]
+        if not isinstance(spec, dict) or spec.get("act") not in acts:
+            problems.append(f"war_act.{who}.act 只能是 {sorted(acts)}")
+            continue
+        if set(spec) - {"act", "id", "target", "item"}:
+            problems.append(f"war_act.{who} 未知字段 {sorted(set(spec) - {'act', 'id', 'target', 'item'})}")
+        required, default = acts[spec["act"]]
+        for field in required:
+            if field not in spec:
+                problems.append(f"war_act.{who}：{spec['act']} 需要 {field}")
+        if "id" in spec and not (isinstance(spec["id"], int) and not isinstance(spec["id"], bool)):
+            problems.append(f"war_act.{who}.id 必须是整数编号")
+        if "item" in spec and not (text_ok(spec["item"]) or (isinstance(spec["item"], int) and not isinstance(spec["item"], bool))):
+            problems.append(f"war_act.{who}.item 写道具名或造型编号")
+        if "target" in spec:
+            target = spec["target"]
+            if not ((isinstance(target, int) and not isinstance(target, bool))
+                    or (isinstance(target, str) and re.fullmatch(r"self|pet\d*|[ef]\d+", target))):
+                problems.append(f"war_act.{who}.target 写 e0/f0/self/pet 或 wid，实际 {target!r}")
+        elif default is None:
+            problems.append(f"war_act.{who}：{spec['act']} 必须写 target")
+    if "wait" in value and not isinstance(value["wait"], bool):
+        problems.append("war_act.wait 必须是 true 或 false")
+    if "timeout" in value and not number_ok(value["timeout"]):
+        problems.append("war_act.timeout 必须是秒数")
+    return problems
+
+
+def validate_setup(value):
+    """setup：school [门派, 流派]、allow_destructive、teji、items、gm。"""
+    fields = {"school", "allow_destructive", "teji", "items", "gm"}
+    if not isinstance(value, dict) or not value:
+        return ["setup 必须是非空对象"]
+    problems = []
+    if set(value) - fields:
+        problems.append(f"未知字段 {sorted(set(value) - fields)}")
+    school = value.get("school")
+    if "school" in value and not (isinstance(school, list) and len(school) == 2
+                                  and all(isinstance(x, int) and not isinstance(x, bool) for x in school)):
+        problems.append("school 写成 [门派编号, 流派编号]")
+    if "allow_destructive" in value and not isinstance(value["allow_destructive"], bool):
+        problems.append("allow_destructive 必须是 true 或 false")
+    if "teji" in value and not text_ok(value["teji"]):
+        problems.append("teji 写特技名")
+    for key in ("items", "gm"):
+        if key in value and not (isinstance(value[key], list) and value[key] and all(text_ok(x) for x in value[key])):
+            problems.append(f"{key} 必须是非空字符串列表")
     return problems
 
 
@@ -382,15 +639,25 @@ class StepFailed(Exception):
         self.record = record or {}
 
 
-def run_case(client, root, case, settle_default):
-    """执行一个用例，返回报告 dict。任何情况下都会尝试还原 Mock 并结束报错收集。"""
-    context = {"devid": client.devid, "root": str(root), "vars": {}, "args": {}}
+def run_case(client, root, case, settle_default, media=None):
+    """执行一个用例，返回报告 dict。任何情况下都会尝试还原 Mock、停止录屏和帧采集、结束报错收集。
+
+    Args:
+        media: (目录 Path, 文件名前缀)，本用例的录像、帧数据、截图写在这里；目录按需创建。
+            省略时用当前目录下的 media/case，仅供单元测试。
+    """
+    directory, prefix = media or (Path("media"), "case")
+    context = {"devid": client.devid, "root": str(root), "vars": {}, "args": {},
+               "media": (Path(directory).resolve(), prefix), "shots": 0}
     report = {"name": case["name"], "steps": [], "mocks": [], "errors": [], "unverified": []}
     start = time.time()
     failure = None
-    state = {"watching": False, "baseline": None, "patched": [], "custom": []}  # 收尾要处理的内容，见 finish
+    # 收尾要处理的内容，见 finish：video／frames 为开始阶段确实开启了的录屏路径和帧数据路径
+    state = {"watching": False, "baseline": None, "patched": [], "custom": [], "video": None, "frames": None}
     try:
         begin(client, case, context, report, state)
+        if case.get("setup"):
+            run_setup(client, case["setup"], report)
         for mock in case.get("mocks", []):
             if "patch" in mock:
                 continue
@@ -431,25 +698,37 @@ def helpers_call(items):
     return source, f"<{ERROR_WATCH.name} 全文>\n<CLIENT_HELPERS>\n{call}"
 
 
-def begin(client, case, context, report, state):
-    """一次调用完成：开始报错收集 → 记录监听基线（有 Mock 时）→ 安装全部 patch Mock。失败抛 StepFailed。
+def media_path(context, suffix):
+    """本用例的媒体文件绝对路径（正斜杠，直接给客户端用），目录按需创建。"""
+    directory, prefix = context["media"]
+    directory.mkdir(parents=True, exist_ok=True)
+    return (directory / f"{prefix}{suffix}").as_posix()
 
-    调用一发出就视为收集器和 patch Mock 都可能已生效，收尾一律尝试结束和还原。
+
+def begin(client, case, context, report, state):
+    """一次调用完成：开始报错收集 → 记录监听基线（有 Mock 时）→ 安装全部 patch Mock → 开始录屏、帧采集。
+
+    失败抛 StepFailed。调用一发出就视为收集器和 patch Mock 都可能已生效，收尾一律尝试结束和还原；
+    录屏只要请求过就在收尾停止，帧采集只有客户端确认开启了才在收尾导出。frames 时内部加装 FRAMES_NOTIFY，挡住战斗结束时的导出弹窗。
     """
     patches = [mock for mock in case.get("mocks", []) if "patch" in mock]
+    if case.get("frames"):
+        patches.append(FRAMES_NOTIFY)
     installs = [f"_case_install({mock['name']!r}, {mock['patch']!r}, {render(mock['value'], context, code=True)!r})"
                 for mock in patches]
-    code, log = helpers_call(["error_watch_start()", "_case_listeners()" if case.get("mocks") else "None",
-                              "[" + ", ".join(installs) + "]"])
+    video = media_path(context, ".mp4") if case.get("record") else None
+    code, log = helpers_call(["error_watch_start()", "_case_listeners()" if patches or case.get("mocks") else "None",
+                              "[" + ", ".join(installs) + "]",
+                              f"_case_media_start({video!r}, {bool(case.get('frames'))!r})"])
     state["watching"] = True
     state["patched"] = patches
-    result = client.run(code, "开始：报错收集、监听基线、patch Mock", log)
+    result = client.run(code, "开始：报错收集、监听基线、patch Mock、录屏、帧采集", log)
     if result["error"] or not isinstance(result["ret"], list):
         raise StepFailed(f"用例开始阶段失败：{result['error'] or clip(result['ret'])}")
-    started, baseline, installed = result["ret"]
+    started, baseline, installed, media = result["ret"]
     if (started or {}).get("stale"):
         report["unverified"].append(f"上次未结束的报错收集残留（不属于本次）：{clip(started['stale'])}")
-    if case.get("mocks"):
+    if patches or case.get("mocks"):
         if isinstance(baseline, dict) and "error" not in baseline:
             state["baseline"] = baseline
         else:
@@ -459,8 +738,45 @@ def begin(client, case, context, report, state):
         report["mocks"].append({"name": mock["name"], "install": clip(ret), "error": (ret or {}).get("error")})
         if (ret or {}).get("error"):
             failed.append(mock["name"])
+    media = media if isinstance(media, dict) else {}
+    state["video"] = video  # 请求过就在收尾停止：开始时报错也可能已经在录
+
+    if media.get("frames"):
+        state["frames"] = media_path(context, "_frames.json")
+    problems = [f"{key}：{clip(media[key])}" for key in ("video_error", "frames_error") if key in media]
     if failed:
         raise StepFailed(f"安装 Mock 失败：{failed}")
+    if problems:
+        raise StepFailed(f"开启录屏或帧采集失败：{problems}")
+
+
+def run_setup(client, setup, report):
+    """造局：先一次调用读现状，已满足的跳过，其余下发 GM 指令；结果写进 report["setup"]。失败抛 StepFailed。
+
+    转门派（$at cs）会清空经脉，只有 allow_destructive 为真才执行。指令是否生效不在这里核对，由用例断言。
+    """
+    items = setup.get("items", [])
+    probe = ("(lambda p: {'school': [p.get('nSchool'), p.get('nSect')], 'missing': [n for n in "
+             f"{items!r} if not __import__('dlgitem').item_find_by_name(n)]}})(__import__('sdata').hero.Prop)")
+    result = client.run(probe, "造局：读取门派和背包")
+    record = {"state": clip(result["ret"]), "commands": []}
+    report["setup"] = record
+    if result["error"] or not isinstance(result["ret"], dict):
+        record["error"] = clip(result["error"])
+        raise StepFailed("造局：读取现状失败")
+    commands = []
+    if "school" in setup and result["ret"]["school"] != setup["school"]:
+        if not setup.get("allow_destructive"):
+            raise StepFailed(f"造局：当前门派流派 {result['ret']['school']}，切到 {setup['school']} 会清空经脉，"
+                             "用例需写 allow_destructive: true")
+        commands.append("$at cs {} {}".format(*setup["school"]))
+    if "teji" in setup:
+        commands.append(f"$at teji 1 {setup['teji']}")
+    commands += [f"$at cloneobj {name}" for name in result["ret"]["missing"]]
+    commands += setup.get("gm", [])
+    for command in commands:
+        ret = client.tool("execute_command", {"devid": client.devid, "command": command}, "造局")
+        record["commands"].append({"command": command, "ret": clip(ret)})
 
 
 def run_step(client, root, step, context, record):
@@ -493,6 +809,55 @@ def run_step(client, root, step, context, record):
         wait_for(client, step["wait_for"], context, record)
     elif kind == "exec_check":
         exec_check(client, root, step["exec_check"], context, record)
+    elif kind == "war_act":
+        war_act(client, step["war_act"], context, record)
+    elif kind == "screenshot":
+        screenshot(client, step["screenshot"], context, record)
+
+
+def war_act(client, spec, context, record):
+    """一次调用下完人物和全部在场召唤兽的指令，再按 wait 等到下一回合的等待下指令阶段或战斗结束。"""
+    call = f"_case_war_act({spec['role']!r}, {spec.get('pet')!r})"
+    result = client.run(WAR_HELPERS + "\n" + call, f"回合指令 {record['index']}", f"<WAR_HELPERS>\n{call}")
+    ret = result["ret"] if isinstance(result["ret"], dict) else {}
+    record.update(result_fields(result))
+    if "roster" in ret:
+        # 场面映射不截断：对照帧数据和日志要用全量。ret 之后会被等待结果覆盖，所以单独保存
+        record.update({"roster": ret["roster"], "sent": ret.get("sent")})
+    if result["error"] or "error" in ret or "turn" not in ret:
+        raise StepFailed(f"下指令失败：{result['error'] or ret.get('error') or clip(result['ret'])}")
+    if ret.get("pending"):
+        raise StepFailed("指令已发出，但还有单位等指令（如身外化身、奇袭召唤兽），war_act 不支持这些单位")
+    if spec.get("wait", True):
+        expr = f"not __import__('utils3').is_in_war() or ({WAR_WAITING} and __import__('war').ActualTurn > {ret['turn']})"
+        wait_for(client, {"expr": expr, "timeout": spec.get("timeout", 90)}, context, record)
+
+
+def screenshot(client, label, context, record):
+    """截渲染画面（utils.screenshot，后台窗口也能截）到媒体目录，本机等文件出现。不直接调 C_app.save_screen（会崩溃）。"""
+    context["shots"] += 1
+    path = media_path(context, f"_shot{context['shots']}.png")
+    code = ("__import__('utils').screenshot(None, (0, 0, __import__('sdata').env.SCREENW, "
+            f"__import__('sdata').env.SCREENH, 2, 90), {path!r})")
+    result = client.run(code, f"截图 {record['index']}")
+    record.update(result_fields(result))
+    record.update({"label": label, "path": path})
+    if result["error"]:
+        raise StepFailed("截图调用报错")
+    if not wait_file(Path(path), SHOT_WAIT):
+        raise StepFailed(f"{SHOT_WAIT} 秒内没有生成截图文件：{path}")
+
+
+def wait_file(path, timeout):
+    """本机等文件出现且大小连续两次（间隔 1 秒）不变、不为 0；超时返回 False。"""
+    deadline, last = time.time() + timeout, -1
+    while time.time() < deadline:
+        size = path.stat().st_size if path.exists() else -1
+        if size > 0 and size == last:
+            return True
+        last = size
+        time.sleep(1)
+    return False
 
 
 def result_fields(result):
@@ -598,21 +963,26 @@ def finish(client, case, context, report, state, settle_default):
             entry.update({"restore_error": f"{type(error).__name__}: {error}", "restored": False})
         restored.append(entry["restored"])
 
-    # patch Mock 逆序还原、核对监听、结束报错收集：合并成一次调用
+    # 停止录屏、导出帧数据（先于还原：帧采集停用后才还原导出弹窗的 Mock）、patch Mock 逆序还原、核对监听、
+    # 结束报错收集：合并成一次调用
     patches = list(reversed(state["patched"]))
-    if patches or state["baseline"] is not None or state["watching"]:
-        items = ["[" + ", ".join(f"_case_restore({mock['name']!r})" for mock in patches) + "]",
+    media = state["video"] or state["frames"]
+    if patches or state["baseline"] is not None or state["watching"] or media:
+        items = [f"_case_media_finish({state['video']!r}, {state['frames']!r})" if media else "None",
+                 "[" + ", ".join(f"_case_restore({mock['name']!r})" for mock in patches) + "]",
                  "_case_listeners()" if state["baseline"] is not None else "None",
                  "error_watch_finish()" if state["watching"] else "None"]
         code, log = helpers_call(items)
         try:
-            result = client.run(code, "收尾：还原 patch Mock、核对监听、结束报错收集", log)
+            result = client.run(code, "收尾：停止录屏和帧采集、还原 patch Mock、核对监听、结束报错收集", log)
             if result["error"] or not isinstance(result["ret"], list):
                 raise mcp_http.McpError(f"收尾调用失败：{result['error'] or clip(result['ret'])}")
-            restores, after, collected = result["ret"]
+            finished, restores, after, collected = result["ret"]
         except (mcp_http.McpError, OSError) as error:
-            restores, after, collected = [None] * len(patches), None, None
-            report["unverified"].append(f"{error}；patch Mock 状态不明，报错收集器可能仍挂在客户端上")
+            finished, restores, after, collected = None, [None] * len(patches), None, None
+            report["unverified"].append(f"{error}；patch Mock、录屏和帧采集状态不明，报错收集器可能仍挂在客户端上")
+        if media:
+            collect_media(state, finished if isinstance(finished, dict) else {}, report)
         for mock, ret in zip(patches, restores):
             entry = entry_of(mock)
             ret = ret if isinstance(ret, dict) else {}
@@ -640,6 +1010,9 @@ def finish(client, case, context, report, state, settle_default):
                 report["unverified"].append(f"报错过多，另有 {collected['dropped']} 条被丢弃")
 
     for step in report["steps"]:
+        if step.get("type") == "screenshot" and step.get("path") and Path(step["path"]).exists():
+            report.setdefault("media", {}).setdefault("screenshots", []).append(
+                {"label": step["label"], "path": step["path"]})
         for path, lines in step.get("missing", {}).items():
             report["unverified"].append(f"步骤 {step['index']} 执行检查未执行到：{path} {lines}")
         for text in step.get("warnings", []):
@@ -647,6 +1020,24 @@ def finish(client, case, context, report, state, settle_default):
     if not restored:
         return "not_needed"
     return "restored" if all(restored) else "unknown"
+
+
+def collect_media(state, finished, report):
+    """核对收尾调用里录屏和帧数据的结果，本机等 mp4 写完；文件路径写进 report["media"]，问题记入 unverified。
+
+    录像和帧数据是证据而不是判定条件，拿不到只记 unverified，不判用例失败。
+    """
+    files = report.setdefault("media", {})
+    for key in ("video_error", "frames_error"):
+        if key in finished:
+            report["unverified"].append(f"{key}：{clip(finished[key])}")
+    if state["video"]:
+        if wait_file(Path(state["video"]), VIDEO_WAIT):
+            files["video"] = state["video"]
+        else:
+            report["unverified"].append(f"停止录屏后 {VIDEO_WAIT} 秒内没有得到完整的 mp4：{state['video']}")
+    if state["frames"] and "frames" in finished:
+        files.update({"frames": state["frames"], "frame_actions": finished["frames"]})
 
 
 def summarize(reports, blocked=None):
@@ -668,8 +1059,13 @@ def summarize(reports, blocked=None):
     }
 
 
-def run(root, devid, sources, settle=2.0, init=True):
-    """校验全部用例后依次执行，返回汇总报告。用例文件有问题时不连接客户端，直接 blocked。"""
+def run(root, devid, sources, settle=2.0, init=True, run_id=None):
+    """校验全部用例后依次执行，返回汇总报告。用例文件有问题时不连接客户端，直接 blocked。
+
+    Args:
+        run_id: 运行编号，决定媒体目录 reports/<run_id>/ 和报告文件名；省略时取当前时间。
+    """
+    run_id = run_id or time.strftime("%Y%m%d-%H%M%S")
     cases = []
     try:
         for source in sources:
@@ -687,16 +1083,95 @@ def run(root, devid, sources, settle=2.0, init=True):
             report = summarize([], f"init_client 失败：{error}")
             report["executed"] = client.executed
             return report
-    reports = [run_case(client, root, case, settle) for _, case in cases]
+    media_dir = Path(root) / REPORT_DIR / run_id
+    reports = [run_case(client, root, case, settle, (media_dir, f"case{number}"))
+               for number, (_, case) in enumerate(cases, 1)]
     report = summarize(reports)
     report["executed"] = client.executed
     return report
 
 
-def save(root, report):
+# ---------- 用例模板与检索 ----------
+
+# 技能导表的条目行：`编号 : ( "名字", 基础编号, ...` 和 `编号:( "名字", ...`
+PERFORM_LINE = re.compile(r'^\s*(\d+)\s*:\s*\(\s*"([^"]*)"\s*,\s*(\d+)', re.M)
+SP_LINE = re.compile(r'^\s*(\d+)\s*:\s*\(\s*"([^"]*)"', re.M)
+
+
+def load_templates():
+    """读取 assets/cases 下全部模板：[{path, description, keywords, case}]。模板写错直接抛异常（单测保证不会）。"""
+    templates = []
+    for path in sorted(TEMPLATE_DIR.rglob("*.json")):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        templates.append({"path": str(path), "description": data["description"],
+                          "keywords": data["keywords"], "case": data["case"]})
+    return templates
+
+
+def search(root, terms):
+    """先找全部关键词都命中（名字、说明、关键词）的模板；没有时按技能名查导表，生成战斗用例骨架。
+
+    Returns:
+        {"templates": [...]}，或 {"templates": [], "skills": [...], "skeletons": [...], "note": 说明}。
+    """
+    found = []
+    for item in load_templates():
+        text = " ".join([item["case"]["name"], item["description"], *item["keywords"]])
+        if all(term in text for term in terms):
+            found.append(item)
+    if found:
+        return {"templates": found}
+    skills = find_skills(root, terms)
+    return {"templates": [], "skills": skills, "skeletons": [skeleton(skill) for skill in skills],
+            "note": "骨架只保证结构合法：角色要会这个技能（不会就在 setup 里补门派、特技），断言按被测内容补；"
+                    "特技在帧数据里的 magic_id 按 sp_id+3000 推算，尚未真机核实"}
+
+
+def find_skills(root, names):
+    """按技能名在 infoskillperform2021（门派法术）和 infosp（特技）里精确查编号。法术只取编号等于基础编号的条目。"""
+    found = []
+    perform = Path(root) / "data" / "infoskillperform2021.py"
+    special = Path(root) / "data" / "infosp.py"
+    perform_text, special_text = (read_source(path) for path in (perform, special))
+    for name in names:
+        for key, title, base in PERFORM_LINE.findall(perform_text):
+            if title == name and key == base:
+                found.append({"name": name, "kind": "magic", "id": int(key), "magic_id": int(key)})
+        for key, title in SP_LINE.findall(special_text):
+            if title == name:
+                found.append({"name": name, "kind": "sp", "id": int(key), "magic_id": int(key) + 3000})
+    return found
+
+
+def read_source(path):
+    """按 Python 源码声明的编码读取（兼容历史 GBK 导表）；文件不存在时返回空串。"""
+    if not path.exists():
+        return ""
+    with tokenize.open(path) as file:
+        return file.read()
+
+
+def skeleton(skill):
+    """战斗用例骨架：进战斗 → 放技能（召唤兽防御）→ 等这次出手播完 → 退战。"""
+    return {
+        "name": f"{skill['name']} 出手表现",
+        "frames": True,
+        "steps": [
+            {"assert": "not __import__('utils3').is_in_war()", "message": "开始前不在战斗中"},
+            {"gm": "$at fightN 2"},
+            {"wait_for": {"preset": "war_idle", "timeout": 60}},
+            {"war_act": {"role": {"act": skill["kind"], "id": skill["id"], "target": "e0"}}},
+            {"wait_for": {"preset": "war_action", "args": {"magic_id": skill["magic_id"], "n": 1}, "timeout": 10}},
+            {"gm": "$at kill"},
+            {"wait_for": {"preset": "war_out", "timeout": 30}},
+        ],
+    }
+
+
+def save(root, report, run_id):
     directory = Path(root) / REPORT_DIR
     directory.mkdir(parents=True, exist_ok=True)
-    path = directory / (time.strftime("%Y%m%d-%H%M%S") + ".json")
+    path = directory / (run_id + ".json")
     path.write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
     return path
 
@@ -710,10 +1185,17 @@ def main(argv=None):
     runner.add_argument("--settle", type=float, default=2.0, help="收尾前等待延迟回调的秒数，用例可用 settle 覆盖")
     runner.add_argument("--no-init", action="store_true", help="同一任务已调用过 init_client 时跳过")
     runner.add_argument("sources", nargs="+")
+    finder = sub.add_parser("search", help="按关键词找用例模板；没有模板时按技能名生成战斗用例骨架")
+    finder.add_argument("--root", required=True, help="项目根目录（mhimage），用来读技能导表")
+    finder.add_argument("terms", nargs="+")
     args = parser.parse_args(argv)
     root = Path(args.root).resolve()
-    report = run(root, args.devid, args.sources, args.settle, not args.no_init)
-    report["report_path"] = str(save(root, report))
+    if args.command == "search":
+        print(json.dumps(search(root, args.terms), ensure_ascii=False, indent=1))
+        return 0
+    run_id = time.strftime("%Y%m%d-%H%M%S")
+    report = run(root, args.devid, args.sources, args.settle, not args.no_init, run_id)
+    report["report_path"] = str(save(root, report, run_id))
     print(json.dumps(report, ensure_ascii=False, indent=1))
     return {"passed": 0, "failed": 1}.get(report["status"], 2)
 

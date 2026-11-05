@@ -62,6 +62,26 @@
 - 用例 `passed` 需要：步骤全部成功、没有收集到报错、`restoration` 不是 `unknown`。判定仍以主会话核对报告为准。
 - `codex_cli.py` 的 test 结果 schema 增加 `executed`（字符串列表，复现清单）。
 
+### 战斗原语、证据采集与用例检索（0.3.29）
+
+借鉴 war-test 的回合指令、场面映射、造局、按出手等待、录像和配方检索，全部在本机执行器内实现，不依赖远端服务。
+
+- **`war_act` 步骤**：`{"war_act": {"role": {"act", "id", "target", "item"}, "pet": {...}, "wait": true, "timeout": 90}}`，一次 `execute_code` 下完人物和全部在场召唤兽的指令，再调 `dlgwar.wait()` 收起指令面板。
+  - 人物动作：`attack`、`magic`（`id` 为 `infoskillperform2021` 的编号，发 `netwar.c_war_perform`）、`sp`（`id` 为 `infosp` 编号，发 `netskill.c_sp_perform`）、`guard`、`protect`（必须写 `target`）、`item`（`item` 写道具名或造型编号，按背包实例 `nOID` 发包）、`fabao`（`id` 为法宝造型编号，按 `dlgfabao.FABAO_INFO` 反查位置）。召唤兽动作：`attack`、`magic`、`guard`、`protect`、`item`；不写 `pet` 时全部防御，避免服务端等召唤兽指令。
+  - 目标：`e0`/`e1`…（敌方按 `(place, wid)` 排序）、`f0`…（其他友方）、`self`、`pet`（第一只在场召唤兽），或直接写 wid。先全部解析再发包，解析失败时一个包都不发。
+  - 前置：必须处于 `war_idle`；否则失败。发包后若 `dlgwar.SelfID` 不为空（还有身外化身、奇袭召唤兽等单位等指令），步骤失败并说明，不支持这些单位。
+  - `wait` 默认为真：本机轮询直到进入下一回合的等待下指令阶段，或战斗已结束。
+  - 步骤记录里附场面映射 `roster`（label、wid、名字、阵营、主人、站位、`sid`、血量百分比）。
+- **`setup` 造局**（用例字段，开始阶段之后、步骤之前执行）：`school: [门派, 流派]`（与 `sdata.hero.Prop` 的 `nSchool`/`nSect` 一致就跳过；否则必须写 `allow_destructive: true` 才发 `$at cs`，因为会清空经脉）、`teji`（`$at teji 1 名字`）、`items`（背包里已有就跳过，否则 `$at cloneobj`）、`gm`（其他指令原样下发）。召唤兽技能、法宝等没有核实过的指令写在 `gm` 里。
+- **证据采集**（都按需开启，默认不做）：每次运行的媒体文件放在 `reports/<运行编号>/`，与报告 `reports/<运行编号>.json` 同名。
+  - `record: true`：开始阶段的合并调用里 `C_app.start_record_screen(绝对路径, 1, 0)`，收尾合并调用里 `stop_record_screen()`；`settle` 等待正好补上录屏延后约 2 秒的尾部。之后本机等 mp4 出现且大小稳定（最多 30 秒），否则记入 `unverified`。
+  - `frames: true`：开始阶段调用 `frame_collector.start_collect()`（必须在进入战斗前），收尾时把本场 `BattleData` 写成 JSON（战斗中取快照，已结束取 `_last_battle`，并排除开始前就有的上一场）后 `stop_collect()`。战斗结束时采集器会弹窗提示导出路径，执行器用内部 patch Mock 把 `_notify_export_done` 换成空函数，收尾还原。
+  - `screenshot` 步骤：`{"screenshot": "说明"}`，调用 `utils.screenshot` 截渲染画面（窗口在后台也能截），本机等文件出现（最多 10 秒）。不直接调 `C_app.save_screen`（会崩溃）。
+- **预设 `war_action`**（需要 `frames: true`）：帧采集器里 `magic_id` 等于 `args.magic_id`、已结束的出手次数 ≥ `args.n`。
+- **用例模板与检索**：模板放在 `assets/cases/<领域>/*.json`，格式 `{"description", "keywords", "case"}`，`case` 必须能通过校验（单测覆盖）。`case_runner.py search --root <项目> 关键词...` 先查模板（全部关键词命中名字、说明或关键词）；没有命中时按技能名在 `data/infoskillperform2021.py`、`data/infosp.py` 里精确查编号，生成战斗用例骨架（进战斗 → `war_act` 放技能 → `war_action` 等出手完成 → 退战），执行者补造局和断言后再跑。
+- 待真机确认：服务端战内 GM 的 `<n1>` 是否等于客户端单位的 `sid`（roster 里给出 `sid` 以便核对）；互通版能否录屏；特技在帧数据里的 `magic_id` 是否为 `sp_id + 3000`；截图文件格式和 `SCREENSHOT2` 事件有无副作用。
+- 这次不做：war-test 的 `pump`（另行调研）；同一场战斗里连跑多个用例。
+
 ## 流程与文档
 
 - **test 任务**：执行者优先写用例文件、用执行器跑；出问题时排查用例或报告缺陷。用例文件写在 `.mhxy-workspace/cases/` 内。
@@ -86,3 +106,4 @@
 ## 变更记录
 
 - 2026-11-05（0.3.28）：初版。
+- 2026-11-05（0.3.29）：新增 `war_act`、场面映射、`setup`、`record`、`frames`、`screenshot`、预设 `war_action`、用例模板与 `search`。

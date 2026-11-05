@@ -1,0 +1,16 @@
+{
+ "description": "读角色属性并断言，演示 patch Mock 的安装与自动还原。改成被测模块的函数和断言即可用于界面、玩法逻辑的自测。",
+ "keywords": ["通用", "界面", "属性", "Mock", "patch", "断言", "sdata"],
+ "case": {
+  "name": "通用_读角色属性与Mock",
+  "settle": 1,
+  "mocks": [
+   {"name": "替换示例属性", "patch": "utils3.__can_reload_data__", "value": "['mocked', orig]"}
+  ],
+  "steps": [
+   {"exec": "{'name': __import__('sdata').hero.Prop.get('sName'), 'level': __import__('sdata').hero.Prop.get('nLevel')}", "save_as": "hero"},
+   {"assert": "bool({vars.hero}['name']) and int({vars.hero}['level'] or 0) > 0", "message": "角色名和等级非空"},
+   {"assert": "__import__('utils3').__can_reload_data__[0] == 'mocked'", "message": "Mock 已生效"}
+  ]
+ }
+}
