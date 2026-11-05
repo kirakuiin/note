@@ -412,6 +412,17 @@ class WarActTests(WarBase):
         self.assertIn("e5", report["results"][0]["failure"])
         self.assertEqual(self.sent, [])
 
+    def test_sent_names_do_not_rely_on_function_name(self):
+        for name in ("c_war_perform", "c_war_summ_guard"):  # 真实客户端的发包函数被装饰器包成 wrapper
+            getattr(sys.modules["netwar"], name).__name__ = "wrapper"
+        report = self.run_case({"name": "n", "steps": [{"war_act": {"role": {"act": "magic", "id": 7}}}]})
+        self.assertEqual(report["results"][0]["steps"][0]["sent"], ["c_war_perform(12, 7)", "c_war_summ_guard(2,)"])
+
+    def test_unknown_wid_sends_nothing(self):
+        report = self.run_case({"name": "w", "steps": [{"war_act": {"role": {"act": "item", "item": "金创药", "target": 99}}}]})
+        self.assertIn("wid 99 不在场上", report["results"][0]["failure"])
+        self.assertEqual(self.sent, [])
+
     def test_not_waiting_state_fails(self):
         self.war.Cmds = ["cmd"]
         report = self.run_case({"name": "d", "steps": [{"war_act": {"role": {"act": "guard"}}}]})
@@ -432,6 +443,106 @@ class WarActTests(WarBase):
         for word in ("必须有 role", "act 只能是", "magic 需要 id", "target 写 e0", "wait 必须是", "protect 必须写 target",
                      "item 需要 item"):
             self.assertIn(word, problems)
+
+
+class PumpTests(WarBase):
+    """pump：假的 war2021_net／netwar 只记录构造顺序；manage_cmd 记录调用；队列由哨兵命令驱动执行完。"""
+
+    def setUp(self):
+        super().setUp()
+        self.queued, self.managed = [], []
+        war = self.war
+        war.Turn, war.AccTurn = 0, 3  # 真实的下指令阶段 Turn 为 0
+        sys.modules["utils3"].is_in_war = lambda: True
+
+        class CCmd:
+            def __init__(cmd):
+                cmd.state, cmd.Func = 0, None
+                war.Cmds.append(cmd)
+        war.CCmd = CCmd
+        war.action_end = lambda: None
+
+        def push_war_cmd(func):
+            cmd = CCmd()
+            cmd.Func = func
+        war.push_war_cmd = push_war_cmd
+        net2021 = types.ModuleType("war2021_net")
+        net2021.LastCmd = "stale"
+
+        def maker(name):
+            def build(*args):
+                if self.fail_on == name:
+                    raise RuntimeError("构造失败")
+                cmd = CCmd()
+                cmd.name = name
+                self.queued.append((name, args))
+            return build
+        for name in ("AttackCmd", "WstateCmd", "WstateSplitCmd", "StatusCmd", "AddonCmd"):
+            setattr(net2021, name, maker(name))
+
+        def manage_cmd(turn):
+            self.managed.append((turn, net2021.LastCmd))
+            self.play()  # 假客户端：下一帧起把队列播完
+        net2021.manage_cmd = manage_cmd
+        self.net2021, self.fail_on = net2021, None
+        sys.modules["netwar"].DO_S_WAR_PERFORM = maker("PerformCmd")
+        patcher = patch.dict(sys.modules, {"war2021_net": net2021})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        self.addCleanup(lambda: sys.__dict__.pop("_mhxy_case_pump", None))
+
+    def play(self):
+        while self.war.Cmds:
+            cmd = self.war.Cmds.pop(0)
+            if callable(cmd.Func) and cmd.Func is not self.war.action_end:
+                cmd.Func()
+
+    def test_perform_shorthand_expands_and_restores_turn(self):
+        report = self.run_case({"name": "p", "steps": [{"pump": {"perform": {
+            "magic_id": 1073, "victims": ["e0", "e1"], "hp_chg": 50, "hits": 2, "status": 80,
+            "addons": [{"target": "e0", "pid": 9}]}}}]})
+        self.assertEqual(report["status"], "passed", report)
+        self.assertEqual([name for name, _ in self.queued], [
+            "PerformCmd", "WstateCmd", "WstateSplitCmd", "WstateCmd", "WstateCmd", "WstateSplitCmd", "WstateCmd",
+            "StatusCmd", "StatusCmd", "AddonCmd"])
+        self.assertEqual(self.queued[0][1][:3], (1, [12, 11], 1073))
+        self.assertEqual(self.queued[1][1][0], 12)
+        self.assertEqual(self.managed, [(3, None)])  # LastCmd 先清空，再按 AccTurn 挂父子
+        self.assertEqual(self.war.Turn, 0)  # 哨兵把临时加的 1 减回
+        self.assertNotIn("_mhxy_case_pump", sys.__dict__)
+
+    def test_raw_events_and_unsupported_op(self):
+        report = self.run_case({"name": "e", "steps": [{"pump": {"events": [
+            {"op": "attack", "data": {"attacker_id": "self", "victim_id": "e0"}},
+            {"op": "wstate", "data": {"victim_id": "e0", "hp_chg": 30}},
+            {"op": "action_end"}]}}]})
+        self.assertEqual(report["status"], "passed", report)
+        self.assertEqual([name for name, _ in self.queued], ["AttackCmd", "WstateCmd"])
+        problems = "；".join(runner.validate({"name": "v", "steps": [
+            {"pump": {"events": [{"op": "delete", "data": {}}]}},
+            {"pump": {"perform": {"victims": ["e0"]}}},
+            {"pump": {"perform": {"magic_id": 1}, "events": []}}]}))
+        for word in ("op 只能是", "magic_id", "perform 和 events 二选一"):
+            self.assertIn(word, problems)
+
+    def test_construction_failure_rolls_back(self):
+        self.fail_on = "StatusCmd"
+        report = self.run_case({"name": "f", "steps": [{"pump": {"perform": {"magic_id": 1, "status": 50}}}]})
+        self.assertIn("构造失败", report["results"][0]["failure"])
+        self.assertEqual(self.war.Cmds, [])
+        self.assertEqual(self.war.Turn, 0)
+        self.assertEqual(self.managed, [])
+
+    def test_not_idle_fails_and_timeout_reports_queue(self):
+        self.war.Cmds.append(types.SimpleNamespace(state=0, Func=None))
+        report = self.run_case({"name": "i", "steps": [{"pump": {"perform": {"magic_id": 1}}}]})
+        self.assertIn("不在等待下指令阶段", report["results"][0]["failure"])
+        self.war.Cmds.clear()
+        self.net2021.manage_cmd = lambda turn: None  # 队列不播放
+        report = self.run_case({"name": "t", "steps": [{"pump": {"perform": {"magic_id": 1}, "timeout": 0}}]})
+        step = report["results"][0]["steps"][0]
+        self.assertIn("pump 超时", report["results"][0]["failure"])
+        self.assertTrue(step["queue"])
 
 
 class SetupTests(WarBase):
@@ -534,6 +645,26 @@ class MediaTests(WarBase):
         self.assertIn("帧采集要在进入战斗前开启", report["results"][0]["failure"])
         self.assertTrue(any("frames: true" in p for p in runner.validate(
             {"name": "g", "steps": [{"wait_for": {"preset": "war_action", "args": {"magic_id": 1, "n": 1}}}]})))
+
+    def test_war_action_ignores_previous_battle(self):
+        self.finish_war()  # 用例开始前的上一场已有 1073 的出手
+        report = self.run_case({"name": "p", "frames": True, "steps": [
+            {"wait_for": {"preset": "war_action", "args": {"magic_id": 1073, "n": 1}, "timeout": 0}}]})
+        self.assertIn("等待超时", report["results"][0]["failure"])
+
+    def test_begin_call_failure_still_stops_media(self):
+        real = self.game
+
+        def flaky(name, arguments, **kwargs):
+            result = real(name, arguments)
+            if name == "execute_code" and "_case_media_start" in arguments["code"]:
+                raise OSError("timeout")  # 客户端已执行完开始阶段，回包丢失
+            return result
+        with patch.object(mcp_http, "call", flaky):
+            report = self.run_case({"name": "b", "record": True, "frames": True, "steps": [{"exec": "1"}]})
+        self.assertIn("timeout", report["results"][0]["failure"])
+        self.assertIsNone(self.recording)
+        self.assertFalse(self.collector._enabled)
 
     def test_missing_video_is_unverified_not_failure(self):
         sys.modules["C_app"].stop_record_screen = lambda: None

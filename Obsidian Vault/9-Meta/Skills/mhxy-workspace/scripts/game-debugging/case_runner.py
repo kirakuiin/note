@@ -30,10 +30,10 @@ EXEC_TRACE = HERE.parent / "exec-check" / "exec_trace.py"
 REPORT_DIR = Path(".mhxy-workspace") / "cases" / "reports"
 TEMPLATE_DIR = HERE.parent.parent / "assets" / "cases"  # 用例模板，见 search
 TEXT_LIMIT = 2000  # 报告中每个返回值、报错保留的字符数
-STEP_TYPES = ("exec", "gm", "mcp", "wait_for", "assert", "exec_check", "war_act", "screenshot")
+STEP_TYPES = ("exec", "gm", "mcp", "wait_for", "assert", "exec_check", "war_act", "screenshot", "pump")
 # 每种步骤除类型键外允许的选项
 STEP_OPTIONS = {"exec": {"save_as"}, "gm": set(), "mcp": {"args", "save_as"}, "wait_for": set(),
-                "assert": {"message"}, "exec_check": set(), "war_act": set(), "screenshot": set()}
+                "assert": {"message"}, "exec_check": set(), "war_act": set(), "screenshot": set(), "pump": set()}
 CASE_FIELDS = {"name", "mocks", "steps", "settle", "ignore_errors", "setup", "record", "frames"}
 # war_act 的动作：动作 → (必填字段, 默认目标)。默认目标 None 表示必须写 target；不需要目标的动作不在乎这一项。
 # 与 WAR_HELPERS 中 _case_war_act 的发包分支一一对应，增删动作两处同步。
@@ -41,6 +41,18 @@ ROLE_ACTS = {"attack": ((), "e0"), "magic": (("id",), "e0"), "sp": (("id",), "e0
              "protect": ((), None), "item": (("item",), "self"), "fabao": (("id",), "e0")}
 PET_ACTS = {"attack": ((), "e0"), "magic": (("id",), "e0"), "guard": ((), "pet"), "protect": ((), None),
             "item": (("item",), "pet")}
+# pump 的事件：op → (必填字段, 可选字段)。与 WAR_HELPERS 中 _case_pump 的构造分支一一对应，增删两处同步。
+# 不提供 delete（会删掉真实战斗的单位）和 turn（war.turn() 会发包导致回合失步）
+PUMP_OPS = {
+    "perform": (("attacker_id", "victims", "magic_id"), ("magic_desc", "name", "info")),
+    "attack": (("attacker_id", "victim_id"), ("series_attack",)),
+    "wstate": (("victim_id",), ("hurt", "life", "ward", "hp_chg", "hp_ext", "magic_id")),
+    "wstate_split": (("victim_id",), ("split_type",)),
+    "status": (("victim_id", "status"), ("eff_status",)),
+    "addon": (("wid", "pid"), ("turn", "level", "aid", "args")),
+    "action_end": ((), ()),
+}
+PUMP_SHORTHAND = {"attacker", "magic_id", "victims", "hp_chg", "hits", "life", "status", "addons"}
 VIDEO_WAIT = 30  # 停止录屏后等 mp4 写完的最长秒数
 SHOT_WAIT = 10  # 截图异步写文件，等文件出现的最长秒数
 FRAMES_NOTIFY = {"name": "帧采集导出弹窗", "patch": "frame_collector.g_collector._notify_export_done",
@@ -62,9 +74,11 @@ PRESETS = {
         # 本场已进入某回合、表演播完、在等玩家下指令
         "war_idle": "{waiting}",
         # 帧采集器里 magic_id 相同、已播完（FRAME_ACTION_END 后归档进回合）的出手次数达到 n。需要用例 frames: true。
-        # 战斗中看 _battle（已归档回合 + 当前回合），战斗结束后看 _last_battle
+        # 战斗中看 _battle（已归档回合 + 当前回合），战斗结束后看 _last_battle；用例开始前就有的上一场
+        # （_case_media_start 记在 sys._mhxy_case_frames_prev）不算，与 _case_media_finish 一致
         "war_action": ("(lambda c: sum(1 for t in ((c._battle.turns + ([c._cur_turn] if c._cur_turn else []))"
-                       " if c._battle else (c._last_battle.turns if c._last_battle else []))"
+                       " if c._battle else (c._last_battle.turns if c._last_battle is not None and id(c._last_battle)"
+                       " != getattr(__import__('sys'), '_mhxy_case_frames_prev', None) else []))"
                        " for a in t.actions if a.magic_id == {{args.magic_id}} and a.end_frame >= 0))"
                        "(__import__('frame_collector').get_instance()) >= {{args.n}}"),
     },
@@ -209,48 +223,65 @@ def _case_media_finish(video, frames_path):
 	return out
 '''
 
-# war_act 用的客户端辅助函数，只在 war_act 步骤发送。动作分支与 ROLE_ACTS／PET_ACTS 一一对应，增删动作两处同步。
-# 先解析全部目标、道具和法宝位置，再统一发包：解析失败时一个包都不发，不会只下了人物指令卡在召唤兽。
-WAR_HELPERS = '''def _case_war_act(role, pet):
+# war_act／pump 用的客户端辅助函数，只在这两种步骤发送。execute_code 中顶层名字对函数不可见，所以共用的
+# _case_scene 作为参数传入（见 war_act、pump 的调用行）。
+# war_act 的动作分支与 ROLE_ACTS／PET_ACTS 一一对应，增删动作两处同步；先解析全部目标、道具和法宝位置，
+# 再统一发包：解析失败时一个包都不发，不会只下了人物指令卡在召唤兽。
+WAR_HELPERS = '''def _case_scene():
+	"""确认在等待下指令阶段并给场上单位编标签。返回 (labels {wid: 标签}, pets, roster, unit 函数)；不在该阶段抛 ValueError。"""
+	import utils3
+	import war
+	import world
+	if not (utils3.is_in_war() and war.PlayerTurn >= 1 and not war.Cmds and war.ProcessFunc == war.wait_cmd):
+		raise ValueError("不在等待下指令阶段，先用预设 war_idle 等待")
+	units = [obj for obj in list(world.Objects.values()) if getattr(obj, "type", None) == "WARRIOR"]
+	pets = list(war.summon_find_list(war.RoleID))
+	labels = {war.RoleID: "self"}
+	for i, wid in enumerate(pets):
+		labels[wid] = "pet" if i == 0 else "pet%d" % i
+	order = lambda obj: (obj.place, obj.id)
+	for i, obj in enumerate(sorted([o for o in units if o.allied == 0], key=order)):
+		labels[obj.id] = "e%d" % i
+	for i, obj in enumerate(sorted([o for o in units if o.allied == 1 and o.id not in labels], key=order)):
+		labels[obj.id] = "f%d" % i
+	wids = {label: wid for wid, label in labels.items()}
+
+	def hp(obj):
+		try:
+			return obj.get_member("hp_per")
+		except Exception:
+			return None
+
+	roster = [{"label": labels.get(obj.id), "wid": obj.id, "name": obj.name, "allied": obj.allied, "owner": obj.owner,
+		"place": obj.place, "sid": getattr(obj, "sid", None), "hp_per": hp(obj)} for obj in sorted(units, key=lambda o: o.id)]
+
+	def unit(value, aliases=None):
+		"""标签或 wid → 场上 wid；aliases 临时覆盖标签（召唤兽动作里 pet 指它自己）。"""
+		names = dict(wids, **(aliases or {}))
+		if isinstance(value, int):
+			if value not in labels:
+				raise ValueError("目标 wid %r 不在场上，可用：%s" % (value, sorted(labels)))
+			return value
+		if value not in names:
+			raise ValueError("目标 %r 不在场上，可用：%s" % (value, sorted(names)))
+		return names[value]
+
+	return labels, pets, roster, unit
+
+
+def _case_war_act(scene, role, pet):
 	import traceback
 	try:
 		import dlgwar
 		import netfabao
 		import netskill
 		import netwar
-		import utils3
 		import war
-		import world
-		if not (utils3.is_in_war() and war.PlayerTurn >= 1 and not war.Cmds and war.ProcessFunc == war.wait_cmd):
-			return {"error": "不在等待下指令阶段，先用预设 war_idle 等待"}
-		units = [obj for obj in list(world.Objects.values()) if getattr(obj, "type", None) == "WARRIOR"]
-		pets = list(war.summon_find_list(war.RoleID))
-		labels = {war.RoleID: "self"}
-		for i, wid in enumerate(pets):
-			labels[wid] = "pet" if i == 0 else "pet%d" % i
-		order = lambda obj: (obj.place, obj.id)
-		for i, obj in enumerate(sorted([o for o in units if o.allied == 0], key=order)):
-			labels[obj.id] = "e%d" % i
-		for i, obj in enumerate(sorted([o for o in units if o.allied == 1 and o.id not in labels], key=order)):
-			labels[obj.id] = "f%d" % i
-		wids = {label: wid for wid, label in labels.items()}
-
-		def hp(obj):
-			try:
-				return obj.get_member("hp_per")
-			except Exception:
-				return None
-
-		roster = [{"label": labels.get(obj.id), "wid": obj.id, "name": obj.name, "allied": obj.allied, "owner": obj.owner,
-			"place": obj.place, "sid": getattr(obj, "sid", None), "hp_per": hp(obj)} for obj in sorted(units, key=lambda o: o.id)]
+		labels, pets, roster, unit = scene()
+		aliases = {}
 
 		def target(spec, default):
-			value = spec.get("target", default)
-			if isinstance(value, int):
-				return value
-			if value not in wids:
-				raise ValueError("目标 %r 不在场上，可用：%s" % (value, sorted(wids)))
-			return wids[value]
+			return unit(spec.get("target", default), aliases)
 
 		def item_oid(value):
 			import dlgitem
@@ -269,40 +300,107 @@ WAR_HELPERS = '''def _case_war_act(role, pet):
 		calls = []
 		act = role["act"]
 		if act == "attack":
-			calls.append((netwar.c_war_attack, (target(role, "e0"),)))
+			calls.append(("c_war_attack", netwar.c_war_attack, (target(role, "e0"),)))
 		elif act == "magic":
-			calls.append((netwar.c_war_perform, (target(role, "e0"), role["id"])))
+			calls.append(("c_war_perform", netwar.c_war_perform, (target(role, "e0"), role["id"])))
 		elif act == "sp":
-			calls.append((netskill.c_sp_perform, (target(role, "e0"), role["id"])))
+			calls.append(("c_sp_perform", netskill.c_sp_perform, (target(role, "e0"), role["id"])))
 		elif act == "guard":
-			calls.append((netwar.c_war_guard, ()))
+			calls.append(("c_war_guard", netwar.c_war_guard, ()))
 		elif act == "protect":
-			calls.append((netwar.c_war_protect, (target(role, None),)))
+			calls.append(("c_war_protect", netwar.c_war_protect, (target(role, None),)))
 		elif act == "item":
-			calls.append((netwar.c_war_item, (target(role, "self"), item_oid(role["item"]))))
+			calls.append(("c_war_item", netwar.c_war_item, (target(role, "self"), item_oid(role["item"]))))
 		elif act == "fabao":
-			calls.append((netfabao.C_USE_FIGHT, (target(role, "e0"), fabao_pos(role["id"]))))
+			calls.append(("C_USE_FIGHT", netfabao.C_USE_FIGHT, (target(role, "e0"), fabao_pos(role["id"]))))
 		for wid in pets:
 			spec = pet or {"act": "guard"}
-			wids["pet"], act = wid, spec["act"]  # 每只召唤兽的 "pet" 指它自己
+			aliases["pet"], act = wid, spec["act"]  # 每只召唤兽的 "pet" 指它自己
 			if act == "attack":
-				calls.append((netwar.c_war_summ_attack, (wid, target(spec, "e0"))))
+				calls.append(("c_war_summ_attack", netwar.c_war_summ_attack, (wid, target(spec, "e0"))))
 			elif act == "magic":
-				calls.append((netwar.c_war_summ_perform, (wid, target(spec, "e0"), spec["id"])))
+				calls.append(("c_war_summ_perform", netwar.c_war_summ_perform, (wid, target(spec, "e0"), spec["id"])))
 			elif act == "guard":
-				calls.append((netwar.c_war_summ_guard, (wid,)))
+				calls.append(("c_war_summ_guard", netwar.c_war_summ_guard, (wid,)))
 			elif act == "protect":
-				calls.append((netwar.c_war_summ_protect, (wid, target(spec, None))))
+				calls.append(("c_war_summ_protect", netwar.c_war_summ_protect, (wid, target(spec, None))))
 			elif act == "item":
-				calls.append((netwar.c_war_summ_item, (wid, target(spec, "pet"), item_oid(spec["item"]))))
+				calls.append(("c_war_summ_item", netwar.c_war_summ_item, (wid, target(spec, "pet"), item_oid(spec["item"]))))
 
 		turn = war.ActualTurn
-		for func, args in calls:
+		for _, func, args in calls:
 			func(*args)
 		war.WarriorCmdOkSet.update([war.RoleID] + pets)  # 与 PC 指令面板一致：本回合已下指令
 		dlgwar.wait()
-		return {"turn": turn, "sent": ["%s%r" % (func.__name__, args) for func, args in calls], "roster": roster,
+		return {"turn": turn, "sent": ["%s%r" % (name, args) for name, _, args in calls], "roster": roster,
 			"pending": dlgwar.SelfID is not None}  # wait() 因身外化身、奇袭召唤兽等还要下指令而提前返回
+	except Exception:
+		return {"error": traceback.format_exc()[-2000:]}
+
+
+def _case_pump(scene, events, token):
+	"""在等待下指令阶段把事件构造成战斗命令入队，末尾加完成哨兵，再 manage_cmd 挂父子关系。
+
+	war.Turn 在下指令阶段为 0，而 war.perform 等在 Turn == 0 时一直等待，所以入队时加 1、哨兵执行时减 1
+	（增减而非赋值：期间收到服务端回合包会正常累加）。构造失败时删除本次入队的命令并减回。
+	哨兵执行时把 sys._mhxy_case_pump 设为 token，本机据此判断播完。
+	"""
+	import sys
+	import traceback
+	try:
+		import netwar
+		import war
+		import war2021_net
+		labels, pets, roster, unit = scene()
+		sys.__dict__.pop("_mhxy_case_pump", None)
+		start = len(war.Cmds)
+		war.Turn += 1
+		try:
+			for item in events:
+				op, data = item["op"], dict(item.get("data", {}))
+				for key in ("attacker_id", "victim_id", "wid"):
+					if key in data:
+						data[key] = unit(data[key])
+				if isinstance(data.get("aid"), str):
+					data["aid"] = unit(data["aid"])
+				if "victims" in data:
+					data["victims"] = [unit(value) for value in data["victims"]]
+				if op == "perform":
+					netwar.DO_S_WAR_PERFORM(data["attacker_id"], data["victims"], data["magic_id"],
+						data.get("magic_desc", 0), data.get("name", ""), data.get("info", ""))
+				elif op == "attack":
+					war2021_net.AttackCmd(data["attacker_id"], data["victim_id"], data.get("series_attack", False))
+				elif op == "wstate":
+					war2021_net.WstateCmd(data["victim_id"], data.get("hurt", 0), data.get("life", 0), data.get("ward", 1),
+						data.get("hp_chg", 100), data.get("hp_ext", 0), data.get("magic_id", 0))
+				elif op == "wstate_split":
+					war2021_net.WstateSplitCmd(data["victim_id"], data.get("split_type", 1))
+				elif op == "status":
+					war2021_net.StatusCmd(data["victim_id"], data["status"], data.get("eff_status", data["status"]))
+				elif op == "addon":
+					war2021_net.AddonCmd(data["wid"], data["pid"], data.get("turn", 2), data.get("level", 0),
+						data.get("aid", 0), data.get("args", 0))
+				elif op == "action_end":
+					cmd = war.CCmd()
+					cmd.Func = war.action_end
+
+			def done():
+				# 与 war.push_war_cmd 的包装相同；不直接用它：它在 war.WarFlag 为假时静默不入队，哨兵就永远不会执行
+				war.Cmds[0].state = 1
+				war.Turn -= 1
+				sys._mhxy_case_pump = token
+				war.next_cmd()
+
+			sentinel = war.CCmd()
+			sentinel.Func = done
+			queued = [type(cmd).__name__ for cmd in war.Cmds[start:]]
+			war2021_net.LastCmd = None  # 从本次第一条命令开始挂父子关系
+			war2021_net.manage_cmd(war.AccTurn)
+		except Exception:
+			del war.Cmds[start:]
+			war.Turn -= 1
+			raise
+		return {"queued": queued, "roster": roster}
 	except Exception:
 		return {"error": traceback.format_exc()[-2000:]}
 '''
@@ -455,6 +553,8 @@ def validate_step(step):
         problems += validate_wait(value)
     if kind == "war_act":
         problems += validate_war_act(value)
+    if kind == "pump":
+        problems += validate_pump(value)
     if kind == "exec_check":
         if not isinstance(value, dict) or not text_ok(value.get("cases")) or set(value) - {"cases", "files"}:
             problems.append("exec_check 只能有 cases（定义 CASES 的客户端代码）和可选的 files")
@@ -526,6 +626,71 @@ def validate_war_act(value):
     if "timeout" in value and not number_ok(value["timeout"]):
         problems.append("war_act.timeout 必须是秒数")
     return problems
+
+
+def validate_pump(value):
+    """pump：perform 简写和 events 原始事件二选一，字段见 PUMP_SHORTHAND／PUMP_OPS；timeout 秒数。"""
+    if not isinstance(value, dict) or ("perform" in value) == ("events" in value):
+        return ["pump 需要对象，perform 和 events 二选一"]
+    problems = []
+    if set(value) - {"perform", "events", "timeout"}:
+        problems.append(f"pump 未知字段 {sorted(set(value) - {'perform', 'events', 'timeout'})}")
+    if "timeout" in value and not number_ok(value["timeout"]):
+        problems.append("pump.timeout 必须是秒数")
+    if "perform" in value:
+        spec = value["perform"]
+        if not isinstance(spec, dict) or not isinstance(spec.get("magic_id"), int):
+            return problems + ["pump.perform 必须有整数 magic_id"]
+        if set(spec) - PUMP_SHORTHAND:
+            problems.append(f"pump.perform 未知字段 {sorted(set(spec) - PUMP_SHORTHAND)}")
+        if "victims" in spec and not (isinstance(spec["victims"], list) and spec["victims"]):
+            problems.append("pump.perform.victims 必须是非空列表")
+        if "hits" in spec and not (isinstance(spec["hits"], int) and spec["hits"] >= 1):
+            problems.append("pump.perform.hits 必须是 ≥1 的整数")
+        for index, addon in enumerate(spec.get("addons", []), 1):
+            if not isinstance(addon, dict) or "pid" not in addon or set(addon) - {"target", "pid", "turn", "level"}:
+                problems.append(f"pump.perform.addons[{index}] 写成 {{target, pid, turn, level}}，pid 必填")
+        return problems
+    events = value["events"]
+    if not isinstance(events, list) or not events:
+        return problems + ["pump.events 必须是非空列表"]
+    for index, item in enumerate(events, 1):
+        if not isinstance(item, dict) or item.get("op") not in PUMP_OPS:
+            problems.append(f"pump.events[{index}].op 只能是 {sorted(PUMP_OPS)}")
+            continue
+        required, optional = PUMP_OPS[item["op"]]
+        data = item.get("data", {})
+        if not isinstance(data, dict) or set(item) - {"op", "data"}:
+            problems.append(f"pump.events[{index}] 只能有 op 和 data（对象）")
+            continue
+        if set(required) - set(data):
+            problems.append(f"pump.events[{index}]：{item['op']} 缺少 {sorted(set(required) - set(data))}")
+        if set(data) - set(required) - set(optional):
+            problems.append(f"pump.events[{index}]：{item['op']} 未知字段 {sorted(set(data) - set(required) - set(optional))}")
+    return problems
+
+
+def expand_pump(spec):
+    """perform 简写 → 原始事件：出手 → 每个目标 hits 段受击（第 2 段起前置分段）→ 血条 → Buff → 行动结束。"""
+    if "events" in spec:
+        return spec["events"]
+    perform = spec["perform"]
+    victims = perform.get("victims", ["e0"])
+    events = [{"op": "perform", "data": {"attacker_id": perform.get("attacker", "self"), "victims": victims,
+                                         "magic_id": perform["magic_id"]}}]
+    for victim in victims:
+        for hit in range(perform.get("hits", 1)):
+            if hit:
+                events.append({"op": "wstate_split", "data": {"victim_id": victim}})
+            events.append({"op": "wstate", "data": {"victim_id": victim, "life": perform.get("life", 0),
+                                                    "hp_chg": perform.get("hp_chg", 100), "magic_id": perform["magic_id"]}})
+    if "status" in perform:
+        events += [{"op": "status", "data": {"victim_id": victim, "status": perform["status"]}} for victim in victims]
+    for addon in perform.get("addons", []):
+        events.append({"op": "addon", "data": {"wid": addon.get("target", "e0"), "pid": addon["pid"],
+                                               "turn": addon.get("turn", 2), "level": addon.get("level", 0),
+                                               "aid": perform.get("attacker", "self")}})
+    return events + [{"op": "action_end"}]
 
 
 def validate_setup(value):
@@ -720,8 +885,9 @@ def begin(client, case, context, report, state):
     code, log = helpers_call(["error_watch_start()", "_case_listeners()" if patches or case.get("mocks") else "None",
                               "[" + ", ".join(installs) + "]",
                               f"_case_media_start({video!r}, {bool(case.get('frames'))!r})"])
-    state["watching"] = True
-    state["patched"] = patches
+    # 调用一发出就可能已生效：录屏、帧采集先登记，确认帧采集没开启时再撤销（见下方 media）
+    state.update({"watching": True, "patched": patches, "video": video,
+                  "frames": media_path(context, "_frames.json") if case.get("frames") else None})
     result = client.run(code, "开始：报错收集、监听基线、patch Mock、录屏、帧采集", log)
     if result["error"] or not isinstance(result["ret"], list):
         raise StepFailed(f"用例开始阶段失败：{result['error'] or clip(result['ret'])}")
@@ -739,10 +905,8 @@ def begin(client, case, context, report, state):
         if (ret or {}).get("error"):
             failed.append(mock["name"])
     media = media if isinstance(media, dict) else {}
-    state["video"] = video  # 请求过就在收尾停止：开始时报错也可能已经在录
-
-    if media.get("frames"):
-        state["frames"] = media_path(context, "_frames.json")
+    if not media.get("frames"):
+        state["frames"] = None  # 客户端确认没开启（如用例开始时已在战斗中），收尾不导出
     problems = [f"{key}：{clip(media[key])}" for key in ("video_error", "frames_error") if key in media]
     if failed:
         raise StepFailed(f"安装 Mock 失败：{failed}")
@@ -813,11 +977,42 @@ def run_step(client, root, step, context, record):
         war_act(client, step["war_act"], context, record)
     elif kind == "screenshot":
         screenshot(client, step["screenshot"], context, record)
+    elif kind == "pump":
+        pump(client, step["pump"], context, record)
+
+
+def pump(client, spec, context, record):
+    """注入技能表现（设计见 spec「pump」）：一次调用入队，本机轮询哨兵标记、队列清空、回到 wait_cmd。
+
+    超时判失败并记录当时的队列（类名、处理函数名），不自动清理：残留命令会继续播放，用例应随后 $at kill。
+    """
+    events = expand_pump(spec)
+    token = f"pump-{time.time_ns()}"
+    call = f"_case_pump(_case_scene, {events!r}, {token!r})"
+    result = client.run(WAR_HELPERS + "\n" + call, f"注入 {record['index']}", f"<WAR_HELPERS>\n{call}")
+    ret = result["ret"] if isinstance(result["ret"], dict) else {}
+    record.update(result_fields(result))
+    record["events"] = events
+    if "roster" in ret:
+        record.update({"roster": ret["roster"], "queued": ret.get("queued")})
+    if result["error"] or "error" in ret or "queued" not in ret:
+        raise StepFailed(f"注入失败：{result['error'] or ret.get('error') or clip(result['ret'])}")
+    # 播完时顺手删掉标记，不留在客户端
+    done = (f"(lambda s, w: s.__dict__.pop('_mhxy_case_pump', None) == {token!r} if getattr(s, '_mhxy_case_pump', None)"
+            f" == {token!r} and not w.Cmds and w.ProcessFunc == w.wait_cmd else False)(__import__('sys'), __import__('war'))")
+    timeout = spec.get("timeout", 15)
+    try:
+        wait_for(client, {"expr": done, "timeout": timeout}, context, record)
+    except StepFailed:
+        snapshot = client.run("[(type(c).__name__, getattr(getattr(c, 'Func', None), '__name__', '')) "
+                              "for c in __import__('war').Cmds]", f"注入 {record['index']} 超时：读取队列")
+        record["queue"] = clip(snapshot["ret"])
+        raise StepFailed(f"pump 超时（{timeout} 秒）没有播完，队列见步骤记录 queue") from None
 
 
 def war_act(client, spec, context, record):
     """一次调用下完人物和全部在场召唤兽的指令，再按 wait 等到下一回合的等待下指令阶段或战斗结束。"""
-    call = f"_case_war_act({spec['role']!r}, {spec.get('pet')!r})"
+    call = f"_case_war_act(_case_scene, {spec['role']!r}, {spec.get('pet')!r})"
     result = client.run(WAR_HELPERS + "\n" + call, f"回合指令 {record['index']}", f"<WAR_HELPERS>\n{call}")
     ret = result["ret"] if isinstance(result["ret"], dict) else {}
     record.update(result_fields(result))
@@ -836,7 +1031,7 @@ def war_act(client, spec, context, record):
 def screenshot(client, label, context, record):
     """截渲染画面（utils.screenshot，后台窗口也能截）到媒体目录，本机等文件出现。不直接调 C_app.save_screen（会崩溃）。"""
     context["shots"] += 1
-    path = media_path(context, f"_shot{context['shots']}.png")
+    path = media_path(context, f"_shot{context['shots']}.jpg")  # 文件类型参数 2 产出 JPEG（真机核实）
     code = ("__import__('utils').screenshot(None, (0, 0, __import__('sdata').env.SCREENW, "
             f"__import__('sdata').env.SCREENH, 2, 90), {path!r})")
     result = client.run(code, f"截图 {record['index']}")
@@ -1160,8 +1355,9 @@ def skeleton(skill):
             {"assert": "not __import__('utils3').is_in_war()", "message": "开始前不在战斗中"},
             {"gm": "$at fightN 2"},
             {"wait_for": {"preset": "war_idle", "timeout": 60}},
-            {"war_act": {"role": {"act": skill["kind"], "id": skill["id"], "target": "e0"}}},
-            {"wait_for": {"preset": "war_action", "args": {"magic_id": skill["magic_id"], "n": 1}, "timeout": 10}},
+            # wait: false：不等整回合播完，由 war_action 等这次出手播完就继续（之后的截图、断言才在出手时刻）
+            {"war_act": {"role": {"act": skill["kind"], "id": skill["id"], "target": "e0"}, "wait": False}},
+            {"wait_for": {"preset": "war_action", "args": {"magic_id": skill["magic_id"], "n": 1}, "timeout": 30}},
             {"gm": "$at kill"},
             {"wait_for": {"preset": "war_out", "timeout": 30}},
         ],
