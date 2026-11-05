@@ -218,28 +218,10 @@ def task_arguments(script, config, allowed):
 
 def mcp(name, arguments, timeout=PROBE_TIMEOUT):
     """调用 mh-game-mcp 工具，返回解析后的业务载荷。"""
-    mcp_http.TIMEOUT = timeout
-    body = mcp_http.post({"jsonrpc": "2.0", "id": 0, "method": "initialize", "params": {
-        "protocolVersion": "2024-11-05", "capabilities": {},
-        "clientInfo": {"name": "client-launch", "version": "1.0"}}})
-    if mcp_http.find_response(body, 0) is None:
-        raise LaunchError("mh-game-mcp 握手失败", "mcp_error")
-    mcp_http.post({"jsonrpc": "2.0", "method": "notifications/initialized"})
-    body = mcp_http.post({"jsonrpc": "2.0", "id": 1, "method": "tools/call",
-                          "params": {"name": name, "arguments": arguments}})
-    response = mcp_http.find_response(body, 1)
-    if response is None or "error" in response:
-        raise LaunchError(f"{name} 调用失败：{(response or {}).get('error')}", "mcp_error")
-    result = response["result"]
-    if result.get("isError"):
-        raise LaunchError(f"{name} 返回错误：{result.get('content')}", "mcp_error")
-    if result.get("structuredContent") is not None:
-        return result["structuredContent"]
-    text = "".join(item.get("text", "") for item in result.get("content", []) if isinstance(item, dict))
     try:
-        return json.loads(text)
-    except ValueError:
-        raise LaunchError(f"{name} 返回无法解析：{text[:200]}", "mcp_error") from None
+        return mcp_http.call(name, arguments, timeout=timeout)
+    except mcp_http.McpError as error:
+        raise LaunchError(str(error), "mcp_error") from None
 
 
 def list_devices():
