@@ -462,10 +462,10 @@ class PumpTests(WarBase):
         war.CCmd = CCmd
         war.action_end = lambda: None
 
-        def push_war_cmd(func):
-            cmd = CCmd()
-            cmd.Func = func
-        war.push_war_cmd = push_war_cmd
+        def next_cmd():
+            while war.Cmds and war.Cmds[0].state:
+                war.Cmds.pop(0)
+        war.next_cmd = next_cmd
         net2021 = types.ModuleType("war2021_net")
         net2021.LastCmd = "stale"
 
@@ -493,9 +493,11 @@ class PumpTests(WarBase):
 
     def play(self):
         while self.war.Cmds:
-            cmd = self.war.Cmds.pop(0)
+            cmd = self.war.Cmds[0]
             if callable(cmd.Func) and cmd.Func is not self.war.action_end:
-                cmd.Func()
+                cmd.Func()  # 哨兵自己置 state 并调用 next_cmd
+            if self.war.Cmds and self.war.Cmds[0] is cmd:
+                self.war.Cmds.pop(0)
 
     def test_perform_shorthand_expands_and_restores_turn(self):
         report = self.run_case({"name": "p", "steps": [{"pump": {"perform": {
@@ -524,6 +526,64 @@ class PumpTests(WarBase):
             {"pump": {"perform": {"magic_id": 1}, "events": []}}]}))
         for word in ("op 只能是", "magic_id", "perform 和 events 二选一"):
             self.assertIn(word, problems)
+
+    def test_validation_never_raises_and_checks_types(self):
+        problems = "；".join(runner.validate({"name": "v", "steps": [
+            {"pump": {"perform": {"magic_id": 1, "addons": None}}},
+            {"pump": {"events": [{"op": []}, {"op": "wstate", "data": {"victim_id": "e0", "hp_chg": "100"}}]}},
+            {"pump": {"perform": {"magic_id": True, "victims": "e0", "status": 120}}}]}))
+        for word in ("addons 必须是列表", "op 只能是", "hp_chg 必须是整数", "magic_id 必须是整数",
+                     "victims 必须是单位列表", "status 必须是0～100"):
+            self.assertIn(word, problems)
+        problems = "；".join(runner.validate({"name": "u", "steps": [
+            {"pump": {"perform": {"magic_id": 1, "victims": []}}},
+            {"pump": {"events": [{"op": "wstate", "data": {"victim_id": "pet0"}}, {"op": "wstate", "data": {"victim_id": "e00"}},
+                                 {"op": "wstate", "data": {"victim_id": -1}}]}},
+            {"war_act": {"role": {"act": "attack", "target": "pet0"}}}]}))
+        for word in ("victims 不能为空", "victim_id 必须是单位，实际 'pet0'", "实际 'e00'", "实际 -1", "war_act.role.target"):
+            self.assertIn(word, problems)
+        self.assertEqual(runner.validate({"name": "ok", "steps": [{"pump": {"events": [
+            {"op": "perform", "data": {"attacker_id": "self", "victims": [], "magic_id": 1}},
+            {"op": "addon", "data": {"wid": "pet1", "pid": 1, "args": ""}}]}}]}), [])
+        report = self.run_case({"name": "b", "steps": [{"pump": {"perform": {"magic_id": 1, "addons": None}}}]})
+        self.assertEqual(report["status"], "blocked")
+
+    def test_timeout_records_state_and_expr_error_is_not_timeout(self):
+        self.net2021.manage_cmd = lambda turn: None  # 队列不播放
+        report = self.run_case({"name": "t", "steps": [{"pump": {"perform": {"magic_id": 1}, "timeout": 0}}]})
+        step = report["results"][0]["steps"][0]
+        self.assertIn("手动 $at kill", report["results"][0]["failure"])
+        self.assertIn("哨兵未执行", report["results"][0]["failure"])
+        self.assertEqual(step["queue"]["turn"], 1)  # 哨兵没执行，Turn 仍多 1
+
+        def run_then_server_turn(turn):  # 哨兵播完后，服务端回合命令排进队列
+            self.play()
+            self.war.Cmds.append(types.SimpleNamespace(state=0, Func=None))
+        self.war.Cmds.clear()
+        self.war.Turn = 0
+        self.net2021.manage_cmd = run_then_server_turn
+        report = self.run_case({"name": "s", "steps": [{"pump": {"perform": {"magic_id": 1}, "timeout": 0}}]})
+        self.assertIn("哨兵已执行", report["results"][0]["failure"])
+        self.assertEqual(self.war.Turn, 0)
+
+        real = self.game
+
+        def probe_error(name, arguments, **kwargs):
+            if name == "execute_code" and "'marker'" in arguments["code"]:
+                return {"result": {"ret": None, "error": "NameError: boom", "loginfo": ""}}
+            return real(name, arguments)
+        self.war.Cmds.clear()
+        self.net2021.manage_cmd = lambda turn: None
+        with patch.object(mcp_http, "call", probe_error):
+            report = self.run_case({"name": "q", "steps": [{"pump": {"perform": {"magic_id": 1}, "timeout": 0}}]})
+        self.assertIn("读取失败", report["results"][0]["steps"][0]["queue"])
+        self.assertIn("状态未知", report["results"][0]["failure"])
+        self.war.Cmds.clear()
+        self.war.Turn = 0
+        with patch.object(runner, "wait_for", side_effect=runner.StepFailed("等待条件报错（第 1 次轮询）")):
+            report = self.run_case({"name": "x", "steps": [{"pump": {"perform": {"magic_id": 1}}}]})
+        self.assertIn("等待条件报错", report["results"][0]["failure"])
+        self.assertNotIn("queue", report["results"][0]["steps"][0])
 
     def test_construction_failure_rolls_back(self):
         self.fail_on = "StatusCmd"

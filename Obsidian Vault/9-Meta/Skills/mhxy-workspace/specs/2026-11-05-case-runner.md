@@ -86,12 +86,12 @@
 
 不经服务端结算，在已进入的真实战斗（GM 测试战斗）里直接构造战斗命令，让客户端播放指定技能的出手、受击、血条和 Buff，用于反复看技能表现。不做纯客户端建场：`war.start()` 会清空大世界对象（`war.py:3246`），结束后不会自动恢复，还会向服务端发回合结束包。
 
-- **步骤**：`{"pump": {"perform": {...}} | {"events": [...]}, "timeout": 15}`，二选一。前置是 `war_idle`（否则失败，一个命令都不入队）。
+- **步骤**：`{"pump": {"perform": {...}, "timeout": 15}}` 或 `{"pump": {"events": [...], "timeout": 15}}`，`perform` 与 `events` 二选一，字段类型在运行前校验。前置是 `war_idle`（否则失败，一个命令都不入队）。
   - `perform` 简写：`attacker`（默认 `self`）、`magic_id`（必填）、`victims`（默认 `["e0"]`）、`hp_chg`（默认 100，负数为加血）、`hits`（受击段数，默认 1）、`life`（默认 0，2 为倒地）、`status`（可选，受击后的血量百分比）、`addons`（可选，`[{"target", "pid", "turn", "level"}]`）。展开为：出手 → 每个目标 `hits` 条受击（第 2 段起前置分段命令）→ 可选血条 → 可选 Buff → 行动结束。
-  - `events` 原始事件：`{"op", "data"}`，`op` 为 `perform`、`attack`、`wstate`、`wstate_split`、`status`、`addon`、`action_end`；数据字段同客户端构造函数（`netwar.DO_S_WAR_PERFORM`、`war2021_net.AttackCmd`/`WstateCmd`/`WstateSplitCmd`/`StatusCmd`/`AddonCmd`），单位字段（`attacker_id`、`victims`、`victim_id`、`wid`、`aid`）可写 `e0`/`self`/`pet` 等标签。不提供 `delete`（会删掉真实战斗的单位）和 `turn`（`war.turn()` 会发包导致回合失步）。
-- **入队**：一次 `execute_code` 内完成，复用 `war_act` 的场面映射。出手直接调 `netwar.DO_S_WAR_PERFORM`（由它分流新战斗、Timeline、老战斗），其余命令直接构造 `war2021_net` 的命令对象（构造即入队）。最后用 `war.push_war_cmd` 加完成哨兵，`war2021_net.LastCmd = None` 后调 `war2021_net.manage_cmd(war.AccTurn)` 把受击、血条、Buff 挂到出手下面（不挂会不扣血、不飘字）。构造中途出错时删除本次入队的全部命令。
+  - `events` 原始事件：`{"op", "data"}`，`op` 为 `perform`、`attack`、`wstate`、`wstate_split`、`status`、`addon`、`action_end`；数据字段同客户端构造函数（`netwar.DO_S_WAR_PERFORM`、`war2021_net.AttackCmd`/`WstateCmd`/`WstateSplitCmd`/`StatusCmd`/`AddonCmd`），单位字段（`attacker_id`、`victims`、`victim_id`、`wid`、`aid`）可写 `e0`/`self`/`pet` 等标签或 wid；原始 `perform` 的 `victims` 可为空列表（无目标技能），简写必须非空。不提供 `delete`（会删掉真实战斗的单位）和 `turn`（`war.turn()` 会发包导致回合失步）。
+- **入队**：一次 `execute_code` 内完成，复用 `war_act` 的场面映射。出手直接调 `netwar.DO_S_WAR_PERFORM`（由它分流新战斗、Timeline、老战斗），其余命令直接构造 `war2021_net` 的命令对象（构造即入队）。最后加完成哨兵（`war.CCmd`，执行时置 `state`、减回 `Turn`、写标记、`next_cmd`；不用 `war.push_war_cmd`，它在 `war.WarFlag` 为假时静默不入队），`war2021_net.LastCmd = None` 后调 `war2021_net.manage_cmd(war.AccTurn)` 把受击、血条、Buff 挂到出手下面（不挂会不扣血、不飘字）。构造中途出错时删除本次入队的全部命令。
 - **`war.Turn`**：下指令阶段 `war.Turn` 为 0，而 `war.perform`、`attack_normal` 等在 `Turn == 0` 时一直等待（`war.py:9286`、`6369`）。注入时 `war.Turn += 1`，哨兵执行时 `-= 1`（用增减而非赋值：注入期间若收到服务端回合包，`Turn` 会被正常累加）；构造失败时同样减回。
-- **完成**：本机轮询哨兵标记（`sys._mhxy_case_pump` 等于本次编号）且命令队列为空、处理函数回到 `wait_cmd`；超时则失败，记录当时的队列快照（类名、处理函数名）。超时后不自动清理队列，由报告说明；用例应随后 `$at kill` 结束战斗。
+- **完成**：本机轮询哨兵标记（`sys._mhxy_case_pump` 等于本次编号）且命令队列为空、处理函数回到 `wait_cmd`；超时则失败，记录当时的 `war.Turn`、处理函数、标记和队列（类名、处理函数名）。超时后不自动清理，按标记区分两种情况：哨兵未执行（`war.Turn` 仍含注入时加的 1，实际值见记录），或哨兵已执行但队列里排进了服务端回合协议；步骤失败即停止，用例里后面的 `$at kill` 不会执行，需要执行者手动结束战斗。等待表达式本身报错时按原错误报告，不算超时。
 - **风险**：服务端回合倒计时可能在播放途中到点，回合协议会排在注入命令之后；技能较长时先用 GM 关闭倒计时。部分特殊门派技能依赖扩展字段 `info` 或前置协议，只发出手会走降级分支，这类用 `events` 补齐。
 
 ## 流程与文档

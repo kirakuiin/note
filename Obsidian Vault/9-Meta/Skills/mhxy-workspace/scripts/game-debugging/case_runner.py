@@ -616,8 +616,7 @@ def validate_war_act(value):
             problems.append(f"war_act.{who}.item 写道具名或造型编号")
         if "target" in spec:
             target = spec["target"]
-            if not ((isinstance(target, int) and not isinstance(target, bool))
-                    or (isinstance(target, str) and re.fullmatch(r"self|pet\d*|[ef]\d+", target))):
+            if not unit_ok(target):
                 problems.append(f"war_act.{who}.target 写 e0/f0/self/pet 或 wid，实际 {target!r}")
         elif default is None:
             problems.append(f"war_act.{who}：{spec['act']} 必须写 target")
@@ -628,8 +627,51 @@ def validate_war_act(value):
     return problems
 
 
+def int_ok(value):
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+# 与 WAR_HELPERS 中 _case_scene 生成的标签一致：self、pet、pet1…、e0…、f0…（无前导零）
+UNIT_LABEL = re.compile(r"self|pet(?:[1-9]\d*)?|[ef](?:0|[1-9]\d*)")
+
+
+def unit_ok(value):
+    """单位写法：_case_scene 生成的标签或非负整数 wid。war_act 与 pump 共用。"""
+    return (int_ok(value) and value >= 0) or (isinstance(value, str) and UNIT_LABEL.fullmatch(value) is not None)
+
+
+# pump 各字段的类型检查：字段名 → (检查函数, 说明)。简写和原始事件共用
+PUMP_FIELD_TYPES = {
+    "attacker": (unit_ok, "单位"), "attacker_id": (unit_ok, "单位"), "victim_id": (unit_ok, "单位"),
+    "wid": (unit_ok, "单位"), "aid": (unit_ok, "单位"), "target": (unit_ok, "单位"),
+    "victims": (lambda v: isinstance(v, list) and all(unit_ok(x) for x in v), "单位列表"),
+    "magic_id": (int_ok, "整数"), "pid": (int_ok, "整数"), "hp_chg": (int_ok, "整数"), "hp_ext": (int_ok, "整数"),
+    "life": (int_ok, "整数"), "ward": (int_ok, "整数"), "hurt": (int_ok, "整数"), "turn": (int_ok, "整数"),
+    "level": (int_ok, "整数"), "args": (lambda v: int_ok(v) or isinstance(v, str), "整数或字符串"),
+    "magic_desc": (int_ok, "整数"),
+    "split_type": (int_ok, "整数"), "series_attack": (lambda v: isinstance(v, bool), "true 或 false"),
+    "hits": (lambda v: int_ok(v) and v >= 1, "≥1 的整数"),
+    "status": (lambda v: int_ok(v) and 0 <= v <= 100, "0～100 的整数"),
+    "eff_status": (lambda v: int_ok(v) and 0 <= v <= 100, "0～100 的整数"),
+    "name": (lambda v: isinstance(v, str), "字符串"), "info": (lambda v: isinstance(v, str), "字符串"),
+}
+
+
+def field_problems(where, data):
+    """按 PUMP_FIELD_TYPES 检查 data 中已写的字段（不在表里的字段由调用方报未知字段）。"""
+    problems = []
+    for key, value in data.items():
+        check, text = PUMP_FIELD_TYPES.get(key, (None, None))
+        if check and not check(value):
+            problems.append(f"{where}.{key} 必须是{text}，实际 {value!r}")
+    return problems
+
+
 def validate_pump(value):
-    """pump：perform 简写和 events 原始事件二选一，字段见 PUMP_SHORTHAND／PUMP_OPS；timeout 秒数。"""
+    """pump：perform 简写和 events 原始事件二选一，字段见 PUMP_SHORTHAND／PUMP_OPS／PUMP_FIELD_TYPES；timeout 秒数。
+
+    任何写法都只返回问题列表、不抛异常，保证用例不合法时整次运行 blocked 而不是崩溃。
+    """
     if not isinstance(value, dict) or ("perform" in value) == ("events" in value):
         return ["pump 需要对象，perform 和 events 二选一"]
     problems = []
@@ -639,34 +681,42 @@ def validate_pump(value):
         problems.append("pump.timeout 必须是秒数")
     if "perform" in value:
         spec = value["perform"]
-        if not isinstance(spec, dict) or not isinstance(spec.get("magic_id"), int):
-            return problems + ["pump.perform 必须有整数 magic_id"]
+        if not isinstance(spec, dict) or "magic_id" not in spec:
+            return problems + ["pump.perform 必须是对象，且有 magic_id"]
         if set(spec) - PUMP_SHORTHAND:
             problems.append(f"pump.perform 未知字段 {sorted(set(spec) - PUMP_SHORTHAND)}")
-        if "victims" in spec and not (isinstance(spec["victims"], list) and spec["victims"]):
-            problems.append("pump.perform.victims 必须是非空列表")
-        if "hits" in spec and not (isinstance(spec["hits"], int) and spec["hits"] >= 1):
-            problems.append("pump.perform.hits 必须是 ≥1 的整数")
-        for index, addon in enumerate(spec.get("addons", []), 1):
+        problems += field_problems("pump.perform", {k: v for k, v in spec.items() if k != "addons"})
+        if spec.get("victims") == []:
+            problems.append("pump.perform.victims 不能为空（无目标技能用 events 写）")
+        addons = spec.get("addons", [])
+        if not isinstance(addons, list):
+            return problems + ["pump.perform.addons 必须是列表"]
+        for index, addon in enumerate(addons, 1):
+            where = f"pump.perform.addons[{index}]"
             if not isinstance(addon, dict) or "pid" not in addon or set(addon) - {"target", "pid", "turn", "level"}:
-                problems.append(f"pump.perform.addons[{index}] 写成 {{target, pid, turn, level}}，pid 必填")
+                problems.append(f"{where} 写成 {{target, pid, turn, level}}，pid 必填")
+            else:
+                problems += field_problems(where, addon)
         return problems
     events = value["events"]
     if not isinstance(events, list) or not events:
         return problems + ["pump.events 必须是非空列表"]
     for index, item in enumerate(events, 1):
-        if not isinstance(item, dict) or item.get("op") not in PUMP_OPS:
-            problems.append(f"pump.events[{index}].op 只能是 {sorted(PUMP_OPS)}")
+        where = f"pump.events[{index}]"
+        op = item.get("op") if isinstance(item, dict) else None
+        if not isinstance(op, str) or op not in PUMP_OPS:
+            problems.append(f"{where}.op 只能是 {sorted(PUMP_OPS)}")
             continue
-        required, optional = PUMP_OPS[item["op"]]
         data = item.get("data", {})
         if not isinstance(data, dict) or set(item) - {"op", "data"}:
-            problems.append(f"pump.events[{index}] 只能有 op 和 data（对象）")
+            problems.append(f"{where} 只能有 op 和 data（对象）")
             continue
+        required, optional = PUMP_OPS[op]
         if set(required) - set(data):
-            problems.append(f"pump.events[{index}]：{item['op']} 缺少 {sorted(set(required) - set(data))}")
+            problems.append(f"{where}：{op} 缺少 {sorted(set(required) - set(data))}")
         if set(data) - set(required) - set(optional):
-            problems.append(f"pump.events[{index}]：{item['op']} 未知字段 {sorted(set(data) - set(required) - set(optional))}")
+            problems.append(f"{where}：{op} 未知字段 {sorted(set(data) - set(required) - set(optional))}")
+        problems += field_problems(f"{where}.data", data)
     return problems
 
 
@@ -1003,11 +1053,32 @@ def pump(client, spec, context, record):
     timeout = spec.get("timeout", 15)
     try:
         wait_for(client, {"expr": done, "timeout": timeout}, context, record)
-    except StepFailed:
-        snapshot = client.run("[(type(c).__name__, getattr(getattr(c, 'Func', None), '__name__', '')) "
-                              "for c in __import__('war').Cmds]", f"注入 {record['index']} 超时：读取队列")
-        record["queue"] = clip(snapshot["ret"])
-        raise StepFailed(f"pump 超时（{timeout} 秒）没有播完，队列见步骤记录 queue") from None
+    except StepFailed as error:
+        if not str(error).startswith("等待超时"):
+            raise  # 等待表达式本身报错：保留原错误，不误报为超时
+        # 后续步骤（含用例里的 $at kill）不会再执行，要手动结束战斗。哨兵是否执行看标记：没执行时 war.Turn 仍多 1
+        probe = ("(lambda w, s: {'turn': w.Turn, 'process': getattr(w.ProcessFunc, '__name__', repr(w.ProcessFunc)),"
+                 " 'marker': getattr(s, '_mhxy_case_pump', None), 'queue': [(type(c).__name__,"
+                 " getattr(getattr(c, 'Func', None), '__name__', '')) for c in w.Cmds]})"
+                 "(__import__('war'), __import__('sys'))")
+        state = {}
+        try:
+            result = client.run(probe, f"注入 {record['index']} 超时：读取状态")
+            if result["error"] or not isinstance(result["ret"], dict):
+                record["queue"] = f"读取失败：{clip(result['error'] or result['ret'])}"
+            else:
+                state = result["ret"]  # 判断用原始值；报告里只裁剪队列列表，避免整个状态被截成字符串
+                record["queue"] = dict(state, queue=clip(state.get("queue")))
+        except (mcp_http.McpError, OSError) as probe_error:
+            record["queue"] = f"读取失败：{probe_error}"
+        if not state:
+            detail = "客户端状态未知"
+        elif state.get("marker") == token:
+            detail = "哨兵已执行（Turn 已减回），但队列未清空或未回到 wait_cmd，可能排进了服务端回合协议"
+        else:
+            detail = f"哨兵未执行，war.Turn 仍含注入时加的 1（当前 {state.get('turn')}）"
+        raise StepFailed(f"pump 超时（{timeout} 秒）：{detail}，状态见步骤记录 queue；"
+                         "后续步骤不再执行，需手动 $at kill 结束战斗") from None
 
 
 def war_act(client, spec, context, record):
