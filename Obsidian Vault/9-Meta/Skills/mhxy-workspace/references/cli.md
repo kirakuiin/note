@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | investigate | 讨论需求时读代码、还原执行路径、确认影响范围 | 只读，可开放列出的只读 MCP 工具 |
 | review | 第 4 步 Codex review，审查清单、收敛条件和 3 轮上限见 [code-review.md](code-review.md) | 只读，不接入 MCP |
-| test | 第 5 步真机自检，默认做改动执行检查（[exec-check.md](exec-check.md)）；客户端操作、Mock 和恢复按 [game-debugging.md](game-debugging.md) | 只写 `.mhxy-workspace/` 内的测试目录，只开放列出的 MCP 工具 |
+| test | 第 5 步真机自检，默认做改动执行检查（[exec-check.md](exec-check.md)）；客户端操作、Mock 和恢复按 [game-debugging.md](game-debugging.md) | 只写 `.mhxy-workspace/` 内的测试目录，只开放列出的 MCP 工具；命令可以联网（用例执行器直连 mh-game-mcp） |
 
 - 受委派方是执行者：不得派生、调用或者请求新的子代理，不与用户核对需求。需要用户判断的事项写进结果返回，由主会话处理。
 - 项目 AGENTS.md 受管区段中的「会话开始」「开发流程」「按需读取」是主会话规则，执行者不执行，只遵守「项目约定」「边界」和任务给的 references。`codex_cli.py` 已写入提示；Codex 主会话在任务说明里写明。
@@ -36,9 +36,11 @@
   "devid": "已选定的设备ID",
   "instructions": "目标代码、用例与断言、Mock 方案、已授权的 GM 指令、停止条件和恢复步骤",
   "mcp_tools": {"mh-game-mcp": ["init_client", "execute_code", "get_game_status"]},
-  "write_dirs": ["<项目>/.mhxy-workspace/exec-check"]
+  "write_dirs": ["<项目>/.mhxy-workspace/cases"]
 }
 ```
+
+- 执行者优先把用例写成 JSON 用例文件，用 game-debugging.md「用例执行器」一次跑完，出问题时排查用例或报告缺陷；`instructions` 里写明这一点，回归时给出 spec 路径。执行器直连 mh-game-mcp HTTP，不经过 `mcp_tools`；`mcp_tools` 只列执行者排查时需要直接调用的工具。
 
 - 设备按 game-debugging.md「选择设备」由主会话用 `client_launch.py select` 自动确定（没有合适的在线设备时会自动启动客户端），不需要用户确认。一个 test 任务只对应一台设备；PC 和互通都要测时分成两个任务。
 - `mcp_tools` 按计划列出实际要用的工具，不照抄示例；其他 MCP 一律不接入。
@@ -51,7 +53,7 @@
 | --- | --- |
 | investigate | `conclusion`；`evidence`，每条“文件:行号 —— 说明”；`uncertainties`，未确认的事项和最快的验证方法 |
 | review | `summary`；`items`，每条有 `level`（必须修改／建议修改／疑问）、`location`（文件:行号）、`problem`、`basis`、`suggestion`。脚本另给 `formatted`（`[级别] 文件:行号 —— 问题；依据；建议`）和 `must_fix` 条数 |
-| test | `status`（passed／failed／blocked）、`cases`、`errors`、`unverified`、`restoration`（restored／unknown／not_needed） |
+| test | `status`（passed／failed／blocked）、`cases`、`errors`、`unverified`、`restoration`（restored／unknown／not_needed）、`executed`（复现清单：实际执行的命令、GM 指令；用了执行器时写用例文件和报告路径） |
 
 - 只看结果内容下结论。退出码为 0、任务 `completed` 都不等于调查正确、审查通过或测试通过；没有完整结果、模型或工具失败都不算通过。
 - 结果是证据，不是结论：主会话逐条核对后再采纳，review 意见的处理见 code-review.md。

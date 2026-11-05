@@ -45,7 +45,7 @@ python -X utf8 "<skill>/scripts/exec-check/diff_lines.py" --root "<项目根目�
 
 ## 4. 执行
 
-报错收集按 `game-debugging.md`「收集客户端报错」执行，行追踪用 `scripts/exec-check/exec_trace.py`。分两次调用 `execute_code`：
+优先用 `game-debugging.md`「用例执行器」的 `exec_check` 步骤：它按第 1 步计算目标行（可用 `files` 限定为当前客户端能加载的文件），报错收集和恢复由执行器负责，下面两次调用由它完成。手动执行时，报错收集按 `game-debugging.md`「收集客户端报错」执行，行追踪用 `scripts/exec-check/exec_trace.py`。分两次调用 `execute_code`：
 
 1. 代码依次为 `scripts/game-debugging/error_watch.py` 全文、`exec_trace.py` 全文、用例定义，最后一行写 `[error_watch_start(), exec_check_start(TARGETS, CASES)]`。
    - `TARGETS` 是第 1 步输出中当前客户端能加载的 `files`，`CASES` 是 `[(名称, 无参函数)]`。

@@ -2,7 +2,11 @@
 
 在用户或内部流程需要 Mock、调试、debug、运行时探测或自测时先读取本文件。仅分析或生成代码时不操作游戏；实际执行要遵循任务授权。
 
-要实际操作客户端的测试——第 5 步真机自检、用户临时要求的 Mock／跑测／自测、覆盖率跑测——一律委派执行（见 [cli.md](cli.md)），主线程不自己跑。唯一例外：只调用一次、只读的探测（如读一个变量、确认客户端状态），主线程可以直接做。本文件是客户端操作和恢复规范，测试执行者和例外情况下的主线程都遵守。
+要实际操作客户端的测试——第 5 步真机自检、用户临时要求的 Mock／跑测／自测、覆盖率跑测——一律委派执行（见 [cli.md](cli.md)），主线程不自己跑。例外只有两种，主线程可以直接做：
+- 只调用一次、只读的探测（如读一个变量、确认客户端状态）；
+- 用「用例执行器」重跑 spec「测试用例」一节里已有的用例做回归：`codex_cli.py lock` 加锁 → 运行 → 核对报告和 `restoration` → `release --restored`。用例需要修改、或运行失败需要排查时，仍委派。
+
+本文件是客户端操作和恢复规范，测试执行者和例外情况下的主线程都遵守。
 
 ## 选择设备
 
@@ -100,6 +104,33 @@ python -X utf8 "<skill>/scripts/game-debugging/mcp_call.py" <工具名> < "<UTF-
 - **判断**：逐条区分与本次操作有关的报错和无关的报错，无关的也要列出并说明理由。最多保留 50 条，`dropped` 大于 0 时说明报错过多，需要先处理。
 - **收集不到的**：引擎层崩溃、不经过 Python logger 的错误、其他线程中的错误。
 - **使用范围**：Mock 与自测、覆盖率跑测（`coverage.md`）和改动执行检查（`exec-check.md`）都用这套方法，各文档只引用本节。
+
+## 用例执行器
+
+测试优先写成 JSON 用例文件，用 `scripts/game-debugging/case_runner.py` 一次跑完，不要逐步手动调用工具。适用于所有玩法，战斗也一样。设计和完整格式见 `specs/2026-11-05-case-runner.md`。
+
+```text
+python -X utf8 "<skill>/scripts/game-debugging/case_runner.py" run --root "<项目>" --devid "<devid>" [--no-init] [--settle 秒] <用例.json | spec.md> ...
+```
+
+**标准骨架**：每个用例按 清场 → 造局 → 执行 → 收集证据 → 恢复 组织。
+- 清场：确认前置状态干净（不在战斗中、目标界面没开等），用 `assert` 或 `wait_for`。
+- 造局：`gm` 指令、`mocks`、`exec` 构造数据。
+- 执行：调用被测函数或操作（`exec`／`mcp`），异步结果用 `wait_for` 等到。
+- 收集证据：`assert` 检查结果；需要改动执行检查时加 `exec_check`。
+- 恢复：Mock 和报错收集由执行器在收尾自动处理；GM 造出的状态（如战斗）在最后几步自己清掉，例如 `$at kill` 后 `wait_for` `war_out`。
+
+**格式要点**：
+- `mocks`：`{"name", "patch": "模块.属性", "value": "表达式，可用 orig"}` 由执行器备份和还原；其他情况用 `{"name", "install", "restore"}`，`restore` 最后一行返回核对结果 `True`。
+- `steps` 每步一个类型：`exec`（可 `save_as`）、`gm`、`mcp`（工具名 + `args`，可 `save_as`）、`wait_for`（`expr` 或 `preset`，`timeout` 默认 30 秒）、`assert`（可 `message`）、`exec_check`（`cases` 为定义 `CASES` 的代码，`files` 可选，规则同 `exec-check.md`）。
+- 占位符：`{devid}`、`{root}`、`{vars.名字}`、`{args.名字}`；代码里 vars 以 `repr()` 代入。客户端代码写法同「找到并调用工具」的 `execute_code`。
+- 等待预设（`case_runner.py` 的 `PRESETS`）：战斗 `war_in`、`war_out`、`war_turn`（`args.n`）、`war_idle`。缺少的判断先用 `expr` 写，在真机验证可靠后再加进预设表。
+
+**执行器负责**：校验全部用例（不合法时 blocked，不连接客户端）→ `init_client` 一次 → 每个用例自动开始报错收集、记录监听基线、安装 Mock → 依次执行步骤，失败即停 → finally 中等待 `settle`、逆序还原 Mock、核对监听、结束报错收集。报告在 stdout 和 `.mhxy-workspace/cases/reports/`，字段即 test 结果字段加 `results`（步骤明细）和 `executed`（实际下发的调用，用于复现）。
+
+**判读**：`status` 只是初判。逐条看 `errors`（区分有关和无关）、`unverified`（监听增加、执行检查未覆盖的行等）、`restoration`；`unknown` 时按「Mock 与验证」检查残留。用例文件本身写错时修正后重跑；业务缺陷带报告返回。
+
+**留档**：真机自检通过的用例，主会话把 JSON 写进项目 spec 的「测试用例」一节（json 代码块），迭代时直接用 spec 路径重跑。
 
 ## Mock 与验证
 

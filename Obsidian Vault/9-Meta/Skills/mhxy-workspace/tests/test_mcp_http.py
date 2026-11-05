@@ -93,6 +93,41 @@ class CallToolTests(unittest.TestCase):
         self.assertIn("oops", out)
 
 
+class CallTests(unittest.TestCase):
+    """call／initialize：返回结构化载荷，失败抛 McpError。"""
+
+    def call(self, server, **kwargs):
+        with patch.object(h.urllib.request, "urlopen", server):
+            return h.call("t", {"a": 1}, **kwargs)
+
+    def test_structured_content_preferred(self):
+        body = json.dumps({"jsonrpc": "2.0", "id": 1, "result": {"structuredContent": {"x": 1},
+                                                                  "content": [{"text": '{"x": 2}'}]}})
+        server = FakeServer(INIT_OK, "", body)
+        self.assertEqual(self.call(server), {"x": 1})
+        self.assertEqual(server.requests[2]["params"], {"name": "t", "arguments": {"a": 1}})
+
+    def test_content_text_and_no_handshake(self):
+        server = FakeServer(json.dumps({"jsonrpc": "2.0", "id": 1, "result": {"content": [{"text": '{"x": 2}'}]}}))
+        self.assertEqual(self.call(server, handshake=False), {"x": 2})
+        self.assertEqual(len(server.requests), 1)
+
+    def test_failures_raise(self):
+        bodies = [json.dumps({"jsonrpc": "2.0", "id": 1, "error": {"message": "e"}}),
+                  json.dumps({"jsonrpc": "2.0", "id": 1, "result": {"isError": True, "content": "bad"}}),
+                  json.dumps({"jsonrpc": "2.0", "id": 1, "result": {"content": [{"text": "not json"}]}}),
+                  "Bad Gateway"]
+        for body in bodies:
+            with self.assertRaises(h.McpError):
+                self.call(FakeServer(body), handshake=False)
+
+    def test_initialize_error_raises(self):
+        server = FakeServer(json.dumps({"jsonrpc": "2.0", "id": 0, "error": {"message": "no"}}))
+        with patch.object(h.urllib.request, "urlopen", server), self.assertRaises(h.McpError):
+            h.initialize()
+        self.assertEqual(len(server.requests), 1)
+
+
 class ScriptArgumentTests(unittest.TestCase):
     """参数错误要在联网前发现。"""
 

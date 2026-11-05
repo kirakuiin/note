@@ -17,7 +17,7 @@ CONFIG = {"model_provider": "p", "model_providers": {"p": {"base_url": "http://x
                           "codeviewer-mcp": {"url": "https://cv/mcp", "http_headers": {"X-Access-Token": "secret"}},
                           "other": {"url": "http://other"}}}
 TEST_RESULT = {"status": "passed", "cases": ["local probe"], "errors": [],
-               "unverified": [], "restoration": "not_needed"}
+               "unverified": [], "restoration": "not_needed", "executed": ["execute_code 读取角色信息"]}
 
 
 @pytest.fixture(autouse=True)
@@ -65,6 +65,13 @@ def test_test_kind_whitelists_mcp_and_write_dirs(tmp_path):
     servers = [b for a, b in zip(command, command[1:]) if a == "-c" and b.startswith("mcp_servers=")]
     assert "execute_code" in servers[0] and '"approve"' in servers[0]
     assert "other" not in servers[0] and "disabled_tools" not in servers[0]
+    assert option(command, "sandbox_workspace_write.network_access=true")  # case_runner.py 直连 HTTP
+
+
+def test_read_only_kinds_get_no_network(tmp_path):
+    for kind in ("investigate", "review"):
+        command = c.cli_command(tmp_path, {"instructions": "x"}, {"kind": kind, "root": "R"})
+        assert not option(command, "sandbox_workspace_write.network_access=true")
 
 
 def test_investigate_gets_only_listed_read_only_mcp(tmp_path):

@@ -96,6 +96,20 @@ class ValidateTests(unittest.TestCase):
         for word in ("未知字段", "缺少 name", "恰好有一个步骤类型", "未知预设", "不支持选项", "name+patch+value"):
             self.assertIn(word, text)
 
+    def test_types_and_preset_args(self):
+        problems = runner.validate({"name": "a", "mocks": [{"name": "m", "patch": "x.y", "value": 1},
+                                                          {"name": "n", "install": "", "restore": "True"}],
+                                    "steps": [{"wait_for": {"preset": "war_turn"}},
+                                              {"wait_for": {"preset": ["war_in"]}},
+                                              {"wait_for": {"expr": "1", "timeout": "5", "args": []}},
+                                              {"exec": "1", "save_as": 3},
+                                              {"exec_check": {"cases": "x", "files": [1]}}]})
+        text = "；".join(problems)
+        for word in ("value 必须是非空字符串", "install、restore", "缺少参数 ['n']", "未知预设 ['war_in']",
+                     "timeout 必须是非负秒数", "args 必须是对象", "save_as 必须是非空字符串", "files 必须是相对路径"):
+            self.assertIn(word, text)
+        self.assertEqual(runner.validate({"name": "a", "mocks": {}, "steps": [{"exec": "1"}]}), ["mocks 必须是列表"])
+
 
 class RenderTests(unittest.TestCase):
     def test_placeholders(self):
@@ -246,6 +260,22 @@ class ExecCheckTests(Base):
         self.assertEqual(report["status"], "passed", report)
         self.assertEqual(report["results"][0]["steps"][0]["missing"], {"mod_x.py": [4]})
         self.assertTrue(any("[4]" in text for text in report["unverified"]))
+
+    def test_skipped_files_fail_and_warnings_reported(self):
+        fake = types.ModuleType("diff_lines")
+        fake.collect = lambda root, rels: {"files": {}, "total": 0, "skipped": {"bad.py": "语法错误"},
+                                           "warnings": ["本机不是 3.11"]}
+        with patch.dict(sys.modules, {"diff_lines": fake}):
+            report = self.run_case({"name": "ec", "steps": [{"exec_check": {"cases": "CASES = []", "files": ["bad.py"]}}]})
+        self.assertIn("无法计算目标行", report["results"][0]["failure"])
+        self.assertTrue(any("3.11" in text for text in report["unverified"]))
+
+    def test_unexpected_error_still_reports(self):
+        with patch.object(runner, "run_step", side_effect=TypeError("bug")):
+            report = self.run_case({"name": "u", "mocks": [{"name": "v", "patch": "fake_target.value", "value": "5"}],
+                                    "steps": [{"exec": "1"}]})
+        self.assertIn("执行器内部错误", report["results"][0]["failure"])
+        self.assertEqual(self.target.value, 1)
 
 
 class MainTests(Base):

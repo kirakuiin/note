@@ -48,7 +48,9 @@ SCHEMAS = {
                       suggestion={"type": "string"})}),
     "test": obj(status={"type": "string", "enum": ["passed", "failed", "blocked"]},
                 cases=STRINGS, errors=STRINGS, unverified=STRINGS,
-                restoration={"type": "string", "enum": ["restored", "unknown", "not_needed"]}),
+                restoration={"type": "string", "enum": ["restored", "unknown", "not_needed"]},
+                # 复现清单：按顺序列出实际执行的命令、GM 指令和用例文件；用了 case_runner.py 时写用例文件和报告路径
+                executed=STRINGS),
 }
 
 ROLE = {
@@ -253,6 +255,9 @@ def cli_command(job, task, state):
                "-c", "features.multi_agent=false", "-c", "features.hooks=false", "-c", "plugins={}",
                "-c", "mcp_servers=" + toml_value(mcp_servers(task, config) if kind != "review" else {}),
                "--json", "-o", str(job / "result.json")]
+    if kind == "test":
+        # 执行者用 case_runner.py 在命令行直连 mh-game-mcp 的 HTTP 入口；workspace-write 默认禁止命令联网
+        options += ["-c", "sandbox_workspace_write.network_access=true"]
     if strict_schema(model):
         options += ["--output-schema", str(job / "schema.json")]
     if os.name == "nt":

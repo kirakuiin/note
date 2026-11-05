@@ -37,8 +37,9 @@ def initialize(client_name="mhxy-workspace", timeout=None):
     body = post({"jsonrpc": "2.0", "id": INIT_ID, "method": "initialize", "params": {
         "protocolVersion": "2024-11-05", "capabilities": {},
         "clientInfo": {"name": client_name, "version": "1.0"}}}, timeout)
-    if find_response(body, INIT_ID) is None:
-        raise McpError(f"mh-game-mcp 握手失败：{body[:200]}")
+    response = find_response(body, INIT_ID)
+    if response is None or "error" in response:
+        raise McpError(f"mh-game-mcp 握手失败：{(response or {}).get('error') or body[:200]}")
     post({"jsonrpc": "2.0", "method": "notifications/initialized"}, timeout)
 
 

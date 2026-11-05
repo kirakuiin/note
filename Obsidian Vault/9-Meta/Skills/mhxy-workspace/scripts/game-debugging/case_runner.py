@@ -165,18 +165,27 @@ def validate(case):
     if not isinstance(case.get("name"), str) or not case["name"].strip():
         problems.append("缺少 name")
     names = set()
-    for index, mock in enumerate(case.get("mocks", []), 1):
+    mocks = case.get("mocks", [])
+    if not isinstance(mocks, list):
+        problems.append("mocks 必须是列表")
+        mocks = []
+    for index, mock in enumerate(mocks, 1):
         where = f"mocks[{index}]"
-        if not isinstance(mock, dict) or not isinstance(mock.get("name"), str):
+        if not isinstance(mock, dict) or not text_ok(mock.get("name")):
             problems.append(f"{where}：需要对象和 name")
             continue
         if mock["name"] in names:
             problems.append(f"{where}：name 重复")
         names.add(mock["name"])
         if set(mock) == {"name", "patch", "value"}:
-            if not isinstance(mock["patch"], str) or mock["patch"].count(".") < 1:
+            if not text_ok(mock["patch"]) or mock["patch"].count(".") < 1:
                 problems.append(f"{where}：patch 写成 模块.属性")
-        elif set(mock) != {"name", "install", "restore"}:
+            if not text_ok(mock["value"]):
+                problems.append(f"{where}：value 必须是非空字符串（客户端表达式）")
+        elif set(mock) == {"name", "install", "restore"}:
+            if not (text_ok(mock["install"]) and text_ok(mock["restore"])):
+                problems.append(f"{where}：install、restore 必须是非空字符串（客户端代码）")
+        else:
             problems.append(f"{where}：只能是 name+patch+value 或 name+install+restore")
     steps = case.get("steps")
     if not isinstance(steps, list) or not steps:
@@ -184,9 +193,17 @@ def validate(case):
         steps = []
     for index, step in enumerate(steps, 1):
         problems += [f"steps[{index}]：{problem}" for problem in validate_step(step)]
-    if "settle" in case and not isinstance(case["settle"], (int, float)):
+    if "settle" in case and not number_ok(case["settle"]):
         problems.append("settle 必须是秒数")
     return problems
+
+
+def text_ok(value):
+    return isinstance(value, str) and bool(value.strip())
+
+
+def number_ok(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and value >= 0
 
 
 def validate_step(step):
@@ -200,22 +217,47 @@ def validate_step(step):
     extra = set(step) - {kind} - STEP_OPTIONS[kind]
     if extra:
         problems.append(f"{kind} 不支持选项 {sorted(extra)}")
-    if kind in ("exec", "gm", "mcp", "assert") and not (isinstance(value, str) and value.strip()):
+    if kind in ("exec", "gm", "mcp", "assert") and not text_ok(value):
         problems.append(f"{kind} 的值必须是非空字符串")
+    for option in ("save_as", "message"):
+        if option in step and not text_ok(step[option]):
+            problems.append(f"{option} 必须是非空字符串")
     if kind == "mcp" and not isinstance(step.get("args", {}), dict):
         problems.append("mcp 的 args 必须是对象")
     if kind == "wait_for":
-        if not isinstance(value, dict) or ("expr" in value) == ("preset" in value):
-            problems.append("wait_for 需要 expr 或 preset 二选一")
-        elif "preset" in value and value["preset"] not in PRESET_INDEX:
-            problems.append(f"未知预设 {value['preset']}，可用：{sorted(PRESET_INDEX)}")
-        elif set(value) - {"expr", "preset", "args", "timeout", "interval"}:
-            problems.append(f"wait_for 未知字段 {sorted(set(value) - {'expr', 'preset', 'args', 'timeout', 'interval'})}")
+        problems += validate_wait(value)
     if kind == "exec_check":
-        if not isinstance(value, dict) or not isinstance(value.get("cases"), str):
-            problems.append("exec_check 需要 cases（定义 CASES 的客户端代码）")
-        elif not isinstance(value.get("files", []), list):
-            problems.append("exec_check 的 files 必须是列表")
+        if not isinstance(value, dict) or not text_ok(value.get("cases")) or set(value) - {"cases", "files"}:
+            problems.append("exec_check 只能有 cases（定义 CASES 的客户端代码）和可选的 files")
+        elif not (isinstance(value.get("files", []), list) and all(text_ok(item) for item in value.get("files", []))):
+            problems.append("exec_check 的 files 必须是相对路径字符串列表")
+    return problems
+
+
+def validate_wait(value):
+    """wait_for 的字段、类型，以及预设表达式用到的 {args.*} 是否都已提供。"""
+    fields = {"expr", "preset", "args", "timeout", "interval"}
+    if not isinstance(value, dict) or ("expr" in value) == ("preset" in value):
+        return ["wait_for 需要 expr 或 preset 二选一"]
+    problems = []
+    if set(value) - fields:
+        problems.append(f"wait_for 未知字段 {sorted(set(value) - fields)}")
+    if "expr" in value and not text_ok(value["expr"]):
+        problems.append("wait_for 的 expr 必须是非空字符串")
+    args = value.get("args", {})
+    if not isinstance(args, dict):
+        problems.append("wait_for 的 args 必须是对象")
+        args = {}
+    if "preset" in value:
+        if not isinstance(value["preset"], str) or value["preset"] not in PRESET_INDEX:
+            problems.append(f"未知预设 {value['preset']!r}，可用：{sorted(PRESET_INDEX)}")
+        else:
+            needed = {key[5:] for key in PLACEHOLDER.findall(PRESET_INDEX[value["preset"]]) if key.startswith("args.")}
+            if needed - set(args):
+                problems.append(f"预设 {value['preset']} 缺少参数 {sorted(needed - set(args))}")
+    for option in ("timeout", "interval"):
+        if option in value and not number_ok(value[option]):
+            problems.append(f"wait_for 的 {option} 必须是非负秒数")
     return problems
 
 
@@ -278,9 +320,11 @@ class Client:
         log_code 用于 executed 中代替冗长的模板全文（例如“<error_watch.py 全文>”），实际仍发送 code。
         """
         arguments = {"devid": self.devid, "code": code, "need_loginfo": True}
-        payload = self.tool("execute_code", arguments, label)
-        if log_code is not None:
-            self.executed[-1]["arguments"] = dict(arguments, code=log_code)
+        try:
+            payload = self.tool("execute_code", arguments, label)
+        finally:  # 调用失败时 executed 里也要是简写
+            if log_code is not None:
+                self.executed[-1]["arguments"] = dict(arguments, code=log_code)
         inner = payload.get("result", payload) if isinstance(payload, dict) and "ret" not in payload else payload
         if not isinstance(inner, dict):
             raise mcp_http.McpError(f"execute_code 结果无法识别：{str(payload)[:200]}")
@@ -347,8 +391,10 @@ def run_case(client, root, case, settle_default):
                 record["seconds"] = round(time.time() - began, 2)
     except StepFailed as error:
         failure = str(error)
-    except (mcp_http.McpError, OSError, KeyError) as error:
+    except (mcp_http.McpError, OSError) as error:
         failure = f"{type(error).__name__}: {error}"
+    except Exception as error:  # 执行器自身的意外错误也要走收尾并输出报告，不能让进程直接崩溃
+        failure = f"执行器内部错误 {type(error).__name__}: {error}"
     finally:
         restoration = finish(client, case, context, report, installed, baseline, watching, settle_default)
     if failure:
@@ -452,13 +498,19 @@ def exec_check(client, root, spec, context, record):
     没执行到的行写进 record["missing"]，由 run_case 汇总到 unverified，不算失败；用例报错算失败。
     """
     import diff_lines  # 只有这一步需要 svn 和 3.11 的行号表，延迟导入
-    rels = spec.get("files") or diff_lines.changed_py_files(root)
-    collected = diff_lines.collect(root, rels)
-    record["targets"] = {"total": collected["total"], "skipped": collected["skipped"], "warnings": collected["warnings"]}
+    try:
+        rels = spec.get("files") or diff_lines.changed_py_files(root)
+        collected = diff_lines.collect(root, rels)
+    except diff_lines.precommit.PrecheckError as error:
+        raise StepFailed(f"计算目标行失败：{error}") from None
+    record["targets"] = {"total": collected["total"], "skipped": collected["skipped"]}
+    record["warnings"] = collected["warnings"]  # 例如本机不是 3.11，行号可能对不上；finish 汇总进 unverified
+    if collected["skipped"]:
+        # exec-check.md：skipped 不为空先报告，有语法错误先修好；不能带着漏检的文件判通过
+        raise StepFailed(f"有文件无法计算目标行：{collected['skipped']}")
     call = f"exec_check_start({collected['files']!r}, CASES)"
-    trace, _ = template(EXEC_TRACE, call)
-    code = trace + "\n" + render(spec["cases"], context, code=True) + "\n" + call
-    log = f"<exec_trace.py 全文>\n{render(spec['cases'], context, code=True)}\n{call}"
+    body = render(spec["cases"], context, code=True) + "\n" + call  # 用例定义在前，调用在最后一行
+    code, log = template(EXEC_TRACE, body)
     result = client.run(code, f"执行检查 {record['index']}", log)
     record.update(result_fields(result))
     ret = result["ret"] if isinstance(result["ret"], dict) else {}
@@ -492,7 +544,7 @@ def finish(client, case, context, report, installed, baseline, watching, settle_
             else:
                 ok = not result["error"] and ret is True  # restore 代码最后一行要返回核对结果 True
             entry.update({"restore": clip(ret), "restore_error": result["error"], "restored": bool(ok)})
-        except (mcp_http.McpError, OSError) as error:
+        except Exception as error:  # 含 restore 代码引用了未赋值的 {vars.*}：记为未还原，继续后面的收尾
             entry.update({"restore_error": f"{type(error).__name__}: {error}", "restored": False})
         restored_all = restored_all and entry["restored"]
     if baseline is not None:
@@ -521,6 +573,8 @@ def finish(client, case, context, report, installed, baseline, watching, settle_
     for step in report["steps"]:
         for path, lines in step.get("missing", {}).items():
             report["unverified"].append(f"步骤 {step['index']} 执行检查未执行到：{path} {lines}")
+        for text in step.get("warnings", []):
+            report["unverified"].append(f"步骤 {step['index']} 目标行计算警告：{text}")
     if not installed:
         return "not_needed"
     return "restored" if restored_all else "unknown"
