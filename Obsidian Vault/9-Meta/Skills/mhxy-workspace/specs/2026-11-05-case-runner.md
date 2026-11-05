@@ -40,12 +40,13 @@
 - **占位符**：`{devid}`、`{root}` 原样代入；`{vars.名字}`（前面 `save_as` 保存的值）、`{args.名字}`（预设参数）在客户端代码里代入 `repr()`，在 GM 指令和 mcp 参数里代入文本。其他花括号不动。
 - **步骤**：每步恰好一个类型键：`exec`、`gm`（`execute_command`）、`mcp`（其他 mh-game-mcp 工具）、`wait_for`、`assert`、`exec_check`。任一步失败即停止后续步骤，转入收尾。
 - **wait_for**：本机轮询客户端表达式直到为真（不在客户端主线程等待），`timeout` 默认 30 秒、`interval` 默认 0.5 秒；表达式报错或超时即失败。executed 只记第一次轮询。
-- **预设**：集中在 `PRESETS` 表，按领域分组；新增玩法只加预设，不改执行流程，每个预设在真机上验证过再加入。第一批战斗预设：`war_in`、`war_out`（`utils3.is_in_war()`）、`war_turn`（`war.Turn >= n`）、`war_idle`（命令队列 `war.Cmds` 为空）。界面类预设等有可靠判断依据后再加。
+- **预设**：集中在 `PRESETS` 表，按领域分组；新增玩法只加预设，不改执行流程，每个预设在真机上验证过再加入。第一批战斗预设：`war_in`、`war_out`（`utils3.is_in_war()`）；`war_idle`：本场已进入某回合且在等下指令（`PlayerTurn >= 1`、`war.Cmds` 为空、`ProcessFunc == wait_cmd`）；`war_turn`：在 `war_idle` 基础上 `ActualTurn >= n`。不用 `war.Turn`：它是“已收到、未播完的回合协议”计数，进入回合时被 `war.turn()` 减 1（真机验证）；`ActualTurn` 只在 `do_end()` 重置，单独判断会在刚开战或连续战斗时过早成立。界面类预设等有可靠判断依据后再加。
 - **exec_check**：目标行由 `diff_lines` 计算（不给 `files` 时取全部未提交的 .py），在一次 `execute_code` 里用 `exec_trace.py` 跑完 `CASES`；用例报错算失败，没执行到的行列进 `unverified`，由执行者补测或说明。
 
 ### Mock 与收尾
 
 - 报错收集不是步骤：每个用例开始时自动 `error_watch_start`，收尾时 `error_watch_finish`。
+- **合并调用**：真机上每次 `execute_code` 往返约 2.8 秒，固定开销合并为每个用例两次调用：开始时一次完成“开始报错收集 + 监听基线（有 Mock 时）+ 安装全部 patch Mock”，收尾时一次完成“逆序还原 patch Mock + 核对监听 + 结束报错收集”。客户端辅助函数（`CLIENT_HELPERS`）各自捕获异常并返回结果，同一次调用里一项失败不影响其他项。自定义 Mock 代码任意，安装和还原仍逐个调用，在 patch Mock 之后安装、之前还原。
 - `patch` 型 Mock 由执行器生成安装和还原代码：备份登记在客户端 `sys._mhxy_case_mocks`，跨多次调用仍可还原；只看对象自己的 `__dict__`，继承来的属性还原时删除而不是写回；先登记再替换。安装在登记前就失败的，视为不需要还原。`install`/`restore` 型用于其他情况，`restore` 最后一行必须返回 `True` 才算核对通过。
 - 有 Mock 时，安装前记录各事件的监听数量。
 - 收尾在 finally 中执行，各项单独捕获失败：等待 `settle` 秒（默认 2，让延迟回调跑完）→ 逆序还原 Mock → 核对监听数量（比基线多的列进 `unverified`，可能是被测代码正常注册）→ 结束报错收集。全部 Mock 核对通过为 `restored`，任一失败为 `unknown`，没有 Mock 为 `not_needed`。
@@ -71,7 +72,8 @@
 
 ## 风险
 
-- 预设表达式判断不准会导致等待超时；以超时失败报告，不静默通过。`war_idle` 只看命令队列，可能早于表演结束的最后几帧。
+- 预设表达式判断不准会导致等待超时；以超时失败报告，不静默通过。
+- 每次调用约 2.8 秒的往返是 mh-game-mcp 服务本身的耗时，执行器只能减少调用次数；`wait_for` 的轮询间隔实际由往返时间决定。
 - 回归由主线程直接操作客户端，要严格按锁和恢复核对执行。
 
 ## 验收

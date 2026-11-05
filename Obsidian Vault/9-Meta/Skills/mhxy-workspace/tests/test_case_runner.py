@@ -63,7 +63,9 @@ class Base(unittest.TestCase):
         self.target.value = 1
         self.target.Holder = type("Holder", (), {"attr": "base"})
         self.war = types.ModuleType("war")
-        self.war.Turn, self.war.Cmds = 0, []
+        self.war.Turn, self.war.ActualTurn, self.war.Cmds = 0, 1, []
+        self.war.wait_cmd = lambda: None
+        self.war.ProcessFunc, self.war.PlayerTurn = self.war.wait_cmd, 1
         utils3 = types.ModuleType("utils3")
         utils3.is_in_war = lambda: self.war.Turn > 0
         event = types.ModuleType("event")
@@ -191,8 +193,29 @@ class RunTests(Base):
         self.assertEqual(report["restoration"], "restored")
         self.assertEqual(report["results"][0]["steps"], [])
 
+    def test_overhead_is_two_calls_per_case(self):
+        report = self.run_case({"name": "o", "mocks": [{"name": "a", "patch": "fake_target.value", "value": "2"},
+                                                       {"name": "b", "patch": "fake_target.Holder.attr", "value": "3"}],
+                                "steps": [{"exec": "1"}]})
+        self.assertEqual(report["status"], "passed", report)
+        labels = [item.get("label") for item in report["executed"][1:]]
+        self.assertEqual(len(labels), 3)  # 开始、步骤、收尾
+        self.assertTrue(labels[0].startswith("开始") and labels[2].startswith("收尾"))
+
+    def test_mixed_mocks_restore_custom_then_patch(self):
+        case = {"name": "mix", "mocks": [
+            {"name": "c", "install": "__import__('fake_target').__dict__.update(x=1)",
+             "restore": "(lambda m: (m.__dict__.pop('x'), 'x' not in vars(m))[1])(__import__('fake_target'))"},
+            {"name": "p", "patch": "fake_target.value", "value": "7"}],
+            "steps": [{"assert": "__import__('fake_target').x == 1 and __import__('fake_target').value == 7"}]}
+        report = self.run_case(case)
+        self.assertEqual((report["status"], report["restoration"]), ("passed", "restored"), report)
+        self.assertNotIn("x", vars(self.target))
+        self.assertEqual(self.target.value, 1)
+
     def test_wait_for_preset_and_timeout(self):
         self.war.Turn = 2
+        self.war.ActualTurn = 2
         report = self.run_case({"name": "w", "steps": [
             {"wait_for": {"preset": "war_turn", "args": {"n": 2}}},
             {"wait_for": {"preset": "war_out", "timeout": 0}}]})
@@ -202,6 +225,16 @@ class RunTests(Base):
         self.assertEqual(report["restoration"], "not_needed")
         waits = [item for item in report["executed"] if item.get("label", "").startswith("等待")]
         self.assertEqual(len(waits), 2)
+
+    def test_war_presets_need_waiting_state(self):
+        self.war.Turn, self.war.ActualTurn = 1, 3  # 已在战斗中，ActualTurn 残留上一场的值
+        for state in ({"PlayerTurn": 0}, {"Cmds": ["war.start"]}, {"ProcessFunc": None}):
+            for key, value in state.items():
+                setattr(self.war, key, value)
+            report = self.run_case({"name": "w", "steps": [{"wait_for": {"preset": "war_turn", "args": {"n": 2},
+                                                                         "timeout": 0}}]})
+            self.assertIn("等待超时", report["results"][0]["failure"], state)
+            self.war.PlayerTurn, self.war.Cmds, self.war.ProcessFunc = 1, [], self.war.wait_cmd
 
     def test_gm_and_mcp_render(self):
         report = self.run_case({"name": "g", "steps": [{"gm": "$at fightN 2"},

@@ -42,61 +42,84 @@ PRESETS = {
         # utils3.is_in_war 即 event.IS_IN_WAR()，客户端各处判断是否在战斗中都用它
         "war_in": "__import__('utils3').is_in_war()",
         "war_out": "not __import__('utils3').is_in_war()",
-        # war.Turn 是客户端当前回合数，进入战斗时从 1 开始
-        "war_turn": "__import__('utils3').is_in_war() and __import__('war').Turn >= {args.n}",
-        # 命令队列为空：本回合的表演播完，等待下指令或下一回合数据
-        "war_idle": "__import__('utils3').is_in_war() and not __import__('war').Cmds",
+        # 进入第 n 回合的等待下指令阶段。回合数用 ActualTurn（每回合 war.turn() 设置）；不能用 war.Turn：
+        # 它是“已收到、未播完的回合协议”计数，进入回合时被 war.turn() 减 1，第 1 回合期间恒为 0（真机已验证）。
+        # ActualTurn 只在 do_end() 重置、初值为 1，单独判断会在刚收到 S_WAR_START 或连续战斗时过早成立，所以叠加 WAR_WAITING
+        "war_turn": "{waiting} and __import__('war').ActualTurn >= {{args.n}}",
+        # 本场已进入某回合、表演播完、在等玩家下指令
+        "war_idle": "{waiting}",
     },
 }
+# 本场战斗已执行过 war.turn()（war.start() 把 PlayerTurn 清零，war.turn() 加 1）、命令队列为空（连续战斗时
+# 上一场的 war.end／本场 war.start 还在队列里，此条排除它们）、当前处理函数是 wait_cmd
+WAR_WAITING = ("__import__('utils3').is_in_war() and __import__('war').PlayerTurn >= 1 and not __import__('war').Cmds"
+               " and __import__('war').ProcessFunc == __import__('war').wait_cmd")
+PRESETS["war"] = {name: expr.format(waiting=WAR_WAITING) for name, expr in PRESETS["war"].items()}
 PRESET_INDEX = {name: expr for group in PRESETS.values() for name, expr in group.items()}
 
-# 各事件当前的监听数量；用于核对 Mock 期间新增、未解除的监听
-LISTENER_PROBE = ("(lambda e: {k: len(v.listeners) for k, v in vars(e).items() "
-                  "if isinstance(getattr(v, 'listeners', None), list)})(__import__('event'))")
-
-# patch 型 Mock 的安装、还原代码。备份存在 sys._mhxy_case_mocks（{名字: (对象, 属性, 原来是否有, 原值, 新值)}），
-# 跨多次 execute_code 仍在；只看对象自己的 __dict__，类上继承来的属性还原时删除而不是写回。
-PATCH_INSTALL = '''def _install(name, target, value_src):
+# 客户端辅助函数，与 error_watch.py 一起发送。每次 execute_code 往返约 3 秒，所以用例开始（报错收集、
+# 监听基线、patch Mock 安装）和收尾（patch Mock 还原、监听核对、结束收集）各合并成一次调用。
+# 各函数自包含（execute_code 中顶层名字对函数不可见），自己捕获异常并返回结果，同一次调用里一项失败不影响其他项。
+# patch 备份登记在 sys._mhxy_case_mocks（{名字: (对象, 属性, 原来是否有, 原值, 新值)}），跨多次调用仍在；
+# 只看对象自己的 __dict__，类上继承来的属性还原时删除而不是写回。
+CLIENT_HELPERS = '''def _case_install(name, target, value_src):
 	import importlib
 	import sys
-	store = sys.__dict__.setdefault("_mhxy_case_mocks", {})
-	if name in store:
-		raise RuntimeError(f"Mock {name} 已有安装记录，可能是上次运行没有还原")
-	parts = target.split(".")
-	for i in range(len(parts) - 1, 0, -1):
-		try:
-			obj = importlib.import_module(".".join(parts[:i]))
-			break
-		except ImportError:
-			continue
-	else:
-		raise ImportError(f"找不到 {target} 所在的模块")
-	for part in parts[i:-1]:
-		obj = getattr(obj, part)
-	attr = parts[-1]
-	had = attr in vars(obj)
-	old = vars(obj).get(attr)
-	value = eval(value_src, {"orig": getattr(obj, attr, None)})
-	store[name] = (obj, attr, had, old, value)  # 先登记再替换：替换失败时还原也只是写回原值
-	setattr(obj, attr, value)
-	return "installed"
-_install(%r, %r, %r)'''
+	import traceback
+	try:
+		store = sys.__dict__.setdefault("_mhxy_case_mocks", {})
+		if name in store:
+			raise RuntimeError(f"Mock {name} 已有安装记录，可能是上次运行没有还原")
+		parts = target.split(".")
+		for i in range(len(parts) - 1, 0, -1):
+			try:
+				obj = importlib.import_module(".".join(parts[:i]))
+				break
+			except ImportError:
+				continue
+		else:
+			raise ImportError(f"找不到 {target} 所在的模块")
+		for part in parts[i:-1]:
+			obj = getattr(obj, part)
+		attr = parts[-1]
+		had = attr in vars(obj)
+		old = vars(obj).get(attr)
+		value = eval(value_src, {"orig": getattr(obj, attr, None)})
+		store[name] = (obj, attr, had, old, value)  # 先登记再替换：替换失败时还原也只是写回原值
+		setattr(obj, attr, value)
+		return {"installed": True}
+	except Exception:
+		return {"error": traceback.format_exc()[-2000:]}
 
-PATCH_RESTORE = '''def _restore(name):
+
+def _case_restore(name):
 	import sys
-	store = sys.__dict__.get("_mhxy_case_mocks", {})
-	if name not in store:
-		return {"restored": False, "reason": "没有安装记录"}
-	obj, attr, had, old, value = store.pop(name)
-	if not store:
-		del sys._mhxy_case_mocks
-	if had:
-		setattr(obj, attr, old)
-		return {"restored": vars(obj).get(attr) is old}
-	if attr in vars(obj):
-		delattr(obj, attr)
-	return {"restored": attr not in vars(obj)}
-_restore(%r)'''
+	import traceback
+	try:
+		store = sys.__dict__.get("_mhxy_case_mocks", {})
+		if name not in store:
+			return {"restored": False, "reason": "没有安装记录"}
+		obj, attr, had, old, value = store.pop(name)
+		if not store:
+			del sys._mhxy_case_mocks
+		if had:
+			setattr(obj, attr, old)
+			return {"restored": vars(obj).get(attr) is old}
+		if attr in vars(obj):
+			delattr(obj, attr)
+		return {"restored": attr not in vars(obj)}
+	except Exception:
+		return {"restored": False, "reason": traceback.format_exc()[-2000:]}
+
+
+def _case_listeners():
+	import traceback
+	try:
+		import event
+		return {k: len(v.listeners) for k, v in vars(event).items() if isinstance(getattr(v, "listeners", None), list)}
+	except Exception:
+		return {"error": traceback.format_exc()[-2000:]}
+'''
 
 
 class CaseError(Exception):
@@ -356,27 +379,14 @@ def run_case(client, root, case, settle_default):
     report = {"name": case["name"], "steps": [], "mocks": [], "errors": [], "unverified": []}
     start = time.time()
     failure = None
-    installed = []  # 已安装（或安装中途失败、状态不明）的 Mock，收尾时逆序还原
-    baseline = None
-    watching = False
+    state = {"watching": False, "baseline": None, "patched": [], "custom": []}  # 收尾要处理的内容，见 finish
     try:
-        code, log = template(ERROR_WATCH, "error_watch_start()")
-        started = client.run(code, "开始报错收集", log)
-        if started["error"]:
-            raise StepFailed(f"开始报错收集失败：{started['error']}")
-        watching = True
-        stale = (started["ret"] or {}).get("stale")
-        if stale:
-            report["unverified"].append(f"上次未结束的报错收集残留（不属于本次）：{clip(stale)}")
-
-        if case.get("mocks"):
-            probe = client.run(LISTENER_PROBE, "记录事件监听基线")
-            baseline = probe["ret"] if not probe["error"] and isinstance(probe["ret"], dict) else None
-            if baseline is None:
-                report["unverified"].append(f"读不到事件监听基线，无法核对监听残留：{probe['error']}")
+        begin(client, case, context, report, state)
         for mock in case.get("mocks", []):
-            installed.append(mock)
-            result = client.run(install_code(mock, context), f"安装 Mock {mock['name']}")
+            if "patch" in mock:
+                continue
+            state["custom"].append(mock)  # 先登记：安装中途失败也要尝试还原
+            result = client.run(render(mock["install"], context, code=True), f"安装 Mock {mock['name']}")
             report["mocks"].append({"name": mock["name"], "install": clip(result["ret"]), "error": result["error"]})
             if result["error"]:
                 raise StepFailed(f"安装 Mock {mock['name']} 失败：{result['error']}")
@@ -396,7 +406,7 @@ def run_case(client, root, case, settle_default):
     except Exception as error:  # 执行器自身的意外错误也要走收尾并输出报告，不能让进程直接崩溃
         failure = f"执行器内部错误 {type(error).__name__}: {error}"
     finally:
-        restoration = finish(client, case, context, report, installed, baseline, watching, settle_default)
+        restoration = finish(client, case, context, report, state, settle_default)
     if failure:
         report["failure"] = failure
     report["restoration"] = restoration
@@ -405,16 +415,43 @@ def run_case(client, root, case, settle_default):
     return report
 
 
-def install_code(mock, context):
-    if "patch" in mock:
-        return PATCH_INSTALL % (mock["name"], mock["patch"], render(mock["value"], context, code=True))
-    return render(mock["install"], context, code=True)
+def helpers_call(items):
+    """error_watch.py、CLIENT_HELPERS 和最后一行的结果列表拼成一次 execute_code；返回 (代码, executed 中的简写)。"""
+    call = "[" + ", ".join(items) + "]"
+    source = ERROR_WATCH.read_text(encoding="utf-8") + "\n" + CLIENT_HELPERS + "\n" + call
+    return source, f"<{ERROR_WATCH.name} 全文>\n<CLIENT_HELPERS>\n{call}"
 
 
-def restore_code(mock, context):
-    if "patch" in mock:
-        return PATCH_RESTORE % (mock["name"],)
-    return render(mock["restore"], context, code=True)
+def begin(client, case, context, report, state):
+    """一次调用完成：开始报错收集 → 记录监听基线（有 Mock 时）→ 安装全部 patch Mock。失败抛 StepFailed。
+
+    调用一发出就视为收集器和 patch Mock 都可能已生效，收尾一律尝试结束和还原。
+    """
+    patches = [mock for mock in case.get("mocks", []) if "patch" in mock]
+    installs = [f"_case_install({mock['name']!r}, {mock['patch']!r}, {render(mock['value'], context, code=True)!r})"
+                for mock in patches]
+    code, log = helpers_call(["error_watch_start()", "_case_listeners()" if case.get("mocks") else "None",
+                              "[" + ", ".join(installs) + "]"])
+    state["watching"] = True
+    state["patched"] = patches
+    result = client.run(code, "开始：报错收集、监听基线、patch Mock", log)
+    if result["error"] or not isinstance(result["ret"], list):
+        raise StepFailed(f"用例开始阶段失败：{result['error'] or clip(result['ret'])}")
+    started, baseline, installed = result["ret"]
+    if (started or {}).get("stale"):
+        report["unverified"].append(f"上次未结束的报错收集残留（不属于本次）：{clip(started['stale'])}")
+    if case.get("mocks"):
+        if isinstance(baseline, dict) and "error" not in baseline:
+            state["baseline"] = baseline
+        else:
+            report["unverified"].append(f"读不到事件监听基线，无法核对监听残留：{clip(baseline)}")
+    failed = []
+    for mock, ret in zip(patches, installed):
+        report["mocks"].append({"name": mock["name"], "install": clip(ret), "error": (ret or {}).get("error")})
+        if (ret or {}).get("error"):
+            failed.append(mock["name"])
+    if failed:
+        raise StepFailed(f"安装 Mock 失败：{failed}")
 
 
 def run_step(client, root, step, context, record):
@@ -522,62 +559,79 @@ def exec_check(client, root, spec, context, record):
         raise StepFailed(f"执行检查用例报错：{sorted(bad)}")
 
 
-def finish(client, case, context, report, installed, baseline, watching, settle_default):
-    """收尾：等待延迟回调，逆序还原 Mock，核对监听，结束报错收集。返回 restoration。
+def finish(client, case, context, report, state, settle_default):
+    """收尾：等待延迟回调，逆序还原自定义 Mock，再用一次调用还原 patch Mock、核对监听、结束报错收集。
 
-    每一项单独捕获失败，前一项失败不影响后一项；还原失败或无法核对的记为 unknown。
+    state 由 run_case／begin 填写：watching（收集器可能已挂上）、baseline（监听基线）、patched、custom
+    （可能已安装的 Mock）。每一项单独捕获失败，前一项失败不影响后一项；还原失败或无法核对的记为 unknown。
+
+    Returns:
+        restoration：restored／unknown／not_needed（没有 Mock）。
     """
     time.sleep(case.get("settle", settle_default))
-    restored_all = True
-    for mock in reversed(installed):
+    restored = []
+
+    def entry_of(mock):
         entry = next((item for item in report["mocks"] if item["name"] == mock["name"]), None)
         if entry is None:
             entry = {"name": mock["name"]}
             report["mocks"].append(entry)
+        return entry
+
+    # 自定义 Mock 逐个逆序还原（代码任意，不能合并）
+    for mock in reversed(state["custom"]):
+        entry = entry_of(mock)
         try:
-            result = client.run(restore_code(mock, context), f"还原 Mock {mock['name']}")
-            ret = result["ret"]
-            if "patch" in mock:
-                # 安装在登记之前就失败（模块找不到、value 报错）时客户端没有任何改动，不需要还原
-                never = entry.get("error") and isinstance(ret, dict) and ret.get("reason") == "没有安装记录"
-                ok = not result["error"] and isinstance(ret, dict) and (ret.get("restored") or never)
-            else:
-                ok = not result["error"] and ret is True  # restore 代码最后一行要返回核对结果 True
-            entry.update({"restore": clip(ret), "restore_error": result["error"], "restored": bool(ok)})
+            result = client.run(render(mock["restore"], context, code=True), f"还原 Mock {mock['name']}")
+            ok = not result["error"] and result["ret"] is True  # restore 代码最后一行要返回核对结果 True
+            entry.update({"restore": clip(result["ret"]), "restore_error": result["error"], "restored": ok})
         except Exception as error:  # 含 restore 代码引用了未赋值的 {vars.*}：记为未还原，继续后面的收尾
             entry.update({"restore_error": f"{type(error).__name__}: {error}", "restored": False})
-        restored_all = restored_all and entry["restored"]
-    if baseline is not None:
+        restored.append(entry["restored"])
+
+    # patch Mock 逆序还原、核对监听、结束报错收集：合并成一次调用
+    patches = list(reversed(state["patched"]))
+    if patches or state["baseline"] is not None or state["watching"]:
+        items = ["[" + ", ".join(f"_case_restore({mock['name']!r})" for mock in patches) + "]",
+                 "_case_listeners()" if state["baseline"] is not None else "None",
+                 "error_watch_finish()" if state["watching"] else "None"]
+        code, log = helpers_call(items)
         try:
-            after = client.run(LISTENER_PROBE, "核对事件监听")
-            grown = {name: [baseline.get(name, 0), count] for name, count in (after["ret"] or {}).items()
-                     if count > baseline.get(name, 0)}
-            if after["error"]:
-                report["unverified"].append(f"核对事件监听失败：{after['error']}")
-            elif grown:
-                report["unverified"].append(f"事件监听比基线多（前后数量，可能是被测代码正常注册，也可能是 Mock 残留）：{grown}")
+            result = client.run(code, "收尾：还原 patch Mock、核对监听、结束报错收集", log)
+            if result["error"] or not isinstance(result["ret"], list):
+                raise mcp_http.McpError(f"收尾调用失败：{result['error'] or clip(result['ret'])}")
+            restores, after, collected = result["ret"]
         except (mcp_http.McpError, OSError) as error:
-            report["unverified"].append(f"核对事件监听失败：{error}")
-    if watching:
-        try:
-            code, log = template(ERROR_WATCH, "error_watch_finish()")
-            result = client.run(code, "结束报错收集", log)
-            collected = result["ret"] if isinstance(result["ret"], dict) else {}
+            restores, after, collected = [None] * len(patches), None, None
+            report["unverified"].append(f"{error}；patch Mock 状态不明，报错收集器可能仍挂在客户端上")
+        for mock, ret in zip(patches, restores):
+            entry = entry_of(mock)
+            ret = ret if isinstance(ret, dict) else {}
+            # 安装在登记之前就失败（模块找不到、value 报错）时客户端没有任何改动，不需要还原
+            never = bool(entry.get("error")) and ret.get("reason") == "没有安装记录"
+            entry.update({"restore": clip(ret), "restored": bool(ret.get("restored") or never)})
+            restored.append(entry["restored"])
+        if state["baseline"] is not None and isinstance(after, dict):
+            if "error" in after:
+                report["unverified"].append(f"核对事件监听失败：{clip(after['error'])}")
+            else:
+                grown = {name: [state["baseline"].get(name, 0), count] for name, count in after.items()
+                         if count > state["baseline"].get(name, 0)}
+                if grown:
+                    report["unverified"].append(f"事件监听比基线多（前后数量，可能是被测代码正常注册，也可能是 Mock 残留）：{grown}")
+        if isinstance(collected, dict):
             report["errors"] = [item.get("text", str(item)) for item in collected.get("errors", [])]
             if collected.get("dropped"):
                 report["unverified"].append(f"报错过多，另有 {collected['dropped']} 条被丢弃")
-            if result["error"]:
-                report["unverified"].append(f"结束报错收集失败：{result['error']}")
-        except (mcp_http.McpError, OSError) as error:
-            report["unverified"].append(f"结束报错收集失败，收集器可能仍挂在客户端上：{error}")
+
     for step in report["steps"]:
         for path, lines in step.get("missing", {}).items():
             report["unverified"].append(f"步骤 {step['index']} 执行检查未执行到：{path} {lines}")
         for text in step.get("warnings", []):
             report["unverified"].append(f"步骤 {step['index']} 目标行计算警告：{text}")
-    if not installed:
+    if not restored:
         return "not_needed"
-    return "restored" if restored_all else "unknown"
+    return "restored" if all(restored) else "unknown"
 
 
 def summarize(reports, blocked=None):
