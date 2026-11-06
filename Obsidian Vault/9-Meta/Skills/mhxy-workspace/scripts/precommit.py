@@ -74,7 +74,8 @@ def svn_process(cwd, *args, timeout=120):
     """
     try:
         return subprocess.run(["svn", *map(str, args), "--non-interactive"], cwd=cwd,
-                              capture_output=True, timeout=timeout)
+                              capture_output=True, timeout=timeout,
+                              creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))  # 见 workspace.SVN_FLAGS
     except subprocess.TimeoutExpired:
         raise SvnTimeout(f"svn {args[0] if args else ''} 超过 {timeout} 秒未结束") from None
     except (OSError, subprocess.SubprocessError) as error:

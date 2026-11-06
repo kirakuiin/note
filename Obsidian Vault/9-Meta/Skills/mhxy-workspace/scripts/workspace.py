@@ -25,6 +25,9 @@ from xml.etree import ElementTree
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import skill_links  # noqa: E402
 
+# 控制台代码页是 65001 时，svn 会把中文路径参数转成乱码；不挂靠控制台则按系统代码页处理
+SVN_FLAGS = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+
 SKILL = Path(__file__).resolve().parents[1]
 NAME = "mhxy-workspace"
 LEGACY_NAME = "mhxy-workspace-init"
@@ -662,7 +665,7 @@ def svn_merge_pending(root, tree):
             targets.append(entry.get("path"))
     try:
         completed = subprocess.run(["svn", "diff", "--properties-only", "--depth", "empty", "--non-interactive",
-                                    *targets], cwd=root, capture_output=True, timeout=20)
+                                    *targets], cwd=root, capture_output=True, timeout=20, creationflags=SVN_FLAGS)
     except (OSError, subprocess.SubprocessError):
         return False
     return not completed.returncode and b"svn:mergeinfo" in completed.stdout
@@ -680,7 +683,7 @@ def svn_local_changes(root):
         return "ok", set()
     try:
         completed = subprocess.run(["svn", "status", "--xml", "--non-interactive", SPEC_DIRECTORY],
-                                   cwd=root, capture_output=True, timeout=20)
+                                   cwd=root, capture_output=True, timeout=20, creationflags=SVN_FLAGS)
         if completed.returncode or b"155007" in completed.stderr:  # 非工作副本时只有警告、退出码为 0
             return "unavailable", set()
         tree = ElementTree.fromstring(completed.stdout)
@@ -726,7 +729,7 @@ def svn_branch(root):
     """
     try:
         completed = subprocess.run(["svn", "info", "--show-item", "url", "--non-interactive", "."],
-                                   cwd=root, capture_output=True, timeout=20)
+                                   cwd=root, capture_output=True, timeout=20, creationflags=SVN_FLAGS)
     except (OSError, subprocess.SubprocessError):
         return None
     url = decode_output(completed.stdout).strip()
@@ -747,7 +750,7 @@ def svn_changelist(root, name):
     """
     try:
         completed = subprocess.run(["svn", "info", "--show-item", "changelist", "--non-interactive", name],
-                                   cwd=root, capture_output=True, timeout=20)
+                                   cwd=root, capture_output=True, timeout=20, creationflags=SVN_FLAGS)
     except (OSError, subprocess.SubprocessError) as error:
         raise WorkspaceError(f"svn 不可用：{error}") from None
     if completed.returncode:
@@ -791,7 +794,7 @@ def apply_ignore_on_commit(root, names):
         return []
     try:
         completed = subprocess.run(["svn", "changelist", IGNORE_ON_COMMIT, "--non-interactive", *names],
-                                   cwd=root, capture_output=True, timeout=20)
+                                   cwd=root, capture_output=True, timeout=20, creationflags=SVN_FLAGS)
     except (OSError, subprocess.SubprocessError) as error:
         return [f"未能把 {', '.join(names)} 加入 {IGNORE_ON_COMMIT}：{error}"]
     if completed.returncode:
