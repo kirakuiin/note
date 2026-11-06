@@ -12,7 +12,9 @@
    {"wait_for": {"preset": "war_idle", "timeout": 60}},
    {"war_act": {"role": {"act": "magic", "id": 1073, "target": "e0"}, "wait": false}},
    {"wait_for": {"preset": "war_action", "args": {"magic_id": 1073, "n": 1}, "timeout": 30}},
-   {"screenshot": "龙卷雨击出手后"},
+   {"screenshot": "龙卷雨击出手后"}
+  ],
+  "finally": [
    {"gm": "$at kill"},
    {"wait_for": {"preset": "war_out", "timeout": 30}}
   ]

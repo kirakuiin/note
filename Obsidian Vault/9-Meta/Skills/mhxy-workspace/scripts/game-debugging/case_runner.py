@@ -34,7 +34,7 @@ STEP_TYPES = ("exec", "gm", "mcp", "wait_for", "assert", "exec_check", "war_act"
 # 每种步骤除类型键外允许的选项
 STEP_OPTIONS = {"exec": {"save_as"}, "gm": set(), "mcp": {"args", "save_as"}, "wait_for": set(),
                 "assert": {"message"}, "exec_check": set(), "war_act": set(), "screenshot": set(), "pump": set()}
-CASE_FIELDS = {"name", "mocks", "steps", "settle", "ignore_errors", "setup", "record", "frames"}
+CASE_FIELDS = {"name", "mocks", "steps", "finally", "settle", "ignore_errors", "setup", "record", "frames", "clean_ui"}
 # war_act 的动作：动作 → (必填字段, 默认目标)。默认目标 None 表示必须写 target；不需要目标的动作不在乎这一项。
 # 与 WAR_HELPERS 中 _case_war_act 的发包分支一一对应，增删动作两处同步。
 ROLE_ACTS = {"attack": ((), "e0"), "magic": (("id",), "e0"), "sp": (("id",), "e0"), "guard": ((), "self"),
@@ -94,8 +94,10 @@ PRESET_INDEX = {name: expr for group in PRESETS.values() for name, expr in group
 # 客户端辅助函数，与 error_watch.py 一起发送。每次 execute_code 往返约 3 秒，所以用例开始（报错收集、
 # 监听基线、patch Mock 安装）和收尾（patch Mock 还原、监听核对、结束收集）各合并成一次调用。
 # 各函数自包含（execute_code 中顶层名字对函数不可见），自己捕获异常并返回结果，同一次调用里一项失败不影响其他项。
-# patch 备份登记在 sys._mhxy_case_mocks（{名字: (对象, 属性, 原来是否有, 原值, 新值)}），跨多次调用仍在；
-# 只看对象自己的 __dict__，类上继承来的属性还原时删除而不是写回。
+# patch 备份登记在 sys._mhxy_case_mocks（{名字: (对象, 属性, 来源, 原值, 新值)}），跨多次调用仍在。来源决定还原方式：
+# own（对象自己的 __dict__，写回原值）、inherited（类上继承，删除覆盖）、absent（原本没有，删除）、
+# proxy（__getattr__ 代理，如 sdata.huodong：读取时才取值或缓存，写回原值）、
+# descriptor（实例的类上有数据描述符，如 sdata 的 Property：赋值走 __set__，写回原值）。
 CLIENT_HELPERS = '''def _case_install(name, target, value_src):
 	import importlib
 	import sys
@@ -116,12 +118,27 @@ CLIENT_HELPERS = '''def _case_install(name, target, value_src):
 		for part in parts[i:-1]:
 			obj = getattr(obj, part)
 		attr = parts[-1]
-		had = attr in vars(obj)
-		old = vars(obj).get(attr)
+		own = vars(obj) if hasattr(obj, "__dict__") else {}
+		bases = obj.__mro__[1:] if isinstance(obj, type) else type(obj).__mro__
+		found = next((vars(base)[attr] for base in bases if attr in vars(base)), None)
+		if attr in own:
+			mode, old = "own", own[attr]
+		elif not hasattr(obj, attr):  # 代理的 __getattr__ 可能在这里把值缓存进 __dict__（如 sdata），不影响下面的判断
+			mode, old = "absent", None
+		elif attr in own:
+			mode, old = "proxy", own[attr]
+		elif found is not None and not isinstance(obj, type) and hasattr(type(found), "__set__"):
+			mode, old = "descriptor", getattr(obj, attr)  # 类上的数据描述符（如 sdata 的 Property）：赋值走 __set__，还原写回
+		elif found is not None:
+			mode, old = "inherited", None
+		else:
+			mode, old = "proxy", getattr(obj, attr)
 		value = eval(value_src, {"orig": getattr(obj, attr, None)})
-		store[name] = (obj, attr, had, old, value)  # 先登记再替换：替换失败时还原也只是写回原值
+		store[name] = (obj, attr, mode, old, value)  # 先登记再替换：替换失败时还原也只是写回原值
 		setattr(obj, attr, value)
-		return {"installed": True}
+		if mode in ("proxy", "descriptor") and getattr(obj, attr, None) is not value:
+			raise RuntimeError(f"{target} 由代理或描述符提供，替换后读回的不是新值，改用 install/restore 型 Mock")
+		return {"installed": True, "mode": mode}
 	except Exception:
 		return {"error": traceback.format_exc()[-2000:]}
 
@@ -133,17 +150,100 @@ def _case_restore(name):
 		store = sys.__dict__.get("_mhxy_case_mocks", {})
 		if name not in store:
 			return {"restored": False, "reason": "没有安装记录"}
-		obj, attr, had, old, value = store.pop(name)
+		obj, attr, mode, old, value = store.pop(name)
 		if not store:
 			del sys._mhxy_case_mocks
-		if had:
+		if mode == "own":
 			setattr(obj, attr, old)
-			return {"restored": vars(obj).get(attr) is old}
-		if attr in vars(obj):
+			return {"restored": vars(obj).get(attr) is old, "mode": mode}
+		if mode in ("proxy", "descriptor"):
+			setattr(obj, attr, old)
+			return {"restored": getattr(obj, attr, None) is old, "mode": mode}
+		if attr in (vars(obj) if hasattr(obj, "__dict__") else {}) or (mode == "absent" and hasattr(obj, attr)):
 			delattr(obj, attr)
-		return {"restored": attr not in vars(obj)}
+		if mode == "inherited":
+			return {"restored": attr not in vars(obj), "mode": mode}
+		return {"restored": not hasattr(obj, attr), "mode": mode}
 	except Exception:
 		return {"restored": False, "reason": traceback.format_exc()[-2000:]}
+
+
+def _case_clean_ui():
+	"""开局整理：按清单逐项关闭遮挡场景的窗口（清单与真机依据见 spec 0.3.31），每项单独捕获异常。
+
+	Returns:
+		{"closed": 整理前可见、整理后不可见的单例窗口, "visible": 整理后仍可见的（含常驻 UI）, "errors": {项: 原因}}
+	"""
+	import sys
+	import traceback
+
+	def visible():
+		import public_ui
+		import uisln
+		names = set()
+		handles = [ref() for ref in list(public_ui.CtrlObjsDict.values()) if ref]
+		stack, seen = list(uisln.Single.__subclasses__()), set()
+		while stack:
+			cls = stack.pop()
+			if cls in seen:
+				continue
+			seen.add(cls)
+			stack.extend(cls.__subclasses__())
+			handles.append(cls.__dict__.get("Instance"))
+		for ins in handles:
+			try:  # 已销毁的实例访问 ctrl 会抛 instance released
+				if ins is not None and getattr(ins, "ctrl", None) is not None and not ins.ctrl.is_real_hide():
+					names.add(type(ins).__module__ + "." + type(ins).__name__)
+			except Exception:
+				continue
+		return names
+
+	def unschedule_checkin():
+		module = sys.modules.get("checkin2018_interface")
+		if module is not None:  # 登录后 S_SHOW_CHECKIN4 延迟 0.2 秒才弹，不取消会在整理后再弹出
+			import utils
+			utils.UnSchedule(module.show_checkin_dlg)
+
+	def new_content():
+		import ww_2022checkin_msg
+		ins = ww_2022checkin_msg.PalNewContent.get_ins()
+		if ins and not ins.get_hide():
+			ins.hide(1)
+
+	def npc():
+		import dlgnpc
+		dlgnpc.hide_dlgnpc()
+
+	out = {"closed": [], "visible": [], "errors": {}}
+	try:
+		before = visible()
+	except Exception:
+		before = None
+		out["errors"]["整理前取可见窗口"] = traceback.format_exc()[-1000:]
+	actions = [("取消签到延迟弹出", unschedule_checkin)]
+	try:
+		import ww_zlp22_chess_guide  # 游戏自带的引导清场函数，逐个调用：hide_some_base_ui 一项失败后面全不执行
+		for name in ("hide_dlg_heroitem", "hide_dlg_status", "hide_dlg_dup", "hide_dlg_task", "hide_dlg_summon",
+		             "hide_dlg_shop", "hide_dlg_friend", "hide_dlg_chat", "hide_dlg_factionunion", "hide_dlg_team",
+		             "hide_dlg_rili", "hide_dlg_checkin", "hide_small_map", "hide_dlg_fairy", "hide_dlg_pet",
+		             "hide_dlg_achieve"):
+			actions.append((name, getattr(ww_zlp22_chess_guide, name)))
+	except Exception:
+		out["errors"]["ww_zlp22_chess_guide"] = traceback.format_exc()[-1000:]
+	actions += [("PalNewContent", new_content), ("hide_dlgnpc", npc)]
+	for label, action in actions:
+		try:
+			action()
+		except Exception:
+			out["errors"][label] = traceback.format_exc()[-1000:]
+	try:
+		after = visible()
+		out["visible"] = sorted(after)
+		if before is not None:
+			out["closed"] = sorted(before - after)
+	except Exception:
+		out["errors"]["整理后取可见窗口"] = traceback.format_exc()[-1000:]
+	return out
 
 
 def _case_listeners():
@@ -498,13 +598,18 @@ def validate(case):
     if not isinstance(steps, list) or not steps:
         problems.append("steps 必须是非空列表")
         steps = []
-    for index, step in enumerate(steps, 1):
-        problems += [f"steps[{index}]：{problem}" for problem in validate_step(step)]
-        wait = step.get("wait_for") if isinstance(step, dict) else None
-        preset = wait.get("preset") if isinstance(wait, dict) else None
-        if isinstance(preset, str) and preset in FRAME_PRESETS and case.get("frames") is not True:
-            problems.append(f"steps[{index}]：预设 {preset} 依赖帧采集，用例要写 frames: true")
-    for flag in ("record", "frames"):
+    final = case.get("finally", [])
+    if not isinstance(final, list):
+        problems.append("finally 必须是步骤列表")
+        final = []
+    for field, items in (("steps", steps), ("finally", final)):
+        for index, step in enumerate(items, 1):
+            problems += [f"{field}[{index}]：{problem}" for problem in validate_step(step)]
+            wait = step.get("wait_for") if isinstance(step, dict) else None
+            preset = wait.get("preset") if isinstance(wait, dict) else None
+            if isinstance(preset, str) and preset in FRAME_PRESETS and case.get("frames") is not True:
+                problems.append(f"{field}[{index}]：预设 {preset} 依赖帧采集，用例要写 frames: true")
+    for flag in ("record", "frames", "clean_ui"):
         if flag in case and not isinstance(case[flag], bool):
             problems.append(f"{flag} 必须是 true 或 false")
     if "setup" in case:
@@ -792,9 +897,19 @@ def render_args(value, context):
 
 
 def clip(value):
-    """报告里的返回值：能 JSON 序列化且不长就原样保留，否则截断为字符串。"""
+    """报告里的值：序列化后不长就原样保留，否则换成 {"clipped": 前 TEXT_LIMIT 字符, "length": 总长度}，报告仍是合法 JSON。"""
     text = json.dumps(value, ensure_ascii=False, default=repr)
-    return value if len(text) <= TEXT_LIMIT else text[:TEXT_LIMIT] + "…（已截断）"
+    return value if len(text) <= TEXT_LIMIT else {"clipped": text[:TEXT_LIMIT], "length": len(text)}
+
+
+def keep(value, context, record, field):
+    """步骤记录里的值：过长时完整内容另存到媒体目录（可 json.load），报告里给出截断预览和文件路径。"""
+    text = json.dumps(value, ensure_ascii=False, default=repr)
+    if len(text) <= TEXT_LIMIT:
+        return value
+    path = media_path(context, f"_step{record['index']}_{field}.json")
+    Path(path).write_text(text, encoding="utf-8")
+    return {"clipped": text[:TEXT_LIMIT], "length": len(text), "file": path}
 
 
 # ---------- 与客户端交互 ----------
@@ -866,10 +981,11 @@ def run_case(client, root, case, settle_default, media=None):
                "media": (Path(directory).resolve(), prefix), "shots": 0}
     report = {"name": case["name"], "steps": [], "mocks": [], "errors": [], "unverified": []}
     start = time.time()
-    failure = None
+    failure = final_failure = None
     # 收尾要处理的内容，见 finish：video／frames 为开始阶段确实开启了的录屏路径和帧数据路径
     state = {"watching": False, "baseline": None, "patched": [], "custom": [], "video": None, "frames": None}
-    try:
+
+    def main():
         begin(client, case, context, report, state)
         if case.get("setup"):
             run_setup(client, case["setup"], report)
@@ -881,29 +997,49 @@ def run_case(client, root, case, settle_default, media=None):
             report["mocks"].append({"name": mock["name"], "install": clip(result["ret"]), "error": result["error"]})
             if result["error"]:
                 raise StepFailed(f"安装 Mock {mock['name']} 失败：{result['error']}")
+        run_steps(client, root, case["steps"], context, report["steps"], "")
 
-        for index, step in enumerate(case["steps"], 1):
-            record = {"index": index}
-            report["steps"].append(record)
-            began = time.time()
-            try:
-                run_step(client, root, step, context, record)
-            finally:
-                record["seconds"] = round(time.time() - began, 2)
-    except StepFailed as error:
-        failure = str(error)
-    except (mcp_http.McpError, OSError) as error:
-        failure = f"{type(error).__name__}: {error}"
-    except Exception as error:  # 执行器自身的意外错误也要走收尾并输出报告，不能让进程直接崩溃
-        failure = f"执行器内部错误 {type(error).__name__}: {error}"
+    try:
+        failure = attempt(main)
+        if case.get("finally"):  # 无论 steps 成败都执行，在还原 Mock、结束报错收集之前
+            report["finally"] = []
+            final_failure = attempt(lambda: run_steps(client, root, case["finally"], context, report["finally"], "F"))
     finally:
         restoration = finish(client, case, context, report, state, settle_default)
     if failure:
         report["failure"] = failure
+    if final_failure:
+        report["finally_failure"] = final_failure
     report["restoration"] = restoration
     report["seconds"] = round(time.time() - start, 2)
-    report["status"] = "passed" if not failure and not report["errors"] and restoration != "unknown" else "failed"
+    report["status"] = ("passed" if not failure and not final_failure and not report["errors"]
+                        and restoration != "unknown" else "failed")
     return report
+
+
+def run_steps(client, root, steps, context, records, prefix):
+    """依次执行步骤，记录追加到 records；序号带前缀（finally 步骤为 F1、F2…）。失败抛 StepFailed 等异常。"""
+    for index, step in enumerate(steps, 1):
+        record = {"index": f"{prefix}{index}" if prefix else index}
+        records.append(record)
+        began = time.time()
+        try:
+            run_step(client, root, step, context, record)
+        finally:
+            record["seconds"] = round(time.time() - began, 2)
+
+
+def attempt(action):
+    """执行 action，返回失败原因（成功为 None）。执行器自身的意外错误也转成失败原因，保证收尾和报告照常进行。"""
+    try:
+        action()
+    except StepFailed as error:
+        return str(error)
+    except (mcp_http.McpError, OSError) as error:
+        return f"{type(error).__name__}: {error}"
+    except Exception as error:
+        return f"执行器内部错误 {type(error).__name__}: {error}"
+    return None
 
 
 def helpers_call(items):
@@ -921,7 +1057,8 @@ def media_path(context, suffix):
 
 
 def begin(client, case, context, report, state):
-    """一次调用完成：开始报错收集 → 记录监听基线（有 Mock 时）→ 安装全部 patch Mock → 开始录屏、帧采集。
+    """一次调用完成：开局整理（clean_ui，默认开）→ 开始报错收集 → 记录监听基线（有 Mock 时）→ 安装全部 patch Mock
+    → 开始录屏、帧采集。
 
     失败抛 StepFailed。调用一发出就视为收集器和 patch Mock 都可能已生效，收尾一律尝试结束和还原；
     录屏只要请求过就在收尾停止，帧采集只有客户端确认开启了才在收尾导出。frames 时内部加装 FRAMES_NOTIFY，挡住战斗结束时的导出弹窗。
@@ -932,16 +1069,23 @@ def begin(client, case, context, report, state):
     installs = [f"_case_install({mock['name']!r}, {mock['patch']!r}, {render(mock['value'], context, code=True)!r})"
                 for mock in patches]
     video = media_path(context, ".mp4") if case.get("record") else None
-    code, log = helpers_call(["error_watch_start()", "_case_listeners()" if patches or case.get("mocks") else "None",
+    # 开局整理在开始报错收集之前：关窗口时的报错不算被测内容的
+    code, log = helpers_call(["_case_clean_ui()" if case.get("clean_ui", True) else "None",
+                              "error_watch_start()", "_case_listeners()" if patches or case.get("mocks") else "None",
                               "[" + ", ".join(installs) + "]",
                               f"_case_media_start({video!r}, {bool(case.get('frames'))!r})"])
     # 调用一发出就可能已生效：录屏、帧采集先登记，确认帧采集没开启时再撤销（见下方 media）
     state.update({"watching": True, "patched": patches, "video": video,
                   "frames": media_path(context, "_frames.json") if case.get("frames") else None})
-    result = client.run(code, "开始：报错收集、监听基线、patch Mock、录屏、帧采集", log)
+    result = client.run(code, "开始：开局整理、报错收集、监听基线、patch Mock、录屏、帧采集", log)
     if result["error"] or not isinstance(result["ret"], list):
         raise StepFailed(f"用例开始阶段失败：{result['error'] or clip(result['ret'])}")
-    started, baseline, installed, media = result["ret"]
+    cleaned, started, baseline, installed, media = result["ret"]
+    if isinstance(cleaned, dict):
+        report["clean_ui"] = cleaned
+        if cleaned.get("errors"):
+            report["unverified"].append(f"开局整理有 {len(cleaned['errors'])} 项失败（不影响判定），见 clean_ui.errors："
+                                        f"{sorted(cleaned['errors'])}")
     if (started or {}).get("stale"):
         report["unverified"].append(f"上次未结束的报错收集残留（不属于本次）：{clip(started['stale'])}")
     if patches or case.get("mocks"):
@@ -999,24 +1143,25 @@ def run_step(client, root, step, context, record):
     record["type"] = kind
     if kind == "exec":
         result = client.run(render(step["exec"], context, code=True), f"步骤 {record['index']}")
-        record.update(result_fields(result))
+        record.update(result_fields(result, context, record))
         if result["error"]:
             raise StepFailed(f"步骤 {record['index']} 客户端报错")
         if "save_as" in step:
             context["vars"][step["save_as"]] = result["ret"]
     elif kind == "assert":
         result = client.run(render(step["assert"], context, code=True), f"断言 {record['index']}")
-        record.update(result_fields(result))
+        record.update(result_fields(result, context, record))
         if result["error"] or not result["ret"]:
             record["message"] = step.get("message", step["assert"])
             raise StepFailed(f"断言失败：{record['message']}")
     elif kind == "gm":
         command = render(step["gm"], context, code=False)
         record["command"] = command
-        record["ret"] = clip(client.tool("execute_command", {"devid": client.devid, "command": command}))
+        ret = client.tool("execute_command", {"devid": client.devid, "command": command})
+        record["ret"] = keep(ret, context, record, "ret")
     elif kind == "mcp":
         payload = client.tool(step["mcp"], render_args(step.get("args", {}), context))
-        record["ret"] = clip(payload)
+        record["ret"] = keep(payload, context, record, "ret")
         if "save_as" in step:
             context["vars"][step["save_as"]] = payload
     elif kind == "wait_for":
@@ -1041,7 +1186,7 @@ def pump(client, spec, context, record):
     call = f"_case_pump(_case_scene, {events!r}, {token!r})"
     result = client.run(WAR_HELPERS + "\n" + call, f"注入 {record['index']}", f"<WAR_HELPERS>\n{call}")
     ret = result["ret"] if isinstance(result["ret"], dict) else {}
-    record.update(result_fields(result))
+    record.update(result_fields(result, context, record))
     record["events"] = events
     if "roster" in ret:
         record.update({"roster": ret["roster"], "queued": ret.get("queued")})
@@ -1086,7 +1231,7 @@ def war_act(client, spec, context, record):
     call = f"_case_war_act(_case_scene, {spec['role']!r}, {spec.get('pet')!r})"
     result = client.run(WAR_HELPERS + "\n" + call, f"回合指令 {record['index']}", f"<WAR_HELPERS>\n{call}")
     ret = result["ret"] if isinstance(result["ret"], dict) else {}
-    record.update(result_fields(result))
+    record.update(result_fields(result, context, record))
     if "roster" in ret:
         # 场面映射不截断：对照帧数据和日志要用全量。ret 之后会被等待结果覆盖，所以单独保存
         record.update({"roster": ret["roster"], "sent": ret.get("sent")})
@@ -1106,7 +1251,7 @@ def screenshot(client, label, context, record):
     code = ("__import__('utils').screenshot(None, (0, 0, __import__('sdata').env.SCREENW, "
             f"__import__('sdata').env.SCREENH, 2, 90), {path!r})")
     result = client.run(code, f"截图 {record['index']}")
-    record.update(result_fields(result))
+    record.update(result_fields(result, context, record))
     record.update({"label": label, "path": path})
     if result["error"]:
         raise StepFailed("截图调用报错")
@@ -1126,11 +1271,11 @@ def wait_file(path, timeout):
     return False
 
 
-def result_fields(result):
-    fields = {"ret": clip(result["ret"])}
+def result_fields(result, context, record):
+    fields = {"ret": keep(result["ret"], context, record, "ret")}
     for key in ("error", "loginfo", "ui_events", "client_event"):
         if result.get(key):
-            fields[key] = clip(result[key])
+            fields[key] = keep(result[key], context, record, key)
     return fields
 
 
@@ -1149,13 +1294,13 @@ def wait_for(client, spec, context, record):
         # 只记录第一次轮询，避免 executed 被重复的轮询淹没
         result = client.run(expr, f"等待 {record['index']}") if polls == 1 else client_quiet(client, expr)
         if result["error"]:
-            record.update(result_fields(result))
+            record.update(result_fields(result, context, record))
             raise StepFailed(f"等待条件报错（第 {polls} 次轮询）")
         if result["ret"]:
-            record.update({"ret": clip(result["ret"]), "polls": polls})
+            record.update({"ret": keep(result["ret"], context, record, "ret"), "polls": polls})
             return
         if time.time() >= deadline:
-            record.update({"ret": clip(result["ret"]), "polls": polls})
+            record.update({"ret": keep(result["ret"], context, record, "ret"), "polls": polls})
             raise StepFailed(f"等待超时（{timeout} 秒，{polls} 次轮询）：{expr}")
         time.sleep(interval)
 
@@ -1189,7 +1334,7 @@ def exec_check(client, root, spec, context, record):
     body = render(spec["cases"], context, code=True) + "\n" + call  # 用例定义在前，调用在最后一行
     code, log = template(EXEC_TRACE, body)
     result = client.run(code, f"执行检查 {record['index']}", log)
-    record.update(result_fields(result))
+    record.update(result_fields(result, context, record))
     ret = result["ret"] if isinstance(result["ret"], dict) else {}
     if result["error"] or "abort" in ret:
         raise StepFailed(f"执行检查没有运行：{result['error'] or ret.get('abort')}")
@@ -1275,7 +1420,7 @@ def finish(client, case, context, report, state, settle_default):
             if collected.get("dropped"):
                 report["unverified"].append(f"报错过多，另有 {collected['dropped']} 条被丢弃")
 
-    for step in report["steps"]:
+    for step in report["steps"] + report.get("finally", []):
         if step.get("type") == "screenshot" and step.get("path") and Path(step["path"]).exists():
             report.setdefault("media", {}).setdefault("screenshots", []).append(
                 {"label": step["label"], "path": step["path"]})
@@ -1317,7 +1462,9 @@ def summarize(reports, blocked=None):
     return {
         "status": "passed" if all(item["status"] == "passed" for item in reports) else "failed",
         "cases": [f"{item['name']}：{item['status']}（{item['seconds']} 秒）"
-                  + (f"，{item['failure']}" if item.get("failure") else "") for item in reports],
+                  + (f"，{item['failure']}" if item.get("failure") else "")
+                  + (f"，finally 失败：{item['finally_failure']}" if item.get("finally_failure") else "")
+                  for item in reports],
         "errors": [f"{item['name']}：{text}" for item in reports for text in item["errors"]],
         "unverified": [f"{item['name']}：{text}" for item in reports for text in item["unverified"]],
         "restoration": restoration,
@@ -1390,7 +1537,8 @@ def search(root, terms):
     skills = find_skills(root, terms)
     return {"templates": [], "skills": skills, "skeletons": [skeleton(skill) for skill in skills],
             "note": "骨架只保证结构合法：角色要会这个技能（不会就在 setup 里补门派、特技），断言按被测内容补；"
-                    "特技在帧数据里的 magic_id 按 sp_id+3000 推算，尚未真机核实"}
+                    "特技在帧数据里的 magic_id 按 sp_id+3000 推算，尚未真机核实；"
+                    "fightN 的敌方机器人没有武器层等装备层，测造型分层要观察主角或指定造型"}
 
 
 def find_skills(root, names):
@@ -1418,7 +1566,10 @@ def read_source(path):
 
 
 def skeleton(skill):
-    """战斗用例骨架：进战斗 → 放技能（召唤兽防御）→ 等这次出手播完 → 退战。"""
+    """战斗用例骨架：进战斗 → 放技能（召唤兽防御）→ 等这次出手播完；退战放在 finally。
+
+    fightN 造出的敌方机器人没有武器层等装备层，测造型分层的用例要把主角或指定造型作为观察对象。
+    """
     return {
         "name": f"{skill['name']} 出手表现",
         "frames": True,
@@ -1429,6 +1580,9 @@ def skeleton(skill):
             # wait: false：不等整回合播完，由 war_action 等这次出手播完就继续（之后的截图、断言才在出手时刻）
             {"war_act": {"role": {"act": skill["kind"], "id": skill["id"], "target": "e0"}, "wait": False}},
             {"wait_for": {"preset": "war_action", "args": {"magic_id": skill["magic_id"], "n": 1}, "timeout": 30}},
+        ],
+        # 失败也退战，避免下一轮第 1 步因还在战斗中而失败
+        "finally": [
             {"gm": "$at kill"},
             {"wait_for": {"preset": "war_out", "timeout": 30}},
         ],

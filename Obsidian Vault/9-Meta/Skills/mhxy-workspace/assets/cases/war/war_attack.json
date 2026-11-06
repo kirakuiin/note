@@ -9,7 +9,9 @@
    {"gm": "$at fightN 2"},
    {"wait_for": {"preset": "war_idle", "timeout": 60}},
    {"war_act": {"role": {"act": "attack", "target": "e0"}, "pet": {"act": "guard"}}},
-   {"assert": "__import__('war').ActualTurn >= 2 or not __import__('utils3').is_in_war()", "message": "已进入下一回合或战斗已结束"},
+   {"assert": "__import__('war').ActualTurn >= 2 or not __import__('utils3').is_in_war()", "message": "已进入下一回合或战斗已结束"}
+  ],
+  "finally": [
    {"gm": "$at kill"},
    {"wait_for": {"preset": "war_out", "timeout": 30}}
   ]

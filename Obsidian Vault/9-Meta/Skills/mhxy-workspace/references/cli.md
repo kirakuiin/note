@@ -79,7 +79,7 @@ python -X utf8 "<skill>/scripts/codex_cli.py" release --job "<任务目录>" --r
 ```
 
 - `start` 启动后台进程后立即返回任务目录（`<项目>/.mhxy-workspace/codex-cli/<任务>/`）。随后用 Bash 工具的 `run_in_background` 运行 `wait`，主会话继续其他工作，任务结束时会收到通知；`wait` 到时仍未结束就再运行一次。各命令都输出 JSON，状态有 starting、running、completed、failed、timed_out、cancelled。
-- 模型走用户 Codex 配置里的模型连接（如 CodeMaker 代理），可选模型名取自其 `model_catalog_json`（如 `deepseek-flash`、`gemini-4-argon`、`claude-opus-5-5`、`glm-5.3`）。配置了目录时，`start` 会校验模型名和强度，填错直接报错并列出可选项；不指定强度时用 `max`，该模型不支持就用它的默认档位（如 `gemini-4-argon` 用 `medium`）。review 续接（`--resume`）不指定模型时沿用上一轮的。实际用的模型和强度记在任务 `state.json` 的 `model`、`effort`。
+- 模型走用户 Codex 配置里的模型连接（如 CodeMaker 代理），可选模型名取自其 `model_catalog_json`（如 `deepseek-flash`、`gemini-4-argon`、`claude-opus-5-5`、`glm-5.3`）。配置了目录时，`start` 会校验模型名和强度，填错直接报错并列出可选项；不指定强度时用默认的 `high`，该模型不支持就用目录给它的默认档位。review 续接（`--resume`）不指定模型时沿用上一轮的。实际用的模型和强度记在任务 `state.json` 的 `model`、`effort`。
 - 结果格式：提示末尾总会附上结果的 JSON Schema。只有 `gpt-*` 模型另加 `--output-schema` 强制结构化输出，因为 Gemini 带上这个参数会被上游以 400 拒绝，GLM 等模型也不会执行它。非 GPT 模型常在结果前写一段推理文字、包一层代码块，或在字符串里留未转义的双引号、换行，脚本取输出中最后一个通过 schema 校验的 JSON 对象，见「读取结果」；字段校验不放宽。Claude 系列受公司高价模型额度限制，未验证。
 - 连续 600 秒没有任何 CLI 输出时，杀掉进程树并标记 `timed_out`；没有总时长上限。`cancel` 只停止，不自动重跑。
 - 子 Codex 带环境变量 `MHXY_CODEX_CHILD=1`，在这个环境里 `start` 会拒绝运行；同时关闭子代理、hooks 和插件，不加载任务未列出的 MCP。

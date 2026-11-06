@@ -758,6 +758,219 @@ class SearchTests(unittest.TestCase):
             self.assertEqual([s["id"] for s in result["skills"]], [1073])
 
 
+class FakeCtrl:
+    def __init__(self, shown=True):
+        self.shown = shown
+
+    def is_real_hide(self):
+        return not self.shown
+
+
+class FakeHandle:
+    def __init__(self, shown=True):
+        self.ctrl = FakeCtrl(shown)
+
+    def get_hide(self):
+        return not self.ctrl.shown
+
+    def hide(self, flag):
+        self.ctrl.shown = not flag
+
+
+class CleanUiTests(Base):
+    """开局整理：按清单逐项关闭，每项单独捕获异常；前后可见窗口对比。"""
+
+    def setUp(self):
+        super().setUp()
+        uisln = types.ModuleType("uisln")
+        uisln.Single = type("Single", (FakeHandle,), {})
+        self.checkin = type("CControl", (FakeHandle,), {"__module__": "checkin2018_msg"})()
+        public_ui = types.ModuleType("public_ui")
+        public_ui.CtrlObjsDict = {type(self.checkin): lambda: self.checkin}
+        spirit = type("PalSpiritBtn", (uisln.Single,), {"__module__": "newbie2022_msg"})
+        spirit.Instance = spirit()  # 常驻 UI：不在清单里，整理后仍可见
+        hidden = type("Hidden", (uisln.Single,), {"__module__": "x"})
+        hidden.Instance = hidden(False)
+        self.classes = [spirit, hidden]  # __subclasses__ 是弱引用，留住类
+        guide = types.ModuleType("ww_zlp22_chess_guide")
+        names = ["hide_dlg_heroitem", "hide_dlg_status", "hide_dlg_dup", "hide_dlg_task", "hide_dlg_summon",
+                 "hide_dlg_shop", "hide_dlg_friend", "hide_dlg_chat", "hide_dlg_factionunion", "hide_dlg_team",
+                 "hide_dlg_rili", "hide_dlg_checkin", "hide_small_map", "hide_dlg_fairy", "hide_dlg_pet",
+                 "hide_dlg_achieve"]
+        self.called = []
+        for name in names:
+            setattr(guide, name, lambda name=name: self.called.append(name))
+        guide.hide_dlg_checkin = lambda: (self.called.append("hide_dlg_checkin"), self.checkin.hide(1))
+
+        def broken():
+            raise RuntimeError("shop boom")
+        guide.hide_dlg_shop = broken
+        interface = types.ModuleType("checkin2018_interface")
+        interface.show_checkin_dlg = lambda: None
+        utils = types.ModuleType("utils")
+        self.unscheduled = []
+        utils.UnSchedule = self.unscheduled.append
+        new_content = types.ModuleType("ww_2022checkin_msg")
+        self.content = FakeHandle()
+        new_content.PalNewContent = types.SimpleNamespace(get_ins=lambda: self.content)
+        dlgnpc = types.ModuleType("dlgnpc")
+        dlgnpc.hide_dlgnpc = lambda: self.called.append("npc")
+        self.interface = interface
+        patcher = patch.dict(sys.modules, {"uisln": uisln, "public_ui": public_ui, "ww_zlp22_chess_guide": guide,
+                                           "checkin2018_interface": interface, "utils": utils,
+                                           "ww_2022checkin_msg": new_content, "dlgnpc": dlgnpc})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_closes_listed_windows_and_isolates_failures(self):
+        report = self.run_case({"name": "c", "steps": [{"exec": "1"}]})
+        result = report["results"][0]
+        self.assertEqual(report["status"], "passed", report)  # 整理失败只记 unverified
+        cleaned = result["clean_ui"]
+        self.assertEqual(cleaned["closed"], ["checkin2018_msg.CControl"])
+        self.assertEqual(cleaned["visible"], ["newbie2022_msg.PalSpiritBtn"])
+        self.assertEqual(sorted(cleaned["errors"]), ["hide_dlg_shop"])
+        self.assertIn("shop boom", cleaned["errors"]["hide_dlg_shop"])
+        self.assertIn("hide_dlg_achieve", self.called)  # 商城失败后后面的照常执行
+        self.assertIn("npc", self.called)
+        self.assertEqual(self.unscheduled, [self.interface.show_checkin_dlg])
+        self.assertTrue(self.content.get_hide())
+        self.assertTrue(any("开局整理" in text for text in result["unverified"]))
+
+    def test_can_be_disabled(self):
+        report = self.run_case({"name": "c", "clean_ui": False, "steps": [{"exec": "1"}]})
+        self.assertNotIn("clean_ui", report["results"][0])
+        self.assertEqual(self.called, [])
+        self.assertFalse(self.checkin.get_hide())
+
+
+class FinallyTests(Base):
+    def test_runs_after_failure_and_reports_separately(self):
+        report = self.run_case({"name": "f", "mocks": [{"name": "v", "patch": "fake_target.value", "value": "5"}],
+                                "steps": [{"exec": "1/0"}, {"exec": "never()"}],
+                                "finally": [{"exec": "__import__('fake_target').value", "save_as": "seen"},
+                                            {"gm": "$at kill"}]})
+        result = report["results"][0]
+        self.assertEqual(report["status"], "failed")
+        self.assertIn("客户端报错", result["failure"])
+        self.assertNotIn("finally_failure", result)
+        self.assertEqual([item["index"] for item in result["finally"]], ["F1", "F2"])
+        self.assertEqual(result["finally"][0]["ret"], 5)  # 在还原 Mock 之前执行
+        self.assertIn(("execute_command", {"devid": "dev", "command": "$at kill"}), self.game.calls)
+        self.assertEqual(self.target.value, 1)
+
+    def test_finally_failure_fails_case(self):
+        report = self.run_case({"name": "f", "steps": [{"exec": "1"}],
+                                "finally": [{"assert": "False", "message": "退战失败"}, {"gm": "$at kill"}]})
+        result = report["results"][0]
+        self.assertEqual(report["status"], "failed")
+        self.assertNotIn("failure", result)
+        self.assertIn("退战失败", result["finally_failure"])
+        self.assertEqual(len(result["finally"]), 1)  # finally 内失败即停
+        self.assertIn("finally 失败", report["cases"][0])
+
+    def test_validation(self):
+        problems = "；".join(runner.validate({"name": "a", "steps": [{"exec": "1"}], "clean_ui": 1,
+                                              "finally": [{"nope": 1}]}))
+        self.assertIn("clean_ui 必须是 true 或 false", problems)
+        self.assertIn("finally[1]：必须恰好有一个步骤类型", problems)
+        self.assertIn("finally 必须是步骤列表",
+                      runner.validate({"name": "a", "steps": [{"exec": "1"}], "finally": {}}))
+
+
+class LongValueTests(Base):
+    def test_long_return_saved_to_file_and_report_stays_json(self):
+        report = self.run_case({"name": "l", "steps": [{"exec": "[{'wid': i, 'name': 'x' * 20} for i in range(200)]"}]})
+        ret = report["results"][0]["steps"][0]["ret"]
+        self.assertEqual(set(ret), {"clipped", "length", "file"})
+        self.assertEqual(len(ret["clipped"]), runner.TEXT_LIMIT)
+        full = json.loads(Path(ret["file"]).read_text(encoding="utf-8"))
+        self.assertEqual(len(full), 200)
+        self.assertTrue(Path(ret["file"]).name.endswith("_step1_ret.json"))
+        json.loads(json.dumps(report, ensure_ascii=False))
+
+    def test_clip_is_structured(self):
+        self.assertEqual(runner.clip("abc"), "abc")
+        clipped = runner.clip("x" * 5000)
+        self.assertEqual(clipped["length"], 5002)  # 含 JSON 引号
+        self.assertEqual(len(clipped["clipped"]), runner.TEXT_LIMIT)
+
+
+class Proxy:
+    """模拟 sdata.huodong 这类代理：属性存在内层对象上，不在自己的 __dict__ 和类上。"""
+
+    def __init__(self, inner, writable=True):
+        object.__setattr__(self, "_inner", inner)
+        object.__setattr__(self, "_writable", writable)
+
+    def __getattr__(self, name):
+        return getattr(self._inner, name)
+
+    def __setattr__(self, name, value):
+        if self._writable:
+            setattr(self._inner, name, value)
+
+
+class ProxyMockTests(Base):
+    def test_proxy_attribute_written_back(self):
+        inner = types.SimpleNamespace(flag=0)
+        self.target.proxy = Proxy(inner)
+        report = self.run_case({"name": "p", "mocks": [{"name": "f", "patch": "fake_target.proxy.flag", "value": "1"}],
+                                "steps": [{"assert": "__import__('fake_target').proxy.flag == 1"}]})
+        self.assertEqual((report["status"], report["restoration"]), ("passed", "restored"), report)
+        self.assertEqual(inner.flag, 0)
+        self.assertEqual(report["results"][0]["mocks"][0]["install"]["mode"], "proxy")
+
+    def test_proxy_ignoring_assignment_fails_install_and_restores(self):
+        inner = types.SimpleNamespace(flag=0)
+        self.target.proxy = Proxy(inner, writable=False)
+        report = self.run_case({"name": "p", "mocks": [{"name": "f", "patch": "fake_target.proxy.flag", "value": "1"}],
+                                "steps": [{"exec": "1"}]})
+        self.assertEqual(report["status"], "failed")
+        self.assertIn("install/restore", json.dumps(report["results"][0]["mocks"], ensure_ascii=False))
+        self.assertEqual(report["restoration"], "restored")
+        self.assertNotIn("_mhxy_case_mocks", sys.__dict__)
+
+    def test_sdata_like_cache_and_descriptor(self):
+        """仿 sdata_imp：普通值第一次读取时缓存进实例 __dict__；Property 是挂在类上的数据描述符。"""
+        store = {"prop": 10}
+
+        class Prop:
+            def __get__(self, inst, owner):
+                return store["prop"] if inst is not None else self
+
+            def __set__(self, inst, value):
+                store["prop"] = value
+
+        module = types.SimpleNamespace(flag=False)
+
+        class ModData:
+            prop = Prop()
+
+            def __getattr__(self, name):
+                value = getattr(module, name)
+                self.__dict__[name] = value  # 缓存，同 sdata_imp._ModData.__getattr__
+                return value
+
+        self.target.huodong = ModData()
+        case = {"name": "s", "mocks": [{"name": "f", "patch": "fake_target.huodong.flag", "value": "True"},
+                                       {"name": "p", "patch": "fake_target.huodong.prop", "value": "99"}],
+                "steps": [{"assert": "__import__('fake_target').huodong.flag is True"},
+                          {"assert": "__import__('fake_target').huodong.prop == 99"}]}
+        report = self.run_case(case)
+        self.assertEqual((report["status"], report["restoration"]), ("passed", "restored"), report)
+        modes = [item["install"]["mode"] for item in report["results"][0]["mocks"]]
+        self.assertEqual(modes, ["proxy", "descriptor"])
+        self.assertIs(self.target.huodong.flag, False)
+        self.assertEqual(store["prop"], 10)
+
+    def test_absent_attribute_removed(self):
+        report = self.run_case({"name": "a", "mocks": [{"name": "n", "patch": "fake_target.brand_new", "value": "3"}],
+                                "steps": [{"assert": "__import__('fake_target').brand_new == 3"}]})
+        self.assertEqual((report["status"], report["restoration"]), ("passed", "restored"), report)
+        self.assertFalse(hasattr(self.target, "brand_new"))
+
+
 class MainTests(Base):
     def test_saves_report_and_exit_code(self):
         path = self.temp / "c.json"

@@ -2,9 +2,9 @@
 
 在用户或内部流程需要 Mock、调试、debug、运行时探测或自测时先读取本文件。仅分析或生成代码时不操作游戏；实际执行要遵循任务授权。
 
-要实际操作客户端的测试——第 5 步真机自检、用户临时要求的 Mock／跑测／自测、覆盖率跑测——一律委派执行（见 [cli.md](cli.md)），主线程不自己跑。例外只有两种，主线程可以直接做：
+要实际操作客户端的测试——第 5 步真机自检、用户临时要求的 Mock／跑测／自测、覆盖率跑测——默认委派执行（见 [cli.md](cli.md)）。以下情况主线程可以直接做：
 - 只调用一次、只读的探测（如读一个变量、确认客户端状态）；
-- 用「用例执行器」重跑 spec「测试用例」一节里已有的用例做回归：`codex_cli.py lock` 加锁 → 运行 → 核对报告和 `restoration` → `release --restored`。用例需要修改、或运行失败需要排查时，仍委派。
+- 用「用例执行器」跑用例，包括重跑 spec「测试用例」一节里已有的用例做回归，也包括主线程自己新写的用例：`codex_cli.py lock` 加锁 → 运行 → 核对报告和 `restoration` → `release --restored`。逐步手动调工具的跑测、运行失败后需要大量排查的，仍委派。
 
 本文件是客户端操作和恢复规范，测试执行者和例外情况下的主线程都遵守。
 
@@ -97,12 +97,12 @@ python -X utf8 "<skill>/scripts/game-debugging/mcp_call.py" <工具名> < "<UTF-
 
 `execute_code` 的 `error` 只包含这次调用当场抛出的异常。移动、点击 NPC、操作界面、服务端指令回包后的刷新，以及定时器和事件回调里的报错，都发生在之后的帧，不会出现在返回里；日志文件也不一定及时刷新。需要确认一段操作没有报错时，用报错收集模板 `scripts/game-debugging/error_watch.py`：
 
-1. **开始**：操作前发送该文件全文，最后一行写 `error_watch_start()`。它会在客户端 `log.py` 的 `MHXY` logger 上挂一个内存 handler，收集 ERROR 级别的记录（含堆栈）。返回的 `stale` 不为空，说明上次的收集没有正常结束，其中的记录要单独说明，不能算在本次操作里。
+1. **开始**：操作前发送该文件全文，最后一行写 `error_watch_start()`。它会在客户端 `log.py` 的 `MHXY` logger 上挂一个内存 handler，收集 ERROR 级别的记录（含堆栈）。客户端把 stderr 转给 `log.error_by_hooker` 写进这个 logger（`log.py`），所以代码自己 `except: traceback.print_exc()` 打出的异常也能收到（PC 真机验证）。返回的 `stale` 不为空，说明上次的收集没有正常结束，其中的记录要单独说明，不能算在本次操作里。
 2. **操作**：照常调用工具或 `execute_code`。
 3. **结束**：操作完成后，再等 2～3 秒让延迟执行的代码跑完；然后发送该文件全文，最后一行写 `error_watch_finish()`。它返回这段时间的记录，并卸载 handler。开始之后无论操作是否成功，都要执行这一步。
 
 - **判断**：逐条区分与本次操作有关的报错和无关的报错，无关的也要列出并说明理由。最多保留 50 条，`dropped` 大于 0 时说明报错过多，需要先处理。
-- **收集不到的**：引擎层崩溃、不经过 Python logger 的错误、其他线程中的错误。
+- **收集不到的**：引擎层崩溃、不经过 Python logger 也不写 stderr 的错误（如 `except: pass`）、其他线程中的错误、收集结束之后才执行的回调里的错误。异常被吞掉后状态是否正确，要用断言覆盖。
 - **使用范围**：Mock 与自测、覆盖率跑测（`coverage.md`）和改动执行检查（`exec-check.md`）都用这套方法，各文档只引用本节。
 
 ## 用例执行器
@@ -117,14 +117,16 @@ python -X utf8 "<skill>/scripts/game-debugging/case_runner.py" search --root "<�
 **先找模板**：写新用例前先 `search`。模板在 `<skill>/assets/cases/`（战斗普攻、技能出手 + 帧数据 + 录像、通用属性 + Mock），全部关键词命中名字、说明或关键词才算匹配；没有模板命中时按技能名查导表，返回技能编号和战斗用例骨架。在模板或骨架上改，不要从头写。
 
 **标准骨架**：每个用例按 清场 → 造局 → 执行 → 收集证据 → 恢复 组织。
-- 清场：确认前置状态干净（不在战斗中、目标界面没开等），用 `assert` 或 `wait_for`。
+- 清场：执行器每个用例开始时自动开局整理（`clean_ui`，见下），关掉签到等遮挡场景的窗口；其余前置状态（不在战斗中、目标界面没开等）用 `assert` 或 `wait_for` 确认。
 - 造局：`gm` 指令、`mocks`、`exec` 构造数据。
 - 执行：调用被测函数或操作（`exec`／`mcp`），异步结果用 `wait_for` 等到。
-- 收集证据：`assert` 检查结果；需要改动执行检查时加 `exec_check`。
-- 恢复：Mock 和报错收集由执行器在收尾自动处理；GM 造出的状态（如战斗）在最后几步自己清掉，例如 `$at kill` 后 `wait_for` `war_out`。
+- 收集证据：`assert` 检查结果；需要改动执行检查时加 `exec_check`。被测代码自己 `except: traceback.print_exc()` 吞掉的异常会经 stderr 进报错收集，`except: pass` 之类收不到，吞掉后状态是否正确要用断言覆盖。
+- 恢复：Mock 和报错收集由执行器在收尾自动处理；GM 造出的状态（如战斗）写在 `finally` 里（`$at kill` 后 `wait_for` `war_out`），步骤失败也会执行，下一轮不会因为还在战斗中而失败。
 
 **格式要点**：
-- `mocks`：`{"name", "patch": "模块.属性", "value": "表达式，可用 orig"}` 由执行器备份和还原；其他情况用 `{"name", "install", "restore"}`，`restore` 最后一行返回核对结果 `True`。
+- `mocks`：`{"name", "patch": "模块.属性", "value": "表达式，可用 orig"}` 由执行器备份和还原，按属性来源还原：对象自己的写回原值，类上继承的删除覆盖，原本没有的删除，`sdata.*` 这类代理提供的值和类上数据描述符（sdata 的 `Property`）写回原值（安装后读回不是新值时报错，改用下一种）；注意 `sdata.xxx` 上的 Mock 只改代理对象，直接读 `xxx_sd` 模块的代码看不到；其他情况用 `{"name", "install", "restore"}`，`restore` 最后一行返回核对结果 `True`。
+- `finally`（可选，步骤列表）：`steps` 结束后无论成败都执行，在还原 Mock 之前；报告单独列在 `finally`，失败写 `finally_failure` 并判用例失败。退战、关掉测试中打开的界面等清理写在这里。
+- `clean_ui`（可选，默认 `true`）：开局整理，在开始报错收集前按清单关闭签到（含取消延迟弹出）、推送面板、NPC 对话框和游戏引导清场覆盖的 16 类界面（道具、属性、任务、日历、商城、精灵等）。结果在用例报告的 `clean_ui`：`closed` 关掉的、`visible` 整理后仍可见的单例窗口（含常驻 UI，用来发现新的遮挡窗口）、`errors` 失败项（只记 `unverified`）。被测内容就是这些界面、需要保留开局状态时写 `false`。清单外的弹窗不会关，遇到时在真机确认关闭方式后加进 `_case_clean_ui`。
 - `steps` 每步一个类型：`exec`（可 `save_as`）、`gm`、`mcp`（工具名 + `args`，可 `save_as`）、`wait_for`（`expr` 或 `preset`，`timeout` 默认 30 秒）、`assert`（可 `message`）、`exec_check`（`cases` 为定义 `CASES` 的代码，`files` 可选，规则同 `exec-check.md`）。
 - `ignore_errors`（可选，正则列表）：已确认与被测内容无关的客户端既有报错（如退出战斗时的 `NSRank 的size不对`），命中的报错移到 `ignored_errors`，不判失败。正则要具体，先确认无关再加，加了要在汇报里说明。
 - 占位符：`{devid}`、`{root}`、`{vars.名字}`、`{args.名字}`；代码里 vars 以 `repr()` 代入。客户端代码写法同「找到并调用工具」的 `execute_code`。
@@ -134,7 +136,7 @@ python -X utf8 "<skill>/scripts/game-debugging/case_runner.py" search --root "<�
 - `setup`（用例字段，步骤前执行）：`school: [门派, 流派]`（已一致就跳过；不一致时必须写 `allow_destructive: true`，转门派会清空经脉）、`teji`（特技名）、`items`（背包已有就跳过）、`gm`（其他造局指令）。
 - 证据（按需开，默认不做）：`record: true` 录整个用例的 mp4；`frames: true` 开帧采集（必须在用例开始时不在战斗中），收尾导出本场帧数据 JSON；`screenshot` 步骤（值为说明）截当前画面。文件在 `.mhxy-workspace/cases/reports/<运行编号>/`，路径写在用例报告的 `media` 里。只需要确认某个瞬间画面时用截图，要看过程（技能表现、受击、回合流程）才录像。录像、帧数据拿不到只记入 `unverified`，不判失败。
 
-**执行器负责**：校验全部用例（不合法时 blocked，不连接客户端）→ `init_client` 一次 → 每个用例自动开始报错收集、记录监听基线、安装 Mock → 依次执行步骤，失败即停 → finally 中等待 `settle`、逆序还原 Mock、核对监听、结束报错收集。报告在 stdout 和 `.mhxy-workspace/cases/reports/`，字段即 test 结果字段加 `results`（步骤明细）和 `executed`（实际下发的调用，用于复现）。
+**执行器负责**：校验全部用例（不合法时 blocked，不连接客户端）→ `init_client` 一次 → 每个用例自动开局整理、开始报错收集、记录监听基线、安装 Mock → 依次执行步骤，失败即停 → 执行 `finally` 步骤 → 等待 `settle`、逆序还原 Mock、核对监听、结束报错收集。报告在 stdout 和 `.mhxy-workspace/cases/reports/`，字段即 test 结果字段加 `results`（步骤明细）和 `executed`（实际下发的调用，用于复现）。步骤返回值序列化后超过 2000 字符时，完整内容另存为 `reports/<运行编号>/<用例>_step<序号>_<字段>.json`，报告里是 `{"clipped", "length", "file"}`，逐项核对时读 `file`。
 
 **判读**：`status` 只是初判。逐条看 `errors`（区分有关和无关）、`unverified`（监听增加、执行检查未覆盖的行等）、`restoration`；`unknown` 时按「Mock 与验证」检查残留。用例文件本身写错时修正后重跑；业务缺陷带报告返回。
 
@@ -157,4 +159,5 @@ python -X utf8 "<skill>/scripts/game-debugging/case_runner.py" search --root "<�
 ## 战斗测试
 
 - 开始：`$at fightN <敌方单位数量>` 进入机器人测试战斗。结束：`$at kill`，不要用 `$halt`（可能导致崩溃）。
+- `fightN` 造出的敌方机器人没有武器层等装备层。测造型分层（武器、锦衣等）的表现时，观察对象要包含主角或指定造型，不能只看敌方。
 - 每回合人物和在场召唤兽都要下指令。`$at ka` 会让回合超时失效，只给人物下指令时服务端会一直等召唤兽；卡住时用 `$at ka 0` 解除，或给召唤兽下防御、攻击指令。
