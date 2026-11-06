@@ -119,11 +119,17 @@ CLIENT_HELPERS = '''def _case_install(name, target, value_src):
 			obj = getattr(obj, part)
 		attr = parts[-1]
 		own = vars(obj) if hasattr(obj, "__dict__") else {}
+		if attr in own:
+			mode, old, present = "own", own[attr], True
+		else:
+			# 代理的 __getattr__ 可能在这里懒加载：把值缓存进实例 __dict__，或把 Property 挂到类上（sdata_imp.py:144），
+			# 所以类上的查找放在它之后
+			mode, old, present = None, None, hasattr(obj, attr)
 		bases = obj.__mro__[1:] if isinstance(obj, type) else type(obj).__mro__
 		found = next((vars(base)[attr] for base in bases if attr in vars(base)), None)
-		if attr in own:
-			mode, old = "own", own[attr]
-		elif not hasattr(obj, attr):  # 代理的 __getattr__ 可能在这里把值缓存进 __dict__（如 sdata），不影响下面的判断
+		if mode == "own":
+			pass
+		elif not present:
 			mode, old = "absent", None
 		elif attr in own:
 			mode, old = "proxy", own[attr]
@@ -907,7 +913,10 @@ def keep(value, context, record, field):
     text = json.dumps(value, ensure_ascii=False, default=repr)
     if len(text) <= TEXT_LIMIT:
         return value
-    path = media_path(context, f"_step{record['index']}_{field}.json")
+    path, number = media_path(context, f"_step{record['index']}_{field}.json"), 1
+    while Path(path).exists():  # 同一步骤可能写两次（如 war_act 下指令后再等待），不覆盖
+        number += 1
+        path = media_path(context, f"_step{record['index']}_{field}_{number}.json")
     Path(path).write_text(text, encoding="utf-8")
     return {"clipped": text[:TEXT_LIMIT], "length": len(text), "file": path}
 

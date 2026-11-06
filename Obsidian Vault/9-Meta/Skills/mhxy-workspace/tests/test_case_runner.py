@@ -889,6 +889,15 @@ class LongValueTests(Base):
         self.assertTrue(Path(ret["file"]).name.endswith("_step1_ret.json"))
         json.loads(json.dumps(report, ensure_ascii=False))
 
+    def test_keep_does_not_overwrite_same_step(self):
+        context = {"media": (self.temp / "m", "case1")}
+        record = {"index": 3}
+        first = runner.keep("a" * 3000, context, record, "ret")
+        second = runner.keep("b" * 3000, context, record, "ret")
+        self.assertNotEqual(first["file"], second["file"])
+        self.assertTrue(second["file"].endswith("_step3_ret_2.json"))
+        self.assertIn("aaa", Path(first["file"]).read_text(encoding="utf-8"))
+
     def test_clip_is_structured(self):
         self.assertEqual(runner.clip("abc"), "abc")
         clipped = runner.clip("x" * 5000)
@@ -942,14 +951,15 @@ class ProxyMockTests(Base):
             def __set__(self, inst, value):
                 store["prop"] = value
 
-        module = types.SimpleNamespace(flag=False)
+        module = types.SimpleNamespace(flag=False, prop=Prop())
 
         class ModData:
-            prop = Prop()
-
-            def __getattr__(self, name):
+            def __getattr__(self, name):  # 同 sdata_imp._ModData.__getattr__：首次访问才懒加载
                 value = getattr(module, name)
-                self.__dict__[name] = value  # 缓存，同 sdata_imp._ModData.__getattr__
+                if isinstance(value, Prop):
+                    setattr(ModData, name, value)  # Property 挂到类上
+                    return getattr(self, name)
+                self.__dict__[name] = value  # 普通值缓存进实例
                 return value
 
         self.target.huodong = ModData()
@@ -963,6 +973,7 @@ class ProxyMockTests(Base):
         self.assertEqual(modes, ["proxy", "descriptor"])
         self.assertIs(self.target.huodong.flag, False)
         self.assertEqual(store["prop"], 10)
+        self.assertIsInstance(vars(ModData)["prop"], Prop)  # 类上的描述符没被删掉
 
     def test_absent_attribute_removed(self):
         report = self.run_case({"name": "a", "mocks": [{"name": "n", "patch": "fake_target.brand_new", "value": "3"}],

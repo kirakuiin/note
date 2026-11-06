@@ -115,7 +115,7 @@
 
 - **test 任务**：执行者优先写用例文件、用执行器跑；出问题时排查用例或报告缺陷。用例文件写在 `.mhxy-workspace/cases/` 内。
 - **用例留档**：真机自检通过的用例，由主会话写入项目 spec 的「测试用例」一节（json 代码块）。
-- **回归例外**：spec 中已有用例的回归，主线程可以直接运行执行器（加锁 → 运行 → 核对报告和恢复 → 释放），不委派。用例需要修改或运行失败需要排查时，仍委派。
+- **主线程直接运行**：主线程可以直接用执行器跑用例（加锁 → 运行 → 核对报告和恢复 → 释放），包括 spec 中已有用例的回归，以及 0.3.31 起主线程新写的用例。逐步手动调工具的跑测、运行失败后需要大量排查的，仍委派。
 - **game-debugging.md**：新增「用例执行器」一节，含标准测试骨架（清场 → 造局 → 执行 → 收集证据 → 恢复）、格式和预设；开头的委派规则加上回归例外。
 - **cli.md**：test 结果字段加 `executed`；test 任务的 `write_dirs` 用 `.mhxy-workspace/cases`。
 - **test 沙箱联网**：执行器由 Codex 在命令行运行，要直连 mh-game-mcp 的 HTTP 入口，而 `workspace-write` 沙箱默认禁止命令联网。`codex_cli.py` 只给 test 任务加 `sandbox_workspace_write.network_access=true`（用户确认）；investigate、review 仍是只读、不联网。
