@@ -862,6 +862,197 @@ def verify_clean_working_copy(target_wc: str) -> None:
         )
 
 
+@dataclass
+class StashedFile:
+    path: pathlib.Path          # 工作副本里的文件
+    backup: pathlib.Path        # 暂存目录里的副本（带本地修改的内容）
+    pristine: pathlib.Path      # 暂存目录里的基准副本（暂存后工作副本里的内容）
+    changelist: str | None      # 原来所在的变更列表，如 ignore-on-commit
+
+
+class LocalStash:
+    """合并期间暂存“与合并无关的本地修改”。
+
+    合并脚本要求工作副本干净，因为合并后要把工作副本的全部改动和源修订逐一比对，
+    提交时也是提交整个工作副本。但工作副本里常有明确不提交的本地修改（例如工作区规则写进
+    AGENTS.md 的区段，放在 ignore-on-commit 变更列表里）。这里在合并前把这类修改备份并还原，
+    让后面的流程照原样在干净的工作副本上进行。
+
+    放回的时机：只在工作副本里没有“合并留下的未提交内容”时才放回。合并因冲突停下、
+    等人处理和提交的那段时间里不放回，否则处理完冲突提交整个工作副本时会把这些本地修改一起提交上去。
+    没放回的暂存留在 <target-wc>/.svn-merge-stash/ 下，下一次 replay 结束时或执行 restore-stash 时放回。
+
+    只暂存“单纯内容被修改的文件”（svn status 第一列为 M、没有属性修改、没有锁和树冲突）。
+    新增、删除、替换、冲突、缺失、锁定仍然像原来一样挡住合并。
+    """
+
+    DIR_NAME = ".svn-merge-stash"
+    MANIFEST = "manifest.json"
+
+    def __init__(self, target_wc: str):
+        self.target_wc = pathlib.Path(target_wc)
+        self.base = self.target_wc / self.DIR_NAME
+
+    # ---- 暂存 ----
+    @staticmethod
+    def _stashable(line: str) -> bool:
+        padded = line.ljust(8)
+        return padded[0] == "M" and padded[1:7].strip() == "" and pathlib.Path(padded[8:]).is_file()
+
+    def save(self) -> None:
+        import datetime
+        import shutil
+
+        output = run_svn(["status", str(self.target_wc)])
+        changelist: str | None = None
+        found: list[tuple[pathlib.Path, str | None]] = []
+        for line in output.splitlines():
+            match = re.match(r"^--- Changelist '(.*)':$", line)
+            if match:
+                changelist = match.group(1)
+                continue
+            if not line:
+                changelist = None
+                continue
+            if line.startswith("Performing status on external item"):
+                continue
+            if self._stashable(line):
+                found.append((pathlib.Path(line.ljust(8)[8:]), changelist))
+        if not found:
+            return
+        root = self.base / datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+        entries = []
+        print("LOCAL_MODIFICATIONS_STASHED_BEGIN")
+        print(f"合并期间暂存这些本地修改，合并完成后放回。备份目录：{root}")
+        for path, name in found:
+            rel = os.path.relpath(path, self.target_wc)
+            backup = root / "local" / rel
+            pristine = root / "pristine" / rel
+            backup.parent.mkdir(parents=True, exist_ok=True)
+            pristine.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, backup)
+            run_svn(["revert", str(path)])
+            shutil.copy2(path, pristine)
+            entries.append({"path": rel, "changelist": name})
+            (root / self.MANIFEST).write_text(json.dumps(entries, ensure_ascii=False, indent=2), encoding="utf-8")
+            print(f"  {rel}" + (f"（变更列表 {name}）" if name else ""))
+        print("LOCAL_MODIFICATIONS_STASHED_END")
+
+    def pending(self) -> list[tuple[pathlib.Path, list[StashedFile]]]:
+        """还没放回的暂存，按时间从早到晚。"""
+        out: list[tuple[pathlib.Path, list[StashedFile]]] = []
+        if not self.base.is_dir():
+            return out
+        for root in sorted(p for p in self.base.iterdir() if (p / self.MANIFEST).is_file()):
+            entries = json.loads((root / self.MANIFEST).read_text(encoding="utf-8"))
+            out.append((root, [
+                StashedFile(self.target_wc / e["path"], root / "local" / e["path"], root / "pristine" / e["path"],
+                            e.get("changelist"))
+                for e in entries
+            ]))
+        return out
+
+    # ---- 放回 ----
+    def _has_pending_merge(self) -> bool:
+        """工作副本里是否还有没提交的改动或冲突（合并停在半路，或默认模式下合并结果等待检查）。"""
+        output = run_svn(["status", str(self.target_wc)], check=False)
+        for line in output.splitlines():
+            if not line or line.startswith(("---", "Performing status on external item")):
+                continue
+            padded = line.ljust(8)
+            if padded[0] in STATUS_BLOCKERS or padded[1] in "MC" or padded[6] == "C":
+                return True
+        return False
+
+    @staticmethod
+    def _three_way(item: StashedFile) -> bytes | None:
+        """把本地修改（backup 相对 pristine 的差异）合并到工作副本当前内容上。
+
+        用 git merge-file 做三方合并；没有 git、文件不存在、是二进制或两边改到同一处时返回 None。
+        """
+        import shutil
+
+        git = shutil.which("git")
+        if not git or not item.path.is_file():
+            return None
+        result = subprocess.run(
+            [git, "merge-file", "-p", str(item.path), str(item.pristine), str(item.backup)],
+            capture_output=True,
+        )
+        return result.stdout if result.returncode == 0 else None
+
+    def restore(self, *, force: bool = False) -> bool:
+        """放回所有暂存。工作副本里还有未提交的合并内容时不放回（force 除外）。返回是否全部放回。"""
+        import shutil
+
+        batches = self.pending()
+        if not batches:
+            return True
+        if not force and self._has_pending_merge():
+            print("LOCAL_MODIFICATIONS_PENDING_BEGIN")
+            print("工作副本里还有这次合并留下的未提交内容，暂存的本地修改先不放回，避免被一起提交。")
+            print(f"备份目录：{self.base}")
+            print("合并结果提交（或撤销）之后执行下面的命令放回；下一次 replay 结束时也会自动放回：")
+            print(f'  python "{pathlib.Path(__file__).resolve()}" restore-stash --target-wc "{self.target_wc}"')
+            print("LOCAL_MODIFICATIONS_PENDING_END")
+            return False
+        restored: list[pathlib.Path] = []
+        remerged: list[pathlib.Path] = []
+        kept: list[StashedFile] = []
+        for root, files in batches:
+            left = False
+            for item in files:
+                try:
+                    untouched = item.path.is_file() and item.path.read_bytes() == item.pristine.read_bytes()
+                except OSError:
+                    untouched = False
+                if untouched:
+                    shutil.copy2(item.backup, item.path)
+                    restored.append(item.path)
+                else:
+                    # 合并或更新也改了这个文件：把本地修改三方合并到新内容上；两边改到同一处才留给人处理
+                    merged = self._three_way(item)
+                    if merged is None:
+                        kept.append(item)
+                        left = True
+                        continue
+                    item.path.write_bytes(merged)
+                    remerged.append(item.path)
+                if item.changelist:
+                    run_svn(["changelist", item.changelist, str(item.path)], check=False)
+            if left:   # 这一批里还有没放回的：改个名字留作备份，不再当作待放回
+                (root / self.MANIFEST).rename(root / "manifest.unrestored.json")
+            else:
+                shutil.rmtree(root, ignore_errors=True)
+        try:
+            self.base.rmdir()
+        except OSError:
+            pass
+        print(f"LOCAL_MODIFICATIONS_RESTORED {len(restored) + len(remerged)} 个文件的本地修改已放回")
+        if remerged:
+            print("LOCAL_MODIFICATIONS_REMERGED_BEGIN")
+            print("下面这些文件这次合并或更新也改过，本地修改已自动合并到新内容上（两边改的不是同一处）：")
+            for path in remerged:
+                print(f"  {path}")
+            print("LOCAL_MODIFICATIONS_REMERGED_END")
+        if kept:
+            print("LOCAL_MODIFICATIONS_NOT_RESTORED_BEGIN")
+            print("下面这些文件的本地修改和这次合并或更新改到了同一处，没有自动合并，也没有用本地版本覆盖。"
+                  "工作副本里是合并后的内容，本地版本在备份目录，需要把本地修改合回去：")
+            for item in kept:
+                print(f"  {item.path}  <-  {item.backup}")
+            print("LOCAL_MODIFICATIONS_NOT_RESTORED_END")
+        return not kept
+
+
+def restore_stash(args: argparse.Namespace) -> int:
+    stash = LocalStash(args.target_wc)
+    if not stash.pending():
+        print("没有待放回的本地修改。")
+        return 0
+    return 0 if stash.restore(force=args.force) else 2
+
+
 def get_eligible_revisions(
     source_url: str,
     target_wc: str,
@@ -1875,6 +2066,23 @@ def replay(args: argparse.Namespace) -> int:
             "请拆分为单组 replay 并逐组检查，或在确认需要自动逐组提交时显式传 --commit。"
         )
 
+    # 与合并无关的本地修改（如 ignore-on-commit 里的 AGENTS.md）先暂存，结束后放回；其余情况照旧挡住。
+    stash = LocalStash(args.target_wc)
+    stash.save()
+    try:
+        processed = _replay_groups(args, revision_groups, target_url, log_policy, preserve_log_revs)
+    finally:
+        # 合并停在半路（冲突待处理）或结果还没提交时不会放回，见 LocalStash
+        stash.restore()
+
+    print("PROCESS_SUMMARY_BEGIN")
+    for line in processed:
+        print(line)
+    print("PROCESS_SUMMARY_END")
+    return 0
+
+
+def _replay_groups(args, revision_groups, target_url, log_policy, preserve_log_revs) -> list[str]:
     verify_clean_working_copy(args.target_wc)
     update_target(args.target_wc)
     auto_resolve_external_conflicts = (
@@ -1905,12 +2113,7 @@ def replay(args: argparse.Namespace) -> int:
         else:
             processed.append(f"OK {format_revision_group(group.revs)} -> r{commit_rev}")
             update_target(args.target_wc)
-
-    print("PROCESS_SUMMARY_BEGIN")
-    for line in processed:
-        print(line)
-    print("PROCESS_SUMMARY_END")
-    return 0
+    return processed
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -1944,6 +2147,15 @@ def build_parser() -> argparse.ArgumentParser:
     message.add_argument("--infer-merge-history-author", action="store_true")
     message.add_argument("--out")
     message.set_defaults(func=write_message)
+
+    restore_cmd = subparsers.add_parser(
+        "restore-stash", help="把 replay 暂存的本地修改放回工作副本。", add_help=False)
+    restore_cmd.add_argument("-h", "--help", action="help", help="显示帮助信息并退出。")
+    restore_cmd.add_argument("--target-wc", required=True)
+    restore_cmd.add_argument(
+        "--force", action="store_true",
+        help="工作副本里还有未提交的改动时也放回（确认之后的提交不会带上这些本地修改时才用）。")
+    restore_cmd.set_defaults(func=restore_stash)
 
     replay_cmd = subparsers.add_parser("replay", help="把修订重放到目标分支。", add_help=False)
     replay_cmd.add_argument("-h", "--help", action="help", help="显示帮助信息并退出。")

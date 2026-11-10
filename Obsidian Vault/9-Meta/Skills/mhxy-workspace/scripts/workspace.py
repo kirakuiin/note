@@ -971,6 +971,12 @@ def require_initialized(root):
         WorkspaceError: AGENTS.md 不存在、无法解码或没有受管区段。
     """
     if block_info(decode_document(read_bytes(root / ENTRY_FILES[0]))[0]) is None:
+        # svn-merge 合并期间会把入口文件的本地修改暂存起来，合并结果提交前不放回，受管区段这时不在文件里
+        stash = root / ".svn-merge-stash"
+        if stash.is_dir() and any(stash.glob("*/manifest.json")):
+            raise WorkspaceError(
+                f"{root} 的 AGENTS.md 受管区段被 svn-merge 暂存了（{stash}），还没放回。"
+                "按 workspace-management.md「合并时」用 svn-merge 的 restore-stash 放回后重试，不要重新初始化")
         raise WorkspaceError(f"{root} 不是已初始化的工作区（AGENTS.md 中没有 {NAME} 受管区段）；"
                              "请把 --root 指向项目根目录，或先按 SKILL.md 初始化")
 
