@@ -183,15 +183,14 @@ def copy_media(sources, target, prefix):
     return items
 
 
-INLINE_CODE = re.compile(r"`([^`]+)`")
+INLINE = re.compile(r"`([^`]+)`|\*\*(.+?)\*\*")  # 一次扫描：行内代码里的 ** 不再当粗体
 
 
 def render_text(text):
     """把会话写的简单 Markdown（段落、列表、代码块、行内代码、粗体）转成 HTML；其余原样转义。"""
     def inline(line):
-        escaped = html.escape(line, quote=False)
-        escaped = INLINE_CODE.sub(lambda match: f"<code>{match[1]}</code>", escaped)
-        return re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", escaped)
+        return INLINE.sub(lambda match: f"<code>{match[1]}</code>" if match[1] is not None
+                          else f"<strong>{match[2]}</strong>", html.escape(line, quote=False))
 
     parts, paragraph, items, ordered, code = [], [], [], False, None
 
@@ -475,6 +474,7 @@ def summary_result(target, data):
 def commit(args):
     """提交后补版本号：状态改为已提交并重新渲染，其余内容不变。"""
     root, personal, _ = workspace.paths(args.root, args.global_config)
+    workspace.require_initialized(root)
     workspace.validate_issue_id(args.issue_id)
     if not re.fullmatch(r"[1-9]\d*", args.revision or ""):
         raise ReportError("--revision 必须是正整数版本号")

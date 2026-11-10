@@ -75,4 +75,12 @@
 ## 变更记录
 
 - 2026-11-10：建立。第 1 项由指针模式改为 context 自动更新副本（原因见上）。
-- 待发版时补记：2026-11-06 `workspace.py`、`precommit.py` 调用 svn 加了 `CREATE_NO_WINDOW`（UTF-8 代码页下 svn 会把中文路径参数转成乱码），当时没有提升版本号。
+- 2026-11-10（0.3.32）：五项全部实现。
+  - 第 1 项：`workspace.py` 的 `update_entry_files`、`context --no-entry-update`，输出字段 `entry_rules_updated`。
+  - 第 2 项：`references/unattended.md`、`scripts/unattended.py`（`result`／`show`），结果文件 `.mhxy-workspace/unattended/<工单号>/result.json`。
+  - 第 3 项：`scripts/report.py`（`build`／`commit`），报告在 `.mhxy-workspace/reports/<工单号>/`。自检结果由脚本现场跑提交前自检（阻断和警告）并读取用例执行器报告；`--case-report latest` 取最新一份。
+  - 第 4 项：`scripts/svn_update.py`，另有 `--code-only`、`--dry-run`。实现细节：更新用 `--force --accept postpone`，被 `--force` 原地纳管且内容不同的未纳管文件存进备份后换成服务器版本；未纳管目录与新增文件互相挡路时 svn 报树冲突，按冲突处理；被换掉的文件除 patch 外另存原件（patch 不含二进制）；`AGENTS.md`／`CLAUDE.md` 冲突取服务器版本后自动重新 sync。每一项先备份成功再动手，失败即放弃该项；链接、入口文件和本地辅助目录上的树冲突不自动处理。
+  - 第 5 项：`branch.py` 的 `reuse_workspace_entries` 和 `clean_workspace` 步骤。
+  - 补记：2026-11-06 `workspace.py`、`precommit.py` 调用 svn 加了 `CREATE_NO_WINDOW`（UTF-8 代码页下 svn 会把中文路径参数转成乱码），当时没有提升版本号，随本次一并发布。
+  - 测试：383 → 439（新增 `test_entry_update.py`、`test_report.py`、`test_svn_update.py`、`test_branch_reuse_clean.py` 和公共的 `svn_fixture.py`，未删改已有测试）。Codex review：第 1 项 1 轮通过；第 2～5 项 2 轮通过（第 1 轮 1 条必须修改：`svn_update.py` 还原失败后仍可能删除本地内容、链接静默跳过备份、未排除本地辅助目录的树冲突，已修并补测试）。
+  - 真实工作区验证：`svn_update.py --dry-run` 在 trunk 和外测（`test_2026_11_10` → 目标 `test_2026_11_17`）只读运行正常；发版后 trunk 的入口文件由 `context` 自动更新到 0.3.32。

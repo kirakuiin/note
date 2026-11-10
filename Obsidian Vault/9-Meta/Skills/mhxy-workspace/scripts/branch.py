@@ -526,6 +526,8 @@ def command_preview(step):
         return f"rename {step['source']} -> {step['target']} (different repository, checkout again)"
     if step["type"] == "remove":
         return f"remove {step['path']} (set-aside old working copy, kept if status unavailable, not clean or removal fails)"
+    if step["type"] == "clean_workspace":
+        return f"clean {Path(step['path']) / workspace.DIRECTORY} (old branch's tracking, index, reports and other local data)"
     return "svn " + " ".join(step["args"] + ["--non-interactive"])
 
 
@@ -534,8 +536,23 @@ def make_svn_step(args, cwd, label):
     return {"type": "svn", "args": list(map(str, args)), "cwd": str(cwd), "label": label}
 
 
-def checkout_plan(name, root, urls, reuse=None, replace=()):
+def reuse_workspace_entries(reuse):
+    """复用目录的 mhimage/.mhxy-workspace/ 里待清理的顶层条目；没有内容时为空列表。
+
+    个人目录里是旧分支的追踪、索引、报告等，切到新分支后不再适用，切换成功后整体清理。这里用
+    workspace.clean 的预览做同样的安全检查：有 Codex 任务在运行、test 任务的设备锁没释放，或目录里有链接时
+    直接拒绝复用，避免切换完成后才发现清不了。
+    """
+    try:
+        return workspace.clean(reuse / "mhimage", CONFIG_PATH, apply=False)["entries"]
+    except workspace.WorkspaceError as error:
+        raise BranchError(f"复用目录的 {workspace.DIRECTORY}/ 无法清理，拒绝复用：{error}") from None
+
+
+def checkout_plan(name, root, urls, reuse=None, replace=(), clean=False):
     """构造新建或复用目录的操作计划，不产生文件系统副作用。
+
+    clean 为真时（复用目录的个人目录里有内容），在全部 SVN 步骤成功后清理 mhimage/.mhxy-workspace/。
 
     replace 中的复用子目录与目标不在同一仓库，无法 switch（见 cross_repository_folders）：先改名挪开再检出，
     全部步骤成功后最后删除挪开的旧目录。改名在文件被占用时会直接失败，不会留下删了一半的工作副本。
@@ -570,6 +587,8 @@ def checkout_plan(name, root, urls, reuse=None, replace=()):
                                            target, f"switch {folder}"))
             else:
                 steps.append(make_svn_step(["checkout", "-q", url, folder], target, f"checkout {folder}"))
+        if clean:
+            steps.append({"type": "clean_workspace", "path": str(target / "mhimage")})
     return steps + removals
 
 
@@ -717,7 +736,10 @@ def build_checkout(name, root_arg=None, reuse_arg=None, config=None, rows=None):
         if replace:
             checks["replaced_working_copies"] = replace
         warnings = warnings + stale_resource_warnings(reuse, urls)
-    steps = checkout_plan(name, root, urls, reuse, replace)
+        cleaned = reuse_workspace_entries(reuse)
+        if cleaned:
+            checks["workspace_clean"] = cleaned
+    steps = checkout_plan(name, root, urls, reuse, replace, clean=bool(reuse is not None and cleaned))
     return {"action": "checkout", "preview": True, "applied": False, "branch": name,
             "root": str(root), "target": str(target), "reuse": str(reuse) if reuse else None,
             "urls": urls, "warnings": warnings, "checks": checks,
@@ -746,6 +768,12 @@ def execute_steps(result):
                 outcome = "set_aside"
             elif step["type"] == "remove":
                 outcome = remove_set_aside(step["path"])
+            elif step["type"] == "clean_workspace":
+                try:
+                    workspace.clean(step["path"], CONFIG_PATH, apply=True)
+                except workspace.WorkspaceError as error:
+                    raise BranchError(str(error)) from None
+                outcome = "cleaned"
             else:
                 completed_process = run_svn(*step["args"], cwd=step["cwd"], timeout=SVN_TIMEOUT)
                 if completed_process.returncode:
