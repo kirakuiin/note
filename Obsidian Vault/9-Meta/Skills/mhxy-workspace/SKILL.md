@@ -20,7 +20,7 @@ disable-model-invocation: true
    - 已有用户级配置但缺少字段时（预览输出的 `missing_fields` 不为空），只询问其中列出的项；已有的配置（包括 null）直接复用，不重复询问。
 3. **应用**：在预览命令后加上收集到的 `--set-global "键=值"`，再加 `--apply`。用户已经要求初始化或更新时，不需要再单独请求批准。
 4. **交付**：说明改了哪些文件和检查结果。预览报告目录不可用时请用户核实，不要自动替换已保存的值。在 Claude Code 中，告诉用户新写入或变化的 hooks 和 CLAUDE.md 要在新会话中才生效：当前会话不会收到 SessionStart 注入的 context，写入 spec 也不会经 PostToolUse 收录。
-5. **入口规则有变化时**：输出中 `entry_rules_changed` 为 true（`notice` 会提示）时，重新读取 AGENTS.md 的受管区段，按实际内容向用户说明新增或变化了哪些规则。当前会话已加载的是旧版本，不要凭印象判断“没有变化”。
+5. **入口规则有变化时**：输出中 `entry_rules_changed` 为 true（`notice` 会提示）时，重新读取 AGENTS.md 的受管区段，按实际内容向用户说明新增或变化了哪些规则。当前会话已加载的是旧版本，不要凭印象判断“没有变化”。skill 升级带来的规则变化通常已由 `context` 自动更新并提示过，这时再 sync 该字段为 false。
 
 sync 会写入用户级配置、AGENTS.md 和 CLAUDE.md 的受管区段、Claude Code 的 hooks，并建立需求索引的收录起点；细节见 workspace-management.md「sync 做什么」。脚本会拒绝不完整的配置、异常标记和版本降级；按报错处理原因，不要手工绕过。
 
@@ -44,6 +44,6 @@ sync 会写入用户级配置、AGENTS.md 和 CLAUDE.md 的受管区段、Claude
 
 - **每条规则只在一个文件里完整描述**，其他地方只放链接。归属：配置、密码、入口文件、索引、hook、清理 → `workspace-management.md`；其余按能力写在各自的 reference 里。入口模板 `assets/managed-block.md` 只放每次会话都要遵守的内容：会话开始、项目约定、开发流程概要（细节链接到对应 reference）、需求索引和追踪工单的用法、「按需读取」表和边界；配置字段等细节只放链接，完整说明留在对应的 reference。
 - 版本的唯一来源是 `config/version.json`。修改模板或行为时递增发布版本；结构不兼容时再递增结构版本（当前只支持 2）。
-- 升级 skill 不会修改已有工作区；入口规则变化后，由用户在各工作区重新执行更新。references 直接从安装目录引用，改了立即生效。
+- 升级 skill（递增发布版本）后，各工作区下次运行 `context`（Claude Code 是开会话时的 hook）会自动把入口文件的受管区段更新到新版本，不需要逐个 sync，见 workspace-management.md「入口规则自动更新」。所以改了入口模板一定要递增发布版本，否则已有工作区不会更新。references 直接从安装目录引用，改了立即生效。
 - 新能力放进 `references/` 和 `scripts/`，并在入口模板的「按需读取」表里加一行。保持只依赖标准库；`cryptography` 只是 OpenID 登录的可选依赖。
 - 测试：`python -B -m pytest -q -p no:cacheprovider tests`。

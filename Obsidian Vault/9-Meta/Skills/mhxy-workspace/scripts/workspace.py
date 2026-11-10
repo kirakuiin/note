@@ -481,6 +481,69 @@ def prompt_password(label, apply):
     return getpass.getpass(label)
 
 
+ENTRY_TEMPLATES = ("managed-block.md", "claude-block.md")  # 与 ENTRY_FILES 一一对应。
+
+
+def render_block(skill, metadata, template_name, newline):
+    """按模板渲染一个入口文件的受管区段：填入管理元数据和本机的 skill 路径，换行跟随目标文件。"""
+    variables = {
+        "metadata": json.dumps(metadata, ensure_ascii=False, indent=2),
+        "references_dir": (skill.resolve() / "references").as_posix(),
+        "workspace_script": (skill.resolve() / "scripts/workspace.py").as_posix(),
+    }
+    template = (skill / "assets" / template_name).read_text(encoding="utf-8").rstrip("\n")
+    return re.sub(r"\{\{(\w+)\}\}", lambda match: variables[match[1]], template).replace("\n", newline)
+
+
+def update_entry_files(root, skill=SKILL):
+    """context 用：AGENTS.md 的受管区段版本落后于 skill 时，重写入口文件的受管区段。
+
+    只在区段已存在、是本 skill 的现用标记、结构版本与模板一致且发布版本更低时更新；
+    版本相同（即使内容不同）或更高时不动，仍由 sync 处理。CLAUDE.md 没有现用受管区段或
+    版本更高时跳过。只替换区段本身，保留区段外内容、编码和换行；不动配置和 hooks。
+
+    Returns:
+        没有更新时为 None；否则为 {"from", "to", "files", "rules_changed", "notice"}，
+        ignore-on-commit 有警告时另含 "warnings"。
+
+    Raises:
+        WorkspaceError: 元数据或区段异常、文件只读、并发修改等；此时本轮写入已恢复。
+    """
+    metadata = parse_json((skill / "config/version.json").read_bytes(), "发布版本")
+    validate_metadata(metadata)
+    target = release(metadata["applied_version"])
+    changes, previous, rules_changed = [], None, False
+    for filename, template_name in zip(ENTRY_FILES, ENTRY_TEMPLATES):
+        path = root / filename
+        old = read_bytes(path)
+        text, encoding, bom, newline = decode_document(old)
+        info = block_info(text) if old is not None else None
+        current = BEGIN in text and info is not None
+        if filename == ENTRY_FILES[0]:
+            if (not current or info[2]["schema_version"] != metadata["schema_version"]
+                    or release(info[2]["applied_version"]) >= target):
+                return None
+            previous = info[2]["applied_version"]
+        elif not current or release(info[2]["applied_version"]) > target:
+            continue
+        rendered = render_block(skill, metadata, template_name, newline)
+        if filename == ENTRY_FILES[0]:
+            rules_changed = rule_body(text[info[0]:info[1]]) != rule_body(rendered)
+        new = bom + (text[:info[0]] + rendered + text[info[1]:]).encode(encoding)
+        if new != old:
+            changes.append((path, old, new))
+    apply_changes(changes)
+    pending, warnings = plan_ignore_on_commit(root)
+    warnings += apply_ignore_on_commit(root, pending)
+    notice = (f"入口规则已自动更新到 {metadata['applied_version']}，规则内容有变化：本会话开始时加载的可能是旧规则，"
+              "请重新读取 AGENTS.md 的受管区段，并向用户说明新增或变化的规则。") if rules_changed else ""
+    result = {"from": previous, "to": metadata["applied_version"], "files": [item[0].name for item in changes],
+              "rules_changed": rules_changed, "notice": notice}
+    if warnings:
+        result["warnings"] = warnings
+    return result
+
+
 def sync(root_arg, global_arg, assignments=(), apply=False, skill=SKILL, local_assignments=()):
     root, personal, global_config = paths(root_arg, global_arg)
     metadata = parse_json((skill / "config/version.json").read_bytes(), "发布版本")
@@ -518,7 +581,7 @@ def sync(root_arg, global_arg, assignments=(), apply=False, skill=SKILL, local_a
     # （Claude Code 读取），规则保持唯一来源。CLAUDE.md 区段完全由 AGENTS.md 派生，
     # 因此不再要求两者元数据一致，只保留拒绝降级；旧版写入的完整区段在此被替换。
     documents = []
-    for filename, template_name in zip(ENTRY_FILES, ("managed-block.md", "claude-block.md")):
+    for filename, template_name in zip(ENTRY_FILES, ENTRY_TEMPLATES):
         path = root / filename
         old = read_bytes(path)
         text, encoding, bom, newline = decode_document(old)
@@ -530,16 +593,9 @@ def sync(root_arg, global_arg, assignments=(), apply=False, skill=SKILL, local_a
                             "可能读不到或读错规则；sync 保留原编码，建议用户自行转换为 UTF-8")
         documents.append((path, old, text, encoding, bom, newline, info, template_name))
 
-    variables = {
-        "metadata": json.dumps(metadata, ensure_ascii=False, indent=2),
-        "references_dir": (skill.resolve() / "references").as_posix(),
-        "workspace_script": (skill.resolve() / "scripts/workspace.py").as_posix(),
-    }
     entry_changed = False
     for path, old, text, encoding, bom, newline, info, template_name in documents:
-        template = (skill / "assets" / template_name).read_text(encoding="utf-8").rstrip("\n")
-        block = re.sub(r"\{\{(\w+)\}\}", lambda match: variables[match[1]], template)
-        rendered = block.replace("\n", newline)
+        rendered = render_block(skill, metadata, template_name, newline)
         if path.name == ENTRY_FILES[0]:
             entry_changed = not info or rule_body(text[info[0]:info[1]]) != rule_body(rendered)
         if info:
@@ -960,8 +1016,11 @@ def record_hook_write(root_arg, global_arg, payload):
         refresh_index(root, personal, scan=False, written=[rel])
 
 
-def context(root_arg, global_arg):
+def context(root_arg, global_arg, skill=SKILL, entry_update=True):
     """会话开始时一次性加载：当前分支、脱敏配置、追踪工单、覆盖率身份、最近的 spec 和遗留的交接文件。
+
+    entry_update 为真时，入口文件的受管区段版本落后于 skill 就自动重写（见 update_entry_files），
+    结果放在 entry_rules_updated；没有更新时不出现该字段。
 
     同时按 skill_links.repair 补建共享 skill 目录到全局 skill 目录的链接，补建过的列在
     skill_links_repaired（Codex 要到新会话才加载这些 skill）。
@@ -975,6 +1034,13 @@ def context(root_arg, global_arg):
     root, personal, _ = paths(root_arg, global_arg)
     require_initialized(root)
     result, problems = {"root": str(root), "branch": svn_branch(root)}, []
+    if entry_update:
+        try:
+            updated = update_entry_files(root, skill)
+            if updated:
+                result["entry_rules_updated"] = updated
+        except (WorkspaceError, OSError, UnicodeError, KeyError) as error:
+            problems.append(f"入口规则自动更新：{error}")
     try:
         result["effective_config"] = masked_config(load_config(root_arg, global_arg))
     except (WorkspaceError, OSError) as error:
@@ -1266,6 +1332,8 @@ def main():
     parser.add_argument("--remove", action="append", default=[], help="index：移出 spec，可重复")
     parser.add_argument(HOOK_FLAG, dest="from_hook", action="store_true",
                         help="context／index：由 Claude Code hook 调用（context 输出注入格式，index 从 stdin 读取写入事件）")
+    parser.add_argument("--no-entry-update", action="store_true",
+                        help="context：入口文件的受管区段落后于 skill 时本次不自动更新")
     parser.add_argument("--issue-id", action="append", default=[])
     parser.add_argument("--replace", action="store_true", help="替换追踪列表；默认追加")
     parser.add_argument("--prompt-password", action="store_true")
@@ -1296,6 +1364,8 @@ def main():
             raise WorkspaceError("--query、--add、--remove 仅用于 index")
         if args.from_hook and args.action not in ("context", "index"):
             raise WorkspaceError(f"{HOOK_FLAG} 仅用于 context 或 index")
+        if args.no_entry_update and args.action != "context":
+            raise WorkspaceError("--no-entry-update 仅用于 context")
         if args.action == "index" and args.from_hook:
             # 写入后的 hook 不得干扰工具调用：静默处理，失败也以 0 退出。
             try:
@@ -1307,7 +1377,8 @@ def main():
         if args.action == "context" and args.from_hook:
             # hook 不得阻断会话：任何失败都作为文本注入，并以 0 退出。
             try:
-                text = json.dumps(context(args.root, args.global_config), ensure_ascii=False, indent=2)
+                text = json.dumps(context(args.root, args.global_config, entry_update=not args.no_entry_update),
+                                  ensure_ascii=False, indent=2)
             except Exception as error:  # noqa: BLE001
                 text = json.dumps({"problems": [f"context 失败：{error}"]}, ensure_ascii=False)
             print(json.dumps({"hookSpecificOutput": {
@@ -1316,7 +1387,7 @@ def main():
             }}, ensure_ascii=False))
             return 0
         if args.action == "context":
-            result = context(args.root, args.global_config)
+            result = context(args.root, args.global_config, entry_update=not args.no_entry_update)
         elif args.action == "index":
             result = query_index(args.root, args.global_config, args.query, args.add, args.remove)
         elif args.action == "sync":

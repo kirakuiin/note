@@ -36,7 +36,7 @@ python "<skill>/scripts/workspace.py" context --root "<项目>"
 
 - `sync`：初始化或更新工作区，可同时设置配置。
 - `config`：用 `--set-global` 只改用户级配置；用 `--root` 加 `--set-local` 只改工作区级配置。都不碰入口文件。
-- `context`：查看合并后的配置（已脱敏），以及追踪工单和索引状态；同时修复 skill 链接，见下节。
+- `context`：查看合并后的配置（已脱敏），以及追踪工单和索引状态；同时修复 skill 链接（见下节），并在入口规则落后时自动更新（见「入口规则自动更新」）。
 - 值写 `键=null` 表示不配置。
 
 ## skill 链接自检
@@ -92,13 +92,23 @@ python "<skill>/scripts/workspace.py" login-account --account <游戏账号> --r
 - **需求索引**：没有收录名单时新建（起点为当前时间、名单为空），然后刷新，见下节。
 - **保留的内容**：区段外的内容、原有编码（UTF-8、UTF-16 BOM、GB18030）和换行格式，以及工作区级配置。Codex 和 Claude Code 按 UTF-8 读取入口文件，所以 AGENTS.md／CLAUDE.md 不是 UTF-8 时 `warnings` 会提示，由用户决定是否转换；脚本不自动转换。
 - **初始化只由 sync 完成**：`context`、`index`（包括 hook）、`track`／`untrack`、`coverage-task` 和 `precommit.py --mark-reviewed` 要求 `--root` 的 AGENTS.md 已有受管区段，否则报错且不写入，避免从子目录运行时另建一个 `.mhxy-workspace/`。hook 遇到这种情况时不阻断会话或工具：SessionStart 把错误放进注入的 `problems`，PostToolUse 静默跳过。
-- **入口规则是否变化**：输出中的 `entry_rules_changed` 只比较 AGENTS.md 受管区段去掉管理元数据后的内容；单纯升级版本号不算变化。
+- **入口规则是否变化**：输出中的 `entry_rules_changed` 表示本次 sync 是否改变了 AGENTS.md 受管区段的规则内容，只比较去掉管理元数据后的内容；单纯升级版本号不算变化。skill 升级后 `context` 通常已先自动更新，这时再 sync 为 false。
 - **安全检查**：先检查全部目标，再逐个文件原子替换；写入失败可捕获时回滚本轮变更。目标文件只读（例如 `svn:needs-lock` 未加锁）时，写入任何文件之前就报错，不自动去掉只读属性。遇到异常标记、未知结构版本或版本降级（AGENTS.md 或 CLAUDE.md 任一版本更新）时停止。内容无变化时不写入。进程被杀、断电或有其他程序同时写入时，不保证跨文件的原子性，重跑时先处理报出的不一致。不要删除标记来绕过报错。
 - **防止误提交**：受版本控制的 `AGENTS.md`、`CLAUDE.md`（`AGENTS.md` 是团队规范文件）写入受管区段后，会显示为已修改。写入完成后，自动用 `svn changelist ignore-on-commit` 把它们放进 TortoiseSVN 提交对话框默认不勾选的变更列表。这只改本地工作副本的元数据，不影响服务器；真要提交团队规范的修改时，在对话框里手动勾选即可。
   - 预览时 `ignore_on_commit` 列出将要加入的文件。
   - 已在该列表中的跳过；在你自己建的其他变更列表中的不移动，只给出警告。
   - 未纳入版本控制或目录不是工作副本时跳过；svn 不可用或执行失败时只给出警告，不影响其余写入。
-- **不修改**：业务代码、spec；除上一条外不执行任何 SVN 操作。升级 skill 不会自动同步工作区；安装路径变化后重新 sync 即可修复引用。
+- **不修改**：业务代码、spec；除上一条外不执行任何 SVN 操作。安装路径变化后重新 sync 即可修复引用。
+
+## 入口规则自动更新
+
+skill 升级后不需要逐个工作区 sync：每次 `context`（包括 SessionStart hook）比较 AGENTS.md 受管区段的版本和 skill 的发布版本，落后就重写入口文件的受管区段。
+
+- **条件**（全部满足才更新）：AGENTS.md 已有本 skill 的受管区段；区段的结构版本与当前模板相同；发布版本低于 skill。版本相同时即使内容不同（安装路径变了、手工改过）也不动，仍用 `sync`；区段版本更高时不降级。
+- **范围**：只替换 AGENTS.md 和 CLAUDE.md 的受管区段，渲染方式、保留的内容、防止误提交的处理都和 `sync` 相同。CLAUDE.md 没有受管区段或版本更高时只更新 AGENTS.md。不动配置和 hooks（hook 命令里的路径变了仍要 `sync`）。
+- **输出**：更新过时 context 多一个 `entry_rules_updated`：`from`／`to`（版本）、`files`（改了哪些入口文件）、`rules_changed`（规则内容是否变化，算法同 `entry_rules_changed`）、`notice`。会话开始时入口文件可能已按旧内容加载，所以 `rules_changed` 为 true 时照 `notice` 重新读取 AGENTS.md 的受管区段，并向用户说明变化；只升版本号时 `notice` 为空，不需要处理。没有更新时不出现这个字段。
+- **失败**：文件只读、编码损坏、标记异常等只记入 `problems`，不写入任何文件，context 其余部分照常返回；按提示处理后重跑，或改用 `sync` 查看完整报错。
+- **关闭**：`context --no-entry-update` 本次不更新。
 
 ## 需求索引
 
