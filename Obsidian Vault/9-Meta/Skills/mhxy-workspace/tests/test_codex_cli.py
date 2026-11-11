@@ -17,7 +17,22 @@ CONFIG = {"model_provider": "p", "model_providers": {"p": {"base_url": "http://x
                           "codeviewer-mcp": {"url": "https://cv/mcp", "http_headers": {"X-Access-Token": "secret"}},
                           "other": {"url": "http://other"}}}
 TEST_RESULT = {"status": "passed", "cases": ["local probe"], "errors": [],
-               "unverified": [], "restoration": "not_needed", "executed": ["execute_code 读取角色信息"]}
+               "unverified": [], "restoration": "not_needed", "executed": ["execute_code 读取角色信息"],
+               "candidates": [{"kind": "preset", "content": "__import__('dlgx').Dlg.Instance is not None",
+                               "runs": 2, "note": "界面已打开"}]}
+
+
+def test_test_schema_candidates():
+    """候选原语是必填列表；runs 必须是整数（布尔、字符串都不行）。"""
+    schema = c.SCHEMAS["test"]
+    assert c.matches(TEST_RESULT, schema)
+    assert c.matches({**TEST_RESULT, "candidates": []}, schema)
+    assert not c.matches({key: value for key, value in TEST_RESULT.items() if key != "candidates"}, schema)
+    for runs in (True, "2", 1.5):
+        item = {**TEST_RESULT["candidates"][0], "runs": runs}
+        assert not c.matches({**TEST_RESULT, "candidates": [item]}, schema)
+    item = {**TEST_RESULT["candidates"][0], "kind": "other"}
+    assert not c.matches({**TEST_RESULT, "candidates": [item]}, schema)
 
 
 @pytest.fixture(autouse=True)

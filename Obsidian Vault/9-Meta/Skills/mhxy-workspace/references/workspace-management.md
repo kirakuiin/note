@@ -140,7 +140,7 @@ python "<skill>/scripts/workspace.py" clean --root "<项目>"
 python "<skill>/scripts/workspace.py" clean --root "<项目>" --apply
 ```
 
-- **会删除**：`.mhxy-workspace/` 内的全部内容，包括工作区级配置、索引和收录名单、工单正文和图片、`tracking.json`、覆盖率登记和 Mock、改动执行检查的用例脚本、CR diff 及其清单和上传记录 `applied.json`（清理后脚本不再能拦截同一工单的重复上传）、`codex_cli.py` 的任务目录 `codex-cli/`、review 指纹 `review-mark.json`、会话交接文件 `handoff/`、处理报告 `reports/`、无人值守结果 `unattended/`、SVN 更新的备份 `backups/`（清理前确认里面的 patch 不再需要）。目录本身保留为空；目录不存在时不创建。
+- **会删除**：`.mhxy-workspace/` 内的全部内容，包括工作区级配置、索引和收录名单、工单正文和图片、`tracking.json`、覆盖率登记和 Mock（含覆盖率用例）、改动执行检查的用例脚本、用例执行器的用例、报告和通过记录 `cases/`、CR diff 及其清单和上传记录 `applied.json`（清理后脚本不再能拦截同一工单的重复上传）、`codex_cli.py` 的任务目录 `codex-cli/`、review 指纹 `review-mark.json`、会话交接文件 `handoff/`、处理报告 `reports/`、无人值守结果 `unattended/`、SVN 更新的备份 `backups/`（清理前确认里面的 patch 不再需要）。目录本身保留为空；目录不存在时不创建。
 - **拒绝清理**：`codex-cli/` 中有任务的 `state.json` 状态为 starting／running，或 test 任务（含 `lock` 建立的 native 任务）的 `released` 不是 true，或任务目录没有、无法读取 state.json（状态未知）时，预览和应用都报错并列出这些任务，不删除任何内容。请用户先等任务结束、取消或 release，再重新预览；没有 state.json 的目录按报错中的方法核实后由用户手动删除。
 - **不会修改**：spec、业务代码、AGENTS.md、CLAUDE.md、用户级配置、用户级经验库 `~/.mhxy-workspace/lessons/` 和远端任务。
 - **安全检查**：脚本先扫描全部待删项，遇到符号链接、目录联接或其他 reparse point 就整体停止。请用户先核实并处理该链接，再重新预览；不要用递归删除绕过。清理无法撤销；中途遇到文件占用等错误时，会报告可能已部分清理。不要在其他程序正在修改这个目录时清理。

@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import re
+import stat
 import time
 
 DIRECTORY = ".mhxy-workspace"
@@ -121,6 +122,8 @@ def meta_problems(case, required):
     if "targets" in case and not (isinstance(case["targets"], list) and case["targets"]
                                   and all(isinstance(item, str) and item.strip() for item in case["targets"])):
         problems.append("targets 必须是非空的字符串列表（文件、目录或模块名）")
+    elif required and "targets" in case and any("<" in item or ">" in item for item in case["targets"]):
+        problems.append(f"targets 还是模板占位 {case['targets']}，换成实际测的文件或模块")
     if "keywords" in case and not (isinstance(case["keywords"], list)
                                    and all(isinstance(item, str) and item.strip() for item in case["keywords"])):
         problems.append("keywords 必须是字符串列表")
@@ -133,11 +136,26 @@ def location_problems(root, path):
     if rel is None or area(root, path) != "cases":
         return []
     parts = rel.split("/")[len(CASES.parts):]
-    if len(parts) == 1:
-        return [f"用例文件要放在 {CASES.as_posix()}/<工单号或功能名>/ 下：{rel}"]
-    if parts[0] == REPORTS:
-        return [f"{CASES.as_posix()}/{REPORTS}/ 是执行器报告目录，不放用例：{rel}"]
+    if parts[0] in (REPORTS, RUNS_FILE):
+        return [f"{CASES.as_posix()}/{parts[0]} 是保留名（执行器报告、通过记录），不放用例：{rel}"]
+    if len(parts) != 2:
+        return [f"用例文件要直接放在 {CASES.as_posix()}/<工单号或功能名>/ 下（目录名是单个路径段）：{rel}"]
     return []
+
+
+def duplicate_names(cases):
+    """同一来源里重名的用例名（通过记录按“来源 + 用例名”区分，必须唯一）。"""
+    names = [case.get("name") for case in cases if isinstance(case, dict)]
+    return sorted({name for name in names if isinstance(name, str) and names.count(name) > 1})
+
+
+def is_link(path):
+    """符号链接或 Windows 目录联接（reparse point），不跟随目标；同 workspace.is_link。"""
+    try:
+        info = Path(path).lstat()
+    except OSError:
+        return False
+    return stat.S_ISLNK(info.st_mode) or bool(getattr(info, "st_file_attributes", 0) & 0x400)
 
 
 def source_problems(root, path, case):
@@ -158,16 +176,16 @@ def case_files(root):
     found = []
     for name, base in (("cases", CASES), ("coverage", COVERAGE)):
         top = Path(root) / base
-        if not top.is_dir() or top.is_symlink():
+        if not top.is_dir() or any(is_link(item) for item in (top, *top.parents)):
             continue
         for directory, subdirs, files in os.walk(top):
             here = Path(directory)
             if name == "cases" and here == top:
                 subdirs[:] = [item for item in subdirs if item != REPORTS]
-            subdirs[:] = [item for item in subdirs if not (here / item).is_symlink()]
+            subdirs[:] = [item for item in subdirs if not is_link(here / item)]
             for file in files:
                 path = here / file
-                if path.suffix.lower() != ".json" or path.is_symlink():
+                if path.suffix.lower() != ".json" or is_link(path):
                     continue
                 if name == "cases" and here == top and file == RUNS_FILE:
                     continue
@@ -186,7 +204,7 @@ def scan(root):
 
     Returns:
         (条目列表, 问题列表)。条目：{path, name, issue, spec, targets, keywords, hash}，path 相对项目根。
-        问题：{path, problem}。cases/ 下读不了或不合法的都算问题；coverage/ 下不像用例的 JSON 跳过。
+        问题：{path, problem}。读不了、JSON 无效或不合法的都算问题；coverage/ 下合法但不像用例的 JSON 跳过。
     """
     entries, problems = [], []
     for name, path in case_files(root):
@@ -194,10 +212,13 @@ def scan(root):
         try:
             loaded = load_cases(path)
         except CaseError as error:
-            if name == "cases":
-                problems.append({"path": rel, "problem": str(error)})
+            problems.append({"path": rel, "problem": str(error)})
             continue
         if name == "coverage" and not looks_like_case([case for _, case in loaded]):
+            continue
+        duplicates = duplicate_names([case for _, case in loaded])
+        if duplicates:
+            problems.append({"path": rel, "problem": f"用例名重复：{duplicates}"})
             continue
         for where, case in loaded:
             issues = location_problems(root, path) + meta_problems(case, True)
@@ -220,6 +241,8 @@ def runs_path(root):
 def read_runs(root):
     """读取通过记录 {"<来源>#<用例名>": {...}}；文件不存在时为空，损坏时抛 CaseError。"""
     path = runs_path(root)
+    if is_link(path):
+        raise CaseError(f"拒绝符号链接或目录联接：{path}")
     if not path.is_file():
         return {}
     try:
@@ -257,6 +280,8 @@ def record_runs(root, results, report_path, now=None):
         return []
     path = runs_path(root)
     lock = path.with_name(RUNS_FILE + ".lock")
+    if any(is_link(item) for item in (path, *path.parents)):
+        return [f"通过记录路径上有符号链接或目录联接，本次结果没有记入：{path}"]
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         if not acquire(lock):
@@ -362,8 +387,10 @@ def changed_files(root):
         if entry["item"] not in CHANGED_ITEMS or not precommit.in_scope(entry):
             continue
         path = Path(root) / entry["path"]
-        if entry["item"] == "unversioned" and path.is_dir():
-            files.extend(item.relative_to(root).as_posix() for item in path.rglob("*") if item.is_file())
+        if entry["item"] == "unversioned" and path.is_dir() and not is_link(path):
+            for directory, subdirs, names in os.walk(path):
+                subdirs[:] = [item for item in subdirs if not is_link(Path(directory) / item)]
+                files.extend((Path(directory) / item).relative_to(root).as_posix() for item in names)
         elif not path.is_dir():
             files.append(entry["path"])
     return sorted(set(files))

@@ -111,6 +111,36 @@ class ReportTests(Workspace):
         for name in media:
             self.assertIn(f"media/{name}", page)
 
+    def test_case_files_are_copied_for_rerun(self):
+        meta = {"issue": "860053", "spec": None, "targets": ["gameplay/a.py"], "keywords": []}
+        json_case = self.write("cases/860053/popup.json", json.dumps({"name": "弹窗", **meta, "steps": []}))
+        spec = self.root / "spec/成语弹窗.md"
+        spec.parent.mkdir()
+        spec.write_text("# 成语弹窗\n## 测试用例\n```json\n" + json.dumps({"name": "回归", "steps": []})
+                        + "\n```\n", encoding="utf-8")
+        path = self.case_report()
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["sources"] = [str(json_case), str(spec), str(json_case)]
+        path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+        code, result, error = run(report, *self.build_args, "--case-report", "latest")
+        self.assertEqual((code, error), (0, None))
+        self.assertEqual(result["case_files"], ["cases/popup.json", "cases/成语弹窗.json"])  # 同一来源只拷一次
+        folder = Path(result["report_dir"])
+        self.assertEqual(json.loads((folder / "cases/popup.json").read_text(encoding="utf-8"))["name"], "弹窗")
+        self.assertEqual([item["name"] for item in json.loads((folder / "cases/成语弹窗.json").read_text(
+            encoding="utf-8"))], ["回归"])
+        page = (folder / "index.html").read_text(encoding="utf-8")
+        self.assertIn('href="cases/popup.json"', page)
+        self.assertIn("case_runner.py", page)
+        _, again, _ = run(report, *self.build_args)  # 重建时 cases/ 一并清掉
+        self.assertEqual(again["case_files"], [])
+        self.assertFalse((folder / "cases").exists())
+        data["sources"] = [str(self.personal / "cases/860053/gone.json")]
+        path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+        code, _, error = run(report, *self.build_args, "--case-report", "latest")
+        self.assertEqual(code, 1)
+        self.assertIn("用例文件不存在", error["error"])
+
     def test_local_only_and_data_changes_are_left_out(self):
         (self.root / "data").mkdir()
         (self.root / "data/info.py").write_text("X = 1\n")

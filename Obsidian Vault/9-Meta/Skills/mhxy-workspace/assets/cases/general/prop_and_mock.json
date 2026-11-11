@@ -3,6 +3,7 @@
  "keywords": ["通用", "界面", "属性", "Mock", "patch", "断言", "sdata"],
  "case": {
   "name": "通用_读角色属性与Mock",
+  "issue": null, "spec": null, "targets": ["<被测文件或模块>"], "keywords": [],
   "settle": 1,
   "mocks": [
    {"name": "替换示例属性", "patch": "utils3.__can_reload_data__", "value": "['mocked', orig]"}

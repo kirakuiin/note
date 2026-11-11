@@ -201,7 +201,7 @@ def copy_cases(sources, target):
         seen.add(key)
         if not source.is_file():
             raise ReportError(f"用例文件不存在（用例执行器报告记录的来源）：{source}")
-        stem = re.sub(r"[^0-9A-Za-z._-]+", "_", source.stem).strip("._") or "case"
+        stem = re.sub(r"[^\w.-]+", "_", source.stem).strip("._") or "case"
         name, number = f"{stem}.json", 1
         while name.lower() in names:
             number += 1

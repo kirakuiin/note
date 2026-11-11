@@ -9,7 +9,7 @@
 ### 会话开始
 - 上下文里已有「mhxy-workspace context」输出（Claude Code 由 hook 自动注入）时直接使用；没有就先运行：
   `python "{{workspace_script}}" context --root "."`
-- 输出包含当前分支及类型（`branch`，null 表示 svn 不可用）、脱敏配置、追踪工单、覆盖率登记，以及最近修改的 spec 标题（`index.recent`）。先据此了解当前工作，再按需读取工单正文或 spec。`problems` 不为空时先告诉用户；有 `entry_rules_updated` 且其 `notice` 不为空时照 `notice` 做；`skill_links_repaired` 不为空时告诉用户这些 skill 的链接已补建；`handoffs`（遗留的会话交接文件）的处理见 `session.md`。
+- 输出包含当前分支及类型（`branch`，null 表示 svn 不可用）、脱敏配置、追踪工单、覆盖率登记、追踪工单已有的真机用例（`cases`，重新测试时先复用，见 `game-debugging.md`「用例执行器」），以及最近修改的 spec 标题（`index.recent`）。先据此了解当前工作，再按需读取工单正文或 spec。`problems` 不为空时先告诉用户；有 `entry_rules_updated` 且其 `notice` 不为空时照 `notice` 做；`skill_links_repaired` 不为空时告诉用户这些 skill 的链接已补建；`handoffs`（遗留的会话交接文件）的处理见 `session.md`。
 - 配置或追踪变化后、或上下文压缩后看不到这份输出时，重新运行。
 
 ### 项目约定

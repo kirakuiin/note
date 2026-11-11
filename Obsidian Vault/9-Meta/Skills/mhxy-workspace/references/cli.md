@@ -40,7 +40,9 @@
 }
 ```
 
-- 执行者优先把用例写成 JSON 用例文件，用 game-debugging.md「用例执行器」一次跑完，出问题时排查用例或报告缺陷；`instructions` 里写明这一点，回归时给出 spec 路径。执行器直连 mh-game-mcp HTTP，不经过 `mcp_tools`；`mcp_tools` 只列执行者排查时需要直接调用的工具。
+- 执行者优先把用例写成 JSON 用例文件，用 game-debugging.md「用例执行器」一次跑完，出问题时排查用例或报告缺陷；`instructions` 里写明这一点。
+- 委派前主会话先 `case_runner.py search`（按工单号、被测文件或 `--changed`）查已有用例，`instructions` 里列出命中的用例文件路径（和 spec 路径），要求执行者先跑这些，有缺口再在原文件补或在同目录加文件，不重写；新用例写好归属字段、放进 `.mhxy-workspace/cases/<工单号或功能名>/`。没有命中时写明“没有已有用例”。
+- 执行器直连 mh-game-mcp HTTP，不经过 `mcp_tools`；`mcp_tools` 只列执行者排查时需要直接调用的工具。
 
 - 设备按 game-debugging.md「选择设备」由主会话用 `client_launch.py select` 自动确定（没有合适的在线设备时会自动启动客户端），不需要用户确认。一个 test 任务只对应一台设备；PC 和互通都要测时分成两个任务。
 - `mcp_tools` 按计划列出实际要用的工具，不照抄示例；其他 MCP 一律不接入。
@@ -53,11 +55,12 @@
 | --- | --- |
 | investigate | `conclusion`；`evidence`，每条“文件:行号 —— 说明”；`uncertainties`，未确认的事项和最快的验证方法 |
 | review | `summary`；`items`，每条有 `level`（必须修改／建议修改／疑问）、`location`（文件:行号）、`problem`、`basis`、`suggestion`。脚本另给 `formatted`（`[级别] 文件:行号 —— 问题；依据；建议`）和 `must_fix` 条数 |
-| test | `status`（passed／failed／blocked）、`cases`、`errors`、`unverified`、`restoration`（restored／unknown／not_needed）、`executed`（复现清单：实际执行的命令、GM 指令；用了执行器时写用例文件和报告路径） |
+| test | `status`（passed／failed／blocked）、`cases`、`errors`、`unverified`、`restoration`（restored／unknown／not_needed）、`executed`（复现清单：实际执行的命令、GM 指令；用了执行器时写用例文件和报告路径）、`candidates`（候选原语，没有时为空列表；每条 `kind`：`preset` 等待条件／`clean_ui` 弹窗关闭方式／`template` 造局或整段用例／`step` 新步骤类型，`content` 表达式或代码，`runs` 真机跑通次数（整数），`note` 用途、适用范围和报告路径） |
 
 - 结果取自 `result.json`（模型最终回复）中最后一个按上表字段完整通过校验的 JSON 对象，前面的推理文字和其中的其他 JSON 忽略；字符串里未转义的双引号会补转义后再校验，补过时 `state.json` 记 `repaired_quotes`（补的个数）和 `raw_result`（原文路径），采纳前对照原文核对相关字段。找不到合格对象时任务记为 failed，`raw_result` 指向原文；回合本身失败（如上游报错）时 `error` 写成“CLI 回合失败：<上游信息>”，不是模型没给结果，按该信息处理后再重跑。
 - 只看结果内容下结论。退出码为 0、任务 `completed` 都不等于调查正确、审查通过或测试通过；没有完整结果、模型或工具失败都不算通过。
 - 结果是证据，不是结论：主会话逐条核对后再采纳，review 意见的处理见 code-review.md。
+- test 结果的 `candidates` 由主会话留存，不当场加进 skill：Claude 主会话在提交后整理记忆时与候选经验一起列给用户确认（session.md「经验沉淀」），Codex 主会话在交付时一并列出；用户同意的再加进执行器并补测试（game-debugging.md「候选原语」）。
 
 ### 设备锁
 
@@ -91,6 +94,7 @@ python -X utf8 "<skill>/scripts/codex_cli.py" release --job "<任务目录>" --r
 - 每次派生都传 `fork_turns = "none"`，不继承主会话历史。
 - 任务说明按「共用」的模板写，开头写明“你是受委派的执行者，不得派生、调用或者请求新的子代理”，并要求按「读取结果」中对应类型的字段返回。
 - 模型和推理强度由角色配置决定，不在任务里指定。
+- verifier 的任务说明要求按 test 结果字段返回，包括 `candidates`（这次写的、可能复用的等待条件、弹窗关闭方式、造局步骤，注明真机跑通次数；没有给空列表）。Codex 主会话没有提交后的记忆整理，交付时把收到的候选原语列给用户确认。
 - review 第 2 轮起把新信息发给同一个 reviewer，不另起新的。
 - 真机自检与 Claude 主会话共用同一把全机设备锁，规则见「设备锁」。派生 verifier 前加锁，报设备已被占用时不要派生；verifier 结束、主会话核对并恢复客户端后释放：
 

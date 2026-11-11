@@ -993,5 +993,81 @@ class MainTests(Base):
         self.assertEqual(len(reports), 1)
 
 
+
+META = {"issue": "860053", "spec": None, "targets": ["war/dlgwar.py"], "keywords": ["成语"]}
+
+
+class WorkspaceCaseTests(Base):
+    """工作区用例：归属字段、归档目录、通过记录和 search。"""
+
+    def write(self, rel, value):
+        path = self.temp / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(value, ensure_ascii=False), encoding="utf-8")
+        return path
+
+    def main(self, *argv):
+        with patch("sys.stdout", new_callable=__import__("io").StringIO) as out:
+            code = runner.main([*argv[:1], "--root", str(self.temp), *argv[1:]])
+        return code, json.loads(out.getvalue())
+
+    def test_workspace_cases_need_meta_and_folder(self):
+        flat = self.write(".mhxy-workspace/cases/flat.json", {"name": "a", **META, "steps": [{"exec": "1"}]})
+        report = runner.run(self.temp, "dev", [str(flat)])
+        self.assertEqual(report["status"], "blocked")
+        self.assertIn("<工单号或功能名>", report["errors"][0])
+        bare = self.write(".mhxy-workspace/cases/860053/a.json", {"name": "a", "steps": [{"exec": "1"}]})
+        report = runner.run(self.temp, "dev", [str(bare)])
+        self.assertIn("归属字段", report["errors"][0])
+        self.assertEqual(self.game.calls, [])  # 不合法时不连接客户端
+        outside = self.write("other/a.json", {"name": "a", "issue": 1, "steps": [{"exec": "1"}]})
+        self.assertIn("issue", runner.run(self.temp, "dev", [str(outside)])["errors"][0])  # 写了就校验类型
+        dup = self.write(".mhxy-workspace/cases/860053/dup.json",
+                         [{"name": "同名", **META, "steps": [{"exec": "1"}]}] * 2)
+        self.assertIn("用例名重复", runner.run(self.temp, "dev", [str(dup)])["errors"][0])
+
+    def test_run_records_and_search(self):
+        value = [{"name": "通过", **META, "steps": [{"exec": "1"}]},
+                 {"name": "失败", **META, "targets": ["netwar"], "steps": [{"assert": "False"}]}]
+        path = self.write(".mhxy-workspace/cases/860053/popup.json", value)
+        code, report = self.main("run", "--devid", "dev", str(path))
+        self.assertEqual(code, 1)
+        self.assertEqual(report["sources"], [str(path.resolve())])
+        self.assertEqual([item["source"] for item in report["results"]], [str(path.resolve())] * 2)
+        runs = json.loads((self.temp / ".mhxy-workspace/cases/runs.json").read_text(encoding="utf-8"))["cases"]
+        key = ".mhxy-workspace/cases/860053/popup.json#"
+        self.assertEqual(runs[key + "通过"]["last_status"], "passed")
+        self.assertEqual(runs[key + "通过"]["report"], report["report_path"])
+        self.assertNotIn("last_passed", runs[key + "失败"])
+        code, found = self.main("search", "--issue", "860053")
+        self.assertEqual(code, 0)
+        self.assertEqual(found["templates"], [])  # 按工单查时不查模板
+        by_name = {item["name"]: item for item in found["workspace"]}
+        self.assertTrue(by_name["通过"]["last_passed"])
+        self.assertIsNone(by_name["失败"]["last_passed"])
+        self.assertNotIn("steps", json.dumps(found["workspace"]))
+        code, found = self.main("search", "--file", "gameplay/netwar.py")
+        self.assertEqual([item["name"] for item in found["workspace"]], ["失败"])
+        with patch.object(runner.case_store, "changed_files", return_value=["war/dlgwar.py"]):
+            code, found = self.main("search", "--changed")
+        self.assertEqual((found["changed_files"], len(found["workspace"])), (["war/dlgwar.py"], 1))
+        code, found = self.main("search", "成语")  # 只给关键词：工作区用例和模板都查，命中了就不生成骨架
+        self.assertEqual(len(found["workspace"]), 2)
+        self.assertNotIn("skeletons", found)
+
+    def test_search_needs_a_condition_and_svn(self):
+        self.assertEqual(self.main("search")[0], 2)
+        with patch.object(runner.case_store, "changed_files", side_effect=runner.CaseError("取不到未提交改动")):
+            code, found = self.main("search", "--changed")
+        self.assertEqual(code, 2)
+        self.assertIn("取不到", found["error"])
+
+    def test_blocked_run_is_not_recorded(self):
+        path = self.write(".mhxy-workspace/cases/860053/bad.json", {"name": "a", **META, "steps": []})
+        code, _ = self.main("run", "--devid", "dev", str(path))
+        self.assertEqual(code, 2)
+        self.assertFalse((self.temp / ".mhxy-workspace/cases/runs.json").exists())
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -54,7 +54,7 @@ python "<skill>/scripts/report.py" commit --root "<项目>" --issue-id <工单�
 ```
 
 - 脚本自己收集：工单标题（追踪记录或 `--title`）、分支、待提交改动和 diff（范围同提交前自检；工作副本里混有无关改动时用 `--path` 限定）、提交前自检结论、用例执行器报告的结论及其同名目录里的截图录屏、提交说明。
-- `--case-report` 给用例执行器报告的路径，可重复；`latest` 取 `.mhxy-workspace/cases/reports/` 里最新的一份。真机自检由受委派的执行者跑完后直接用 `latest`；同一工作区跑过多份时，给出执行者结果里记录的报告路径。
+- `--case-report` 给用例执行器报告的路径，可重复；`latest` 取 `.mhxy-workspace/cases/reports/` 里最新的一份。真机自检由受委派的执行者跑完后直接用 `latest`；同一工作区跑过多份时，给出执行者结果里记录的报告路径。报告记录的用例来源会拷进报告文件夹的 `cases/`（spec 只取「测试用例」一节），页面附重跑命令；来源文件已被删除时 build 报错。
 - 只要求修复后的证据。工单自带的问题截图用 `--problem-media` 放进“问题定位”。
 - 输出 JSON 只有路径和统计。**不要读取 diff、截图和生成的 HTML**，核对输出里的 `changed_files`、`blocking`、`case_reports`、`media` 数量即可。
 - 报告在 `.mhxy-workspace/reports/<工单号>/`（`index.html` 加 `media/`），整个文件夹拷到哪里都能打开；重新 build 会整体重建。提交后用 `commit` 补版本号，状态变为“已提交”。清理个人目录会删掉它。

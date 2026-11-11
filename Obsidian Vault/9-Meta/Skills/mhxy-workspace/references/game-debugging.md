@@ -111,10 +111,15 @@ python -X utf8 "<skill>/scripts/game-debugging/mcp_call.py" <工具名> < "<UTF-
 
 ```text
 python -X utf8 "<skill>/scripts/game-debugging/case_runner.py" run --root "<项目>" --devid "<devid>" [--no-init] [--settle 秒] <用例.json | spec.md> ...
-python -X utf8 "<skill>/scripts/game-debugging/case_runner.py" search --root "<项目>" 关键词 ...
+python -X utf8 "<skill>/scripts/game-debugging/case_runner.py" search --root "<项目>" [--issue <工单号>] [--file <被测文件>]... [--changed] [关键词 ...]
 ```
 
-**先找模板**：写新用例前先 `search`。模板在 `<skill>/assets/cases/`（战斗普攻、技能出手 + 帧数据 + 录像、通用属性 + Mock），全部关键词命中名字、说明或关键词才算匹配；没有模板命中时按技能名查导表，返回技能编号和战斗用例骨架。在模板或骨架上改，不要从头写。
+**先找再写**：工作区的用例在一个制作或维护周期内一直保留（周期边界清理个人目录时才删），重新测试时复用，不重写。
+1. 写用例前先查已有的：`search --issue <工单号>`、`--file <被测文件>` 或 `--changed`（与当前未提交改动的文件相关的），条件可以组合。结果 `workspace` 给出路径、归属字段、`last_status`、`last_passed`；`changed_since_pass` 为真表示通过后用例改过。`problems` 里是读不了或缺归属字段的用例文件，先修好。
+2. 重新测试先跑命中的已有用例；有缺口时在原文件里补用例或在同目录加文件，不重写已有的。
+3. 没有可复用的工作区用例，再按关键词 `search` 查模板（`<skill>/assets/cases/`：战斗普攻、技能出手 + 帧数据 + 录像、通用属性 + Mock；全部关键词命中名字、说明或关键词才算）；工作区用例和模板都没有命中时按技能名查导表，返回技能编号和战斗用例骨架。在模板或骨架上改，不要从头写。
+
+**归属与归档**：工作区用例放在 `.mhxy-workspace/cases/<工单号或功能名>/*.json`（覆盖率用例放覆盖率任务目录，见 `coverage.md`）。每个用例写归属字段：`issue`（工单号字符串，没有写 `null`）、`spec`（相对项目根的 spec 路径，小改动没有写 `null`）、`targets`（测的文件、以 `/` 结尾的目录或模块名，不能留模板里的 `<被测文件或模块>`）、`keywords`（玩法、界面、现象等检索词）。缺字段或直接放在 `cases/` 下时执行器 blocked。每次运行后执行器把各用例的结果记进 `cases/runs.json`（上次状态、通过时间、报告路径），`search` 和会话开始的 `context`（`cases`：追踪工单的用例数、通过数、最近通过时间和文件）都读它。
 
 **标准骨架**：每个用例按 清场 → 造局 → 执行 → 收集证据 → 恢复 组织。
 - 清场：执行器每个用例开始时自动开局整理（`clean_ui`，见下），关掉签到等遮挡场景的窗口；其余前置状态（不在战斗中、目标界面没开等）用 `assert` 或 `wait_for` 确认。
@@ -130,17 +135,19 @@ python -X utf8 "<skill>/scripts/game-debugging/case_runner.py" search --root "<�
 - `steps` 每步一个类型：`exec`（可 `save_as`）、`gm`、`mcp`（工具名 + `args`，可 `save_as`）、`wait_for`（`expr` 或 `preset`，`timeout` 默认 30 秒）、`assert`（可 `message`）、`exec_check`（`cases` 为定义 `CASES` 的代码，`files` 可选，规则同 `exec-check.md`）。
 - `ignore_errors`（可选，正则列表）：已确认与被测内容无关的客户端既有报错（如退出战斗时的 `NSRank 的size不对`），命中的报错移到 `ignored_errors`，不判失败。正则要具体，先确认无关再加，加了要在汇报里说明。
 - 占位符：`{devid}`、`{root}`、`{vars.名字}`、`{args.名字}`；代码里 vars 以 `repr()` 代入。客户端代码写法同「找到并调用工具」的 `execute_code`。
-- 等待预设（`case_runner.py` 的 `PRESETS`）：战斗 `war_in`、`war_out`、`war_turn`（`args.n`）、`war_idle`、`war_action`（`args.magic_id`、`args.n`：该技能已播完的出手次数，需要 `frames: true`）。缺少的判断先用 `expr` 写，在真机验证可靠后再加进预设表。
+- 等待预设（`case_runner.py` 的 `PRESETS`）：战斗 `war_in`、`war_out`、`war_turn`（`args.n`）、`war_idle`、`war_action`（`args.magic_id`、`args.n`：该技能已播完的出手次数，需要 `frames: true`）。缺少的判断先用 `expr` 写，跑通后作为候选原语上报（见「候选原语」），真机验证可靠后再加进预设表。
 - `war_act`（战斗回合指令）：`{"role": {"act", "id", "target", "item"}, "pet": {...}, "wait": true, "timeout": 90}`，前置是 `war_idle`。人物 `act`：`attack`、`magic`（`id` 为法术编号）、`sp`（`id` 为特技编号）、`guard`、`protect`（必须写 `target`）、`item`（`item` 写道具名或造型编号）、`fabao`（`id` 为法宝造型编号）；召唤兽 `act`：`attack`、`magic`、`guard`、`protect`、`item`，不写 `pet` 时所有在场召唤兽防御。目标写 `e0`/`e1`（敌方按站位）、`f0`（其他友方）、`self`、`pet` 或 wid。一次调用发完所有指令并收起指令面板，默认等到下一回合可下指令或战斗结束，不用再干等回合超时。步骤记录附场面映射 `roster`（label、wid、名字、阵营、主人、站位、`sid`、血量百分比）。身外化身、奇袭召唤兽等额外单位不支持，遇到时步骤失败。
 - `pump`（在真实战斗里注入技能表现，不经服务端结算，用于反复看技能表现）：前置是 `war_idle`。写 `{"perform": {"magic_id", "attacker", "victims", "hp_chg", "hits", "life", "status", "addons"}, "timeout": 15}`（只有 `magic_id` 必填，自动展开为出手、受击、分段、血条、Buff、行动结束），或 `{"events": [{"op", "data"}]}` 逐条写（`op`：`perform`、`attack`、`wstate`、`wstate_split`、`status`、`addon`、`action_end`）。单位写 `e0`/`self`/`pet` 或 wid。播完才进入下一步；超时判失败并记录队列，随后要 `$at kill`。技能较长时先用 GM 关回合倒计时，避免服务端回合协议插进来。可配合 `frames: true` 和 `war_action` 取帧数据。
 - `setup`（用例字段，步骤前执行）：`school: [门派, 流派]`（已一致就跳过；不一致时必须写 `allow_destructive: true`，转门派会清空经脉）、`teji`（特技名）、`items`（背包已有就跳过）、`gm`（其他造局指令）。
 - 证据（按需开，默认不做）：`record: true` 录整个用例的 mp4；`frames: true` 开帧采集（必须在用例开始时不在战斗中），收尾导出本场帧数据 JSON；`screenshot` 步骤（值为说明）截当前画面。文件在 `.mhxy-workspace/cases/reports/<运行编号>/`，路径写在用例报告的 `media` 里。只需要确认某个瞬间画面时用截图，要看过程（技能表现、受击、回合流程）才录像。录像、帧数据拿不到只记入 `unverified`，不判失败。
 
-**执行器负责**：校验全部用例（不合法时 blocked，不连接客户端）→ `init_client` 一次 → 每个用例自动开局整理、开始报错收集、记录监听基线、安装 Mock → 依次执行步骤，失败即停 → 执行 `finally` 步骤 → 等待 `settle`、逆序还原 Mock、核对监听、结束报错收集。报告在 stdout 和 `.mhxy-workspace/cases/reports/`，字段即 test 结果字段加 `results`（步骤明细）和 `executed`（实际下发的调用，用于复现）。步骤返回值序列化后超过 2000 字符时，完整内容另存为 `reports/<运行编号>/<用例>_step<序号>_<字段>.json`，报告里是 `{"clipped", "length", "file"}`，逐项核对时读 `file`。
+**执行器负责**：校验全部用例（不合法时 blocked，不连接客户端）→ `init_client` 一次 → 每个用例自动开局整理、开始报错收集、记录监听基线、安装 Mock → 依次执行步骤，失败即停 → 执行 `finally` 步骤 → 等待 `settle`、逆序还原 Mock、核对监听、结束报错收集。报告在 stdout 和 `.mhxy-workspace/cases/reports/`，字段即 test 结果字段加 `results`（步骤明细，含用例来源）、`executed`（实际下发的调用，用于复现）和 `sources`（用例来源文件，处理报告据此拷贝用例）。步骤返回值序列化后超过 2000 字符时，完整内容另存为 `reports/<运行编号>/<用例>_step<序号>_<字段>.json`，报告里是 `{"clipped", "length", "file"}`，逐项核对时读 `file`。
 
 **判读**：`status` 只是初判。逐条看 `errors`（区分有关和无关）、`unverified`（监听增加、执行检查未覆盖的行等）、`restoration`；`unknown` 时按「Mock 与验证」检查残留。用例文件本身写错时修正后重跑；业务缺陷带报告返回。
 
-**留档**：真机自检通过的用例，主会话把 JSON 写进项目 spec 的「测试用例」一节（json 代码块），迭代时直接用 spec 路径重跑。
+**留档**：工作区里的用例文件保留到周期结束。跨周期长期保存：有 spec 的功能，真机自检通过后主会话把用例 JSON 写进 spec 的「测试用例」一节（json 代码块，`spec` 字段指向该 spec），迭代时直接用 spec 路径重跑；能通用的提升为模板（见「候选原语」）。
+
+**候选原语**：写用例时自己写的、可能复用的内容——等待条件表达式、新弹窗的关闭方式、造局步骤或整段用例、值得做成新步骤类型的操作——由测试执行者在 test 结果的 `candidates` 里上报，注明在真机上跑通的次数（格式见 `cli.md`「读取结果」）。执行者不改 skill；主会话汇总后经用户一次确认，再加进 `PRESETS`、`_case_clean_ui`、`assets/cases/` 模板或新步骤类型，并补单元测试。
 
 ## Mock 与验证
 

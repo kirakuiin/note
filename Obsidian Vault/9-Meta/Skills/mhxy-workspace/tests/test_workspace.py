@@ -430,6 +430,32 @@ class WorkspaceTests(unittest.TestCase):
         state.write_text(json.dumps({"since": since, "specs": [], "excluded": "spec/a.md"}), encoding="utf-8")
         self.assertTrue(any(p.startswith("索引") for p in w.context(self.root, self.global_config)["problems"]))
 
+    def test_context_lists_cases_of_tracked_tasks(self):
+        self.initialize()
+        result = w.context(self.root, self.global_config)
+        self.assertEqual(result["cases"], {"total": 0, "problem_files": 0, "tracked": []})
+        (self.personal / "tracking.json").write_text(json.dumps(
+            {"tracked_tasks": [w.issue_entry("860053", "成语弹窗")], "coverage_tasks": []}), encoding="utf-8")
+        cases = self.personal / "cases"
+        (cases / "860053").mkdir(parents=True)
+        meta = {"issue": "860053", "spec": None, "targets": ["war/dlgwar.py"], "keywords": []}
+        (cases / "860053/popup.json").write_text(json.dumps(
+            [{"name": "a", **meta, "steps": [{"exec": "1"}]}, {"name": "b", **meta, "steps": [{"exec": "1"}]}]),
+            encoding="utf-8")
+        (cases / "other").mkdir()
+        (cases / "other/x.json").write_text(json.dumps({"name": "x", **meta, "issue": None, "steps": []}),
+                                            encoding="utf-8")
+        result = w.context(self.root, self.global_config)
+        self.assertEqual(result["problems"], [])
+        self.assertEqual(result["cases"], {"total": 3, "problem_files": 0, "tracked": [
+            {"issue_id": "860053", "count": 2, "passed": 0, "last_passed": None,
+             "files": [".mhxy-workspace/cases/860053/popup.json"]}]})
+        (cases / "runs.json").write_text("[", encoding="utf-8")  # 通过记录损坏只记问题，不影响其他部分
+        result = w.context(self.root, self.global_config)
+        self.assertNotIn("cases", result)
+        self.assertTrue(any(p.startswith("用例") for p in result["problems"]))
+        self.assertIn("index", result)
+
     def test_merge_pending_skips_svn_collection(self):
         self.initialize()
         self.write_spec("他人/合并来的.md")

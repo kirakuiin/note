@@ -3,6 +3,7 @@
  "keywords": ["战斗", "技能", "法术", "出手", "帧数据", "frame_collector", "war_action", "录像", "record", "龙卷雨击"],
  "case": {
   "name": "战斗_龙卷雨击出手表现",
+  "issue": null, "spec": null, "targets": ["<被测文件或模块>"], "keywords": [],
   "frames": true,
   "record": true,
   "ignore_errors": ["图标 NSRank 的size不对"],

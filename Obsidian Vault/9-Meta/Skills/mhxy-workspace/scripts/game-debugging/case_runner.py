@@ -1455,6 +1455,10 @@ def run(root, devid, sources, settle=2.0, init=True, run_id=None):
     problems = [f"{where}：{problem}" for path, where, case in cases
                 for problem in case_store.location_problems(root, path)
                 + validate(case, case_store.area(root, path) is not None)]
+    for path in dict.fromkeys(path for path, _, _ in cases):
+        duplicates = case_store.duplicate_names([case for source, _, case in cases if source == path])
+        if duplicates:
+            problems.append(f"{path.name}：用例名重复 {duplicates}（通过记录按来源和用例名区分）")
     if problems:
         return summarize([], "用例文件不合法：" + "；".join(problems))
     client = Client(devid)
@@ -1561,6 +1565,7 @@ def skeleton(skill):
     """
     return {
         "name": f"{skill['name']} 出手表现",
+        "issue": None, "spec": None, "targets": ["<被测文件或模块>"], "keywords": [skill["name"]],
         "frames": True,
         "steps": [
             {"assert": "not __import__('utils3').is_in_war()", "message": "开始前不在战斗中"},
