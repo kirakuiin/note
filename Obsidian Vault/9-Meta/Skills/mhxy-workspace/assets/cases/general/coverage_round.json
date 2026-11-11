@@ -1,0 +1,20 @@
+{
+ "description": "覆盖率一轮跑测：$$scover_set 开始采集 → 调用原始被测逻辑并断言 → 记录上传前时间 → 主线程同步 scover_finish 上传并断言 commit 成功。把 <任务名> 换成 task_name，把执行步骤换成本任务的 Mock 与断言；前置状态（如战斗界面）在开始采集前造好。上传后用 coverage_query.py --submitted-after <上传前时间> 查网站。见 coverage.md「跑测流程」。",
+ "keywords": ["覆盖率", "coverage", "scover", "scover_set", "scover_finish", "上传", "补测"],
+ "case": {
+  "name": "覆盖率一轮_<任务名>",
+  "issue": null, "spec": null, "targets": ["<被测文件或模块>"], "keywords": [],
+  "settle": 2,
+  "ignore_errors": ["^\\[wd2dataclass:wrap:\\d+\\]dataclass = <class '(anyio|h11)\\."],
+  "steps": [
+   {"gm": "$$scover_set <任务名>"},
+   {"exec": "import SCover.run_var as rv\ntask = rv.get_cov_mgr().get_task('<任务名>')\n{'tracing': task is not None, 'revision': getattr(task, 'revision', None)}", "save_as": "cov"},
+   {"assert": "{vars.cov}['tracing']", "message": "任务正在采集（$$scover_set 成功）"},
+   {"exec": "'把这里换成：调用原始被测逻辑的 Mock 与用例，返回精简结果'", "save_as": "run"},
+   {"assert": "{vars.run}", "message": "把这里换成：用例全部通过"},
+   {"exec": "__import__('datetime').datetime.now().astimezone().isoformat(timespec='seconds')", "save_as": "before_upload"},
+   {"exec": "import wizard_cmd\nimport SCover.run_var as rv\napi = rv.get_cov_mgr().api_client\nown = 'commit_coverage' in api.__dict__\norig = api.commit_coverage\nbox = {}\ndef record(task, *args, _orig=orig, _box=box, **kwargs):\n\t_box['ok'] = _orig(task, *args, **kwargs)\n\treturn _box['ok']\napi.commit_coverage = record\ntry:\n\twizard_cmd.scover_finish('<任务名>', True)\nfinally:\n\tif own:\n\t\tapi.commit_coverage = orig\n\telse:\n\t\tdel api.commit_coverage\n{'commit_ok': box.get('ok'), 'restored': ('commit_coverage' in api.__dict__) == own}", "save_as": "commit"},
+   {"assert": "{vars.commit}['commit_ok'] is True and {vars.commit}['restored']", "message": "主线程同步上传成功，记录用的包装已还原"}
+  ]
+ }
+}
