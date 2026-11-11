@@ -34,10 +34,16 @@
 
 - 新增测试：等前一单提交的字段与拒绝条件、候选原语两种输入与校验、可选字段顺序、`report build --status 已提交` 拒绝、`svn_commit` 与 `pm_update` 的 `MHXY_NO_COMMIT`、`--global-config`。全量 491 → 496 通过，未改动已有断言。
 
-## 服务侧
+## 服务侧（`D:\workspace\popo-agent-service`，记录在该项目 `docs/spec.md` §4）
 
-见下一节，第二阶段完成后补写。
+- 开关 `clean`、`unattended`、`report` 打开，新增 `pm_update`。
+- 结果文件“等前一单提交”→ `waiting_dep`；只认服务列出的占用关系，占用单提交、放弃或被更新脚本还原后只续接在等它的单。
+- `work` 档位放行 `scripts/game-debugging/`、`scripts/exec-check/` 子目录脚本，并禁止 `svn_merge.py commit`；会话带 `MHXY_NO_COMMIT=1`（已有），由本 skill 的脚本层拒绝写入。
+- 提示词：正文给相对工作区根目录的路径；带用例复用规则和 `--candidates-file`。
+- 提交（含合并提交）成功后按结果的 `pm_update` 写工单：待提交时预览进卡片，用户点“提交”即确认（用户 2026-11-11 定）；随后 `report.py commit`。
+- 卡片列候选原语，“收下候选原语”追加到服务的 `data/candidates.jsonl`，由后续会话经用户确认后加进本 skill（`game-debugging.md`「候选原语」）。
+- 测试替身补齐 `unattended.py`、`pm_update.py`、`svn_merge.py`、`game-debugging/case_runner.py`；新增 `tests/test_real_skill.py` 对本 skill 的真实脚本跑 `--help` 和不联网命令，核对参数名、结果状态、结果文件往返和 `MHXY_NO_COMMIT`。服务测试 26 → 49 通过。
 
 ## 变更记录
 
-- 2026-11-11（0.3.38）：skill 侧完成。
+- 2026-11-11（0.3.38）：skill 侧完成；服务侧接入完成（服务改动未提交，等用户确认）。真实链路验证待用户同意后在外测工作区进行。
