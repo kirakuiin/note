@@ -263,6 +263,29 @@ class UnattendedResultTests(Workspace):
         code, shown, _ = run(unattended, "show", *self.common)
         self.assertEqual((code, shown["result"]), (0, saved))
 
+    def test_pm_update_is_optional_and_validated(self):
+        pm = ("--pm-status", "代码审查", "--pm-status-from", "新建,10%", "--pm-hours", "0.2",
+              "--pm-activity", "程序开发-制作")
+        code, output, error = run(unattended, *self.ready, *pm)
+        self.assertEqual((code, error), (0, None))
+        saved = output["result"]
+        self.assertEqual(tuple(saved), unattended.FIELDS + ("pm_update",))
+        self.assertEqual(saved["pm_update"], {"status": "代码审查", "status_from": "新建,10%", "hours": "0.2",
+                                              "activity": "程序开发-制作", "comments": ""})
+        code, shown, _ = run(unattended, "show", *self.common)
+        self.assertEqual((code, shown["result"]), (0, saved))
+        for bad in (("--pm-hours", "0.2"), ("--pm-activity", "程序开发-制作"), ("--pm-status-from", "新建"),
+                    ("--pm-hours", "0", "--pm-activity", "a"), ("--pm-hours", "0.125", "--pm-activity", "a"),
+                    ("--pm-comments", "只有备注"), ("--pm-status", "代码审查", "--pm-comments", "备注"),
+                    ("--pm-status", " "), ("--pm-status", "代码审查", "--pm-status-from", "新建,,10%")):
+            with self.subTest(bad):
+                code, _, error = run(unattended, *self.ready, *bad)
+                self.assertEqual(code, 1)
+        code, _, error = run(unattended, "result", *self.common, "--status", "放弃", "--reason", "x",
+                             "--pm-status", "代码审查")
+        self.assertEqual(code, 1)
+        self.assertIn("待提交", error["error"])
+
     def test_ready_requires_every_field(self):
         for flag, label in (("--file", "改动文件"), ("--message", "提交说明"), ("--self-check", "自检结果"),
                             ("--report", "报告路径")):

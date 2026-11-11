@@ -11,12 +11,16 @@ popo-agent-service）读取；`show` 原样读回。结果文件的字段固定�
 
 status 为“待提交”时，改动文件、提交说明、自检结果和报告都必须齐全；“需要你处理”“放弃”只要求原因，
 其余有就填、没有为空。只写个人目录，不执行任何 SVN 写操作。
+
+给出 --pm-status 或 --pm-hours 时，结果文件末尾多一个 pm_update 对象（提交成功后要对易协作工单做的更新，
+约定见 references/task-tracking.md「更新工单」），调用方原样转成 pm_update.py 的参数；不给时没有这个字段。
 """
 import argparse
 from datetime import datetime
 import json
 import os
 from pathlib import Path
+import re
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -27,6 +31,8 @@ RESULT_FILE = "result.json"
 STATUSES = ("待提交", "需要你处理", "放弃")
 FIELDS = ("issue_id", "status", "reason", "changed_files", "commit_message", "self_check", "report_path",
           "branch", "written_at")
+PM_FIELD = "pm_update"  # 可选字段，只能排在固定字段之后。
+PM_KEYS = ("status", "status_from", "hours", "activity", "comments")
 
 
 class ResultError(Exception):
@@ -47,8 +53,32 @@ def text_argument(value, file_path, label):
 
 def validate(result):
     """校验结果的字段齐全且互相一致；通过时返回 None。"""
-    if tuple(result) != FIELDS:
+    if tuple(result) not in (FIELDS, FIELDS + (PM_FIELD,)):
         raise ResultError("结果字段不完整或顺序不符")
+    if PM_FIELD in result:
+        pm_update = result[PM_FIELD]
+        if not isinstance(pm_update, dict) or tuple(pm_update) != PM_KEYS:
+            raise ResultError("pm_update 字段不完整或顺序不符")
+        if pm_update["status"] is None and pm_update["hours"] is None:
+            raise ResultError("pm_update 至少要有状态或工时")
+        if (pm_update["hours"] is None) != (pm_update["activity"] is None):
+            raise ResultError("工单工时和活动要一起给出")
+        if pm_update["hours"] is None and pm_update["comments"]:
+            raise ResultError("--pm-comments 要和 --pm-hours 一起使用")
+        for key, label in (("status", "工单状态"), ("activity", "工时活动")):
+            if pm_update[key] is not None and not str(pm_update[key]).strip():
+                raise ResultError(f"{label}不能为空")
+        if pm_update["status_from"] is not None and not all(
+                name.strip() for name in re.split(r"[,，]", pm_update["status_from"])):
+            raise ResultError("--pm-status-from 里有空的状态名")
+        hours = pm_update["hours"]
+        if hours is not None and (not isinstance(hours, str) or not re.fullmatch(r"\d{1,3}(\.\d{1,2})?", hours)
+                                  or float(hours) <= 0):
+            raise ResultError("工单工时须大于 0、不超过 999.99，且最多两位小数")
+        if pm_update["status_from"] is not None and pm_update["status"] is None:
+            raise ResultError("--pm-status-from 要和 --pm-status 一起使用")
+        if result["status"] != "待提交":
+            raise ResultError("只有待提交的结果才能带工单更新")
     if result["status"] not in STATUSES:
         raise ResultError(f"状态只能是：{'、'.join(STATUSES)}")
     if not result["reason"]:
@@ -92,6 +122,10 @@ def write_result(args):
         text_argument(args.message, args.message_file, "提交说明"),
         text_argument(args.self_check, args.self_check_file, "自检结果"), report,
         workspace.svn_branch(root), datetime.now().astimezone().isoformat(timespec="seconds"))))
+    if args.pm_status is not None or args.pm_hours is not None or args.pm_activity is not None \
+            or args.pm_status_from is not None or args.pm_comments:
+        result[PM_FIELD] = dict(zip(PM_KEYS, (args.pm_status, args.pm_status_from, args.pm_hours,
+                                              args.pm_activity, args.pm_comments)))
     validate(result)
     path = result_path(personal, args.issue_id)
     workspace.apply_changes([(path, workspace.read_bytes(path), workspace.json_bytes(result))])
@@ -131,6 +165,11 @@ def main(argv=None):
     writer.add_argument("--self-check", help="自检结果（提交前自检和真机自检的结论）")
     writer.add_argument("--self-check-file")
     writer.add_argument("--report", help="处理报告的目录或 index.html")
+    writer.add_argument("--pm-status", help="提交后工单要改成的状态（pm_update.py --status）")
+    writer.add_argument("--pm-status-from", help="只有当前状态在其中才改（pm_update.py --status-from）")
+    writer.add_argument("--pm-hours", help="提交后要登记的工时（pm_update.py --hours）")
+    writer.add_argument("--pm-activity", help="工时的活动（pm_update.py --activity）")
+    writer.add_argument("--pm-comments", default="", help="工时备注（pm_update.py --comments）")
     commands.add_parser("show", parents=[common], help="读回结果文件")
     args = parser.parse_args(argv)
     try:

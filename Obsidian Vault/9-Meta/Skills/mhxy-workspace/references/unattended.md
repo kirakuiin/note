@@ -64,10 +64,11 @@ python "<skill>/scripts/report.py" commit --root "<项目>" --issue-id <工单�
 结束前（无论做完还是停下）必须调用，脚本校验字段：
 
 ```text
-python "<skill>/scripts/unattended.py" result --root "<项目>" --issue-id <工单号> --status <待提交|需要你处理|放弃> --reason "<原因>" [--file <改动文件>]... [--message-file <提交说明>] [--self-check "<自检结果>"] [--report <报告目录或 index.html>]
+python "<skill>/scripts/unattended.py" result --root "<项目>" --issue-id <工单号> --status <待提交|需要你处理|放弃> --reason "<原因>" [--file <改动文件>]... [--message-file <提交说明>] [--self-check "<自检结果>"] [--report <报告目录或 index.html>] [--pm-status … --pm-hours … --pm-activity …]
 ```
 
 - 写到 `.mhxy-workspace/unattended/<工单号>/result.json`，字段固定：`issue_id`、`status`、`reason`、`changed_files`、`commit_message`、`self_check`、`report_path`、`branch`、`written_at`。
 - “待提交”要求改动文件、提交说明、自检结果、报告齐全，否则报错；`reason` 写一句处理结论。其余两种状态只要求原因，别的有就填。
 - 较长的文字用 `--reason-file`、`--self-check-file` 从文件读取。`unattended.py show` 读回结果。
+- **维护单的工单更新**（仅“待提交”）：按 `task-tracking.md`「更新工单」判断是不是维护单并算出工时，是的话追加 `--pm-status "代码审查" --pm-status-from "新建,10%,20%,30%,40%,50%,60%,70%,80%,90%" --pm-hours <数值> --pm-activity "程序开发-制作"`（需要备注时加 `--pm-comments`）。结果文件末尾会多一个 `pm_update` 对象（`status`、`status_from`、`hours`、`activity`、`comments`）；不是维护单时不加这些参数，结果文件没有这个字段。会话自己不调用 `pm_update.py --apply`：调用方在用户点“提交”、提交成功后，把 `pm_update` 的各项原样传给 `pm_update.py --issue-id <工单号> … --apply`，并按它的退出码和输出通知用户。
 - 脚本报错时按提示补齐后重跑；最后一条回复只需简述状态和结果文件路径。
