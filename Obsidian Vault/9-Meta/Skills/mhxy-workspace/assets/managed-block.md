@@ -68,7 +68,7 @@ Claude 主会话在第 2、4、6 步完成后和开始另一项功能前检查�
 | 提测（提交测试）：填写并保存提测单 | `test-request.md` |
 | 用户要求提 CR、生成 CR diff、提交代码审查（把已提交改动上传到 reviewboard） | `cr-diff.md` |
 | 用户明确要求创建开发分支，或把分支（含周期分支）检出到本地 | `branch.md` |
-| SVN 合并：把修订合到另一个分支（如合到外测、外放分支）、分支同步、处理合并冲突 | 使用 `svn-merge` 技能，本 skill 不提供合并流程。入口文件的本地修改不用先还原；合并后按 `workspace-management.md`「合并时」确认它们已放回 |
+| SVN 合并：把修订合到另一个分支（研发分支合到外放分支或 trunk、把主干同步到研发分支）、处理合并冲突 | `svn-merge.md`；只用本 skill 的 `svn_merge.py`，不手写 `svn merge`，不用独立的 `svn-merge` 技能 |
 | 查配置字段的含义，修改配置、初始化、清理 `.mhxy-workspace/` | `workspace-management.md` |
 | 提示词明确要求“按无人值守模式处理工单”；或用户要求生成工单处理报告 | `unattended.md` |
 | Claude 主会话：流程检查点的会话交接、提交后的记忆整理和经验沉淀 | `session.md` |
@@ -78,5 +78,5 @@ Claude 主会话在第 2、4、6 步完成后和开始另一项功能前检查�
 - 配置文件、本区段、追踪文件和索引只由 skill 脚本写入。
 - `.mhxy-workspace/` 是可清理的本地辅助目录，不放业务数据。
 - 写记忆前先判断：跨分支有用的梦幻西游经验，按 `session.md`「经验沉淀」汇总后一次征得用户同意再写进 lessons；其余按工具默认的记忆规则处理。
-- 初始化、配置更新和清理只在用户明确要求时执行。用户确认分支检出或复用后，可按 `branch.md` 执行 checkout、cleanup、switch，以及删除与目标不在同一仓库的旧资源工作副本；用户明确要求更新工作副本时，按 `svn-update.md` 用脚本执行 update、switch，脚本会自动处理挡住更新的内容（cleanup、冲突文件采用服务器版本、带开关时 revert，都先备份），结果要向用户列出；用户确认本次提交说明和文件清单后，可按 `svn-commit.md` 指定的入口提交（包括先 add 清单中的新文件）；用户确认合并计划后，合并按 `svn-merge` 技能通过它的脚本执行；其他流程不执行 SVN 写操作。入口文件放入本地 `ignore-on-commit` 变更列表不影响服务器。
+- 初始化、配置更新和清理只在用户明确要求时执行。用户确认分支检出或复用后，可按 `branch.md` 执行 checkout、cleanup、switch，以及删除与目标不在同一仓库的旧资源工作副本；用户明确要求更新工作副本时，按 `svn-update.md` 用脚本执行 update、switch，脚本会自动处理挡住更新的内容（cleanup、冲突文件采用服务器版本、带开关时 revert，都先备份），结果要向用户列出；用户确认本次提交说明和文件清单后，可按 `svn-commit.md` 指定的入口提交（包括先 add 清单中的新文件）；用户确认合并计划后，可按 `svn-merge.md` 用脚本合并，合并结果的提交要用户另行明确批准；其他流程不执行 SVN 写操作。入口文件放入本地 `ignore-on-commit` 变更列表不影响服务器。
 <!-- mhxy-workspace:end -->

@@ -5,7 +5,7 @@
     report.py commit --root <项目> --issue-id <工单号> --revision <版本号>
 
 会话只提供“问题定位”和“处理方案”两段文字；工单信息、改动和 diff、提交前自检、用例执行器报告、
-截图录屏、提交说明都由脚本收集。输出 JSON 只给路径和统计，不含 diff 和页面内容。
+本次跑过的用例文件（拷进 cases/，报告拷到别处也能重跑）、截图录屏、提交说明都由脚本收集。输出 JSON 只给路径和统计，不含 diff 和页面内容。
 报告位于 <项目>/.mhxy-workspace/reports/<工单号>/，重新 build 会整体重建；report.json 保存渲染数据，
 供 commit 补版本号后重新渲染。只读 SVN（status、diff），不修改工作副本。
 """
@@ -20,6 +20,7 @@ import shutil
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import case_store  # noqa: E402
 import precommit  # noqa: E402
 import workspace  # noqa: E402
 
@@ -29,6 +30,7 @@ STATUSES = ("待提交", "需要你处理", "放弃", "已提交")
 IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp")
 VIDEO_SUFFIXES = (".mp4", ".webm")
 CASE_REPORTS = Path(workspace.DIRECTORY) / "cases" / "reports"  # 见 case_runner.REPORT_DIR
+CASE_DIR = "cases"  # 报告文件夹里存放用例文件的子目录
 DIFF_LINE_LIMIT = 3000  # 单个文件 diff 最多保留的行数，超出截断并注明。
 NEW_FILE_BYTES = 200_000  # 未纳管的新文件超过这个大小不内嵌内容。
 
@@ -143,7 +145,7 @@ def resolve_case_reports(root, values):
 
 
 def load_case_report(path):
-    """读取一份用例执行器报告，只取结论字段；同名目录里的截图和录屏作为证据返回。"""
+    """读取一份用例执行器报告，只取结论字段和用例来源（sources）；同名目录里的截图和录屏作为证据返回。"""
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as error:
@@ -157,7 +159,8 @@ def load_case_report(path):
 
     summary = {"name": path.stem, "status": str(data["status"]), "cases": strings("cases"),
                "errors": strings("errors"), "unverified": strings("unverified"),
-               "restoration": str(data.get("restoration", ""))}
+               "restoration": str(data.get("restoration", "")),
+               "sources": [str(item) for item in data.get("sources", []) if isinstance(item, str)]}
     media_dir = path.with_suffix("")
     media = sorted(item for item in media_dir.iterdir()
                    if item.is_file() and item.suffix.lower() in IMAGE_SUFFIXES + VIDEO_SUFFIXES) \
@@ -180,6 +183,40 @@ def copy_media(sources, target, prefix):
         shutil.copyfile(source, target / name)
         items.append({"file": f"media/{name}", "kind": "video" if suffix in VIDEO_SUFFIXES else "image",
                       "caption": source.stem})
+    return items
+
+
+def copy_cases(sources, target):
+    """把用例来源拷进报告的 cases/：.json 原样拷贝，spec（.md）只取「测试用例」一节写成 <spec 名>.json。
+
+    Returns:
+        [{"file": "cases/<文件名>", "source": 原路径}]，同一来源只拷一次，重名时加序号。
+    """
+    items, seen, names = [], set(), set()
+    for source in sources:
+        source = Path(source)
+        key = str(source.resolve()).lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        if not source.is_file():
+            raise ReportError(f"用例文件不存在（用例执行器报告记录的来源）：{source}")
+        stem = re.sub(r"[^0-9A-Za-z._-]+", "_", source.stem).strip("._") or "case"
+        name, number = f"{stem}.json", 1
+        while name.lower() in names:
+            number += 1
+            name = f"{stem}_{number}.json"
+        names.add(name.lower())
+        target.mkdir(parents=True, exist_ok=True)
+        if source.suffix.lower() == ".md":
+            try:
+                cases = [case for _, case in case_store.load_cases(source)]
+            except case_store.CaseError as error:
+                raise ReportError(str(error)) from None
+            (target / name).write_text(json.dumps(cases, ensure_ascii=False, indent=1), encoding="utf-8")
+        else:
+            shutil.copyfile(source, target / name)
+        items.append({"file": f"{CASE_DIR}/{name}", "source": str(source)})
     return items
 
 
@@ -364,6 +401,13 @@ def render_page(data):
             check.append(f"<p class=\"note\">环境还原：{escape(case['restoration'])}</p>")
     if not data["case_reports"]:
         check.append("<p class=\"note\">没有附真机用例报告。</p>")
+    if data.get("case_files"):
+        links = "".join(f"<li><a href=\"{escape(item['file'])}\">{escape(item['file'])}</a>"
+                        f" <span class=\"note\">（{escape(item['source'])}）</span></li>" for item in data["case_files"])
+        command = ('python -X utf8 "&lt;skill&gt;/scripts/game-debugging/case_runner.py" run --root "&lt;项目&gt;" '
+                   '--devid "&lt;设备ID&gt;" ' + " ".join(escape(item["file"]) for item in data["case_files"]))
+        check.append(f"<h3>用例文件</h3><ul>{links}</ul><p class=\"note\">在报告文件夹里重跑：</p>"
+                     f"<pre class=\"msg\">{command}</pre>")
     if data.get("self_check"):
         check.append("<h3>补充说明</h3>" + render_text(data["self_check"]))
     section("自检结果", "\n".join(check))
@@ -407,17 +451,17 @@ def write_report(target, data):
 
 
 def clear_report(target):
-    """重建前删除旧报告的内容；只删本目录下的普通文件和 media/，遇到链接或其他内容就停止。"""
+    """重建前删除旧报告的内容；只删本目录下的普通文件、media/ 和 cases/，遇到链接或其他内容就停止。"""
     if not target.exists():
         return
     for path in sorted(target.rglob("*"), reverse=True):
         workspace.no_links(path)
         relative = path.relative_to(target).parts
         if path.is_dir():
-            if relative != ("media",):
+            if relative not in (("media",), (CASE_DIR,)):
                 raise ReportError(f"报告目录里有不认识的子目录，请先处理：{path}")
             path.rmdir()
-        elif len(relative) == 1 and relative[0] in (DATA_FILE, "index.html") or relative[0] == "media":
+        elif len(relative) == 1 and relative[0] in (DATA_FILE, "index.html") or relative[0] in ("media", CASE_DIR):
             path.unlink()
         else:
             raise ReportError(f"报告目录里有不认识的文件，请先处理：{path}")
@@ -445,11 +489,12 @@ def build(args):
         data["changes"], data["precheck"] = collect_changes(root, args.path)
     except precommit.PrecheckError as error:
         raise ReportError(f"无法收集改动：{error}") from None
-    case_media, data["case_reports"] = [], []
+    case_media, case_sources, data["case_reports"] = [], [], []
     for path in resolve_case_reports(root, args.case_report):
         summary, media = load_case_report(path)
         data["case_reports"].append(summary)
         case_media += media
+        case_sources += summary["sources"]
     extra = [Path(item) if Path(item).is_absolute() else root / item for item in args.media]
     problem = [Path(item) if Path(item).is_absolute() else root / item for item in args.problem_media]
     target = report_dir(personal, args.issue_id)
@@ -457,6 +502,7 @@ def build(args):
     target.mkdir(parents=True, exist_ok=True)
     data["media"] = copy_media(case_media + extra, target / "media", "after")
     data["problem_media"] = copy_media(problem, target / "media", "problem")
+    data["case_files"] = copy_cases(case_sources, target / CASE_DIR)
     write_report(target, data)
     return summary_result(target, data)
 
@@ -468,6 +514,7 @@ def summary_result(target, data):
             "blocking": len(data["precheck"]["blocking"]), "warnings": len(data["precheck"]["warnings"]),
             "case_reports": [f"{item['name']}：{item['status']}" for item in data["case_reports"]],
             "media": len(data["media"]), "problem_media": len(data["problem_media"]),
+            "case_files": [item["file"] for item in data.get("case_files", [])],
             "revision": data.get("revision")}
 
 

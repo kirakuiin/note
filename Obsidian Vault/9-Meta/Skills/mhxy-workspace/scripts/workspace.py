@@ -23,6 +23,7 @@ from urllib.parse import unquote
 from xml.etree import ElementTree
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import case_store  # noqa: E402
 import skill_links  # noqa: E402
 
 # 控制台代码页是 65001 时，svn 会把中文路径参数转成乱码；不挂靠控制台则按系统代码页处理
@@ -971,12 +972,11 @@ def require_initialized(root):
         WorkspaceError: AGENTS.md 不存在、无法解码或没有受管区段。
     """
     if block_info(decode_document(read_bytes(root / ENTRY_FILES[0]))[0]) is None:
-        # svn-merge 合并期间会把入口文件的本地修改暂存起来，合并结果提交前不放回，受管区段这时不在文件里
-        stash = root / ".svn-merge-stash"
-        if stash.is_dir() and any(stash.glob("*/manifest.json")):
+        # 合并停在冲突上时，入口文件的本地修改还暂存着没放回，受管区段这时不在文件里
+        if (root / ".mhxy-workspace" / "merge" / "state.json").is_file():
             raise WorkspaceError(
-                f"{root} 的 AGENTS.md 受管区段被 svn-merge 暂存了（{stash}），还没放回。"
-                "按 workspace-management.md「合并时」用 svn-merge 的 restore-stash 放回后重试，不要重新初始化")
+                f"{root} 有一次合并停在半路，AGENTS.md 的受管区段暂存着还没放回。"
+                "按 svn-merge.md 处理完冲突后运行 svn_merge.py continue，或运行 abort 撤销；不要重新初始化")
         raise WorkspaceError(f"{root} 不是已初始化的工作区（AGENTS.md 中没有 {NAME} 受管区段）；"
                              "请把 --root 指向项目根目录，或先按 SKILL.md 初始化")
 
@@ -1023,7 +1023,9 @@ def record_hook_write(root_arg, global_arg, payload):
 
 
 def context(root_arg, global_arg, skill=SKILL, entry_update=True):
-    """会话开始时一次性加载：当前分支、脱敏配置、追踪工单、覆盖率身份、最近的 spec 和遗留的交接文件。
+    """会话开始时一次性加载：当前分支、脱敏配置、追踪工单、覆盖率身份、追踪工单的已有用例、最近的 spec 和遗留的交接文件。
+
+    cases 只给数量、最近通过时间和文件路径（见 case_store.context_summary），不放用例内容。
 
     entry_update 为真时，入口文件的受管区段版本落后于 skill 就自动重写（见 update_entry_files），
     结果放在 entry_rules_updated；没有更新时不出现该字段。
@@ -1051,12 +1053,19 @@ def context(root_arg, global_arg, skill=SKILL, entry_update=True):
         result["effective_config"] = masked_config(load_config(root_arg, global_arg))
     except (WorkspaceError, OSError) as error:
         problems.append(f"配置：{error}")
+    tracking = None
     try:
         tracking = read_tracking(personal)[2]
         result["tracked_tasks"] = tracking["tracked_tasks"]
         result["coverage_tasks"] = tracking["coverage_tasks"]
     except (WorkspaceError, OSError) as error:
         problems.append(f"追踪：{error}")
+    try:
+        no_links(personal)
+        issue_ids = [task["issue_id"] for task in tracking["tracked_tasks"]] if tracking else []
+        result["cases"] = case_store.context_summary(root, issue_ids)
+    except (WorkspaceError, OSError, case_store.CaseError) as error:
+        problems.append(f"用例：{error}")
     try:
         stats, entries = refresh_index(root, personal)
         recent = sorted(entries, key=lambda entry: mtime(root / entry[1]) or 0, reverse=True)

@@ -50,7 +50,12 @@ SCHEMAS = {
                 cases=STRINGS, errors=STRINGS, unverified=STRINGS,
                 restoration={"type": "string", "enum": ["restored", "unknown", "not_needed"]},
                 # 复现清单：按顺序列出实际执行的命令、GM 指令和用例文件；用了 case_runner.py 时写用例文件和报告路径
-                executed=STRINGS),
+                executed=STRINGS,
+                # 候选原语：这次写的、可能复用的等待条件、弹窗关闭方式、造局或用例片段、新步骤；没有时为空列表。
+                # 主会话汇总后经用户确认再加进 case_runner（见 cli.md「读取结果」、session.md「记忆整理」）
+                candidates={"type": "array", "items": obj(
+                    kind={"type": "string", "enum": ["preset", "clean_ui", "template", "step"]},
+                    content={"type": "string"}, runs={"type": "integer"}, note={"type": "string"})}),
 }
 
 ROLE = {
@@ -62,7 +67,9 @@ ROLE = {
                "没有必须修改的问题时 summary 写明“没有必须修改的问题”。"),
     "test": ("你是测试执行者。只写任务目录和允许的测试目录，不修改业务源码；需要用户判断时返回 blocked。"
              "默认按 exec-check.md 做改动执行检查。测试结束尽力恢复；结果按 schema 返回证据，"
-             "不能把发送成功或覆盖率百分比当作测试通过。"),
+             "不能把发送成功或覆盖率百分比当作测试通过。"
+             "这次自己写的、可能复用的等待条件、新弹窗的关闭方式、造局步骤或用例片段写进 candidates，"
+             "注明在真机上跑通的次数；没有就给空列表。"),
 }
 DEFAULT_REFS = {"investigate": [], "review": ["code-review.md", "engineering-principles.md"],
                 "test": ["cli.md", "game-debugging.md", "exec-check.md"]}
@@ -140,6 +147,8 @@ def toml_value(value):
 def matches(value, schema):
     """按本文件 SCHEMAS 用到的 JSON Schema 子集校验结果。"""
     kind = schema["type"]
+    if kind == "integer":
+        return isinstance(value, int) and not isinstance(value, bool)
     if kind == "string":
         return isinstance(value, str) and value in schema.get("enum", [value])
     if kind == "array":

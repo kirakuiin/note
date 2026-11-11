@@ -23,6 +23,8 @@ import tokenize
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / "exec-check"))
+sys.path.insert(0, str(HERE.parent))
+import case_store  # noqa: E402
 import mcp_http  # noqa: E402
 
 ERROR_WATCH = HERE / "error_watch.py"
@@ -34,7 +36,8 @@ STEP_TYPES = ("exec", "gm", "mcp", "wait_for", "assert", "exec_check", "war_act"
 # 每种步骤除类型键外允许的选项
 STEP_OPTIONS = {"exec": {"save_as"}, "gm": set(), "mcp": {"args", "save_as"}, "wait_for": set(),
                 "assert": {"message"}, "exec_check": set(), "war_act": set(), "screenshot": set(), "pump": set()}
-CASE_FIELDS = {"name", "mocks", "steps", "finally", "settle", "ignore_errors", "setup", "record", "frames", "clean_ui"}
+CASE_FIELDS = {"name", "mocks", "steps", "finally", "settle", "ignore_errors", "setup", "record", "frames", "clean_ui",
+               *case_store.META_FIELDS}  # 归属字段 issue／spec／targets／keywords 见 case_store
 # war_act 的动作：动作 → (必填字段, 默认目标)。默认目标 None 表示必须写 target；不需要目标的动作不在乎这一项。
 # 与 WAR_HELPERS 中 _case_war_act 的发包分支一一对应，增删动作两处同步。
 ROLE_ACTS = {"attack": ((), "e0"), "magic": (("id",), "e0"), "sp": (("id",), "e0"), "guard": ((), "self"),
@@ -57,7 +60,6 @@ VIDEO_WAIT = 30  # 停止录屏后等 mp4 写完的最长秒数
 SHOT_WAIT = 10  # 截图异步写文件，等文件出现的最长秒数
 FRAMES_NOTIFY = {"name": "帧采集导出弹窗", "patch": "frame_collector.g_collector._notify_export_done",
                  "value": "lambda *args, **kwargs: None"}  # frames: true 时内部安装，见 begin
-SPEC_HEADING = re.compile(r"^(#+)\s*测试用例\s*$")
 PLACEHOLDER = re.compile(r"\{(devid|root|(?:vars|args)\.[A-Za-z_]\w*)\}")
 
 # wait_for 预设：领域 → 名字 → 客户端表达式（单个表达式，可用 {args.名字}）。
@@ -512,66 +514,22 @@ def _case_pump(scene, events, token):
 '''
 
 
-class CaseError(Exception):
-    """用例文件或参数不合法（运行前发现，不连接客户端）。"""
+CaseError = case_store.CaseError  # 用例文件或参数不合法（运行前发现，不连接客户端）
+load_cases = case_store.load_cases
+spec_blocks = case_store.spec_blocks
 
 
 # ---------- 用例文件 ----------
 
-def load_cases(path):
-    """读取用例：.json 为一个用例或用例列表；.md 取「测试用例」一节下的 json 代码块。
+def validate(case, require_meta=False):
+    """检查用例结构，返回问题列表（空表示合法）。不检查客户端代码本身。
 
-    Returns:
-        [(来源说明, 用例 dict)]
-    Raises:
-        CaseError: 文件读不了、JSON 无效或找不到用例。
+    Args:
+        require_meta: 工作区用例（.mhxy-workspace/ 下）为真，归属字段必须写全。
     """
-    path = Path(path)
-    try:
-        text = path.read_text(encoding="utf-8-sig")
-    except OSError as error:
-        raise CaseError(f"读不了 {path}：{error}") from None
-    blocks = spec_blocks(text) if path.suffix.lower() == ".md" else [text]
-    cases = []
-    for number, block in enumerate(blocks, 1):
-        try:
-            value = json.loads(block)
-        except ValueError as error:
-            raise CaseError(f"{path} 第 {number} 个用例块不是有效 JSON：{error}") from None
-        for item in value if isinstance(value, list) else [value]:
-            cases.append((f"{path.name}#{len(cases) + 1}", item))
-    if not cases:
-        raise CaseError(f"{path} 中没有用例" + ("（「测试用例」一节下没有 json 代码块）" if blocks == [] else ""))
-    return cases
-
-
-def spec_blocks(text):
-    """取 markdown 中「测试用例」标题下（到同级或更高级标题为止）的 ```json 代码块正文。"""
-    blocks, level, current = [], None, None
-    for line in text.splitlines():
-        heading = re.match(r"^(#+)\s", line)
-        if current is None and heading and level is not None and len(heading.group(1)) <= level:
-            level = None
-        if level is None:
-            match = SPEC_HEADING.match(line)
-            if match:
-                level = len(match.group(1))
-            continue
-        if current is None and line.strip().lower() == "```json":
-            current = []
-        elif current is not None and line.strip() == "```":
-            blocks.append("\n".join(current))
-            current = None
-        elif current is not None:
-            current.append(line)
-    return blocks
-
-
-def validate(case):
-    """检查用例结构，返回问题列表（空表示合法）。不检查客户端代码本身。"""
     if not isinstance(case, dict):
         return ["用例必须是对象"]
-    problems = []
+    problems = case_store.meta_problems(case, require_meta)
     unknown = set(case) - CASE_FIELDS
     if unknown:
         problems.append(f"未知字段：{sorted(unknown)}")
@@ -1488,13 +1446,15 @@ def run(root, devid, sources, settle=2.0, init=True, run_id=None):
         run_id: 运行编号，决定媒体目录 reports/<run_id>/ 和报告文件名；省略时取当前时间。
     """
     run_id = run_id or time.strftime("%Y%m%d-%H%M%S")
-    cases = []
+    cases = []  # [(来源路径, 来源说明, 用例)]
     try:
         for source in sources:
-            cases += load_cases(source)
+            cases += [(Path(source).resolve(), where, case) for where, case in load_cases(source)]
     except CaseError as error:
         return summarize([], str(error))
-    problems = [f"{where}：{problem}" for where, case in cases for problem in validate(case)]
+    problems = [f"{where}：{problem}" for path, where, case in cases
+                for problem in case_store.location_problems(root, path)
+                + validate(case, case_store.area(root, path) is not None)]
     if problems:
         return summarize([], "用例文件不合法：" + "；".join(problems))
     client = Client(devid)
@@ -1506,10 +1466,14 @@ def run(root, devid, sources, settle=2.0, init=True, run_id=None):
             report["executed"] = client.executed
             return report
     media_dir = Path(root) / REPORT_DIR / run_id
-    reports = [run_case(client, root, case, settle, (media_dir, f"case{number}"))
-               for number, (_, case) in enumerate(cases, 1)]
+    reports = []
+    for number, (path, _, case) in enumerate(cases, 1):
+        item = run_case(client, root, case, settle, (media_dir, f"case{number}"))
+        item["source"], item["case_hash"] = str(path), case_store.digest(case)
+        reports.append(item)
     report = summarize(reports)
     report["executed"] = client.executed
+    report["sources"] = list(dict.fromkeys(str(path) for path, _, _ in cases))
     return report
 
 
@@ -1530,24 +1494,40 @@ def load_templates():
     return templates
 
 
-def search(root, terms):
-    """先找全部关键词都命中（名字、说明、关键词）的模板；没有时按技能名查导表，生成战斗用例骨架。
+def search(root, terms=(), issue=None, files=(), changed=False):
+    """检索可复用的用例：工作区用例（cases/、coverage/ 下，按工单、文件、未提交改动、关键词），以及模板。
+
+    条件同时满足才命中。只给关键词时同时查模板（全部关键词命中名字、说明或关键词）；工作区用例和模板都没有
+    命中时，按技能名查导表生成战斗用例骨架。只要给了 issue、files 或 changed，就不查模板。
 
     Returns:
-        {"templates": [...]}，或 {"templates": [], "skills": [...], "skeletons": [...], "note": 说明}。
+        {"workspace": [...], "templates": [...], "problems": [...]}，按改动查时另有 changed_files，
+        生成骨架时另有 skills、skeletons、note。
+    Raises:
+        CaseError: 没有任何条件，或按改动查时取不到 svn 状态。
     """
-    found = []
+    if not (terms or issue or files or changed):
+        raise CaseError("至少给一个条件：--issue、--file、--changed 或关键词")
+    modified = case_store.changed_files(root) if changed else None
+    found = case_store.find(root, issue, files, terms, modified)
+    result = {"workspace": found["cases"], "templates": [], "problems": found["problems"]}
+    if modified is not None:
+        result["changed_files"] = modified
+    if issue or files or changed:
+        return result
     for item in load_templates():
         text = " ".join([item["case"]["name"], item["description"], *item["keywords"]])
         if all(term in text for term in terms):
-            found.append(item)
-    if found:
-        return {"templates": found}
+            result["templates"].append(item)
+    if result["workspace"] or result["templates"]:
+        return result
     skills = find_skills(root, terms)
-    return {"templates": [], "skills": skills, "skeletons": [skeleton(skill) for skill in skills],
-            "note": "骨架只保证结构合法：角色要会这个技能（不会就在 setup 里补门派、特技），断言按被测内容补；"
-                    "特技在帧数据里的 magic_id 按 sp_id+3000 推算，尚未真机核实；"
-                    "fightN 的敌方机器人没有武器层等装备层，测造型分层要观察主角或指定造型"}
+    result.update(skills=skills, skeletons=[skeleton(skill) for skill in skills],
+                  note="骨架只保证结构合法：角色要会这个技能（不会就在 setup 里补门派、特技），断言按被测内容补，"
+                       "保存前补上归属字段 issue／spec／targets／keywords；"
+                       "特技在帧数据里的 magic_id 按 sp_id+3000 推算，尚未真机核实；"
+                       "fightN 的敌方机器人没有武器层等装备层，测造型分层要观察主角或指定造型")
+    return result
 
 
 def find_skills(root, names):
@@ -1615,16 +1595,28 @@ def main(argv=None):
     runner.add_argument("--settle", type=float, default=2.0, help="收尾前等待延迟回调的秒数，用例可用 settle 覆盖")
     runner.add_argument("--no-init", action="store_true", help="同一任务已调用过 init_client 时跳过")
     runner.add_argument("sources", nargs="+")
-    finder = sub.add_parser("search", help="按关键词找用例模板；没有模板时按技能名生成战斗用例骨架")
-    finder.add_argument("--root", required=True, help="项目根目录（mhimage），用来读技能导表")
-    finder.add_argument("terms", nargs="+")
+    finder = sub.add_parser("search", help="找可复用的工作区用例（按工单、文件、未提交改动、关键词）和模板；"
+                                           "只给关键词且都没有命中时按技能名生成战斗用例骨架")
+    finder.add_argument("--root", required=True, help="项目根目录（mhimage）")
+    finder.add_argument("--issue", help="工单号：用例的 issue")
+    finder.add_argument("--file", action="append", default=[], help="被测文件或模块，与用例的 targets 匹配；可重复")
+    finder.add_argument("--changed", action="store_true", help="与当前未提交改动的文件相关的用例")
+    finder.add_argument("terms", nargs="*")
     args = parser.parse_args(argv)
     root = Path(args.root).resolve()
     if args.command == "search":
-        print(json.dumps(search(root, args.terms), ensure_ascii=False, indent=1))
+        try:
+            found = search(root, args.terms, args.issue, args.file, args.changed)
+        except CaseError as error:
+            print(json.dumps({"error": str(error)}, ensure_ascii=False, indent=1))
+            return 2
+        print(json.dumps(found, ensure_ascii=False, indent=1))
         return 0
     run_id = time.strftime("%Y%m%d-%H%M%S")
     report = run(root, args.devid, args.sources, args.settle, not args.no_init, run_id)
+    path = root / REPORT_DIR / (run_id + ".json")
+    if report["status"] != "blocked":
+        report["unverified"] += case_store.record_runs(root, report["results"], path)
     report["report_path"] = str(save(root, report, run_id))
     print(json.dumps(report, ensure_ascii=False, indent=1))
     return {"passed": 0, "failed": 1}.get(report["status"], 2)
