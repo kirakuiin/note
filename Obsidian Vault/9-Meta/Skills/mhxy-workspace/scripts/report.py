@@ -26,7 +26,8 @@ import workspace  # noqa: E402
 
 REPORTS = "reports"  # 个人目录下的报告目录，每个工单一个子目录。
 DATA_FILE = "report.json"
-STATUSES = ("待提交", "需要你处理", "放弃", "已提交")
+STATUSES = ("待提交", "需要你处理", "放弃", "等前一单提交")  # build 可用的状态，与 unattended.py 一致
+COMMITTED = "已提交"  # 只由 commit 设置
 IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp")
 VIDEO_SUFFIXES = (".mp4", ".webm")
 CASE_REPORTS = Path(workspace.DIRECTORY) / "cases" / "reports"  # 见 case_runner.REPORT_DIR
@@ -348,7 +349,8 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
 def render_page(data):
     """按固定模板渲染整页；data 即 report.json 的内容。"""
     escape = html.escape
-    status_class = {"待提交": "warn", "已提交": "ok", "需要你处理": "bad", "放弃": "bad"}.get(data["status"], "warn")
+    status_class = {"待提交": "warn", COMMITTED: "ok", "需要你处理": "bad", "放弃": "bad",
+                    "等前一单提交": "warn"}.get(data["status"], "warn")
     branch = data.get("branch") or {}
     meta = [f"<span>分支 <b>{escape(branch.get('name') or '未知')}</b>"
             + (f"（{escape(branch['kind'])}）" if branch.get("kind") else "") + "</span>",
@@ -472,7 +474,7 @@ def build(args):
     workspace.require_initialized(root)
     workspace.validate_issue_id(args.issue_id)
     if args.status not in STATUSES:
-        raise ReportError(f"--status 只能是：{'、'.join(STATUSES)}")
+        raise ReportError(f"--status 只能是：{'、'.join(STATUSES)}（{COMMITTED}由 commit 设置）")
     data = {
         "issue_id": args.issue_id,
         "title": issue_title(personal, args.issue_id, args.title),
@@ -530,7 +532,7 @@ def commit(args):
     if raw is None:
         raise ReportError(f"工单 {args.issue_id} 还没有处理报告：{target}")
     data = workspace.parse_json(raw, target / DATA_FILE)
-    data["revision"], data["status"] = int(args.revision), "已提交"
+    data["revision"], data["status"] = int(args.revision), COMMITTED
     write_report(target, data)
     return summary_result(target, data)
 

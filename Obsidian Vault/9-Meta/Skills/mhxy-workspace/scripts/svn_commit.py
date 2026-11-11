@@ -219,6 +219,9 @@ def submit(root_arg, paths, message_file, apply=False):
         result.update(prepare(root, paths, message))
         if not apply:
             return result
+        if workspace.commit_forbidden():
+            raise ValueError(f"这个会话没有得到提交的批准（环境变量 {workspace.NO_COMMIT_ENV}=1），拒绝提交；"
+                             "把提交说明和文件清单交给用户，由用户或调用方提交")
         targets = ["./" + entry["path"] + "@" for entry in result["entries"]]
         if result["will_add"]:
             run_svn(root, "add", "--depth", "empty", *["./" + path + "@" for path in result["will_add"]])

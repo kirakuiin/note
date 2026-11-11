@@ -126,6 +126,9 @@ python "<skill>/scripts/svn_commit.py" --root "<项目根目录>" --message-file
 
 3. **提交**：使用完全相同的参数，仅追加 `--apply`。脚本只添加清单内的新文件，再以 UTF-8 消息文件提交，随后读取**指定的新修订**，核验完整日志与实际变更路径集合。
 4. `committed: true` 且 `verified: true` 时报告新版本号；两个字段分别表示“已提交”和“日志与路径核验通过”，不能混用。
+5. **补报告**：`committed: true` 后，本次工单有处理报告（`.mhxy-workspace/reports/<工单号>/` 存在，见 [unattended.md](unattended.md)「处理报告」）时运行 `python "<skill>/scripts/report.py" commit --root "<项目根目录>" --issue-id <工单号> --revision <新版本号>`，报告状态变为“已提交”。没有报告时跳过；失败只作提醒，不影响已完成的提交。合并提交同样处理，见 [svn-merge.md](svn-merge.md)「流程」第 6 步。
+
+环境变量 `MHXY_NO_COMMIT` 不为空也不是 `0` 时（后台服务拉起、没有得到提交批准的会话），`--apply` 直接拒绝，返回 `committed: false` 和 `error`；预览照常。照实报告，不要绕过。
 
 失败处理（任何失败都报告 `error` 原文，不自动 update、resolve、cleanup 或重试）：
 - `committed: false`：没有提交。包括预览阶段的拒绝，以及 SVN 在提交前或钩子阶段拒绝（版本过旧、冲突、非法目标、pre-commit 钩子拒绝等，判定的错误码见脚本 `REJECTED_CODES`）。如果新文件已添加，保留并说明其本地状态。
@@ -134,7 +137,7 @@ python "<skill>/scripts/svn_commit.py" --root "<项目根目录>" --message-file
 
 ## 提交后更新工单
 
-易协作工单的约定和脚本用法见 [task-tracking.md](task-tracking.md)「更新工单」。目前只有维护单有约定；其他工单（制作单、popo 跟测单等）跳过本节。
+易协作工单的约定和脚本用法见 [task-tracking.md](task-tracking.md)「更新工单」。目前只有维护单有约定；其他工单（制作单、popo 跟测单等）跳过本节。用 `svn_merge.py` 合并后的提交也按本节处理（见 [svn-merge.md](svn-merge.md)「流程」第 6 步），工时按合并提交新增加修改的行数算。
 
 1. **交付时**（工单号确定后，只读）：运行 `pm_update.py --issue-id <工单号>`，`target_version` 以「维护内容」结尾才是维护单。是维护单时，按约定算出工时，再用不带 `--apply` 的完整命令预览，把结果写成「交给用户的内容」第 4 项。预览失败（登录、网络）时如实写明，不影响交付提交说明。
 2. **提交成功后**：`svn_commit.py` 返回 `committed: true` 才执行同一条命令加 `--apply`；`committed` 为 `false` 或 `null` 时不执行。用户确认时改过工时、活动或备注的，用改后的值。

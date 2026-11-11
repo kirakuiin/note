@@ -515,7 +515,7 @@ def credentials(config_path, username=None):
 def main(argv=None):
     """默认落盘并返回简短 JSON 清单；--stdout 保留表格导出能力。"""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--config", type=Path, default=Path.home()/".mhxy-workspace/config.json")
+    parser.add_argument("--global-config", "--config", dest="config", type=Path, default=Path.home()/".mhxy-workspace/config.json")
     parser.add_argument("--username", help="登录账号；省略时使用配置中的 openid_username")
     parser.add_argument("--root", default=".", help="保存工单的项目根目录")
     parser.add_argument("--stdout", action="store_true", help="仅导出表格，不落盘或下载图片")

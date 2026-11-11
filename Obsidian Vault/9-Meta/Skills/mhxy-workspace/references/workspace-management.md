@@ -135,6 +135,8 @@ skill 升级后不需要逐个工作区 sync：每次 `context`（包括 Session
 
 只在用户明确要求清理 `.mhxy-workspace/` 的全部内容时执行；“清理业务工作副本”不是这个动作。先预览，确认范围符合用户的要求后再应用；授权已经明确时不重复询问。
 
+唯一的例外是复用目录检出：用户确认复用某个目录（`branch.py checkout --reuse`）即包含清理该目录的 `.mhxy-workspace/`，由脚本在 SVN 步骤全部成功后自动执行，不另行询问，见 [branch.md](branch.md)「复用时清理个人目录」。预览阶段要把清理这一步和其中的条目告诉用户。
+
 ```text
 python "<skill>/scripts/workspace.py" clean --root "<项目>"
 python "<skill>/scripts/workspace.py" clean --root "<项目>" --apply

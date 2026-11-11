@@ -50,7 +50,7 @@ python "<skill>/scripts/svn_update.py" --root "<项目>" [--code-only] [--clean-
 输出 JSON，退出码 0 全部成功、2 部分完成、1 代码工作副本失败或参数错误：
 
 - `status`：`success`／`partial`／`failed`（`--dry-run` 为 `planned`）；`mode`：`default`／`clean-blockers`；`backup_dir`：本次备份目录，没有备份时为 null。
-- `working_copies` 每项：`name`、`path`、`before`／`after`（`url`、`branch`、`revision`）、`target`（`url`、`branch`、`reason`）、`operation`（`update`／`switch`）、`status`（`updated`／`partial`／`failed`）、`handled`（`cleanup`、`reverted`、`conflicts_resolved`、`moved_unversioned`）、`conflicts`（处理后仍然冲突的路径）、`external_failures`、`errors`、`notes`。
+- `working_copies` 每项：`name`、`path`、`before`／`after`（`url`、`branch`、`revision`）、`target`（`url`、`branch`、`reason`）、`operation`（`update`／`switch`）、`status`（`updated`／`partial`／`failed`，`--dry-run` 为 `planned`）、`local_changes`（更新前有本地修改的条目数，含入口文件）、`locked`（只在 `--dry-run` 时出现：工作副本是否被锁，被锁时实际运行会先 cleanup）、`handled`（`cleanup`、`reverted`、`conflicts_resolved`、`moved_unversioned`）、`conflicts`（处理后仍然冲突的路径）、`external_failures`、`errors`、`notes`。
 
 向用户汇报：每个工作副本的前后分支和版本、周期分支是否到达目标维护周、`handled` 里处理了哪些文件和备份路径、失败和跳过的部分。`handled` 不为空时一定要列出文件，让用户知道哪些本地内容被换掉了、去哪里找回。
 

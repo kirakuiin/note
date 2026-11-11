@@ -186,6 +186,7 @@ class ReportTests(Workspace):
         cases = {
             "标题": (("build", *self.common, "--analysis-file", self.analysis, "--solution-file", self.solution), "--title"),
             "状态": ((*self.build_args, "--status", "完成"), "--status"),
+            "已提交只由 commit 设置": ((*self.build_args, "--status", "已提交"), "由 commit 设置"),
             "空文本": ((*self.build_args[:-4], "--solution-file", self.write("empty.md", " \n"), "--title", "t"), "为空"),
             "媒体类型": ((*self.build_args, "--media", self.analysis), "媒体类型"),
             "用例报告": ((*self.build_args, "--case-report", "latest"), "没有用例执行器报告"),
@@ -325,6 +326,73 @@ class UnattendedResultTests(Workspace):
         code, _, error = run(unattended, "show", *self.common)
         self.assertEqual(code, 1)
         self.assertIn("还没有结果文件", error["error"])
+
+    def test_waiting_status_requires_the_blocking_issue(self):
+        code, output, error = run(unattended, "result", *self.common, "--status", "等前一单提交",
+                                  "--reason", "要改 gameplay/a.py，被 #860001 占用", "--waiting-for", "#860001",
+                                  "--file", "gameplay/b.py")
+        self.assertEqual((code, error), (0, None))
+        saved = output["result"]
+        self.assertEqual(tuple(saved), unattended.FIELDS + ("waiting_for",))
+        self.assertEqual((saved["waiting_for"], saved["changed_files"]), ("860001", ["gameplay/b.py"]))
+        code, shown, _ = run(unattended, "show", *self.common)
+        self.assertEqual((code, shown["result"]), (0, saved))
+        cases = {
+            "缺工单号": (("--status", "等前一单提交", "--reason", "x"), "--waiting-for"),
+            "其他状态": (("--status", "需要你处理", "--reason", "x", "--waiting-for", "860001"), "--waiting-for"),
+            "本工单": (("--status", "等前一单提交", "--reason", "x", "--waiting-for", "860053"), "本工单"),
+            "非法单号": (("--status", "等前一单提交", "--reason", "x", "--waiting-for", "abc"), "正整数"),
+            "带工单更新": (("--status", "等前一单提交", "--reason", "x", "--waiting-for", "860001",
+                         "--pm-status", "代码审查"), "待提交"),
+        }
+        for label, (extra, expected) in cases.items():
+            with self.subTest(label):
+                code, _, error = run(unattended, "result", *self.common, *extra)
+                self.assertEqual(code, 1)
+                self.assertIn(expected, error["error"])
+
+    def test_candidates_from_test_result_or_list(self):
+        item = {"kind": "preset", "content": "war.Turn >= 2", "runs": 2, "note": "等第二回合"}
+        test_result = self.write("test-result.json", json.dumps(
+            {"status": "passed", "cases": [], "candidates": [{**item, "extra": 1}]}, ensure_ascii=False))
+        code, _, error = run(unattended, *self.ready, "--candidates-file", test_result)
+        self.assertEqual(code, 1)
+        self.assertIn("字段", error["error"])
+        test_result.write_text(json.dumps({"status": "passed", "candidates": [dict(reversed(item.items()))]}),
+                               encoding="utf-8")
+        pm = ("--pm-status", "代码审查")
+        code, output, error = run(unattended, *self.ready, "--candidates-file", test_result, *pm)
+        self.assertEqual((code, error), (0, None))
+        saved = output["result"]
+        self.assertEqual(tuple(saved), unattended.FIELDS + ("candidates", "pm_update"))
+        self.assertEqual(saved["candidates"], [item])
+        self.assertEqual(tuple(saved["candidates"][0]), unattended.CANDIDATE_KEYS)
+        code, shown, _ = run(unattended, "show", *self.common)
+        self.assertEqual((code, shown["result"]), (0, saved))
+        listed = self.write("candidates.json", json.dumps([item]))
+        code, output, _ = run(unattended, "result", *self.common, "--status", "需要你处理", "--reason", "x",
+                              "--candidates-file", listed)
+        self.assertEqual((code, output["result"]["candidates"]), (0, [item]))
+        for label, data, expected in (
+                ("kind", [{**item, "kind": "other"}], "kind"), ("runs", [{**item, "runs": True}], "runs"),
+                ("content", [{**item, "content": " "}], "content"), ("没有字段", {"status": "passed"}, "candidates"),
+                ("不是列表", {"candidates": "x"}, "列表")):
+            with self.subTest(label):
+                bad = self.write("bad.json", json.dumps(data))
+                code, _, error = run(unattended, *self.ready, "--candidates-file", bad)
+                self.assertEqual(code, 1)
+                self.assertIn(expected, error["error"])
+
+    def test_show_rejects_misordered_optional_fields(self):
+        code, output, _ = run(unattended, *self.ready, "--pm-status", "代码审查")
+        saved = output["result"]
+        broken = {key: saved[key] for key in unattended.FIELDS}
+        broken["pm_update"], broken["candidates"] = saved["pm_update"], []
+        (self.personal / "unattended/860053/result.json").write_text(json.dumps(broken, ensure_ascii=False),
+                                                                    encoding="utf-8")
+        code, _, error = run(unattended, "show", *self.common)
+        self.assertEqual(code, 1)
+        self.assertIn("顺序", error["error"])
 
 
 if __name__ == "__main__":

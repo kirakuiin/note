@@ -1153,6 +1153,14 @@ def validate_coverage(task):
     validate_issue_id(task["redmine_id"])
 
 
+NO_COMMIT_ENV = "MHXY_NO_COMMIT"  # 调用方（如后台服务）用它声明会话没有得到提交、写工单的批准。
+
+
+def commit_forbidden():
+    """环境变量 MHXY_NO_COMMIT 不为空也不是 0 时为真：提交、合并提交和写工单的脚本拒绝写入。"""
+    return os.environ.get(NO_COMMIT_ENV, "") not in ("", "0")
+
+
 def validate_issue_id(issue_id):
     """工单号同时用作目录名，只接受正整数字符串。"""
     if not isinstance(issue_id, str) or not re.fullmatch(r"[1-9][0-9]*", issue_id):

@@ -10,10 +10,15 @@ popo-agent-service）读取；`show` 原样读回。结果文件的字段固定�
     issue_id, status, reason, changed_files, commit_message, self_check, report_path, branch, written_at
 
 status 为“待提交”时，改动文件、提交说明、自检结果和报告都必须齐全；“需要你处理”“放弃”只要求原因，
-其余有就填、没有为空。只写个人目录，不执行任何 SVN 写操作。
+其余有就填、没有为空。“等前一单提交”表示要改的文件被同一工作区另一张未提交的工单占用，必须用
+--waiting-for 给出占用它的工单号。只写个人目录，不执行任何 SVN 写操作。
 
-给出 --pm-status 或 --pm-hours 时，结果文件末尾多一个 pm_update 对象（提交成功后要对易协作工单做的更新，
-约定见 references/task-tracking.md「更新工单」），调用方原样转成 pm_update.py 的参数；不给时没有这个字段。
+固定字段之后按以下顺序可以多出几个可选字段，不给对应参数时没有：
+- waiting_for：只在“等前一单提交”时出现，占用文件的工单号；
+- candidates：真机自检里测试执行者上报的候选原语（test 结果的 candidates，格式见 references/cli.md「读取结果」），
+  由调用方列给用户确认；
+- pm_update：给出 --pm-status 或 --pm-hours 时出现，提交成功后要对易协作工单做的更新
+  （约定见 references/task-tracking.md「更新工单」），调用方原样转成 pm_update.py 的参数。
 """
 import argparse
 from datetime import datetime
@@ -28,11 +33,15 @@ import workspace  # noqa: E402
 
 DIRECTORY = "unattended"  # 个人目录下的结果目录，每个工单一个子目录。
 RESULT_FILE = "result.json"
-STATUSES = ("待提交", "需要你处理", "放弃")
+READY, WAITING = "待提交", "等前一单提交"
+STATUSES = (READY, "需要你处理", "放弃", WAITING)
 FIELDS = ("issue_id", "status", "reason", "changed_files", "commit_message", "self_check", "report_path",
           "branch", "written_at")
-PM_FIELD = "pm_update"  # 可选字段，只能排在固定字段之后。
+WAIT_FIELD, CANDIDATES_FIELD, PM_FIELD = "waiting_for", "candidates", "pm_update"
+OPTIONAL = (WAIT_FIELD, CANDIDATES_FIELD, PM_FIELD)  # 可选字段，只能按这个顺序排在固定字段之后。
 PM_KEYS = ("status", "status_from", "hours", "activity", "comments")
+CANDIDATE_KEYS = ("kind", "content", "runs", "note")
+CANDIDATE_KINDS = ("preset", "clean_ui", "template", "step")  # 与 codex_cli.py 的 test schema 一致
 
 
 class ResultError(Exception):
@@ -51,10 +60,52 @@ def text_argument(value, file_path, label):
     return (value or "").strip()
 
 
+def validate_candidates(candidates):
+    if not isinstance(candidates, list):
+        raise ResultError("候选原语必须是列表")
+    for index, item in enumerate(candidates, 1):
+        if not isinstance(item, dict) or set(item) != set(CANDIDATE_KEYS):
+            raise ResultError(f"第 {index} 条候选原语的字段应为：{'、'.join(CANDIDATE_KEYS)}")
+        if item["kind"] not in CANDIDATE_KINDS:
+            raise ResultError(f"第 {index} 条候选原语的 kind 只能是：{'、'.join(CANDIDATE_KINDS)}")
+        if not isinstance(item["content"], str) or not item["content"].strip():
+            raise ResultError(f"第 {index} 条候选原语的 content 不能为空")
+        if not isinstance(item["runs"], int) or isinstance(item["runs"], bool) or item["runs"] < 0:
+            raise ResultError(f"第 {index} 条候选原语的 runs 必须是非负整数")
+        if not isinstance(item["note"], str):
+            raise ResultError(f"第 {index} 条候选原语的 note 必须是字符串")
+
+
+def load_candidates(path):
+    """读取候选原语：candidates 列表本身，或含 candidates 字段的 test 结果对象；按固定键序返回。"""
+    try:
+        data = json.loads(workspace.decode_document(Path(path).read_bytes())[0])
+    except (OSError, ValueError, workspace.WorkspaceError) as error:
+        raise ResultError(f"无法读取候选原语文件：{path}：{error}") from None
+    if isinstance(data, dict):
+        if CANDIDATES_FIELD not in data:
+            raise ResultError(f"候选原语文件里没有 candidates 字段：{path}")
+        data = data[CANDIDATES_FIELD]
+    validate_candidates(data)
+    return [{key: item[key] for key in CANDIDATE_KEYS} for item in data]
+
+
 def validate(result):
     """校验结果的字段齐全且互相一致；通过时返回 None。"""
-    if tuple(result) not in (FIELDS, FIELDS + (PM_FIELD,)):
+    keys = tuple(result)
+    extra = keys[len(FIELDS):]
+    if keys[:len(FIELDS)] != FIELDS or extra != tuple(key for key in OPTIONAL if key in extra):
         raise ResultError("结果字段不完整或顺序不符")
+    if result["status"] not in STATUSES:
+        raise ResultError(f"状态只能是：{'、'.join(STATUSES)}")
+    if (result["status"] == WAITING) != (WAIT_FIELD in result):
+        raise ResultError(f"状态为{WAITING}时必须用 --waiting-for 给出占用文件的工单号，其他状态不能给")
+    if WAIT_FIELD in result:
+        workspace.validate_issue_id(result[WAIT_FIELD])
+        if result[WAIT_FIELD] == result["issue_id"]:
+            raise ResultError("--waiting-for 不能是本工单")
+    if CANDIDATES_FIELD in result:
+        validate_candidates(result[CANDIDATES_FIELD])
     if PM_FIELD in result:
         pm_update = result[PM_FIELD]
         if not isinstance(pm_update, dict) or tuple(pm_update) != PM_KEYS:
@@ -79,8 +130,6 @@ def validate(result):
             raise ResultError("--pm-status-from 要和 --pm-status 一起使用")
         if result["status"] != "待提交":
             raise ResultError("只有待提交的结果才能带工单更新")
-    if result["status"] not in STATUSES:
-        raise ResultError(f"状态只能是：{'、'.join(STATUSES)}")
     if not result["reason"]:
         raise ResultError("必须写明原因（待提交时写处理结论，其余写卡在哪里）")
     if result["status"] != "待提交":
@@ -122,6 +171,10 @@ def write_result(args):
         text_argument(args.message, args.message_file, "提交说明"),
         text_argument(args.self_check, args.self_check_file, "自检结果"), report,
         workspace.svn_branch(root), datetime.now().astimezone().isoformat(timespec="seconds"))))
+    if args.waiting_for is not None:
+        result[WAIT_FIELD] = args.waiting_for.strip().lstrip("#")
+    if args.candidates_file is not None:
+        result[CANDIDATES_FIELD] = load_candidates(args.candidates_file)
     if args.pm_status is not None or args.pm_hours is not None or args.pm_activity is not None \
             or args.pm_status_from is not None or args.pm_comments:
         result[PM_FIELD] = dict(zip(PM_KEYS, (args.pm_status, args.pm_status_from, args.pm_hours,
@@ -165,6 +218,9 @@ def main(argv=None):
     writer.add_argument("--self-check", help="自检结果（提交前自检和真机自检的结论）")
     writer.add_argument("--self-check-file")
     writer.add_argument("--report", help="处理报告的目录或 index.html")
+    writer.add_argument("--waiting-for", help=f"状态为{WAITING}时必填：占用要改的文件的工单号")
+    writer.add_argument("--candidates-file",
+                        help="候选原语：test 结果 JSON（取其 candidates）或 candidates 列表本身；没有候选原语时不给")
     writer.add_argument("--pm-status", help="提交后工单要改成的状态（pm_update.py --status）")
     writer.add_argument("--pm-status-from", help="只有当前状态在其中才改（pm_update.py --status-from）")
     writer.add_argument("--pm-hours", help="提交后要登记的工时（pm_update.py --hours）")

@@ -122,6 +122,17 @@ class CommitTests(unittest.TestCase):
         self.assertEqual([call for call in self.calls if call[0] == "add"], [("add", "--depth", "empty", "./new.txt@")])
         self.assertEqual(self.last_targets, ["a.py", "new.txt"])
 
+    def test_no_commit_env_allows_preview_but_refuses_apply(self):
+        with patch.dict(commit.workspace.os.environ, {"MHXY_NO_COMMIT": "1"}):
+            preview = self.submit()
+            self.assertNotIn("error", preview)
+            result = self.submit(apply=True)
+        self.assertIs(result["committed"], False)
+        self.assertIn("MHXY_NO_COMMIT", result["error"])
+        self.assertFalse([call for call in self.calls if call[0] in ("add", "commit")])
+        with patch.dict(commit.workspace.os.environ, {"MHXY_NO_COMMIT": "0"}):
+            self.assertTrue(self.submit(apply=True)["committed"])
+
     def test_commit_removes_committed_files_from_review_mark(self):
         mark = self.root / ".mhxy-workspace" / "review-mark.json"
         mark.parent.mkdir()

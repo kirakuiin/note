@@ -475,7 +475,7 @@ def main(argv=None):
     parser.add_argument("--force", action="store_true", help="upload：该工单已上传过时仍再次上传（会生成新的 review）")
     parser.add_argument("--wait", type=int, default=WAIT_SECONDS,
                         help="upload：等待构建结束的最长秒数；调大时命令工具的超时也要相应调大")
-    parser.add_argument("--config", type=Path, default=Path.home() / ".mhxy-workspace/config.json")
+    parser.add_argument("--global-config", "--config", dest="config", type=Path, default=Path.home() / ".mhxy-workspace/config.json")
     args = parser.parse_args(argv)
     try:
         if args.action == "prepare":

@@ -227,7 +227,7 @@ def main(argv=None):
     parser.add_argument("--cli-cover", help="save：客户端覆盖率地址（coverage_query.py 输出的 url）")
     parser.add_argument("--attention-file", type=Path, help="save：“测试需特别注意”HTML 文件（UTF-8）")
     parser.add_argument("--apply", action="store_true", help="save：确认后实际保存")
-    parser.add_argument("--config", type=Path, default=Path.home() / ".mhxy-workspace/config.json")
+    parser.add_argument("--global-config", "--config", dest="config", type=Path, default=Path.home() / ".mhxy-workspace/config.json")
     args = parser.parse_args(argv)
     try:
         # 先检查参数和本地文件，再登录。

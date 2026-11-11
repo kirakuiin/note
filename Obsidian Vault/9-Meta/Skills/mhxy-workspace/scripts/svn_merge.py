@@ -591,7 +591,7 @@ def finish(root, state):
 
 def commit_allowed():
     """调用方（如后台服务）用环境变量 MHXY_NO_COMMIT=1 声明这个会话没有得到提交的批准。"""
-    return os.environ.get("MHXY_NO_COMMIT", "") in ("", "0")
+    return not workspace.commit_forbidden()
 
 
 def do_commit(root, state, result):

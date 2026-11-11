@@ -808,7 +808,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="action", required=True)
     common = argparse.ArgumentParser(add_help=False)
-    common.add_argument("--config", type=Path, default=CONFIG_PATH, help="用户级配置文件")
+    common.add_argument("--global-config", "--config", dest="config", type=Path, default=CONFIG_PATH, help="用户级配置文件")
 
     name_parser = commands.add_parser("name", parents=[common], help="只读预览分支名")
     name_parser.add_argument("--purpose", required=True)

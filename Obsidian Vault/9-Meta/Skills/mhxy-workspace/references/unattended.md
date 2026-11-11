@@ -11,7 +11,7 @@
 | 类别 | 标准 | 做什么 |
 | --- | --- | --- |
 | A 自动处理 | 全部满足：bug 修复（不是合并，也不是新功能）；描述清楚，能定位到具体代码；属于 `engineering-principles.md`「编码前先设计」定义的小改动；只改客户端脚本，不需要策划配置、美术资源或服务端配合；没有需要用户取舍的问题 | 按下文「处理 A 类」 |
-| B 问用户 | 合并类工单（如把功能合并到外测） | 不处理，结果写“需要你处理”，原因写明是合并类；用户同意后（由用户或调用方另行发起）按 [svn-merge.md](svn-merge.md) 做，合完停在未提交，由用户决定提交 |
+| B 问用户 | 合并类工单（如把功能合并到外测） | 不处理，不发起合并，结果写“需要你处理”，原因写明是合并类。用户同意后由用户或调用方另起会话，按 [svn-merge.md](svn-merge.md)「无人值守与后台服务」合并 |
 | C 只列出 | 其余全部 | 不处理，结果写“放弃”，原因写明不符合 A 类的哪一条 |
 
 拿不准一律归 C。标准从严：定位到的代码和工单描述对不上、需要先和策划确认表现、改动会波及公共接口，都不是 A 类。
@@ -19,9 +19,9 @@
 ## 与正常流程的差别
 
 1. **不向用户提问，不出方案流程图**，不使用 `grilling`。原本要问用户才能继续的地方，就是该停下的地方。
-2. **不提交**。做完提交前自检后停下，拟好提交说明和待提交文件清单；不询问是否代为提交，不调用 `svn_commit.py`。
-3. **跳过**上下文用量检查、会话交接、记忆整理和经验沉淀（`session.md` 整份不执行）。
-4. 其余规则照常：项目规范、`engineering-principles.md`、真机自检（委派、设备锁、Mock 还原）、`svn-commit.md` 的说明格式和提交前自检。A 类单是小改动，不写 spec，不做 Codex review。
+2. **不提交，不写工单**。做完提交前自检后停下，拟好提交说明和待提交文件清单；不询问是否代为提交，不调用 `svn_commit.py --apply`、`svn_merge.py commit`、`pm_update.py --apply`。调用方可能设置了环境变量 `MHXY_NO_COMMIT=1`，这时这些脚本会直接拒绝写入；照实报告，不要绕过。
+3. **跳过**上下文用量检查、会话交接、记忆整理和经验沉淀（`session.md` 整份不执行）。真机自检里测试执行者上报的候选原语不在本会话处理，写进结果文件（见「结果文件」），由调用方列给用户确认。
+4. 其余规则照常：项目规范、`engineering-principles.md`、真机自检（委派、设备锁、Mock 还原，委派前先按 `cli.md` 用 `case_runner.py search` 查已有用例，重新测试先跑已有用例）、`svn-commit.md` 的说明格式和提交前自检。A 类单是小改动，不写 spec，不做 Codex review。
 
 ## 处理 A 类
 
@@ -38,6 +38,7 @@
 
 - **需要你处理**：这张单应该做，但要用户介入才能继续——需要决策、改动超出小改动、自检不过、环境问题、B 类合并单。原因写清卡在哪一步、已经做了什么、需要用户做什么。
 - **放弃**：这张单不适合自动处理（C 类），或确认不需要改客户端。原因写明依据。
+- **等前一单提交**：要改的文件被同一工作区另一张还没提交的工单占用。占用关系以提示词为准（调用方会列出“被其他未提交工单占用的文件”及工单号）；提示词没列出时，不要自己推断占用者，按“需要你处理”停下。需要改其中任何一个文件时不改它，立即停下：已做的其他修改保留，原因写明要改哪个文件、改什么，`--waiting-for` 填占用它的工单号（多张时填第一张）。调用方在那张单提交或放弃后会让本会话继续：先 `svn update` 涉及的文件，再接着处理。
 
 遇到权限清单以外的操作（如需要提交、写工作区外的文件、破坏性 GM 指令）同样停下，状态为“需要你处理”，不等待授权。
 
@@ -49,7 +50,7 @@
 - **处理方案**：改了什么、为什么这么改、影响范围。
 
 ```text
-python "<skill>/scripts/report.py" build --root "<项目>" --issue-id <工单号> --analysis-file <问题定位> --solution-file <处理方案> --message-file <提交说明> --case-report latest [--status 待提交|需要你处理|放弃] [--self-check-file <补充说明>] [--problem-media <工单里的问题截图>]... [--media <额外的修复后截图或录屏>]... [--path <文件>]...
+python "<skill>/scripts/report.py" build --root "<项目>" --issue-id <工单号> --analysis-file <问题定位> --solution-file <处理方案> --message-file <提交说明> --case-report latest [--status 待提交|需要你处理|放弃|等前一单提交] [--self-check-file <补充说明>] [--problem-media <工单里的问题截图>]... [--media <额外的修复后截图或录屏>]... [--path <文件>]...
 python "<skill>/scripts/report.py" commit --root "<项目>" --issue-id <工单号> --revision <版本号>
 ```
 
@@ -57,18 +58,19 @@ python "<skill>/scripts/report.py" commit --root "<项目>" --issue-id <工单�
 - `--case-report` 给用例执行器报告的路径，可重复；`latest` 取 `.mhxy-workspace/cases/reports/` 里最新的一份。真机自检由受委派的执行者跑完后直接用 `latest`；同一工作区跑过多份时，给出执行者结果里记录的报告路径。报告记录的用例来源会拷进报告文件夹的 `cases/`（spec 只取「测试用例」一节），页面附重跑命令；来源文件已被删除时 build 报错。
 - 只要求修复后的证据。工单自带的问题截图用 `--problem-media` 放进“问题定位”。
 - 输出 JSON 只有路径和统计。**不要读取 diff、截图和生成的 HTML**，核对输出里的 `changed_files`、`blocking`、`case_reports`、`media` 数量即可。
-- 报告在 `.mhxy-workspace/reports/<工单号>/`（`index.html` 加 `media/`），整个文件夹拷到哪里都能打开；重新 build 会整体重建。提交后用 `commit` 补版本号，状态变为“已提交”。清理个人目录会删掉它。
+- 报告在 `.mhxy-workspace/reports/<工单号>/`（`index.html` 加 `media/`），整个文件夹拷到哪里都能打开；重新 build 会整体重建。`build --status` 只接受上面四种；“已提交”只由 `commit` 设置：提交成功后（不论谁提交）用它补版本号，见 `svn-commit.md`「提交」。清理个人目录会删掉它。
 
 ## 结果文件
 
 结束前（无论做完还是停下）必须调用，脚本校验字段：
 
 ```text
-python "<skill>/scripts/unattended.py" result --root "<项目>" --issue-id <工单号> --status <待提交|需要你处理|放弃> --reason "<原因>" [--file <改动文件>]... [--message-file <提交说明>] [--self-check "<自检结果>"] [--report <报告目录或 index.html>] [--pm-status … --pm-hours … --pm-activity …]
+python "<skill>/scripts/unattended.py" result --root "<项目>" --issue-id <工单号> --status <待提交|需要你处理|放弃|等前一单提交> --reason "<原因>" [--file <改动文件>]... [--message-file <提交说明>] [--self-check "<自检结果>"] [--report <报告目录或 index.html>] [--waiting-for <占用文件的工单号>] [--candidates-file <test 结果 JSON>] [--pm-status … --pm-hours … --pm-activity …]
 ```
 
-- 写到 `.mhxy-workspace/unattended/<工单号>/result.json`，字段固定：`issue_id`、`status`、`reason`、`changed_files`、`commit_message`、`self_check`、`report_path`、`branch`、`written_at`。
-- “待提交”要求改动文件、提交说明、自检结果、报告齐全，否则报错；`reason` 写一句处理结论。其余两种状态只要求原因，别的有就填。
+- 写到 `.mhxy-workspace/unattended/<工单号>/result.json`，字段固定：`issue_id`、`status`、`reason`、`changed_files`、`commit_message`、`self_check`、`report_path`、`branch`、`written_at`；之后按顺序可能多出可选字段 `waiting_for`、`candidates`、`pm_update`（见下）。
+- “待提交”要求改动文件、提交说明、自检结果、报告齐全，否则报错；`reason` 写一句处理结论。“需要你处理”“放弃”只要求原因，别的有就填。“等前一单提交”另外必须给 `--waiting-for`（其他状态不能给），结果多一个字段 `waiting_for`。
+- **候选原语**：真机自检的 test 结果里 `candidates` 不为空时，把那份 test 结果 JSON（或只含候选原语列表的 JSON 文件）用 `--candidates-file` 传入，结果多一个字段 `candidates`（每条 `kind`、`content`、`runs`、`note`，格式见 `cli.md`「读取结果」）。为空时不给。任何状态都可以带。
 - 较长的文字用 `--reason-file`、`--self-check-file` 从文件读取。`unattended.py show` 读回结果。
-- **维护单的工单更新**（仅“待提交”）：按 `task-tracking.md`「更新工单」判断是不是维护单并算出工时，是的话追加 `--pm-status "代码审查" --pm-status-from "新建,10%,20%,30%,40%,50%,60%,70%,80%,90%" --pm-hours <数值> --pm-activity "程序开发-制作"`（需要备注时加 `--pm-comments`）。结果文件末尾会多一个 `pm_update` 对象（`status`、`status_from`、`hours`、`activity`、`comments`）；不是维护单时不加这些参数，结果文件没有这个字段。会话自己不调用 `pm_update.py --apply`：调用方在用户点“提交”、提交成功后，把 `pm_update` 的各项原样传给 `pm_update.py --issue-id <工单号> … --apply`，并按它的退出码和输出通知用户。
+- **维护单的工单更新**（仅“待提交”）：按 `task-tracking.md`「更新工单」判断是不是维护单并算出工时，是的话追加 `--pm-status "代码审查" --pm-status-from "新建,10%,20%,30%,40%,50%,60%,70%,80%,90%" --pm-hours <数值> --pm-activity "程序开发-制作"`（需要备注时加 `--pm-comments`）。结果文件末尾会多一个 `pm_update` 对象（`status`、`status_from`、`hours`、`activity`、`comments`）；不是维护单时不加这些参数，结果文件没有这个字段。会话自己不调用 `pm_update.py --apply`：调用方在用户点“提交”、提交成功后，把 `pm_update` 的各项原样传给 `pm_update.py --issue-id <工单号> … --apply`，并按它的退出码和输出通知用户；随后用 `report.py commit` 给报告补版本号。
 - 脚本报错时按提示补齐后重跑；最后一条回复只需简述状态和结果文件路径。

@@ -91,7 +91,7 @@ case_runner.py search --root <项目> [--issue <工单号>] [--file <路径>]...
 
 ## 验收
 
-- 单元测试：归属字段校验（工作区用例必填、spec／模板可选）、归档目录检查、通过记录写入与摘要比对、`search` 各条件与组合、`--changed`（模拟 svn）、`context` 的 `cases`、`report.py` 拷贝用例文件、test schema 的 `candidates`。全量 `python -m pytest -q` 通过。
+- 单元测试：归属字段校验（工作区用例必填、spec／模板可选）、归档目录检查、通过记录写入与摘要比对、`search` 各条件与组合、`--changed`（模拟 svn）、`context` 的 `cases`、`report.py` 拷贝用例文件、test schema 的 `candidates`。全量测试（SKILL.md「维护本 skill」的命令）通过。
 - 真机：在 trunk 工作区写一个带归属字段的用例跑通，确认 `runs.json` 记录、`search --issue`／`--changed` 和 `context` 能看到它。
 - 覆盖率：在真实任务上跑一轮 `$$scover_*` 用例，与手动方式对比耗时和工具调用次数。
 

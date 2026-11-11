@@ -60,7 +60,7 @@
 - 结果取自 `result.json`（模型最终回复）中最后一个按上表字段完整通过校验的 JSON 对象，前面的推理文字和其中的其他 JSON 忽略；字符串里未转义的双引号会补转义后再校验，补过时 `state.json` 记 `repaired_quotes`（补的个数）和 `raw_result`（原文路径），采纳前对照原文核对相关字段。找不到合格对象时任务记为 failed，`raw_result` 指向原文；回合本身失败（如上游报错）时 `error` 写成“CLI 回合失败：<上游信息>”，不是模型没给结果，按该信息处理后再重跑。
 - 只看结果内容下结论。退出码为 0、任务 `completed` 都不等于调查正确、审查通过或测试通过；没有完整结果、模型或工具失败都不算通过。
 - 结果是证据，不是结论：主会话逐条核对后再采纳，review 意见的处理见 code-review.md。
-- test 结果的 `candidates` 由主会话留存，不当场加进 skill：Claude 主会话在提交后整理记忆时与候选经验一起列给用户确认（session.md「经验沉淀」），Codex 主会话在交付时一并列出；用户同意的再加进执行器并补测试（game-debugging.md「候选原语」）。
+- test 结果的 `candidates` 由主会话留存，不当场加进 skill：Claude 主会话在提交后整理记忆时与候选经验一起列给用户确认（session.md「经验沉淀」），Codex 主会话在交付时一并列出，无人值守会话用 `unattended.py result --candidates-file` 写进结果文件、由调用方列出（unattended.md「结果文件」）；用户同意的再加进执行器并补测试（game-debugging.md「候选原语」）。
 
 ### 设备锁
 
