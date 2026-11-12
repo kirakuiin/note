@@ -264,6 +264,39 @@ class UnattendedResultTests(Workspace):
         code, shown, _ = run(unattended, "show", *self.common)
         self.assertEqual((code, shown["result"]), (0, saved))
 
+    def test_popo_issue_requires_bug_note(self):
+        popo = ("--root", self.root, "--issue-id", "popo-297291", "--global-config", self.config)
+        self.write("reports/popo-297291/index.html", "<html>")
+        ready = ("result", *popo, "--status", "待提交", "--reason", "已修复", "--file", "gameplay/a.py",
+                 "--message", "#834463 #跟测 bugfix %297291 #Y袁延亮 x", "--self-check", "通过",
+                 "--report", self.personal / "reports/popo-297291")
+        code, _, error = run(unattended, *ready)
+        self.assertEqual(code, 1)
+        self.assertIn("--bug-note", error["error"])
+        code, output, error = run(unattended, *ready, "--bug-note", "返回键改用原按钮坐标")
+        self.assertEqual((code, error), (0, None))
+        saved = json.loads((self.personal / "unattended/popo-297291/result.json").read_text(encoding="utf-8"))
+        self.assertEqual(tuple(saved), unattended.FIELDS + ("bug_note",))
+        self.assertEqual(saved["bug_note"], "返回键改用原按钮坐标")
+        code, shown, _ = run(unattended, "show", *popo)
+        self.assertEqual((code, shown["result"]), (0, saved))
+        for bad in ("一" * 21, "两行\n备注"):
+            code, _, error = run(unattended, *ready, "--bug-note", bad)
+            self.assertEqual(code, 1, bad)
+        code, _, error = run(unattended, *ready, "--bug-note", "x", "--pm-status", "代码审查")
+        self.assertIn("popo 工单不更新易协作工单", error["error"])
+        code, _, error = run(unattended, "result", *popo, "--status", "放弃", "--reason", "缺少复现步骤")
+        self.assertEqual(code, 1)
+        code, _, error = run(unattended, "result", *popo, "--status", "放弃", "--reason", "缺步骤",
+                             "--bug-note", "缺少复现步骤")
+        self.assertEqual(code, 0)
+        code, _, error = run(unattended, *self.ready, "--bug-note", "x")    # 易协作工单不能带
+        self.assertIn("只有 popo 工单", error["error"])
+        for key in ("popo-", "popo-0", "bug-1", "popo-12a"):
+            code, _, error = run(unattended, "show", "--root", self.root, "--issue-id", key,
+                                 "--global-config", self.config)
+            self.assertEqual(code, 1, key)
+
     def test_pm_update_is_optional_and_validated(self):
         pm = ("--pm-status", "代码审查", "--pm-status-from", "新建,10%", "--pm-hours", "0.2",
               "--pm-activity", "程序开发-制作")

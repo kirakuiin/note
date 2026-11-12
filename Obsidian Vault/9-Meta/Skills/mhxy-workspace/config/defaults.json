@@ -11,5 +11,7 @@
   "branches_root": null,
   "login_accounts": null,
   "login_server": null,
-  "client_idle_minutes": null
+  "client_idle_minutes": null,
+  "patch_token": null,
+  "patch_template": null
 }

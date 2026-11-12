@@ -198,7 +198,7 @@ def validate_config(config, keys, label):
     if set(config) - set(keys):
         raise WorkspaceError(f"未知配置键：{label}：{sorted(set(config) - set(keys))}")
     for key, value in config.items():
-        if key in {"openid_username", "openid_password"}:
+        if key in {"openid_username", "openid_password", "patch_token"}:
             if value is not None and (not isinstance(value, str) or not value or any(c in value for c in "\r\n\x00")):
                 raise WorkspaceError(f"{label} 的 {key} 必须是非空字符串或 null")
             if key == "openid_username" and value is not None and not re.fullmatch(r"[A-Za-z0-9_.-]+@corp\.netease\.com", value):
@@ -225,9 +225,19 @@ def validate_config(config, keys, label):
                                       or any(c in value for c in "\r\n\x00\"")):
                 raise WorkspaceError(f"{label} 的 login_server 必须是单行服务器名或 null")
             continue
+        if key == "patch_template":
+            if value is not None and not valid_patch_template(value):
+                raise WorkspaceError(f"{label} 的 patch_template 必须是 1–64 字符的单行模板名或 null")
+            continue
         if value is not None and (not isinstance(value, str) or not value or
                                   not Path(value).is_absolute() or any(c in value for c in "\r\n\x00")):
             raise WorkspaceError(f"{label} 的 {key} 必须是绝对路径或 null")
+
+
+def valid_patch_template(name):
+    """Sunshine 打包模板名：1–64 字符的单行文本，不含引号、反斜杠，首尾无空白。"""
+    return (isinstance(name, str) and 0 < len(name) <= 64 and name == name.strip()
+            and not any(c in name for c in "\r\n\x00\"'\\"))
 
 
 def valid_login_account(account):
@@ -359,6 +369,8 @@ def apply_settings(values, assignments, option):
             raise WorkspaceError("密码通过 config --prompt-password 隐藏输入，不放在命令行参数中")
         if key == "login_accounts" and value != "null":
             raise WorkspaceError("账号池用 login-account 命令维护，密码隐藏输入，不放在命令行参数中")
+        if key == "patch_token" and value != "null":
+            raise WorkspaceError("打包令牌通过 config --prompt-patch-token 隐藏输入，不放在命令行参数中")
         if key == "openid_username" and result.get(key) != (None if value == "null" else value):
             result.pop("openid_password", None)  # An old password must not follow an account change.
         result[key] = None if value == "null" else value
@@ -371,6 +383,8 @@ def effective_values(global_values, local):
         raise WorkspaceError("OpenID 账密仅允许存放在用户级配置")
     if "login_accounts" in local:
         raise WorkspaceError("账号池仅允许存放在用户级配置")
+    if "patch_token" in local:
+        raise WorkspaceError("打包令牌仅允许存放在用户级配置")
     values = {**global_values, **local}
     if not values.get("coder_name") and values.get("openid_username"):
         values["coder_name"] = values["openid_username"].split("@", 1)[0]
@@ -383,7 +397,7 @@ def masked_config(values):
     账号池只显示账号（按优先顺序），不显示密码。
     """
     def mask(key, value):
-        if key == "openid_password":
+        if key in ("openid_password", "patch_token"):
             return "***" if value is not None else None
         if key == "login_accounts" and value is not None:
             return [item["account"] for item in value]
@@ -404,7 +418,7 @@ def load_config(root_arg, global_arg):
     return effective_values({**defaults, **values[0]}, values[1])
 
 
-def configure_global(global_arg, assignments=(), password=None, apply=False):
+def configure_global(global_arg, assignments=(), password=None, apply=False, patch_token=None):
     """Update only the user configuration, preserving unrelated settings."""
     path = absolute(global_arg)
     old = read_bytes(path)
@@ -412,6 +426,8 @@ def configure_global(global_arg, assignments=(), password=None, apply=False):
     values = apply_settings(values, assignments, "--set-global")
     if password is not None:
         values["openid_password"] = password
+    if patch_token is not None:
+        values["patch_token"] = patch_token.strip()
     defaults = parse_json((SKILL / "config/defaults.json").read_bytes(), "配置模板")
     validate_config(values, defaults, path)
     new = json_bytes(values)
@@ -1185,6 +1201,19 @@ def validate_issue_id(issue_id):
         raise WorkspaceError("工单号必须为正整数")
 
 
+POPO_KEY_PREFIX = "popo-"   # 提单平台 bug 单（popo 工单）在无人值守结果和处理报告里的工单号前缀
+
+
+def validate_issue_key(key):
+    """无人值守结果、处理报告用的工单号：易协作单号，或 popo- 加提单平台的 6 位单号（同时用作目录名）。"""
+    if not isinstance(key, str) or not re.fullmatch(r"(?:popo-)?[1-9][0-9]*", key):
+        raise WorkspaceError("工单号必须为正整数，或 popo- 加提单平台单号")
+
+
+def is_popo_key(key):
+    return isinstance(key, str) and key.startswith(POPO_KEY_PREFIX)
+
+
 def issue_entry(issue_id, title):
     """生成不含正文的工单定位信息，路径始终相对于项目根目录。"""
     validate_issue_id(issue_id)
@@ -1378,6 +1407,7 @@ def main():
     parser.add_argument("--issue-id", action="append", default=[])
     parser.add_argument("--replace", action="store_true", help="替换追踪列表；默认追加")
     parser.add_argument("--prompt-password", action="store_true")
+    parser.add_argument("--prompt-patch-token", action="store_true", help="config：隐藏输入打包服务令牌")
     parser.add_argument("--task-name")
     parser.add_argument("--branch", help="coverage-task：仓库相对路径（如 branchs/2026_dev/x），省略时从 svn 推断")
     parser.add_argument("--redmine-id")
@@ -1395,12 +1425,14 @@ def main():
             raise WorkspaceError("--issue-id 仅用于 track 或 untrack")
         if args.action not in ("sync", "config") and (args.set_global or args.set_local):
             raise WorkspaceError("此操作不接受 --set-global 或 --set-local")
-        if args.action != "config" and args.prompt_password:
-            raise WorkspaceError("--prompt-password 仅用于 config")
+        if args.action != "config" and (args.prompt_password or args.prompt_patch_token):
+            raise WorkspaceError("--prompt-password、--prompt-patch-token 仅用于 config")
         if args.action != "login-account" and (args.account or args.remove_account):
             raise WorkspaceError("--account、--remove-account 仅用于 login-account")
-        if args.action == "config" and args.set_local and (args.set_global or args.prompt_password):
-            raise WorkspaceError("config 的 --set-local 不能与 --set-global、--prompt-password 同时使用")
+        if args.action == "config" and args.set_local and (args.set_global or args.prompt_password
+                                                           or args.prompt_patch_token):
+            raise WorkspaceError("config 的 --set-local 不能与 --set-global、--prompt-password、"
+                                 "--prompt-patch-token 同时使用")
         if (args.query or args.add or args.remove) and args.action != "index":
             raise WorkspaceError("--query、--add、--remove 仅用于 index")
         if args.from_hook and args.action not in ("context", "index"):
@@ -1439,11 +1471,13 @@ def main():
         elif args.action == "config" and args.set_local:
             result = configure_local(args.root, args.global_config, args.set_local, args.apply)
         elif args.action == "config":
-            password = None
+            password = token = None
             if args.prompt_password:
                 password = prompt_password("OpenID password (save to user config): ", args.apply)
-            result = configure_global(args.global_config, args.set_global, password, args.apply)
-            password = None
+            if args.prompt_patch_token:
+                token = prompt_password("Patch service token (save to user config): ", args.apply)
+            result = configure_global(args.global_config, args.set_global, password, args.apply, token)
+            password = token = None
         elif args.action == "login-account":
             if not args.account:
                 raise WorkspaceError("login-account 需要 --account")

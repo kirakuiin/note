@@ -472,7 +472,7 @@ def clear_report(target):
 def build(args):
     root, personal, _ = workspace.paths(args.root, args.global_config)
     workspace.require_initialized(root)
-    workspace.validate_issue_id(args.issue_id)
+    workspace.validate_issue_key(args.issue_id)
     if args.status not in STATUSES:
         raise ReportError(f"--status 只能是：{'、'.join(STATUSES)}（{COMMITTED}由 commit 设置）")
     data = {
@@ -524,7 +524,7 @@ def commit(args):
     """提交后补版本号：状态改为已提交并重新渲染，其余内容不变。"""
     root, personal, _ = workspace.paths(args.root, args.global_config)
     workspace.require_initialized(root)
-    workspace.validate_issue_id(args.issue_id)
+    workspace.validate_issue_key(args.issue_id)
     if not re.fullmatch(r"[1-9]\d*", args.revision or ""):
         raise ReportError("--revision 必须是正整数版本号")
     target = report_dir(personal, args.issue_id)

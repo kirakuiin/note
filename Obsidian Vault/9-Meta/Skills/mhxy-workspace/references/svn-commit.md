@@ -41,7 +41,7 @@
 
 ## 跟测 bug（popo 工单）
 
-如果本上下文用 `popo-issue-fetch` 处理过某个 popo 工单，默认使用跟测格式：
+如果本上下文用 `popo-issue-fetch` 处理过某个 popo 工单，或是在无人值守模式下处理 popo 工单（`unattended.md`「popo 工单」，字段取自 `.mhxy-workspace/bugs/<单号>/issue.md`），默认使用跟测格式：
 
 ```text
 #<策划单号> #跟测 bugfix %<popo 工单号> #<提单人> 描述

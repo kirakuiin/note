@@ -19,7 +19,9 @@ status 为“待提交”时，改动文件、提交说明、自检结果和报�
   由调用方列给用户确认；
 - pm_update：给出 --pm-status 或 --pm-hours 时出现，提交成功后要对易协作工单做的更新
   （约定见 references/task-tracking.md「更新工单」），调用方原样转成 pm_update.py 的参数；
-  ai_level 在给了状态时默认“L4 - 全自主Agent”。
+  ai_level 在给了状态时默认“L4 - 全自主Agent”；
+- bug_note：popo 工单（工单号 popo-<提单平台单号>）必有、其他工单没有，调用方写到 bug 单上的备注
+  （不超过 20 字，一行）。
 """
 import argparse
 from datetime import datetime
@@ -38,8 +40,9 @@ READY, WAITING = "待提交", "等前一单提交"
 STATUSES = (READY, "需要你处理", "放弃", WAITING)
 FIELDS = ("issue_id", "status", "reason", "changed_files", "commit_message", "self_check", "report_path",
           "branch", "written_at")
-WAIT_FIELD, CANDIDATES_FIELD, PM_FIELD = "waiting_for", "candidates", "pm_update"
-OPTIONAL = (WAIT_FIELD, CANDIDATES_FIELD, PM_FIELD)  # 可选字段，只能按这个顺序排在固定字段之后。
+WAIT_FIELD, CANDIDATES_FIELD, PM_FIELD, BUG_FIELD = "waiting_for", "candidates", "pm_update", "bug_note"
+OPTIONAL = (WAIT_FIELD, CANDIDATES_FIELD, PM_FIELD, BUG_FIELD)  # 可选字段，只能按这个顺序排在固定字段之后。
+BUG_NOTE_MAX = 20   # popo 工单备注正文的字数上限（用户 2026-11-12 定）
 PM_KEYS = ("status", "status_from", "ai_level", "hours", "activity", "comments")
 DEFAULT_AI_LEVEL = "L4 - 全自主Agent"   # 无人值守会话的工单一律 L4（用户 2026-11-12 定，见 task-tracking.md「更新工单」）
 CANDIDATE_KEYS = ("kind", "content", "runs", "note")
@@ -102,8 +105,16 @@ def validate(result):
         raise ResultError(f"状态只能是：{'、'.join(STATUSES)}")
     if (result["status"] == WAITING) != (WAIT_FIELD in result):
         raise ResultError(f"状态为{WAITING}时必须用 --waiting-for 给出占用文件的工单号，其他状态不能给")
+    popo = workspace.is_popo_key(result["issue_id"])
+    if popo != (BUG_FIELD in result):
+        raise ResultError("popo 工单必须用 --bug-note 给出备注，其他工单不能给" if popo
+                          else "只有 popo 工单（popo- 开头）才能带 --bug-note")
+    if BUG_FIELD in result:
+        note = result[BUG_FIELD]
+        if not isinstance(note, str) or not note or len(note) > BUG_NOTE_MAX or re.search(r"[\r\n]", note):
+            raise ResultError(f"--bug-note 要写一行、不超过 {BUG_NOTE_MAX} 个字")
     if WAIT_FIELD in result:
-        workspace.validate_issue_id(result[WAIT_FIELD])
+        workspace.validate_issue_key(result[WAIT_FIELD])
         if result[WAIT_FIELD] == result["issue_id"]:
             raise ResultError("--waiting-for 不能是本工单")
     if CANDIDATES_FIELD in result:
@@ -134,6 +145,8 @@ def validate(result):
             raise ResultError("--pm-status-from 要和 --pm-status 一起使用")
         if result["status"] != "待提交":
             raise ResultError("只有待提交的结果才能带工单更新")
+        if popo:
+            raise ResultError("popo 工单不更新易协作工单，不能带 --pm-* 参数")
     if not result["reason"]:
         raise ResultError("必须写明原因（待提交时写处理结论，其余写卡在哪里）")
     if result["status"] != "待提交":
@@ -154,7 +167,7 @@ def result_path(personal, issue_id):
 def write_result(args):
     root, personal, _ = workspace.paths(args.root, args.global_config)
     workspace.require_initialized(root)
-    workspace.validate_issue_id(args.issue_id)
+    workspace.validate_issue_key(args.issue_id)
     files = []
     for value in args.file:
         relative = str(value).replace("\\", "/").strip("/")
@@ -184,6 +197,8 @@ def write_result(args):
         ai_level = args.pm_ai_level or (DEFAULT_AI_LEVEL if args.pm_status is not None else None)
         result[PM_FIELD] = dict(zip(PM_KEYS, (args.pm_status, args.pm_status_from, ai_level, args.pm_hours,
                                               args.pm_activity, args.pm_comments)))
+    if args.bug_note is not None:
+        result[BUG_FIELD] = args.bug_note.strip()
     validate(result)
     path = result_path(personal, args.issue_id)
     workspace.apply_changes([(path, workspace.read_bytes(path), workspace.json_bytes(result))])
@@ -193,7 +208,7 @@ def write_result(args):
 def show_result(args):
     root, personal, _ = workspace.paths(args.root, args.global_config)
     workspace.require_initialized(root)
-    workspace.validate_issue_id(args.issue_id)
+    workspace.validate_issue_key(args.issue_id)
     path = result_path(personal, args.issue_id)
     raw = workspace.read_bytes(path)
     if raw is None:
@@ -233,6 +248,8 @@ def main(argv=None):
     writer.add_argument("--pm-hours", help="提交后要登记的工时（pm_update.py --hours）")
     writer.add_argument("--pm-activity", help="工时的活动（pm_update.py --activity）")
     writer.add_argument("--pm-comments", default="", help="工时备注（pm_update.py --comments）")
+    writer.add_argument("--bug-note", help=f"popo 工单（--issue-id popo-<单号>）必填：写到 bug 单上的备注，"
+                        f"不超过 {BUG_NOTE_MAX} 字；待提交写怎么修的，其余写原因")
     commands.add_parser("show", parents=[common], help="读回结果文件")
     args = parser.parse_args(argv)
     try:

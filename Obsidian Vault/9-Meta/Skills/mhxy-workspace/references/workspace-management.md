@@ -24,6 +24,8 @@
 | `login_accounts` | 自动启动客户端用的游戏账号池，按优先顺序排列，只存在用户级配置中，见「账号池」 | 否 | 只能用 `login-account` 维护；输出中只显示账号 |
 | `login_server` | 自动启动客户端登录的服务器名（如 `王卓为-trunk`、`模拟15`、`孙锐贤-test_branch`），每个分支通常固定，一般放工作区级；写法见「账号池」末尾 | 否 | 单行服务器名或 null |
 | `client_idle_minutes` | 自动启动的客户端空闲多久后由兜底关闭，见 game-debugging.md「自动启动客户端」 | 否 | 1–9999 的整数分钟或 null（30） |
+| `patch_token` | 打包服务 mh-patch-mcp 的令牌（请求头 `X-Access-Token`），只存在用户级配置中，见 patch.md | 否 | 只能隐藏输入：`config --prompt-patch-token --apply`（交互终端规则同「密码」）；任何输出里都显示为 `***` |
+| `patch_template` | 本分支的 Sunshine 打包模板名（中文），打 patch 和提测共用，放工作区级；`patch.py` 建模板或打包成功后自动记录，见 patch.md | 否 | 1–64 字符的单行文本或 null |
 
 null 表示明确不配置；用到该项时再请用户补齐。只有五个路径是初始化的必填项。
 
