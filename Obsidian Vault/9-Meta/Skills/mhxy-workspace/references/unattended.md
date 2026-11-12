@@ -19,7 +19,7 @@
 ## 与正常流程的差别
 
 1. **不向用户提问，不出方案流程图**，不使用 `grilling`。原本要问用户才能继续的地方，就是该停下的地方。
-2. **不提交，不写工单**。做完提交前自检后停下，拟好提交说明和待提交文件清单；不询问是否代为提交，不调用 `svn_commit.py --apply`、`svn_merge.py commit`、`pm_update.py --apply`。调用方可能设置了环境变量 `MHXY_NO_COMMIT=1`，这时这些脚本会直接拒绝写入；照实报告，不要绕过。
+2. **不提交，不写工单**。做完提交前自检后停下，拟好提交说明和待提交文件清单；不询问是否代为提交，不调用 `svn_commit.py --apply`、`svn_merge.py commit`、`pm_update.py --apply`。调用方可能设置了环境变量 `MHXY_NO_COMMIT=1`（禁止提交）和 `MHXY_NO_PM_WRITE=1`（禁止写工单），这时这些脚本会直接拒绝写入；照实报告，不要绕过。
 3. **跳过**上下文用量检查、会话交接、记忆整理和经验沉淀（`session.md` 整份不执行）。真机自检里测试执行者上报的候选原语不在本会话处理，写进结果文件（见「结果文件」），由调用方列给用户确认。
 4. 其余规则照常：项目规范、`engineering-principles.md`、真机自检（委派、设备锁、Mock 还原，委派前先按 `cli.md` 用 `case_runner.py search` 查已有用例，重新测试先跑已有用例）、`svn-commit.md` 的说明格式和提交前自检。A 类单是小改动，不写 spec，不做 Codex review。
 

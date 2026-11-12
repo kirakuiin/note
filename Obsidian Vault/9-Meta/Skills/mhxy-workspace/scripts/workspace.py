@@ -1153,12 +1153,25 @@ def validate_coverage(task):
     validate_issue_id(task["redmine_id"])
 
 
-NO_COMMIT_ENV = "MHXY_NO_COMMIT"  # 调用方（如后台服务）用它声明会话没有得到提交、写工单的批准。
+NO_COMMIT_ENV = "MHXY_NO_COMMIT"       # 调用方（如后台服务）用它声明会话没有得到 SVN 提交的批准
+NO_PM_WRITE_ENV = "MHXY_NO_PM_WRITE"   # 调用方用它声明会话没有得到写工单（改状态、登记工时）的批准
+
+
+def _env_flag(name):
+    return os.environ.get(name, "") not in ("", "0")
 
 
 def commit_forbidden():
-    """环境变量 MHXY_NO_COMMIT 不为空也不是 0 时为真：提交、合并提交和写工单的脚本拒绝写入。"""
-    return os.environ.get(NO_COMMIT_ENV, "") not in ("", "0")
+    """MHXY_NO_COMMIT 不为空也不是 0 时为真：svn_commit.py、svn_merge.py 的提交拒绝写入。"""
+    return _env_flag(NO_COMMIT_ENV)
+
+
+def pm_write_forbidden():
+    """MHXY_NO_PM_WRITE 不为空也不是 0 时为真：pm_update.py --apply 拒绝写入。
+
+    和提交分开：用户只批准了改工单时，调用方可以放开写工单而仍然禁止提交。
+    """
+    return _env_flag(NO_PM_WRITE_ENV)
 
 
 def validate_issue_id(issue_id):

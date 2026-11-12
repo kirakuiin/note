@@ -254,16 +254,23 @@ class UpdateTests(unittest.TestCase):
                 self.assertEqual(u.main(argv), 1)
                 load.assert_not_called()
 
-    def test_no_commit_env_refuses_apply_before_login(self):
+    def test_no_pm_write_env_refuses_apply_before_login(self):
         argv = ["--issue-id", "864519", "--status", "代码审查", "--apply"]
-        with patch.dict(os.environ, {"MHXY_NO_COMMIT": "1"}), \
+        with patch.dict(os.environ, {"MHXY_NO_PM_WRITE": "1"}), \
                 patch.object(u.corp_login, "load_credentials") as load, patch("sys.stderr") as stderr:
             self.assertEqual(u.main(argv), 1)
             load.assert_not_called()
-        self.assertIn("MHXY_NO_COMMIT", "".join(call.args[0] for call in stderr.write.call_args_list))
+        self.assertIn("MHXY_NO_PM_WRITE", "".join(call.args[0] for call in stderr.write.call_args_list))
+        # 只禁止提交（MHXY_NO_COMMIT）不影响写工单：用户只批准了改工单时调用方会这样设置
+        env = {k: v for k, v in os.environ.items() if k != "MHXY_NO_PM_WRITE"}
+        with patch.dict(os.environ, {**env, "MHXY_NO_COMMIT": "1"}, clear=True), \
+                patch.object(u.corp_login, "load_credentials", side_effect=u.corp_login.LoginError("停在登录")) \
+                as load, patch("sys.stderr"):
+            self.assertEqual(u.main(argv), 1)
+            load.assert_called_once()
         # 预览不受影响；--global-config 与旧写法 --config 都可用
         for flag in ("--global-config", "--config"):
-            with self.subTest(flag), patch.dict(os.environ, {"MHXY_NO_COMMIT": "1"}), \
+            with self.subTest(flag), patch.dict(os.environ, {"MHXY_NO_PM_WRITE": "1"}), \
                     patch.object(u.corp_login, "load_credentials", side_effect=u.corp_login.LoginError("停在登录")) \
                     as load, patch("sys.stderr"):
                 self.assertEqual(u.main(["--issue-id", "864519", "--status", "代码审查", flag, "x.json"]), 1)

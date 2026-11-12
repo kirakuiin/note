@@ -394,8 +394,8 @@ def main(argv=None):
             raise UpdateError("--spent-on、--comments 要和 --hours 一起使用")
         if args.apply and args.status is None and args.hours is None:
             raise UpdateError("--apply 需要 --status 或 --hours")
-        if args.apply and workspace.commit_forbidden():
-            raise UpdateError(f"这个会话没有得到写工单的批准（环境变量 {workspace.NO_COMMIT_ENV}=1），拒绝写入；"
+        if args.apply and workspace.pm_write_forbidden():
+            raise UpdateError(f"这个会话没有得到写工单的批准（环境变量 {workspace.NO_PM_WRITE_ENV}=1），拒绝写入；"
                               "去掉 --apply 只预览，写入由用户或调用方执行")
         if args.hours is not None:
             parse_hours(args.hours)
