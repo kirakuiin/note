@@ -91,6 +91,8 @@ class PopoBugTests(unittest.TestCase):
         self.assertEqual((bug["id"], bug["readable_id"]), ("b1", "297291"))
         self.assertTrue(client.keyword)
         self.assertIsNone(p.find_bug(client, "t1", "mark @王卓为|梦幻2|191 返回键歪"))
+        # 群里直接 @ 机器人时原消息开头多了 @机器人：平台存的原文有没有它都能对上
+        self.assertEqual(p.find_bug(client, "t1", "@大肥鱼 mark @王卓为|梦幻2|191 返回键歪了")["id"], "b1")
 
     def test_find_matches_reported_bugs_only_while_open_and_takes_newest(self):
         made = {**ROW, "origin_subject": "", "subject": "【群里报告】Y杨某\n奇袭按钮  点不动"}
@@ -134,6 +136,9 @@ class PopoBugTests(unittest.TestCase):
         out = p.task_result(FakeClient(), "wangzhuowei", "8854601")
         self.assertEqual(out["type_prefix"]["mark"], "备忘")
         self.assertEqual([t["id"] for t in out["tasks"]], ["t1"])
+        self.assertEqual([t["id"] for t in p.task_result(FakeClient(), "w")["tasks"]], ["t1", "t2"])   # 不给条件：全部
+        self.assertEqual([t["id"] for t in p.task_result(FakeClient(), "w", task_id="t2")["tasks"]], ["t2"])
+        self.assertEqual(p.task_result(FakeClient(), "w", "8854601", "t2")["tasks"], [])
 
     def test_note_appends_without_name_and_rejects_long_text(self):
         client = FakeClient(markdown="杨某: 已复现")

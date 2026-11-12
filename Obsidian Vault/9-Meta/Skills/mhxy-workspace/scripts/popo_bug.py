@@ -3,7 +3,7 @@
 
 设计与接口见 specs/2026-11-12-popo-bug-group-fix.md。子命令：
 
-    popo_bug.py task   --group <群号>
+    popo_bug.py task   [--group <群号>] [--id <任务ID>]      （都不给时列出与本人相关的全部进行中任务）
     popo_bug.py find   --task <任务ID> --text <引用的原文>
     popo_bug.py show   --task <任务ID> --id <bug _id> [--save <项目根>]
     popo_bug.py create --task <任务ID> --text <内容> --reporter <报告人> [--type <工单类型>] [--assignee <账号>]
@@ -198,15 +198,17 @@ def task_brief(task, people=None):
     return brief
 
 
-def find_tasks(client, account, group):
+def find_tasks(client, account, group=None, task_id=None):
+    """与账号相关的进行中任务；给了群号只留绑定了这个群的，给了任务 ID 只留那一个。"""
     people = client.people()
     return [task_brief(t, people) for t in client.tasks(account)
-            if str(group) in {str(g) for g in t.get("popo_group_num") or []}]
+            if (not group or str(group) in {str(g) for g in t.get("popo_group_num") or []})
+            and (not task_id or str(t.get("_id")) == str(task_id))]
 
 
-def task_result(client, account, group):
+def task_result(client, account, group=None, task_id=None):
     """task 命令的输出：任务列表，加上平台的消息前缀表（调用方据此判断群消息是不是在报问题）。"""
-    return {"tasks": find_tasks(client, account, group), "type_prefix": client.type_prefix()}
+    return {"tasks": find_tasks(client, account, group, task_id), "type_prefix": client.type_prefix()}
 
 
 def bug_brief(row):
@@ -226,6 +228,11 @@ def keyword_for(text):
 OPEN_STATUSES = ("新建", "描述不清", "完成转回")   # 还需要开发处理的状态（与 popo-issue-fetch 的 --status open 一致）
 
 
+def strip_lead_mentions(text):
+    """去掉开头的 @ 片段（@机器人、@某人），用于比对群消息原文。"""
+    return re.sub(r"^(?:\s*@\S+)+\s*", "", text or "").strip()
+
+
 def reported_text(subject):
     """create 代建的单去掉“【群里报告】<报告人>”那一行后的原文（归一后）；不是代建的单返回 None。"""
     text = normalize(subject)
@@ -240,9 +247,11 @@ def find_bug(client, task_id, text):
     wanted = normalize(text)
     if not wanted:
         raise PopoBugError("原文为空")
-    rows = [row for row in client.issues(task_id, keyword_for(text))
+    bare = strip_lead_mentions(wanted)    # 群消息开头的 @机器人 可能在、也可能不在平台存的原文里
+    rows = [row for row in client.issues(task_id, keyword_for(bare))
             if str(row.get("status") or "") in OPEN_STATUSES
-            and (normalize(row.get("origin_subject")) == wanted or reported_text(row.get("subject")) == wanted)]
+            and (strip_lead_mentions(normalize(row.get("origin_subject"))) == bare
+                 or reported_text(row.get("subject")) in (wanted, bare))]
     return bug_brief(max(rows, key=lambda r: int(r.get("readable_id") or 0))) if rows else None
 
 
@@ -381,9 +390,9 @@ def main(argv=None):
             stream.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("action", choices=("task", "find", "show", "create", "note", "status"))
-    parser.add_argument("--group", help="task：群号")
+    parser.add_argument("--group", help="task：只列绑定了这个群的任务")
     parser.add_argument("--task", help="任务 ID（task 输出的 id）")
-    parser.add_argument("--id", help="bug 单的 _id（find、create 输出的 id）")
+    parser.add_argument("--id", help="bug 单的 _id（find、create 输出的 id）；task 命令里是任务 ID")
     parser.add_argument("--text", help="find：引用的原文；create：内容；note：备注正文")
     parser.add_argument("--reporter", help="create：报告人（邮箱、账号或姓名，按人员表换成平台显示的姓名）")
     parser.add_argument("--assignee", help="create：指派人账号，默认登录账号")
@@ -396,7 +405,7 @@ def main(argv=None):
                         default=Path.home() / workspace.DIRECTORY / "config.json")
     args = parser.parse_args(argv)
     try:
-        need = {"task": ("group",), "find": ("task", "text"), "show": ("task", "id"),
+        need = {"task": (), "find": ("task", "text"), "show": ("task", "id"),
                 "create": ("task", "text", "reporter"), "note": ("task", "id", "prefix", "text"),
                 "status": ("task", "id", "to")}[args.action]
         missing = [f"--{name}" for name in need if not getattr(args, name)]
@@ -410,7 +419,7 @@ def main(argv=None):
             raise PopoBugError(f"备注正文要写、且不超过 {NOTE_MAX} 个字")
         client, account = connect(args.config)
         if args.action == "task":
-            result = task_result(client, account, args.group)
+            result = task_result(client, account, args.group, args.id)
         elif args.action == "find":
             result = {"bug": find_bug(client, args.task, args.text)}
         elif args.action == "show":

@@ -86,3 +86,4 @@
   - 补记：2026-11-06 `workspace.py`、`precommit.py` 调用 svn 加了 `CREATE_NO_WINDOW`（UTF-8 代码页下 svn 会把中文路径参数转成乱码），当时没有提升版本号，随本次一并发布。
   - 测试：383 → 439（新增 `test_entry_update.py`、`test_report.py`、`test_svn_update.py`、`test_branch_reuse_clean.py` 和公共的 `svn_fixture.py`，未删改已有测试）。Codex review：第 1 项 1 轮通过；第 2～5 项 2 轮通过（第 1 轮 1 条必须修改：`svn_update.py` 还原失败后仍可能删除本地内容、链接静默跳过备份、未排除本地辅助目录的树冲突，已修并补测试）。
   - 真实工作区验证：`svn_update.py --dry-run` 在 trunk 和外测（`test_2026_11_10` → 目标 `test_2026_11_17`）只读运行正常；发版后 trunk 的入口文件由 `context` 自动更新到 0.3.32。
+- 2026-11-12（0.3.44）：试玩（`shiwan`）周期分支默认不切到下一个维护周，原地更新（`svn_update.py` 的 `NO_ADVANCE_TYPES`），用户明确要求时加 `--advance`。原因：用户说明试玩分支一般不跟周走。同日 popo-agent-service 把 shiwan 登记为工作区但不参加周维护（`enabled: false`）。

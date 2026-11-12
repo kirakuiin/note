@@ -25,19 +25,19 @@
 ## popo_bug.py
 
 ```text
-popo_bug.py task   --group <群号>
+popo_bug.py task   [--group <群号>] [--id <任务ID>]
 popo_bug.py find   --task <任务ID> --text <引用的原文>
 popo_bug.py show   --task <任务ID> --id <bug _id> [--save <项目根>]
-popo_bug.py create --task <任务ID> --text <内容> --reporter <报告人：邮箱、账号或姓名> [--assignee <账号>]
+popo_bug.py create --task <任务ID> --text <内容> --reporter <报告人：邮箱、账号或姓名> [--type <工单类型>] [--assignee <账号>]
 popo_bug.py note   --task <任务ID> --id <bug _id> --prefix <已修复|未处理> --text <不超过 20 字>
 popo_bug.py status --task <任务ID> --id <bug _id> --to 已完成 [--followqa <账号>]
 ```
 
 - 输出 JSON；出错时 `{"error": …}`、退出码 1。账号取 `openid_username`，密码由 `corp_login.load_credentials` 读取，不输出。会话 Cookie 只在内存里，每次调用重新登录。
-- `task`：与登录账号相关的进行中任务里，`popo_group_num` 含该群的那些。输出 `tasks[]`：`id`、`name`、`planner_id`（`parentid`）、`members`（`related_person` 与 `related_redmine` 账号的并集）、`subtickets`（`related_redmine`）、`qa`、`member_mails`（成员邮箱，按人员表对照）。
-- `find`：按 `keyword` 搜任务下还没处理完（新建、描述不清、完成转回）的 bug：`origin_subject`（平台机器人按 mark 建的）或去掉“【群里报告】<报告人>”行后的标题（代建的）归一后与 `--text` 相同；多张取单号最大的；没有时 `bug` 为 null。
+- `task`：与登录账号相关的进行中任务；给了 `--group` 只留 `popo_group_num` 含该群的，给了 `--id` 只留那一个，都不给时全部列出（供对话会话按用户的说法挑任务）。输出 `tasks[]`：`id`、`name`、`planner_id`（`parentid`）、`members`（`related_person` 与 `related_redmine` 账号的并集）、`subtickets`（`related_redmine`）、`qa`、`member_mails`（成员邮箱，按人员表对照）；另外输出平台配置的消息前缀表 `type_prefix`（小写键，如 bug→BUG、mark→备忘、sug→建议），调用方据此判断群消息是不是在报问题。
+- `find`：按 `keyword` 搜任务下还没处理完（新建、描述不清、完成转回）的 bug：`origin_subject`（平台机器人按 mark 建的）或去掉“【群里报告】<报告人>”行后的标题（代建的）归一后与 `--text` 相同（比对时忽略开头的 @ 片段）；多张取单号最大的；没有时 `bug` 为 null。
 - `show`：详情，`author_name` 按人员表取姓名；`--save` 把正文写到 `<项目根>/.mhxy-workspace/bugs/<readable_id>/issue.md`（标题、类型、状态、提单人、所属任务和策划单号、问题描述、重现步骤、已有备注；`[图片]` 按顺序换成本地图片路径，多出的接在段落末尾），图片用不带登录 Cookie 的独立请求下载到同一目录；单张失败不中断，正文里写明原链接，输出 `image_errors`。
-- `create`：报告人按人员表换成平台显示的姓名；内容第一行写“【群里报告】<报告人>”，正文接原消息，指派默认登录账号，类型 BUG、优先级 P2。平台不返回新单 ID：按完整标题相等找回，取单号最大的一张，输出新单的 `_id`、`readable_id`。
+- `create`：报告人按人员表换成平台显示的姓名；内容第一行写“【群里报告】<报告人>”，正文接原消息，指派默认登录账号，类型由 `--type` 给出（必须是前缀表里的值，默认 BUG），优先级 P2。平台不返回新单 ID：按完整标题相等找回，取单号最大的一张，输出新单的 `_id`、`readable_id`。
 - `note`：先读出现有备注，在末尾追加一行“<前缀>：<正文>”（不带名字）再整段写回；写回前再读一次，和第一次不同就重新拼接（最多 3 次）。备注正文超过 20 个字时报错，不截断。
 - `status`：只接受“已完成”。`ret_code` 2 时用 `--followqa`（缺省为 bug 单原来的跟进 QA）调 `update_issue`；其他失败照实输出 `ret_code`、`retmsg`，不重试。
 - `create`、`note`、`status` 是写操作：环境变量 `MHXY_NO_PM_WRITE=1` 时拒绝（与 `pm_update.py --apply` 同一个开关，服务给自动会话都带着它），只有服务自己调用。

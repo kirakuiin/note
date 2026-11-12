@@ -141,8 +141,14 @@ def list_branches(directory, url):
     return [line.strip().rstrip("/") for line in precommit.decode_output(completed.stdout).splitlines() if line.strip()]
 
 
-def choose_target(directory, url, today):
+# 这些类型的周期分支默认不跟着维护周切换，原地更新；用户明确要切换时加 --advance（用户 2026-11-12 定）
+NO_ADVANCE_TYPES = ("shiwan",)
+
+
+def choose_target(directory, url, today, advance=False):
     """按 svn-update.md「选择目标」决定代码工作副本的目标 URL。
+
+    advance 为假时，NO_ADVANCE_TYPES 里的周期分支保持当前分支。
 
     Returns:
         (目标 URL, 说明)。不是周期分支时目标就是当前 URL。
@@ -151,6 +157,8 @@ def choose_target(directory, url, today):
     if not match:
         return url, "不是周期分支，保持当前分支"
     kind, current = match[1], date(int(match[2]), int(match[3]), int(match[4]))
+    if kind in NO_ADVANCE_TYPES and not advance:
+        return url, f"{kind} 分支默认不切到下一个维护周，保持当前分支（要切换时加 --advance）"
     prefix = url[:url.rindex("/branchs/")] + "/branchs"
     target_day = next_maintenance_day(today)
     published = {}
@@ -332,7 +340,8 @@ def update_working_copy(directory, name, target, backup, clean_blockers, dry_run
         if target is None:
             target_url, reason = before["url"], "保持当前分支"
         else:
-            target_url, reason = choose_target(directory, before["url"], today or date.today())
+            target_url, reason = choose_target(directory, before["url"], today or date.today(),
+                                               advance=target == "advance")
         result["target"] = {"url": target_url, "branch": target_url.rstrip("/").rsplit("/", 1)[-1], "reason": reason}
         switching = target_url != before["url"]
         result["operation"] = "switch" if switching else "update"
@@ -418,11 +427,13 @@ def has_block(root):
         return False
 
 
-def update(root_arg, global_arg, code_only=False, clean_blockers=False, dry_run=False, today=None, stamp=None):
+def update(root_arg, global_arg, code_only=False, clean_blockers=False, dry_run=False, today=None, stamp=None,
+           advance=False):
     root, personal, _ = workspace.paths(root_arg, global_arg)
     workspace.require_initialized(root)
     backup = Backup(personal, stamp or datetime.now().strftime("%Y%m%d-%H%M%S"))
-    copies = [update_working_copy(root, root.name, "choose", backup, clean_blockers, dry_run, today)]
+    copies = [update_working_copy(root, root.name, "advance" if advance else "choose", backup, clean_blockers,
+                                  dry_run, today)]
     entry_resolved = set(copies[0]["handled"]["conflicts_resolved"]) & set(workspace.ENTRY_FILES)
     if not dry_run and (entry_resolved or not has_block(root)):
         # 入口文件冲突后采用了服务器版本，受管区段随之丢失：重新写入
@@ -462,9 +473,12 @@ def main(argv=None):
     parser.add_argument("--code-only", action="store_true", help="不更新 ../_test")
     parser.add_argument("--clean-blockers", action="store_true", help="备份后把全部本地修改 revert 再更新")
     parser.add_argument("--dry-run", action="store_true", help="只报告当前和目标分支、本地改动数量，不做任何修改")
+    parser.add_argument("--advance", action="store_true",
+                        help="试玩（shiwan）这类默认不跟维护周切换的周期分支，也切到下一个维护周")
     args = parser.parse_args(argv)
     try:
-        result = update(args.root, args.global_config, args.code_only, args.clean_blockers, args.dry_run)
+        result = update(args.root, args.global_config, args.code_only, args.clean_blockers, args.dry_run,
+                        advance=args.advance)
     except (UpdateError, workspace.WorkspaceError, OSError) as error:
         print(json.dumps({"error": str(error)}, ensure_ascii=False), file=sys.stderr)
         return 1

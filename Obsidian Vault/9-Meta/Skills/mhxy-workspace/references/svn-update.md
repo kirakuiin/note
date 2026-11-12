@@ -17,6 +17,7 @@ python "<skill>/scripts/svn_update.py" --root "<项目>" [--code-only] [--clean-
 ## 选择目标
 
 - **周期分支**：实际代码 URL 符合 `wzimage/branchs/<年份>_ship/<类型>_YYYY_MM_DD`（类型见 `workspace.py` 的 `PERIODIC_TYPES`）时，尽量更新到下一个维护周。context 输出的 `branch.kind` 按同一规则判定（`workspace.py` 的 `PERIODIC_BRANCH`）。
+  - 例外：试玩（`shiwan`）一般不跟着维护周走，默认保持当前分支原地 `svn update`（`svn_update.py` 的 `NO_ADVANCE_TYPES`）。只有用户明确要切到下一周时才加 `--advance`；用户点名了具体分支（如 `shiwan_2026_11_17`）时按点名的切换。
   - 目标日期为本地日期之后最近的周二；周二当天取下周二，跨年使用目标日期所属年份。
   - 用 `svn list` 确认真实远端分支，保持仓库与前缀不变。目标日期的分支存在就 `svn switch` 过去；已经在目标 URL 时直接 `svn update`。
   - 目标分支尚未发布时，在同类型已发布分支中选不晚于目标日期、不早于当前分支日期的最新一个；没有更新的候选就保持当前 URL 执行 `svn update`，并在 `target.reason` 说明未到达目标维护周。不退回旧周，也不跳到更远的周。无法列出远端时该工作副本失败并报告原因，不把网络或权限失败当作分支不存在。

@@ -319,6 +319,18 @@ class UpdateTests(unittest.TestCase):
         self.assertEqual((code["operation"], code["after"]["branch"]), ("update", "test_2026_11_10"))
         self.assertIn("保持当前分支", code["target"]["reason"])
 
+    def test_shiwan_stays_unless_advance(self):
+        for day in ("2026_11_10", "2026_11_17"):
+            self.repository.copy("wzimage/trunk", f"{SHIP}/shiwan_{day}")
+        self.checkout(f"{SHIP}/shiwan_2026_11_10", resource=False)
+        result = self.update(today=date(2026, 11, 12))   # 试玩分支默认原地更新
+        code = result["working_copies"][0]
+        self.assertEqual((code["operation"], code["after"]["branch"]), ("update", "shiwan_2026_11_10"))
+        self.assertIn("--advance", code["target"]["reason"])
+        result = self.update(today=date(2026, 11, 12), advance=True)   # 明确要求才切到下一个维护周
+        code = result["working_copies"][0]
+        self.assertEqual((code["operation"], code["after"]["branch"]), ("switch", "shiwan_2026_11_17"))
+
     def test_periodic_crosses_year(self):
         self.periodic("2026_12_29")
         self.repository.copy("wzimage/trunk", "wzimage/branchs/2027_ship/test_2027_01_05")
