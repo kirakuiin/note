@@ -27,6 +27,8 @@
 python -X utf8 "<skill>/scripts/client_launch.py" select --root "<项目>" [--platform pc|ht] [--server <服务器名>] [--dry-run]
 python -X utf8 "<skill>/scripts/client_launch.py" launch --root "<项目>" [--platform pc|ht] [--server <服务器名>] [--dry-run]
 python -X utf8 "<skill>/scripts/client_launch.py" doctor --root "<项目>"
+python -X utf8 "<skill>/scripts/client_launch.py" close --root "<项目>" (--mine | --devid <devid> | --pid <进程号>) [--dry-run]
+python -X utf8 "<skill>/scripts/client_launch.py" reap --root "<项目>" [--idle-minutes <分钟>] [--dry-run]
 ```
 
 - **launch 做什么**：确认客户端目录的类型与 `--platform` 相符；用项目根的上一级作为 workspace（加载当前工作副本的 `mhimage/` 和 `_test/`）；查本机在线设备当前登录的账号（`loginenter.Account`），选账号池中第一个空闲账号；触发计划任务启动 `mhmain.exe` 并自动登录第一个角色；等新设备以该账号上线后输出 `devid`。默认等 240 秒，用 Bash 工具的 `run_in_background` 运行。
@@ -37,7 +39,7 @@ python -X utf8 "<skill>/scripts/client_launch.py" doctor --root "<项目>"
   - `all_occupied`：账号池都被本机在线客户端占用，报告各账号所在设备，请用户关掉一个或添加账号。
   - `need_accounts`、`task_failed`、`task_no_result`、`launcher_error`：运行 `doctor`，把其中的 `fix` 交给用户（`install` 和录入密码要用户在管理员终端或交互终端执行）。
   - `bad_workspace`：例如 workspace 的 `_test/mhimage.wdf` 存在，客户端会加载打包脚本而不是源码。告诉用户，由用户决定是否移走，不要自行删除。
-  - `device_timeout`：客户端已启动但没等到登录。查对应客户端目录 `Log/log_<pid>.txt` 里的 `CDlgError`、`S_LOGIN_ERROR`、`S_MOBILE_ERROR` 定位原因，按下表处理；表里没有的报告用户。失败的客户端不会自动关闭，交付时告诉用户进程号。
+  - `device_timeout`：客户端已启动但没等到登录。查对应客户端目录 `Log/log_<pid>.txt` 里的 `CDlgError`、`S_LOGIN_ERROR`、`S_MOBILE_ERROR` 定位原因，按下表处理；表里没有的报告用户。收集完日志后用 `close --pid <进程号>` 关闭；报告里仍写进程号和日志位置。
 
     | 日志 | 原因 | 处理 |
     | --- | --- | --- |
@@ -50,8 +52,12 @@ python -X utf8 "<skill>/scripts/client_launch.py" doctor --root "<项目>"
   - 标准 `mhedit.wdf`：来源是 `<Sunshine>/SunshineStarter/Plugins/Aluba/_Res/toClient/mhedit.wdf`（本机常见 `D:/sunshine/...`），复制到客户端根目录；先比对 MD5，一致就不用动。
   - 操作：只在内服测试客户端上做，首次需用户同意。改之前备份 `xy1.ini`，只把 `no_anywhere` 的值改成 0（按字节替换，保持原编码和换行），其他键不动；改完重新运行 `select`／`launch`。PC 和互通目录各有自己的 `xy1.ini`，分别检查。
 - 只查得到本机的设备；账号在其他机器上登录时会被顶下线或登录失败。读不出账号的设备列在 `unknown_devices` 中。
-- 用完不自动关闭客户端。不要用打包服务（mh-patch-mcp 的 `control_aluba_client`）代替：它拉起的是 aluba 自我验证循环，不能指定 workspace 和账号。
-- **部署**（新电脑或重装后）：先把 skill 链接到位，再在管理员 PowerShell 运行 `client_launch.py install`（全机一次，与工作区无关，可重复执行；客户端目录变化或 skill 更新启动器后要重新运行），然后按 workspace-management.md 录入账号池。`doctor` 列出还缺什么；`uninstall` 删除计划任务。
+- **登记**：`launch`（含 `select` 触发的启动）把自己启动的客户端登记在 `%LOCALAPPDATA%\mhxy-cli-testing\clients\`（devid、进程号和创建时间、类型、账号、启动它的项目根、发起方）。发起方取 `--owner` 或环境变量 `MHXY_CLIENT_OWNER`（popo-agent-service 给工单会话设为 `issue:<工单号>`，交互会话为空）。`close`／`reap` 只处理登记过的客户端：用户自己开的、别的工具开的一律不动；有设备锁（正在测试或待恢复）的也不关，不管是谁开的。关闭前用进程号和创建时间核对，原进程已退出（进程号被复用）时只删除登记。
+- **关闭时机**：整个流程结束时关，不在每轮测试后关；同一流程里多轮测试（修完 review 意见再测、回归）复用同一台。交互开发在提交成功后（`svn_commit.py` 的 `next_steps` 会提示），或用户放弃本次改动时，由主会话运行 `close --mine`；无人值守由调用方在工单会话结束后关闭，会话自己不关。`--mine` 只关登记中项目根与 `--root` 相同、发起方与本次相同的客户端。
+- **关闭方式**：有 devid 时先经 `execute_code` 让客户端自己退出（客户端内先核对进程号，再 `C_app.quit_game(1)`），30 秒内没退出或没有 devid 时由计划任务以管理员权限结束进程；核对进程确已退出后删除登记。输出每台的 `outcome`：`closed`（`method` 为 `mcp`／`task`）、`gone`（已不在，删登记）、`locked`（有锁，不关）、`would_close`（`--dry-run`）、`failed`（保留登记，见 `error`；提示启动器版本过旧时请用户在管理员 PowerShell 重新 `install`）。
+- **空闲兜底**：会话崩溃或被关时没人关客户端。`select`／`launch` 开始前自动 `reap` 一次（结果在输出的 `reap` 字段，兜底出错只记在 `reap.error`，不影响选设备）：关闭登记中空闲超过 `client_idle_minutes`（默认 30 分钟）且没有设备锁的客户端。空闲从登记的 `last_used` 算起：启动、`select` 选中复用、`codex_cli.py` 释放锁时（先刷新再删锁）刷新。关闭期间 `close` 自己占用设备锁，被杀后残留的这种锁会在下次加锁时回收。也可以单独运行 `reap`。
+- 不要用打包服务（mh-patch-mcp 的 `control_aluba_client`）代替自动启动：它拉起的是 aluba 自我验证循环，不能指定 workspace 和账号。
+- **部署**（新电脑或重装后）：先把 skill 链接到位，再在管理员 PowerShell 运行 `client_launch.py install`（全机一次，与工作区无关，可重复执行；客户端目录变化或 skill 更新启动器后要重新运行，`doctor` 会提示启动器版本不一致），然后按 workspace-management.md 录入账号池。`doctor` 列出还缺什么；`uninstall` 删除计划任务。
 
 ## 找到并调用工具
 

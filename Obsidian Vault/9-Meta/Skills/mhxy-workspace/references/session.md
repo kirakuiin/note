@@ -18,7 +18,7 @@ Claude 主会话专用，Codex 主会话忽略本文件。用到的工具可能�
 
 ## 记忆整理
 
-第 6 步用户确认提交后：
+第 6 步用户确认提交后（提交成功后先按 `svn_commit.py` 的 `next_steps` 关闭本流程自动启动的客户端；用户放弃本次改动时也要关，见 game-debugging.md「自动启动客户端」）：
 
 1. 运行 `anthropic-skills:consolidate-memory` 技能：合并重复，删除过时或错误的条目，只保留无法从代码、spec 或提交记录得到的内容（用户偏好、踩过的坑、外部资源的位置）。MEMORY.md 的索引每行保持简短。功能细节写进 spec，不写进记忆。
 2. 整理中发现值得跨分支共享的经验，以及本次 test 结果里的候选原语（`candidates`，见 game-debugging.md「候选原语」），按「经验沉淀」处理。

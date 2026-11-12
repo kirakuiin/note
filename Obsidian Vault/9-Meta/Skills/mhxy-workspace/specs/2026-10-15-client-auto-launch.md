@@ -39,3 +39,4 @@
 - 2026-10-15（0.3.24）：`select` 自动选设备。
 - 2026-10-20（0.3.26）：`select` 按 `--platform` 筛选在线设备；`launch` 启动前按 `update.ini` 校验客户端目录类型（`platform_mismatch`／`platform_unknown`）；`doctor` 报告各客户端目录类型；新增 `select --dry-run`；主会话按改动决定测 PC、互通或两端，两端各一台设备、分别委派。
 - 2026-10-21（0.3.27）：服务器名支持客户端 `common/server.ini` 的 `大区名-服务器名`（如 `孙锐贤-test_branch`），用于不在 `serverlist.txt` 里的服务器；`select` 支持 `--server`。
+- 2026-11-12（0.3.41）：自动启动的客户端登记后，流程结束时 `close` 关闭，`reap` 空闲兜底（默认 30 分钟），有设备锁的不关；详见 specs/2026-11-12-client-auto-close.md。

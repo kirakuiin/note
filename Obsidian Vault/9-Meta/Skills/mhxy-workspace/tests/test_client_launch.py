@@ -1,6 +1,7 @@
 """client_launch.py／client_launch_task.py 的纯逻辑测试；不访问网络、MCP、计划任务或真实配置。"""
 import importlib.util
 import json
+import os
 from pathlib import Path
 import sys
 import tempfile
@@ -28,8 +29,12 @@ class ClientLaunchTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix="mhxy-launch-")
         self.base = Path(self.temporary.name).resolve()
+        # 选设备会刷新客户端登记（client_registry），不能碰本机真实的登记目录
+        self.environment = patch.dict(os.environ, {"LOCALAPPDATA": str(self.base / "local")})
+        self.environment.start()
 
     def tearDown(self):
+        self.environment.stop()
         self.temporary.cleanup()
 
     def test_normalize_and_choose_account(self):

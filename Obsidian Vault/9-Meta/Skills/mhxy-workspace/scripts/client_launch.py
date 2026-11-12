@@ -10,6 +10,13 @@
              等新设备登录上线后返回 devid。
   select     普通权限：为当前工作区确定指定类型（PC／互通）的测试设备。在线设备中选第一台类型相符、
              加载当前工作区源码、没有设备锁的；没有就 launch 一台。不需要用户确认。
+  close      普通权限：关闭登记过的（本脚本启动的）客户端：--mine 为当前工作区、当前发起方的全部，
+             或 --devid／--pid 指定一台。有设备锁的不关。
+  reap       普通权限：空闲兜底，关闭登记中空闲超过阈值（client_idle_minutes，默认 30 分钟）且没有设备锁的
+             客户端。select／launch 开始前自动运行一次。
+
+launch 启动的客户端登记在 %LOCALAPPDATA%/mhxy-cli-testing/clients（client_registry.py）；未登记的客户端
+（用户自己开的、别的工具开的）close／reap 一律不动。
 
 客户端以管理员身份运行，agent 的普通权限进程直接启动会弹 UAC；计划任务由用户安装一次，之后
 触发不再弹窗。账号密码只在用户级配置（workspace.py login-account 维护），不出现在输出和请求文件中。
@@ -34,6 +41,7 @@ sys.path.insert(0, str(SCRIPTS))
 sys.path.insert(0, str(SCRIPTS / "game-debugging"))
 import workspace  # noqa: E402
 import mcp_http  # noqa: E402
+import client_registry as registry  # noqa: E402
 
 TASK = "mhxy-client-launch"
 TASK_SCRIPT = "client_launch_task.py"
@@ -55,6 +63,12 @@ DEVICE_PROBE = ('(lambda s: {"account": getattr(s.modules.get("loginenter"), "Ac
 PLATFORMS = {"win32": "pc", "mobile": "ht"}  # C_app.get_platform() 的返回值 → --platform
 PLATFORM_NAMES = {"pc": "PC", "ht": "互通"}
 LOCKS = Path(os.environ.get("LOCALAPPDATA", str(Path.home() / ".cache"))) / "mhxy-cli-testing/locks"
+IDLE_MINUTES = 30  # client_idle_minutes 未配置时的空闲阈值
+QUIT_WAIT = 30  # 秒；让客户端自己退出后等待进程结束
+OWNER_ENV = "MHXY_CLIENT_OWNER"  # 发起方（如 popo-agent-service 的 issue:<工单号>）
+# 在客户端进程内先核对进程号再退出：devid 可能在重启后被另一台客户端沿用
+QUIT_CODE = ('(lambda o, a: (a.quit_game(1), "quit")[1] if o.getpid() == {pid} else "pid_mismatch")'
+             '(__import__("os"), __import__("C_app"))')
 
 
 class LaunchError(Exception):
@@ -90,9 +104,59 @@ def loads_workspace(source, root):
     return source.replace("\\", "/").lower().startswith(prefix)
 
 
+def lock_file(devid):
+    """codex_cli.py 的全机设备锁文件（与 codex_cli.acquire_lock 同一规则）。"""
+    return LOCKS / (hashlib.sha256(devid.encode()).hexdigest() + ".json")
+
+
 def locked(devid):
-    """设备是否有 codex_cli.py 的全机设备锁（正在测试或待恢复）。"""
-    return (LOCKS / (hashlib.sha256(devid.encode()).hexdigest() + ".json")).exists()
+    """设备是否有 codex_cli.py 的全机设备锁（正在测试或待恢复）；已退出的 close 进程残留的锁不算。"""
+    path = lock_file(devid)
+    return path.exists() and not registry.stale_close_lock(path)
+
+
+def hold_lock(entry):
+    """关闭期间占用这台设备的设备锁，与 codex_cli 加锁互斥：返回锁文件；已有锁返回 None。
+
+    锁内容记下本进程（见 client_registry.close_lock_body），本进程被杀后残留的锁可被回收。
+    """
+    path = lock_file(entry["devid"])
+    path.parent.mkdir(parents=True, exist_ok=True)
+    body = registry.close_lock_body(entry["devid"], entry["pid"])
+    for _ in range(2):
+        try:
+            with path.open("x", encoding="utf-8") as handle:
+                json.dump(body, handle, ensure_ascii=False)
+            return path
+        except FileExistsError:
+            if not registry.reclaim_close_lock(path):
+                return None
+    return None
+
+
+def resolve_owner(owner=None):
+    """发起方：参数优先，其次环境变量 MHXY_CLIENT_OWNER；都没有为 None。"""
+    owner = owner if owner is not None else os.environ.get(OWNER_ENV)
+    return (owner.strip() or None) if isinstance(owner, str) else None
+
+
+def idle_limit(config, override=None):
+    """空闲阈值（分钟）：--idle-minutes 优先，其次配置 client_idle_minutes，默认 30。"""
+    value = override if override is not None else (config or {}).get("client_idle_minutes")
+    if value is None:
+        return IDLE_MINUTES
+    try:
+        value = int(value)
+    except (TypeError, ValueError):
+        raise LaunchError(f"client_idle_minutes 必须是整数分钟：{value}", "bad_config") from None
+    if value < 0:
+        raise LaunchError(f"client_idle_minutes 不能为负：{value}", "bad_config")
+    return value
+
+
+def mine(entry, root, owner):
+    """--mine：同一工作区、同一发起方（都为空也算相同）。"""
+    return registry.same_root(entry.get("root"), str(root)) and (entry.get("owner") or None) == owner
 
 
 def parse_server_ini(text):
@@ -472,7 +536,18 @@ def wait_result(request_id, timeout=30):
     raise LaunchError("计划任务没有返回结果：确认已运行 install，任务未被禁用", "task_no_result")
 
 
-def launch(root, global_config, platform="pc", server=None, timeout=240, dry_run=False):
+def register_launch(plan, root, owner):
+    """登记刚启动的客户端；进程已经退出（读不到创建时间）时不登记，返回 None。"""
+    if not plan.get("pid"):
+        return None
+    info = registry.process_info(plan["pid"])
+    if not info:
+        return None
+    return registry.register(plan["pid"], info["created"], platform=plan["platform"], account=plan["account"],
+                             client_dir=plan["client_dir"], root=str(Path(root).resolve()), owner=owner)
+
+
+def launch(root, global_config, platform="pc", server=None, timeout=240, dry_run=False, owner=None):
     config = workspace.load_config(root, global_config)
     client = config.get(f"{platform}_client_dir")
     if not client or not (Path(client) / EXE).is_file():
@@ -512,6 +587,8 @@ def launch(root, global_config, platform="pc", server=None, timeout=240, dry_run
     if result.get("error"):
         raise LaunchError(f"启动器报错：{result['error']}", "launcher_error")
     plan["pid"] = result.get("pid")
+    entry = register_launch(plan, root, owner)
+    plan["registered"] = bool(entry)
     before = {device["devid"] for device in devices}
     target = normalize_account(account)
     deadline = time.time() + timeout
@@ -523,16 +600,19 @@ def launch(root, global_config, platform="pc", server=None, timeout=240, dry_run
                     continue
                 try:
                     if device_account(device["devid"]) == target:
+                        if entry:
+                            registry.update(entry, devid=device["devid"], last_used=time.time())
                         return {"action": "launch", "devid": device["devid"], "name": device.get("name"), **plan}
                 except (LaunchError, OSError):
                     continue  # 客户端仍在初始化
         except (LaunchError, OSError):
             continue
     raise LaunchError(f"{timeout} 秒内没有等到账号 {account} 的新设备上线：检查客户端是否停在登录界面或报错，"
-                      f"日志见 {client}/Log/ 中进程号 {plan['pid']} 对应的文件", "device_timeout", **plan)
+                      f"日志见 {client}/Log/ 中进程号 {plan['pid']} 对应的文件；收集完日志后用 close --pid "
+                      f"{plan['pid']} 关闭", "device_timeout", **plan)
 
 
-def select(root, global_config, platform="pc", timeout=240, dry_run=False, server=None):
+def select(root, global_config, platform="pc", timeout=240, dry_run=False, server=None, owner=None):
     """为当前工作区确定 platform 类型的测试设备，不需要用户确认。
 
     在线设备按列表顺序，取第一台类型相符、加载当前工作区源码、没有设备锁的；没有就自动启动一台
@@ -558,10 +638,157 @@ def select(root, global_config, platform="pc", timeout=240, dry_run=False, serve
         elif not loads_workspace(info["source"], root):
             skipped.append({"devid": devid, "reason": f"加载的不是当前工作区源码：{info['source']}"})
         else:
+            registry.touch(devid)  # 自己启动的客户端被选中复用，空闲时间从现在算
             return {"action": "select", "how": "online", "devid": devid, "name": device.get("name"),
                     "platform": platform, "account": info["account"], "skipped": skipped}
-    result = launch(root, global_config, platform, server=server, timeout=timeout, dry_run=dry_run)
+    result = launch(root, global_config, platform, server=server, timeout=timeout, dry_run=dry_run, owner=owner)
     return {**result, "action": "select", "how": "would_launch" if dry_run else "launched", "skipped": skipped}
+
+
+def describe(entry, outcome, **extra):
+    return {"devid": entry.get("devid"), "pid": entry["pid"], "account": entry.get("account"),
+            "platform": entry.get("platform"), "root": entry.get("root"), "owner": entry.get("owner"),
+            "outcome": outcome, **extra}
+
+
+def wait_exit(entry, seconds):
+    deadline = time.time() + seconds
+    while True:
+        if not registry.alive(entry):
+            return True
+        if time.time() >= deadline:
+            return False
+        time.sleep(1)
+
+
+def quit_by_mcp(entry):
+    """让客户端自己退出；返回说明（调用可能因进程退出而报错，不作判断依据）。"""
+    try:
+        value = mcp("execute_code", {"devid": entry["devid"], "code": QUIT_CODE.format(pid=int(entry["pid"])),
+                                     "need_loginfo": False}, timeout=15)
+    except (LaunchError, OSError) as error:
+        return str(error)[:200]
+    return str(value)[:200]
+
+
+def close_by_task(entry):
+    """由计划任务（管理员权限）结束进程；返回启动器的结果。"""
+    request_id = uuid.uuid4().hex
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    request = {"id": request_id, "action": "close", "pid": int(entry["pid"]), "created": int(entry["created"])}
+    temporary = STATE_DIR / "request.json.tmp"
+    temporary.write_text(json.dumps(request), encoding="utf-8")
+    os.replace(temporary, STATE_DIR / "request.json")
+    completed = subprocess.run(["schtasks", "/run", "/tn", TASK], capture_output=True, timeout=30)
+    if completed.returncode:
+        (STATE_DIR / "request.json").unlink(missing_ok=True)
+        raise LaunchError(f"触发计划任务失败：{workspace.decode_output(completed.stderr).strip()}", "task_failed")
+    result = wait_result(request_id)
+    if result.get("error"):
+        hint = "；启动器版本过旧，请在管理员 PowerShell 重新运行 install" if "启动请求字段无效" in result["error"] else ""
+        raise LaunchError(f"启动器报错：{result['error']}{hint}", "launcher_error")
+    return result
+
+
+def idle_minutes(entry, now):
+    return round((now - float(entry.get("last_used") or entry.get("started_at") or 0)) / 60, 1)
+
+
+def close_entry(entry, dry_run=False, limit=None):
+    """按 spec 的顺序处理一台登记的客户端，返回结果条目；进程状态查不清（OSError）时为 failed，保留登记。
+
+    有 devid 时整个关闭过程占用该设备的设备锁：别的会话此时加锁会失败，不会在关闭中途开始测试。
+    limit（reap 的空闲阈值，分钟）不为 None 时，拿到锁后按最新登记重新判断空闲，刚被使用过的不关。
+    """
+    try:
+        return _close_entry(entry, dry_run, limit)
+    except OSError as error:
+        return describe(entry, "failed", error=str(error))
+
+
+def _close_entry(entry, dry_run, limit):
+    if not registry.alive(entry):
+        if not dry_run:
+            registry.remove(entry)
+        return describe(entry, "gone")
+    if dry_run:
+        return describe(entry, "locked" if entry.get("devid") and locked(entry["devid"]) else "would_close")
+    held = hold_lock(entry) if entry.get("devid") else None
+    if entry.get("devid") and held is None:
+        registry.update(entry, last_used=time.time())
+        return describe(entry, "locked")
+    try:
+        fresh = registry.read(entry)
+        if fresh is None:  # 别的会话已经关掉并删了登记
+            return describe(entry, "gone")
+        if limit is not None and idle_minutes(fresh, time.time()) < limit:
+            return describe(fresh, "kept", idle_minutes=idle_minutes(fresh, time.time()))
+        return terminate(fresh)
+    finally:
+        if held:
+            held.unlink(missing_ok=True)
+
+
+def terminate(entry):
+    """先让客户端自己退出，不行再由计划任务结束进程；核对退出后删除登记。"""
+    notes = []
+    if entry.get("devid"):
+        notes.append("mcp: " + quit_by_mcp(entry))
+        if wait_exit(entry, QUIT_WAIT):
+            registry.remove(entry)
+            return describe(entry, "closed", method="mcp")
+    try:
+        close_by_task(entry)
+    except (LaunchError, OSError, subprocess.SubprocessError) as error:
+        return describe(entry, "failed", error="；".join(notes + [str(error)]))
+    if wait_exit(entry, 10):
+        registry.remove(entry)
+        return describe(entry, "closed", method="task")
+    return describe(entry, "failed", error="；".join(notes + ["计划任务报告已结束，但进程仍在"]))
+
+
+def close(root, owner=None, devid=None, pid=None, dry_run=False):
+    """关闭登记过的客户端：--mine（当前工作区、当前发起方）或 --devid／--pid 指定一台。"""
+    root = Path(root).resolve()
+    if devid:
+        targets = [item for item in registry.entries() if item.get("devid") == devid]
+    elif pid:
+        targets = [item for item in registry.entries() if item["pid"] == int(pid)]
+    else:
+        targets = [item for item in registry.entries() if mine(item, root, owner)]
+    results = [close_entry(item, dry_run) for item in targets]
+    return {"action": "close", "dry_run": dry_run, "results": results,
+            "ok": not any(item["outcome"] == "failed" for item in results)}
+
+
+def reap(limit, dry_run=False, now=None):
+    """空闲兜底：全部登记中，空闲超过 limit 分钟、没有设备锁的关闭；进程已不在的删除登记。"""
+    now = now or time.time()
+    results = []
+    for entry in registry.entries():
+        idle = idle_minutes(entry, now)
+        try:
+            quiet = registry.alive(entry) and not (entry.get("devid") and locked(entry["devid"])) and idle < limit
+        except OSError as error:
+            results.append(describe(entry, "failed", error=str(error), idle_minutes=idle))
+            continue
+        if quiet:
+            results.append(describe(entry, "kept", idle_minutes=idle))
+            continue
+        results.append({"idle_minutes": idle, **close_entry(entry, dry_run, limit)})
+    return {"action": "reap", "dry_run": dry_run, "idle_limit_minutes": limit, "results": results,
+            "ok": not any(item["outcome"] == "failed" for item in results)}
+
+
+def auto_reap(root, global_config, dry_run):
+    """select／launch 前的兜底；出错只记在结果里，不影响选设备。"""
+    try:
+        config = workspace.load_config(root, global_config)
+        result = reap(idle_limit(config), dry_run)
+    except (LaunchError, workspace.WorkspaceError, OSError, ValueError, subprocess.SubprocessError) as error:
+        return {"action": "reap", "error": str(error)}
+    result["results"] = [item for item in result["results"] if item["outcome"] != "kept"]
+    return result
 
 
 def main():
@@ -569,7 +796,7 @@ def main():
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("action", choices=("install", "uninstall", "doctor", "launch", "select"))
+    parser.add_argument("action", choices=("install", "uninstall", "doctor", "launch", "select", "close", "reap"))
     parser.add_argument("--root", default=os.getcwd())
     parser.add_argument("--global-config", default=str(Path.home() / workspace.DIRECTORY / "config.json"))
     parser.add_argument("--platform", choices=("pc", "ht"), default="pc")
@@ -579,22 +806,46 @@ def main():
     parser.add_argument("--dry-run", action="store_true",
                         help="launch／select：只检查并给出将选用的设备或启动计划，不启动客户端")
     parser.add_argument("--user", help="install：计划任务的运行用户，默认当前用户")
+    parser.add_argument("--owner", help=f"launch／select／close：发起方，省略时取环境变量 {OWNER_ENV}")
+    target = parser.add_mutually_exclusive_group()
+    target.add_argument("--mine", action="store_true", help="close：当前工作区、当前发起方登记的全部客户端")
+    target.add_argument("--devid", help="close：登记中这个 devid 的客户端")
+    target.add_argument("--pid", type=int, help="close：登记中这个进程号的客户端（如 device_timeout 的）")
+    parser.add_argument("--idle-minutes", type=int, help="reap：本次的空闲阈值（分钟），默认读 client_idle_minutes")
     args = parser.parse_args()
+    owner = resolve_owner(args.owner)
+    reaped = None
     try:
+        if args.action in ("select", "launch"):
+            reaped = auto_reap(args.root, args.global_config, args.dry_run)
         if args.action == "install":
             result = install(args.global_config, args.user)
         elif args.action == "uninstall":
             result = uninstall()
         elif args.action == "select":
-            result = select(args.root, args.global_config, args.platform, args.timeout, args.dry_run, args.server)
+            result = select(args.root, args.global_config, args.platform, args.timeout, args.dry_run, args.server,
+                            owner)
+        elif args.action == "close":
+            if not (args.mine or args.devid or args.pid):
+                raise LaunchError("close 需要 --mine、--devid 或 --pid 之一", "bad_arguments")
+            result = close(args.root, owner, args.devid, args.pid, args.dry_run)
+        elif args.action == "reap":
+            config = workspace.load_config(args.root, args.global_config)
+            result = reap(idle_limit(config, args.idle_minutes), args.dry_run)
         elif args.action == "doctor":
             result = doctor(args.root, args.global_config, args.platform)
         else:
-            result = launch(args.root, args.global_config, args.platform, args.server, args.timeout, args.dry_run)
+            result = launch(args.root, args.global_config, args.platform, args.server, args.timeout, args.dry_run,
+                            owner)
+        if reaped is not None:
+            result["reap"] = reaped
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0 if result.get("ok", True) else 1
     except LaunchError as error:
-        print(json.dumps({"error": str(error), "code": error.code, **error.detail}, ensure_ascii=False, indent=2))
+        output = {"error": str(error), "code": error.code, **error.detail}
+        if reaped is not None:
+            output["reap"] = reaped
+        print(json.dumps(output, ensure_ascii=False, indent=2))
         return 1
     except (workspace.WorkspaceError, OSError, ValueError, subprocess.SubprocessError) as error:
         print(json.dumps({"error": str(error), "code": "error"}, ensure_ascii=False, indent=2))

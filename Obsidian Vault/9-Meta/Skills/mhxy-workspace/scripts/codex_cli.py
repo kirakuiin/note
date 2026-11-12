@@ -15,6 +15,9 @@ import time
 import tomllib
 import uuid
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import client_registry  # noqa: E402
+
 SKILL = Path(__file__).resolve().parents[1]
 TERMINAL = {"completed", "failed", "timed_out", "cancelled"}
 KINDS = ("investigate", "review", "test")
@@ -528,12 +531,15 @@ def acquire_lock(devid, job):
     locks = Path(os.environ.get("LOCALAPPDATA", str(Path.home() / ".cache"))) / "mhxy-cli-testing/locks"
     locks.mkdir(parents=True, exist_ok=True)
     lock = locks / (hashlib.sha256(devid.encode()).hexdigest() + ".json")
-    try:
-        with lock.open("x", encoding="utf-8") as handle:
-            json.dump({"job": str(job), "devid": devid}, handle)
-    except FileExistsError:
-        raise ValueError("设备已有任务或待恢复状态：" + str(read_json(lock).get("job"))) from None
-    return lock
+    for attempt in range(2):
+        try:
+            with lock.open("x", encoding="utf-8") as handle:
+                json.dump({"job": str(job), "devid": devid}, handle)
+            return lock
+        except FileExistsError:
+            # client_launch.py close 被杀后残留的锁（持有者已退出）可以回收，其余的锁照常拒绝
+            if attempt or not client_registry.reclaim_close_lock(lock):
+                raise ValueError("设备已有任务或待恢复状态：" + str(read_json(lock).get("job"))) from None
 
 
 def prepare(root, kind, task, resume):
@@ -794,6 +800,12 @@ def release(job):
             raise ValueError("任务进程仍在运行（PID " + "、".join(map(str, running))
                              + "）：确认是本任务的进程并结束后再 release，设备锁保留")
         time.sleep(0.2)
+    # 先刷新自动启动客户端登记的使用时间再删锁：否则删锁后、刷新前的空闲兜底会把刚用完的客户端当成空闲关掉。
+    # 刷新失败时不删锁，免得客户端处于“无锁且计时陈旧”的可关闭状态。
+    try:
+        client_registry.touch(state.get("devid"))
+    except OSError as error:
+        raise ValueError(f"客户端登记的使用时间未能刷新：{error}；设备锁保留，处理后重新 release") from None
     release_lock(Path(state["lock"]), job)
     state.update(restoration="restored", released=True)
     write_json(job / "state.json", state)

@@ -215,6 +215,11 @@ def validate_config(config, keys, label):
         if key == "login_accounts":
             validate_login_accounts(value, label)
             continue
+        if key == "client_idle_minutes":
+            text = str(value) if type(value) in (int, str) else ""
+            if value is not None and not re.fullmatch(r"[1-9][0-9]{0,3}", text):
+                raise WorkspaceError(f"{label} 的 client_idle_minutes 必须是 1–9999 的整数分钟或 null")
+            continue
         if key == "login_server":
             if value is not None and (not isinstance(value, str) or not value.strip() or len(value) > 64
                                       or any(c in value for c in "\r\n\x00\"")):

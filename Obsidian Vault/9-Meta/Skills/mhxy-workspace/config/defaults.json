@@ -10,5 +10,6 @@
   "default_devid": null,
   "branches_root": null,
   "login_accounts": null,
-  "login_server": null
+  "login_server": null,
+  "client_idle_minutes": null
 }
