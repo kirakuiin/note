@@ -37,12 +37,12 @@
    - 新模板要过一两分钟才查得到，脚本会等最多 5 分钟再读回核对地址。核对通过后模板名自动记到工作区配置 `patch_template`；读回地址不对时退出码 2，这个模板不能用来打包，告诉用户在 Sunshine 上删掉。
 
 3. **打包**：
-   - 预览：`patch.py start --root "<项目>" [--name <模板名>]`。把模板名、绑定的分支、上次打包（`package`：时间、打包人、各仓库 revision）列给用户；可以顺带说明本分支在上次打包之后有没有新的提交（`svn log -r <上次 revision>:HEAD` 只读查询）。
-   - **用户确认后**加 `--apply` 发起。打包在服务端后台执行，完成后服务会给打包人发 popo 通知；输出里有 `job.result.job_id`。
+   - **不需要用户确认**（用户 2026-11-12 定）：模板存在且绑定本分支（`prepare` 的 `next` 为 `start`）时，直接 `patch.py start --root "<项目>" [--name <模板名>] --apply` 发起。没有模板（`next` 为 `name`／`create`）时不打包，按第 1、2 步问用户。
+   - 发起后把模板名、绑定的分支、上次打包（`package`：时间、打包人、各仓库 revision）和 `job.result.job_id` 告诉用户；可以顺带说明本分支在上次打包之后有没有新的提交（`svn log -r <上次 revision>:HEAD` 只读查询）。打包在服务端后台执行，完成后服务会给打包人发 popo 通知。
 
 4. **查进度**：`patch.py status --job-id <job_id>`；忘了 job_id 时 `patch.py status --recent`。`job.status` 为 `pending`／`running` 时稍后再查，不要循环轮询；`success` 时把 `script_url`、`res_url` 交给用户；`failed` 时报告 `error`，需要分析时加 `--raw` 看完整打包日志。
 
-建模板和打包每次都要用户确认，上一次的确认不延续到下一次；网络超时时请求可能已经执行，先 prepare 或 status 查清再决定，不要直接重试。
+建模板每次都要用户确认，上一次的确认不延续到下一次；已有模板时打包不需要确认。发起打包前用 `status --recent` 看同一模板有没有 `pending`／`running` 的任务，有就报告进度，不重复发起。网络超时时请求可能已经执行，先 prepare 或 status 查清再决定，不要直接重试。
 
 ## 输出
 
