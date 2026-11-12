@@ -6,7 +6,7 @@
     popo_bug.py task   --group <群号>
     popo_bug.py find   --task <任务ID> --text <引用的原文>
     popo_bug.py show   --task <任务ID> --id <bug _id> [--save <项目根>]
-    popo_bug.py create --task <任务ID> --text <内容> --reporter <报告人姓名> [--assignee <账号>]
+    popo_bug.py create --task <任务ID> --text <内容> --reporter <报告人> [--type <工单类型>] [--assignee <账号>]
     popo_bug.py note   --task <任务ID> --id <bug _id> --prefix <已修复|未处理> --text <不超过 20 字>
     popo_bug.py status --task <任务ID> --id <bug _id> --to 已完成 [--followqa <账号>]
 
@@ -22,7 +22,7 @@ import re
 import sys
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urlsplit
-from urllib.request import Request
+from urllib.request import Request, build_opener
 import uuid
 
 sys.dont_write_bytecode = True
@@ -104,10 +104,23 @@ class Client:
             raise PopoBugError("任务列表结构已变化")
         return [row for row in rows if isinstance(row, dict)]
 
+    def init(self):
+        """/api/index/init：人员表、平台配置等，一次调用内缓存。"""
+        if getattr(self, "_init", None) is None:
+            data = self.get("/api/index/init", None)
+            self._init = (data.get("data") or data) if isinstance(data, dict) else {}
+        return self._init
+
+    def type_prefix(self):
+        """平台机器人认的消息前缀 → 工单类型（平台配置 type_prefix，如 bug→BUG、mark→备忘、sug→建议），键为小写。"""
+        table = (self.init().get("config") or {}).get("type_prefix")
+        if not isinstance(table, dict) or not table:
+            raise PopoBugError("平台配置里没有 type_prefix，结构可能已变化")
+        return {str(k).lower(): str(v) for k, v in table.items() if k and v}
+
     def people(self):
         """账号 → {"name": 平台显示的姓名（如 W王卓为）, "mail": 邮箱}，来自 /api/index/init 的 person_dict。"""
-        data = self.get("/api/index/init", None)
-        groups = (data.get("data") or data).get("person_dict") if isinstance(data, dict) else None
+        groups = self.init().get("person_dict")
         if not isinstance(groups, dict):
             raise PopoBugError("人员表结构已变化")
         out = {}
@@ -136,11 +149,12 @@ class Client:
         return data
 
     def download(self, url):
+        """下载截图。图片在对象存储上，用不带登录 Cookie、不限跳转站点的独立请求，不把 CORP 会话发给图床。"""
         target = urlsplit(url)
         if target.scheme not in ("http", "https"):
             raise PopoBugError(f"图片地址不是 http(s)：{url[:80]}")
         try:
-            with self.opener.open(Request(url), timeout=self.timeout) as response:
+            with build_opener().open(Request(url), timeout=self.timeout) as response:
                 data = response.read(IMAGE_LIMIT + 1)
                 kind = response.headers.get("Content-Type", "")
         except (HTTPError, URLError, OSError):
@@ -190,6 +204,11 @@ def find_tasks(client, account, group):
             if str(group) in {str(g) for g in t.get("popo_group_num") or []}]
 
 
+def task_result(client, account, group):
+    """task 命令的输出：任务列表，加上平台的消息前缀表（调用方据此判断群消息是不是在报问题）。"""
+    return {"tasks": find_tasks(client, account, group), "type_prefix": client.type_prefix()}
+
+
 def bug_brief(row):
     return {"id": str(row.get("_id") or ""), "readable_id": str(row.get("readable_id") or ""),
             "task_id": str(row.get("taskid") or ""), "subject": str(row.get("subject") or ""),
@@ -204,56 +223,85 @@ def keyword_for(text):
     return pieces[0][:30] if pieces and pieces[0] else ""
 
 
+OPEN_STATUSES = ("新建", "描述不清", "完成转回")   # 还需要开发处理的状态（与 popo-issue-fetch 的 --status open 一致）
+
+
+def reported_text(subject):
+    """create 代建的单去掉“【群里报告】<报告人>”那一行后的原文（归一后）；不是代建的单返回 None。"""
+    text = normalize(subject)
+    if not text.startswith(REPORT_HEAD):
+        return None
+    return re.sub(rf"^{re.escape(REPORT_HEAD)}\S+\s*", "", text)
+
+
 def find_bug(client, task_id, text):
-    """按原文找平台机器人建的单：origin_subject 归一后与原文相同。"""
+    """按原文找还没处理完的单：平台机器人建的（origin_subject）或本脚本代建的（去掉报告人行后的正文），
+    归一后与原文相同；多张时取单号最大的。已完成、关闭等状态的不算，同样的问题再报要新建。"""
     wanted = normalize(text)
     if not wanted:
         raise PopoBugError("原文为空")
-    for row in client.issues(task_id, keyword_for(text)):
-        if normalize(row.get("origin_subject")) == wanted:
-            return bug_brief(row)
-    return None
+    rows = [row for row in client.issues(task_id, keyword_for(text))
+            if str(row.get("status") or "") in OPEN_STATUSES
+            and (normalize(row.get("origin_subject")) == wanted or reported_text(row.get("subject")) == wanted)]
+    return bug_brief(max(rows, key=lambda r: int(r.get("readable_id") or 0))) if rows else None
 
 
-def render(detail, task):
-    """issue.md：会话读的正文。[图片] 替换成本地文件名由 save 负责。"""
-    subject = str(detail.get("subject") or "")
-    lines = [f"# popo-{detail.get('readable_id')} {normalize(subject)[:60]}", "",
+def fill_images(text, paths):
+    """按顺序把正文里的 [图片] 换成本地路径；占位符不够时把多出的图片接在段落末尾。"""
+    parts = str(text or "").split("[图片]")
+    out = parts[0]
+    for index, rest in enumerate(parts[1:]):
+        out += (f"[图片 {paths[index]}]" if index < len(paths) else "[图片]") + rest
+    extra = paths[len(parts) - 1:]
+    return (out.strip() + ("\n\n" + "\n".join(f"[图片 {p}]" for p in extra) if extra else "")).strip()
+
+
+def render(detail, task, images=None):
+    """issue.md：会话读的正文。images：{"img": [本地路径或说明], "way_img": [...]}，按顺序填进 [图片]。"""
+    images = images or {}
+    subject = fill_images(detail.get("subject"), images.get("img") or [])
+    way = fill_images(detail.get("way_text"), images.get("way_img") or [])
+    lines = [f"# popo-{detail.get('readable_id')} {normalize(detail.get('subject'))[:60]}", "",
              f"- 类型/状态/优先级：{detail.get('type', '')} / {detail.get('status', '')} / {detail.get('priority', '')}",
              f"- 提单：{detail.get('author_name') or detail.get('author', '')}（{detail.get('author', '')}）",
              f"- 指派：{detail.get('assignee', '')}　跟进 QA：{detail.get('followqa', '')}",
              f"- 所属任务：{task.get('name') or detail.get('task_name') or ''}　策划单号：{task.get('planner_id', '')}",
-             "", "## 问题描述", "", subject.strip() or "（空）"]
-    if str(detail.get("way_text") or "").strip():
-        lines += ["", "## 重现步骤", "", str(detail["way_text"]).strip()]
+             "", "## 问题描述", "", subject or "（空）"]
+    if way:
+        lines += ["", "## 重现步骤", "", way]
     if str(detail.get("markdown") or "").strip():
         lines += ["", "## 已有备注", "", str(detail["markdown"]).strip()]
     return "\n".join(lines) + "\n"
 
 
-def save(client, detail, task, root):
-    """把正文和截图写到 <项目根>/.mhxy-workspace/bugs/<readable_id>/。"""
-    root_path, personal, _ = workspace.paths(root, str(Path.home() / workspace.DIRECTORY / "config.json"))
+def save(client, detail, task, root, config):
+    """把正文和截图写到 <项目根>/.mhxy-workspace/bugs/<readable_id>/。单张图片下载失败不中断，正文里写明。"""
+    root_path, personal, _ = workspace.paths(root, str(config))
     workspace.require_initialized(root_path)
     rid = str(detail.get("readable_id") or "")
     workspace.validate_issue_id(rid)
     folder = personal / BUGS / rid
     workspace.no_links(folder)
     folder.mkdir(parents=True, exist_ok=True)
-    text = render(detail, task)
-    images = []
+    images, local, failed = [], {}, []
     for field, label in (("img", "问题描述"), ("way_img", "重现步骤")):
         for index, url in enumerate(detail.get(field) or [], 1):
-            data, kind = client.download(str(url))
+            try:
+                data, kind = client.download(str(url))
+            except PopoBugError as error:
+                failed.append(str(error))
+                local.setdefault(field, []).append(f"下载失败，原链接 {url}")
+                continue
             ext = mimetypes.guess_extension(kind.split(";")[0].strip()) or Path(urlsplit(str(url)).path).suffix or ".png"
             name = f"{field}_{index}{ext}"
             (folder / name).write_bytes(data)
             images.append({"section": label, "path": str(folder / name)})
-    if images:
-        text += "\n## 截图\n\n" + "\n".join(f"- {i['section']}：{i['path']}" for i in images) + "\n"
+            local.setdefault(field, []).append(str(folder / name))
+    text = render(detail, task, local)
     path = folder / "issue.md"
     path.write_text(text, encoding="utf-8")
-    return {"issue_path": str(path.relative_to(root_path)).replace("\\", "/"), "images": images}
+    return {"issue_path": str(path.relative_to(root_path)).replace("\\", "/"), "images": images,
+            "image_errors": failed}
 
 
 def display_name(client, who):
@@ -268,21 +316,24 @@ def display_name(client, who):
     return next((p["name"] for p in people.values() if p["mail"] and p["mail"] == lowered), who)
 
 
-def create_bug(client, account, task_id, text, reporter, assignee=None):
+def create_bug(client, account, task_id, text, reporter, assignee=None, issue_type="BUG"):
     require_write()
+    if issue_type not in set(client.type_prefix().values()):
+        raise PopoBugError(f"工单类型不在平台的前缀表里：{issue_type}")
     body = normalize(text)
     if not body:
         raise PopoBugError("内容为空")
     subject = f"{REPORT_HEAD}{display_name(client, reporter)}\n{str(text).strip()}"
     result = client.post_form("/mgr/task/save_issue", {
         "subject": subject, "img_path": "", "taskid": task_id, "_id": "", "ctype": "0",
-        "assignee": assignee or account, "issue_type": "BUG", "way_text": "", "way_img": "", "priority": "P2"})
+        "assignee": assignee or account, "issue_type": issue_type, "way_text": "", "way_img": "", "priority": "P2"})
     if not isinstance(result, dict) or result.get("success") is False or result.get("result") == "error":
         raise PopoBugError("建单失败：" + str((result or {}).get("msg") or (result or {}).get("retmsg") or "未知原因")[:200])
-    for row in client.issues(task_id, keyword_for(text)):    # 平台不返回新单 ID，按内容找回最新的一张
-        if normalize(row.get("subject")).startswith(normalize(REPORT_HEAD)) and body in normalize(row.get("subject")):
-            return bug_brief(row)
-    raise PopoBugError("建单接口返回成功，但按内容找不到新单，请到平台核对")
+    # 平台不返回新单 ID：按完整标题找回，同样内容的多张里取单号最大的（刚建的）
+    rows = [row for row in client.issues(task_id, keyword_for(text)) if normalize(row.get("subject")) == normalize(subject)]
+    if not rows:
+        raise PopoBugError("建单接口返回成功，但按内容找不到新单，请到平台核对")
+    return bug_brief(max(rows, key=lambda r: int(r.get("readable_id") or 0)))
 
 
 def append_note(client, task_id, bug_id, prefix, text):
@@ -336,6 +387,7 @@ def main(argv=None):
     parser.add_argument("--text", help="find：引用的原文；create：内容；note：备注正文")
     parser.add_argument("--reporter", help="create：报告人（邮箱、账号或姓名，按人员表换成平台显示的姓名）")
     parser.add_argument("--assignee", help="create：指派人账号，默认登录账号")
+    parser.add_argument("--type", help="create：工单类型（平台 type_prefix 里的值，如 BUG、备忘、建议），默认 BUG")
     parser.add_argument("--prefix", choices=NOTE_PREFIXES, help="note：备注前缀")
     parser.add_argument("--to", help="status：目标状态，只支持“已完成”")
     parser.add_argument("--followqa", help="status：需要指定跟进 QA 时用的账号，默认 bug 单原来的跟进 QA")
@@ -358,7 +410,7 @@ def main(argv=None):
             raise PopoBugError(f"备注正文要写、且不超过 {NOTE_MAX} 个字")
         client, account = connect(args.config)
         if args.action == "task":
-            result = {"tasks": find_tasks(client, account, args.group)}
+            result = task_result(client, account, args.group)
         elif args.action == "find":
             result = {"bug": find_bug(client, args.task, args.text)}
         elif args.action == "show":
@@ -369,9 +421,10 @@ def main(argv=None):
             result = {"bug": {**bug_brief(detail), "markdown": str(detail.get("markdown") or ""),
                               "author_name": str(detail.get("author_name") or "")}, "task": task}
             if args.save:
-                result.update(save(client, detail, task, args.save))
+                result.update(save(client, detail, task, args.save, args.config))
         elif args.action == "create":
-            result = {"bug": create_bug(client, account, args.task, args.text, args.reporter, args.assignee)}
+            result = {"bug": create_bug(client, account, args.task, args.text, args.reporter, args.assignee,
+                                        args.type or "BUG")}
         elif args.action == "note":
             result = append_note(client, args.task, args.id, args.prefix, args.text)
         else:

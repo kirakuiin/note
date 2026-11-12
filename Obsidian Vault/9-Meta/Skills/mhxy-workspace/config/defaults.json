@@ -12,6 +12,5 @@
   "login_accounts": null,
   "login_server": null,
   "client_idle_minutes": null,
-  "patch_token": null,
   "patch_template": null
 }

@@ -36,6 +36,9 @@ class FakeClient:
     def people(self):
         return PEOPLE
 
+    def type_prefix(self):
+        return {"bug": "BUG", "mark": "备忘", "sug": "建议"}
+
     def issues(self, task_id, keyword="", length=200):
         self.keyword = keyword
         return self.rows
@@ -89,16 +92,48 @@ class PopoBugTests(unittest.TestCase):
         self.assertTrue(client.keyword)
         self.assertIsNone(p.find_bug(client, "t1", "mark @王卓为|梦幻2|191 返回键歪"))
 
+    def test_find_matches_reported_bugs_only_while_open_and_takes_newest(self):
+        made = {**ROW, "origin_subject": "", "subject": "【群里报告】Y杨某\n奇袭按钮  点不动"}
+        client = FakeClient([{**made, "_id": "old", "readable_id": 1}, {**made, "_id": "new", "readable_id": 9},
+                             {**made, "_id": "done", "readable_id": 20, "status": "已完成"},
+                             {**ROW, "_id": "x", "origin_subject": "", "subject": "奇袭按钮 点不动"}])
+        self.assertEqual(p.find_bug(client, "t1", "奇袭按钮 点不动")["id"], "new")
+        self.assertIsNone(p.find_bug(FakeClient([{**ROW, "status": "关闭"}]), "t1", "mark @王卓为|梦幻2|191 返回键歪了"))
+
+    def test_create_takes_exact_subject_not_substring(self):
+        client = FakeClient()
+        client.post_form = lambda path, fields: (setattr(client, "rows", [
+            {**ROW, "_id": "older", "readable_id": 5, "subject": fields["subject"] + " 打不开"},
+            {**ROW, "_id": "new", "readable_id": 7, "subject": fields["subject"]}]) or {"success": True})
+        self.assertEqual(p.create_bug(client, "wangzhuowei", "t1", "卡住", "Y杨某")["id"], "new")
+
+    def test_images_fill_placeholders_and_failures_do_not_stop(self):
+        self.assertEqual(p.fill_images("a[图片]b[图片]", ["1.png"]), "a[图片 1.png]b[图片]")
+        self.assertEqual(p.fill_images("a", ["1.png", "2.png"]), "a\n\n[图片 1.png]\n[图片 2.png]")
+        text = p.render({"readable_id": 1, "subject": "看图[图片]", "way_text": "", "way_img": ["u"]}, {},
+                        {"img": ["D:/a.png"], "way_img": ["下载失败，原链接 u"]})
+        self.assertIn("看图[图片 D:/a.png]", text)
+        self.assertIn("## 重现步骤\n\n[图片 下载失败，原链接 u]", text)     # 只有图没有文字也保留这一段
+
     def test_create_marks_reporter_and_finds_new_issue(self):
         client = FakeClient()
         bug = p.create_bug(client, "wangzhuowei", "t1", "  奇袭按钮  点不动 ", "YangMou@corp.netease.com")
         path, fields = client.posts[0]
         self.assertEqual(path, "/mgr/task/save_issue")
         self.assertTrue(fields["subject"].startswith("【群里报告】Y杨某\n"))
-        self.assertEqual(p.display_name(client, "wangzhuowei"), "W王卓为")
-        self.assertEqual(p.display_name(client, "Y袁延亮"), "Y袁延亮")
         self.assertEqual((fields["ctype"], fields["assignee"], fields["issue_type"]), ("0", "wangzhuowei", "BUG"))
         self.assertEqual(bug["readable_id"], "300001")
+        self.assertEqual(p.display_name(client, "wangzhuowei"), "W王卓为")
+        self.assertEqual(p.display_name(client, "Y袁延亮"), "Y袁延亮")
+        p.create_bug(client, "wangzhuowei", "t1", "加个按钮", "Y杨某", issue_type="建议")
+        self.assertEqual(client.posts[-1][1]["issue_type"], "建议")
+        with self.assertRaises(p.PopoBugError):
+            p.create_bug(client, "wangzhuowei", "t1", "x", "y", issue_type="乱写")
+
+    def test_task_result_includes_platform_prefixes(self):
+        out = p.task_result(FakeClient(), "wangzhuowei", "8854601")
+        self.assertEqual(out["type_prefix"]["mark"], "备忘")
+        self.assertEqual([t["id"] for t in out["tasks"]], ["t1"])
 
     def test_note_appends_without_name_and_rejects_long_text(self):
         client = FakeClient(markdown="杨某: 已复现")
