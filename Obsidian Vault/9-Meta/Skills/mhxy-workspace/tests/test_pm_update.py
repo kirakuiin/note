@@ -30,6 +30,8 @@ class Server:
         self.fail = {}  # 路径片段 -> 要抛出的错误；用于模拟写入或读回失败。
         self.drop_writes = False  # 为真时写请求返回成功但不生效。
         self.can_edit = True
+        self.ai_required = False  # 为真时改到「代码审查」要求填 AI Coding Level（1011）
+        self.ai_value = None
 
     def request(self, client, method, path, body=None):
         for fragment, error in self.fail.items():
@@ -41,10 +43,17 @@ class Server:
                               "status": {"id": status["id"], "name": status["name"], "is_closed": False},
                               "fixed_version": {"id": 1076, "name": "2026-11-17维护内容"}}}
         if path == "/api/v6/issue_form/form":
+            target = ((body or {}).get("issue") or {}).get("status_id", self.status_id)
+            left = [{"id": "status_id", "is_required": True, "possible_values": copy.deepcopy(STATUSES)}]
+            if self.ai_required and target == 5:
+                left.append({"id": 1011, "name": "AI Coding Level", "is_required": True, "possible_values": [
+                    {"id": None, "name": "- 无 -"}, {"id": "\u200b新增代码≤30行\u200b", "name": "\u200b新增代码≤30行\u200b"},
+                    {"id": "L3 - 半自主Agent，人工监督关键点和结果", "name": "L3 - 半自主Agent，人工监督关键点和结果"},
+                    {"id": "L4 - 全自主Agent", "name": "L4 - 全自主Agent"}]})
             return {"res_code": 1, "data": {
-                "issue": {"id": 864519, "status_id": self.status_id, "lock_version": self.lock_version,
-                          "last_journal_id": 7, "project_id": 16},
-                "fields": {"left": [{"id": "status_id", "possible_values": copy.deepcopy(STATUSES)}]}}}
+                "issue": {"id": 864519, "status_id": target, "lock_version": self.lock_version,
+                          "last_journal_id": 7, "project_id": 16, "custom_field_values": {"1011": self.ai_value}},
+                "fields": {"left": left}}}
         if method == "GET" and path.endswith("/time_entries/new_options.json"):
             return {"res_code": 1, "data": {"options": {
                 "activities": copy.deepcopy(ACTIVITIES), "users": [{"id": 986, "role_ids": [7]}],
@@ -59,14 +68,18 @@ class Server:
         if method == "PUT" and path == "/issues/864519.json":
             self.writes.append(("status", body))
             if not self.drop_writes:
+                if self.ai_required and body["issue"]["status_id"] == 5 \
+                        and not (body["issue"].get("custom_field_values") or {}).get("1011", self.ai_value):
+                    return {"res_code": 0, "res_msg": "更新失败"}   # 真服务器缺必填项时只回这一句
                 self.status_id = body["issue"]["status_id"]
+                self.ai_value = (body["issue"].get("custom_field_values") or {}).get("1011", self.ai_value)
                 self.lock_version += 1
             return None
         raise AssertionError(f"未预期的请求：{method} {path}")
 
 
 def arguments(**values):
-    defaults = {"issue_id": "864519", "status": None, "status_from": None, "hours": None, "activity": None,
+    defaults = {"issue_id": "864519", "status": None, "status_from": None, "ai_level": None, "hours": None, "activity": None,
                 "spent_on": "2026-11-11", "comments": "", "apply": False}
     defaults.update(values)
     return argparse.Namespace(**defaults)
@@ -232,7 +245,7 @@ class UpdateTests(unittest.TestCase):
         def broken(client, method, path, body=None):
             if path == "/api/v6/issue_form/form":
                 calls["form"] += 1
-                if calls["form"] == 2:
+                if calls["form"] == 3:   # 第 1 次规划、第 2 次查目标状态的必填项、第 3 次取最新 lock_version
                     raise u.UpdateError("网络请求失败，结果不明")
             return real(client, method, path, body)
 
@@ -240,6 +253,31 @@ class UpdateTests(unittest.TestCase):
             output, code = u.run(object(), 986, arguments(status="代码审查", apply=True))
         self.assertEqual((code, server.writes), (1, []))
         self.assertIn("尚未发出", output["errors"][0])
+
+    def test_required_ai_level_is_checked_in_preview_and_sent_with_status(self):
+        server = Server()
+        server.ai_required = True
+        with self.assertRaises(u.UpdateError) as caught:     # 没给级别：预览就拦下，什么都不写
+            self.run_update(server, status="代码审查", hours="0.2", activity="程序开发-制作")
+        self.assertIn("AI Coding Level", str(caught.exception))
+        with self.assertRaises(u.UpdateError):               # 级别不在可选值里
+            self.run_update(server, status="代码审查", ai_level="L9", apply=True)
+        self.assertEqual(server.writes, [])
+        # 名称里的零宽字符不影响匹配；提交时带上平台原样的取值
+        output, code = self.run_update(server, status="代码审查", ai_level="新增代码≤30行", hours="0.1",
+                                       activity="程序开发-制作", apply=True)
+        self.assertEqual(code, 0)
+        self.assertEqual(output["status"]["fields"], {"AI Coding Level": "新增代码≤30行"})
+        self.assertNotIn("custom_fields", output["status"])
+        self.assertEqual(server.writes[1][1]["issue"]["custom_field_values"], {"1011": "\u200b新增代码≤30行\u200b"})
+        self.assertEqual(server.status_id, 5)
+
+    def test_filled_ai_level_is_not_required_again(self):
+        server = Server()
+        server.ai_required, server.ai_value = True, "L3 - 半自主Agent，人工监督关键点和结果"
+        output, code = self.run_update(server, status="代码审查", apply=True)
+        self.assertEqual((code, server.status_id), (0, 5))
+        self.assertNotIn("custom_field_values", server.writes[0][1]["issue"])
 
     def test_argument_combinations(self):
         for argv in (["--issue-id", "864519", "--hours", "0.2"],

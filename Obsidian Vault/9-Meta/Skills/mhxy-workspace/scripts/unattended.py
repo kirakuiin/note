@@ -18,7 +18,8 @@ status 为“待提交”时，改动文件、提交说明、自检结果和报�
 - candidates：真机自检里测试执行者上报的候选原语（test 结果的 candidates，格式见 references/cli.md「读取结果」），
   由调用方列给用户确认；
 - pm_update：给出 --pm-status 或 --pm-hours 时出现，提交成功后要对易协作工单做的更新
-  （约定见 references/task-tracking.md「更新工单」），调用方原样转成 pm_update.py 的参数。
+  （约定见 references/task-tracking.md「更新工单」），调用方原样转成 pm_update.py 的参数；
+  ai_level 在给了状态时默认“L4 - 全自主Agent”。
 """
 import argparse
 from datetime import datetime
@@ -39,7 +40,8 @@ FIELDS = ("issue_id", "status", "reason", "changed_files", "commit_message", "se
           "branch", "written_at")
 WAIT_FIELD, CANDIDATES_FIELD, PM_FIELD = "waiting_for", "candidates", "pm_update"
 OPTIONAL = (WAIT_FIELD, CANDIDATES_FIELD, PM_FIELD)  # 可选字段，只能按这个顺序排在固定字段之后。
-PM_KEYS = ("status", "status_from", "hours", "activity", "comments")
+PM_KEYS = ("status", "status_from", "ai_level", "hours", "activity", "comments")
+DEFAULT_AI_LEVEL = "L4 - 全自主Agent"   # 无人值守会话的工单一律 L4（用户 2026-11-12 定，见 task-tracking.md「更新工单」）
 CANDIDATE_KEYS = ("kind", "content", "runs", "note")
 CANDIDATE_KINDS = ("preset", "clean_ui", "template", "step")  # 与 codex_cli.py 的 test schema 一致
 
@@ -126,6 +128,8 @@ def validate(result):
         if hours is not None and (not isinstance(hours, str) or not re.fullmatch(r"\d{1,3}(\.\d{1,2})?", hours)
                                   or float(hours) <= 0):
             raise ResultError("工单工时须大于 0、不超过 999.99，且最多两位小数")
+        if pm_update["ai_level"] is not None and pm_update["status"] is None:
+            raise ResultError("--pm-ai-level 要和 --pm-status 一起使用")
         if pm_update["status_from"] is not None and pm_update["status"] is None:
             raise ResultError("--pm-status-from 要和 --pm-status 一起使用")
         if result["status"] != "待提交":
@@ -177,7 +181,8 @@ def write_result(args):
         result[CANDIDATES_FIELD] = load_candidates(args.candidates_file)
     if args.pm_status is not None or args.pm_hours is not None or args.pm_activity is not None \
             or args.pm_status_from is not None or args.pm_comments:
-        result[PM_FIELD] = dict(zip(PM_KEYS, (args.pm_status, args.pm_status_from, args.pm_hours,
+        ai_level = args.pm_ai_level or (DEFAULT_AI_LEVEL if args.pm_status is not None else None)
+        result[PM_FIELD] = dict(zip(PM_KEYS, (args.pm_status, args.pm_status_from, ai_level, args.pm_hours,
                                               args.pm_activity, args.pm_comments)))
     validate(result)
     path = result_path(personal, args.issue_id)
@@ -223,6 +228,8 @@ def main(argv=None):
                         help="候选原语：test 结果 JSON（取其 candidates）或 candidates 列表本身；没有候选原语时不给")
     writer.add_argument("--pm-status", help="提交后工单要改成的状态（pm_update.py --status）")
     writer.add_argument("--pm-status-from", help="只有当前状态在其中才改（pm_update.py --status-from）")
+    writer.add_argument("--pm-ai-level", help="改状态时一起填的 AI Coding Level（pm_update.py --ai-level）；"
+                        "给了 --pm-status 而不给它时默认“L4 - 全自主Agent”")
     writer.add_argument("--pm-hours", help="提交后要登记的工时（pm_update.py --hours）")
     writer.add_argument("--pm-activity", help="工时的活动（pm_update.py --activity）")
     writer.add_argument("--pm-comments", default="", help="工时备注（pm_update.py --comments）")

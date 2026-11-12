@@ -172,6 +172,57 @@ def split_names(value):
     return names
 
 
+AI_LEVEL_FIELD = "AI Coding Level"
+INVISIBLE = dict.fromkeys(map(ord, "​‌‍﻿"))
+
+
+def plain(text):
+    """去掉零宽字符和首尾空白后的名称（平台的选项名里夹着零宽空格）。"""
+    return str(text or "").translate(INVISIBLE).strip()
+
+
+def blank(value):
+    return value is None or value == "" or value == [] or value == {}
+
+
+def required_for_target(client, issue_id, target_id):
+    """按目标状态重新取编辑表单，返回改到这个状态时必填、但现在是空的字段：[(字段 id, 字段定义)]。
+
+    表单里的必填标记随状态变化（如「[客户端]程序开发」改到「代码审查」要求填 AI Coding Level），
+    服务器拒绝时只回笼统的“更新失败”，所以写入前先查清。
+    """
+    data = as_dict(api(client, "POST", "/issue_form/form", {"id": issue_id, "issue": {"status_id": target_id}}),
+                   "编辑表单")
+    issue = as_dict(data.get("issue"), "编辑表单")
+    values = issue.get("custom_field_values") if isinstance(issue.get("custom_field_values"), dict) else {}
+    missing = []
+    for side in as_dict(data.get("fields"), "编辑表单").values():
+        for field in side if isinstance(side, list) else []:
+            if not isinstance(field, dict) or not field.get("is_required") or field.get("id") == "status_id":
+                continue
+            fid = field.get("id")
+            value = issue.get(fid) if isinstance(fid, str) else values.get(str(fid))
+            if blank(value):
+                missing.append((fid, field))
+    return missing
+
+
+def fill_required(missing, ai_level):
+    """把能由参数补上的必填字段填好，返回 (要一起提交的自定义字段 {id: 值}, 仍然缺的字段名列表)。"""
+    fill, still = {}, []
+    for fid, field in missing:
+        if plain(field.get("name")) == AI_LEVEL_FIELD and ai_level is not None and not isinstance(fid, str):
+            options = [o for o in field.get("possible_values") or [] if isinstance(o, dict) and o.get("id")]
+            match = [o for o in options if plain(o.get("name")) == plain(ai_level)]
+            if len(match) != 1:
+                names = "、".join(plain(o.get("name")) for o in options)
+                raise UpdateError(f"{AI_LEVEL_FIELD}“{ai_level}”不在可选值里：{names}")
+            fill[str(fid)] = match[0]["id"]
+        else:
+            still.append(plain(field.get("name")) or str(fid))
+    return fill, still
+
+
 def plan_status(issue, form_issue, statuses, target, sources):
     """决定状态这一步做什么。
 
@@ -297,7 +348,10 @@ def apply_status(client, issue_id, plan):
         form_issue, _ = load_form(client, issue_id)  # 取最新的 lock_version。
     except pm_issues.QueryError as failure:
         return f"修改状态失败（写入请求尚未发出）：{failure}"
-    body = {"id": issue_id, "issue": {"status_id": plan["target_id"], "lock_version": form_issue.get("lock_version")},
+    fields = {"status_id": plan["target_id"], "lock_version": form_issue.get("lock_version")}
+    if plan.get("custom_fields"):     # 目标状态要求的必填项（如 AI Coding Level），和状态一起提交
+        fields["custom_field_values"] = plan["custom_fields"]
+    body = {"id": issue_id, "issue": fields,
             "last_journal_id": form_issue.get("last_journal_id"), "project_id": form_issue.get("project_id")}
     error = None
     try:
@@ -328,9 +382,18 @@ def run(client, user_id, args):
     form_issue, statuses = load_form(client, issue_id)
     sources = split_names(args.status_from) if args.status_from is not None else None
     status = plan_status(issue, form_issue, statuses, args.status, sources)
+    if status["action"] == "change":
+        fill, still = fill_required(required_for_target(client, issue_id, status["target_id"]), args.ai_level)
+        if still:
+            hint = "（用 --ai-level 指定）" if AI_LEVEL_FIELD in still else ""
+            raise UpdateError(f"改成“{args.status}”前要先填必填项：{'、'.join(still)}{hint}；什么都没写")
+        if fill:
+            status["custom_fields"] = fill
+            status["fields"] = {AI_LEVEL_FIELD: plain(next(iter(fill.values())))}
     hours = parse_hours(args.hours) if args.hours is not None else None
     time = plan_time(options, form_issue, user_id, hours, args.activity, parse_date(args.spent_on), args.comments)
-    output.update(status={key: value for key, value in status.items() if key != "target_id"},
+    hidden = ("target_id", "custom_fields")
+    output.update(status={key: value for key, value in status.items() if key not in hidden},
                   time_entry={key: value for key, value in time.items() if key != "entry"})
     if not args.apply:
         return output, 0
@@ -355,7 +418,7 @@ def run(client, user_id, args):
         except pm_issues.QueryError as failure:
             output["errors"].append(f"修改状态后读回失败，结果不明，请到工单页面核对：{failure}")
             return output, 2
-        output["status"] = {key: value for key, value in status.items() if key != "target_id"}
+        output["status"] = {key: value for key, value in status.items() if key not in hidden}
         if error:
             output["errors"].append(error)
             return output, 2 if time["done"] else 1
@@ -370,6 +433,9 @@ def main(argv=None):
     parser.add_argument("--issue-id", required=True, metavar="工单号")
     parser.add_argument("--status", metavar="状态名", help="目标状态的完整名称")
     parser.add_argument("--status-from", metavar="状态名,…", help="只有当前状态在其中才修改，否则跳过；逗号分隔")
+    parser.add_argument("--ai-level", metavar="级别",
+                        help="目标状态要求填 AI Coding Level 时的取值，如“L3 - 半自主Agent，人工监督关键点和结果”、"
+                             "“新增代码≤30行”；取值规则见 task-tracking.md「更新工单」")
     parser.add_argument("--hours", metavar="数值", help="要登记的工时")
     parser.add_argument("--activity", metavar="活动名", help="工时的活动，完整名称")
     parser.add_argument("--spent-on", metavar="YYYY-MM-DD", help="工时日期，默认当天")
@@ -386,6 +452,8 @@ def main(argv=None):
             raise UpdateError("超时须大于零")
         if args.status is not None and not args.status.strip():
             raise UpdateError("状态名不能为空")
+        if args.ai_level is not None and args.status is None:
+            raise UpdateError("--ai-level 要和 --status 一起使用")
         if args.status_from is not None and args.status is None:
             raise UpdateError("--status-from 要和 --status 一起使用")
         if (args.hours is None) != (args.activity is None):

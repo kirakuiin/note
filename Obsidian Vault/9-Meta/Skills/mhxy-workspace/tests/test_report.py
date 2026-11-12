@@ -271,14 +271,17 @@ class UnattendedResultTests(Workspace):
         self.assertEqual((code, error), (0, None))
         saved = output["result"]
         self.assertEqual(tuple(saved), unattended.FIELDS + ("pm_update",))
-        self.assertEqual(saved["pm_update"], {"status": "代码审查", "status_from": "新建,10%", "hours": "0.2",
+        # 给了状态而没给级别时，无人值守的单默认 L4
+        self.assertEqual(saved["pm_update"], {"status": "代码审查", "status_from": "新建,10%",
+                                              "ai_level": "L4 - 全自主Agent", "hours": "0.2",
                                               "activity": "程序开发-制作", "comments": ""})
         code, shown, _ = run(unattended, "show", *self.common)
         self.assertEqual((code, shown["result"]), (0, saved))
         for bad in (("--pm-hours", "0.2"), ("--pm-activity", "程序开发-制作"), ("--pm-status-from", "新建"),
                     ("--pm-hours", "0", "--pm-activity", "a"), ("--pm-hours", "0.125", "--pm-activity", "a"),
                     ("--pm-comments", "只有备注"), ("--pm-status", "代码审查", "--pm-comments", "备注"),
-                    ("--pm-status", " "), ("--pm-status", "代码审查", "--pm-status-from", "新建,,10%")):
+                    ("--pm-status", " "), ("--pm-status", "代码审查", "--pm-status-from", "新建,,10%"),
+                    ("--pm-ai-level", "L3", "--pm-hours", "0.2", "--pm-activity", "a")):
             with self.subTest(bad):
                 code, _, error = run(unattended, *self.ready, *bad)
                 self.assertEqual(code, 1)
