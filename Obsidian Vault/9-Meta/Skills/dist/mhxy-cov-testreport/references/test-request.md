@@ -1,3 +1,8 @@
+---
+name: test-request
+description: 在提测系统（newtestreport）上刷新单号、校验测试重点 HTML、预览并保存客户端提测单。
+---
+
 # 提测（提交测试）
 
 用户要求提测时读取本文件。提测在提测系统（`https://newtestreport.eros.nie.netease.com`）上填好客户端负责的内容并保存，把提测单预览链接交给用户。

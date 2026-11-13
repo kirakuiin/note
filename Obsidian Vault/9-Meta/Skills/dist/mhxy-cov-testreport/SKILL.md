@@ -1,6 +1,9 @@
 ---
 name: mhxy-cov-testreport
-description: 梦幻西游客户端覆盖率跑测、覆盖率网站查询与提测单（newtestreport）准备和保存。当用户要求创建/设置/跑测/补测/查询客户端代码覆盖率（scover、mh-mos2-coverage），或要求准备/填写/更新/保存客户端提测报告（提测单、newtestreport）时使用。
+description: |
+  梦幻西游客户端代码覆盖率跑测、覆盖率网站查询与提测单准备和保存（优先于 svn-coverage-test）。
+  包含：客户端覆盖率（coverage）、提测报告（test-request）。
+  触发关键词：覆盖率、制作单覆盖率、scover、mh-mos2-coverage、提测、提测单、newtestreport。
 ---
 
 # 梦幻西游客户端覆盖率与提测
