@@ -31,8 +31,9 @@ temp/res_copy/{TAG}/1794654796_origin/2026年_斩杀特效/tcp/1.25/斩杀特效
 class Site:
     """假的网站接口：记下收到的请求，绑定是整份覆盖。"""
 
-    def __init__(self, bound, tags=(TAG,), reject=None, drop=False):
+    def __init__(self, bound, tags=(TAG,), reject=None, drop=False, rewrite=False):
         self.items, self.tags, self.reject, self.drop, self.calls = list(bound), tags, reject, drop, []
+        self.rewrite = rewrite      # 像真实平台那样改写：svn:// 存成 https://，补上 _testhd，地址排到群号前面
 
     def post(self, path, payload):
         self.calls.append((path, payload))
@@ -43,7 +44,11 @@ class Site:
             return 200, {"bindSVN": list(self.items), "code_svn_binder": "x@corp.netease.com", "needBindSvn": True}
         if self.reject:
             return 201, {"msg": self.reject}
-        if not self.drop:
+        if self.rewrite:
+            svns = [i.replace("svn://", "https://") for i in payload["bindSVN"] if not i.isdigit()]
+            svns += [i[:-len("_test")] + "_testhd" for i in svns if i.endswith("/_test")]
+            self.items = svns + [i for i in payload["bindSVN"] if i.isdigit()]
+        elif not self.drop:
             self.items = list(payload["bindSVN"])
         return 200, {"msg": "绑定成功", "infos": []}
 
@@ -83,6 +88,17 @@ class ArtBindTests(unittest.TestCase):
         self.assertEqual((result["groups"], result["svns"]), (["8205741"], [SVN]))
         code, result = run(["bind", "--tag", TAG, "--svn", SVN + "/", "--apply"], site)     # 再绑一次：不动
         self.assertEqual((code, result["applied"], result["changed"]), (0, False, False))
+        self.assertEqual(sum("bind_redmine" in c[0] for c in site.calls), 1)
+
+    def test_platform_rewrites_address(self):
+        """真实平台把 svn:// 存成 https://、自动补 _testhd：读回核对要认得出来，再绑一次也认得出已经绑过。"""
+        svn = SVN.replace("https://", "svn://")
+        site = Site(["8205741"], rewrite=True)
+        code, result = run(["bind", "--tag", TAG, "--svn", svn, "--apply"], site)
+        self.assertEqual((code, result["changed"], result["errors"]), (0, True, []))
+        self.assertEqual(result["bound"], [SVN, SVN + "hd", "8205741"])
+        code, result = run(["bind", "--tag", TAG, "--svn", svn, "--apply"], site)
+        self.assertEqual((code, result["applied"], result["will_bind"]), (0, False, None))
         self.assertEqual(sum("bind_redmine" in c[0] for c in site.calls), 1)
 
     def test_show_and_tag_from_text_file(self):

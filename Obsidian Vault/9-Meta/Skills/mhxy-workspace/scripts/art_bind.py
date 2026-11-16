@@ -49,6 +49,12 @@ def normalize(url):
     return unquote((url or "").strip()).rstrip("/")
 
 
+def same_key(url):
+    """比较两个绑定项是不是同一个地址用的键：平台存的时候会把 svn:// 换成 https://（2026-11-16 实测），所以不看协议。"""
+    url = normalize(url)
+    return url.split("://", 1)[1] if "://" in url else url
+
+
 def tag_from_text(text):
     """从美术上传通知的原文里取标签名；取不到时返回空串。"""
     for pattern in NOTICE_TAG:
@@ -159,7 +165,7 @@ def run(client, args, result):
     if args.action == "show":
         return
     target = result["svn"]
-    if target in {normalize(item) for item in items}:
+    if same_key(target) in {same_key(item) for item in items}:
         result["message"] = "已经绑定过这个地址，没有改动"
         return
     wanted = items + [target]     # 原有的每一项（包括 popo 群号）都保留，只在后面追加
@@ -172,7 +178,8 @@ def run(client, args, result):
     after, binder, need = client.bound(tag)
     result.update(bound=after, svns=[i for i in after if not i.isdigit()], groups=[i for i in after if i.isdigit()],
                   binder=binder, need_bind=need)
-    missing = [item for item in wanted if normalize(item) not in {normalize(i) for i in after}]
+    # 平台会改写提交的内容：svn:// 存成 https://，还会自动补上同分支的 _testhd。所以只核对每一项都还在，不要求列表一模一样。
+    missing = [item for item in wanted if same_key(item) not in {same_key(i) for i in after}]
     if missing:
         raise ArtBindError("已提交，但读回的绑定里缺：" + "、".join(missing) + "；请到网站上核对", code=2)
     result["changed"] = True
