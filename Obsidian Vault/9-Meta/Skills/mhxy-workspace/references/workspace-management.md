@@ -16,7 +16,7 @@
 | `engine_dir` | 引擎源码目录，用于查 API 和底层实现，不是运行目录 | 是 | 绝对路径或 null |
 | `global_resources_dir` | 全局共享资源（UI、造型等） | 是 | 绝对路径或 null |
 | `design_config_dir` | 策划配置源目录（导表输入） | 是 | 绝对路径或 null |
-| `openid_username` | OpenID 账号，工单查询、覆盖率、提测、提 CR 登录用 | 否 | CORP 邮箱（`@corp.netease.com`）或 null |
+| `openid_username` | OpenID 账号，工单查询、覆盖率、提测、提 CR、绑定美术资源登录用（登录方式见 `corp-login.md`） | 否 | CORP 邮箱（`@corp.netease.com`）或 null |
 | `openid_password` | OpenID 密码，只存在用户级配置中 | 否 | 只能隐藏输入（见「密码」）；任何输出里都显示为 `***` |
 | `coder_name` | 覆盖率开发者名，用于 diff 过滤 | 否 | 邮箱前缀；为 null 时自动取 `openid_username` 的前缀 |
 | `default_devid` | 按 IP 查找不到调试设备时的兜底设备 ID，见 game-debugging.md「选择设备」 | 否 | 设备 ID 或 null |

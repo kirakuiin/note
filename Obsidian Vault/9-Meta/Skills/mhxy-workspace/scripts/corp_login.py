@@ -1,15 +1,20 @@
-"""CORP 登录页公共逻辑：账号校验、跳转限制、登录表单解析与密码编码。
+"""CORP 登录（公司内部站点通用）：账号校验、跳转限制、登录表单解析与密码编码，以及通用登录入口 login()。
 
-pm_issues.py（易协作）与 coverage_auth.py（覆盖率站）共用本模块；两站的登录入口、
-回调和身份核对方式不同，各自保留在调用方。登录协议变化时只修改这里。
+新接一个内部站点时先用 login()：打开站点的登录入口 → 跟着跳到 CORP 登录页 → 提交表单 → 回到站点，
+返回带会话的 opener。各站只是登录入口路径和中途经过的主机不同，用参数说明（见 references/corp-login.md）。
+eros 统一认证（eros_auth.py）和资源提交网站（art_bind.py）都走 login()；易协作（pm_issues.py）和覆盖率站
+（coverage_auth.py）登录后还要和站点交换一次凭据，流程保留在各自脚本里，只复用这里的表单和密码编码。
+登录协议变化时只修改这里。
 """
 import getpass
 from html.parser import HTMLParser
+import http.cookiejar
 import json
 import re
 import sys
-from urllib.parse import urlsplit
-from urllib.request import HTTPRedirectHandler
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode, urlsplit
+from urllib.request import HTTPCookieProcessor, HTTPRedirectHandler, Request, build_opener
 
 LOGIN = "https://login.netease.com"
 
@@ -52,6 +57,82 @@ def redirect_handler(site):
             return super().redirect_request(req, fp, code, msg, headers, newurl)
 
     return RestrictedRedirects
+
+
+def redirects(site, https_hosts=(), http_hosts=()):
+    """生成 login() 用的跳转处理器类。
+
+    允许的跳转：站点本身和 CORP 登录页（https）、`https_hosts` 里的主机（https）、`http_hosts` 里的主机（http）。
+    http 只给服务端自己发 http 跳转的那一跳用（认证中转站，或站点登记的 OpenID 回调是 http 的情况）：这一跳带的是
+    签过名的 OpenID 回调参数，不是密码；密码只提交给 https 的 CORP 登录页。地址里带账号密码的一律拒绝。
+    跳转时去掉 Origin 和 Referer：它们只是提交 CORP 登录表单要用的，带到站点会被有的站当成跨站请求打回登录页
+    （资源提交网站，2026-11-16 实测）。
+    """
+    https_ok = {urlsplit(site).netloc, urlsplit(LOGIN).netloc, *https_hosts}
+    http_ok = set(http_hosts)
+
+    class Redirects(HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            target = urlsplit(newurl)
+            allowed = ((target.scheme == "https" and target.netloc in https_ok)
+                       or (target.scheme == "http" and target.netloc in http_ok))
+            if not allowed or target.username or target.password:
+                raise LoginError("登录跳转到未识别站点，已停止")
+            request = super().redirect_request(req, fp, code, msg, headers, newurl)
+            if request is not None:
+                for name in ("Origin", "Referer"):
+                    request.headers.pop(name, None)
+                    request.unredirected_hdrs.pop(name, None)
+            return request
+
+    return Redirects
+
+
+def login(site, username, password, entry="/login?next=/", https_hosts=(), http_hosts=(), timeout=30):
+    """登录一个用 CORP OpenID 的内部站点，返回带会话的 opener。
+
+    Args:
+        site: 站点根地址（https），如 "https://artrestrans.eros.nie.netease.com"。
+        username: CORP 邮箱或账号。
+        password: CORP 密码；只提交给 CORP 登录页，调用方拿到返回值后应立即丢弃。
+        entry: 站点上会跳去登录的入口路径（未登录时打开它会被带到 CORP 登录页）。
+        https_hosts: 中途允许经过的其他主机（https），如认证中转站。
+        http_hosts: 允许以 http 经过的主机，见 redirects()；站点自己的回调是 http 时把站点主机放进来。
+        timeout: 单次请求超时秒数。
+
+    Returns:
+        urllib opener，Cookie 仅在内存中；调用方不得输出或持久化。之后的请求一律用 https 的站点地址。
+        只确认回到了站点，不核对登录后的账号（各站的用户信息接口不同，需要时由调用方核对）。
+
+    Raises:
+        LoginError: 跳转异常、需要验证码／二次验证、凭据错误或协议变化。不自动重试密码。
+    """
+    prefix = account_prefix(username)
+    site = site.rstrip("/")
+    if urlsplit(site).scheme != "https":
+        raise LoginError("站点地址必须是 https")
+    opener = build_opener(HTTPCookieProcessor(http.cookiejar.CookieJar()), redirects(site, https_hosts, http_hosts)())
+
+    def read(url, data=None, headers=None):
+        try:
+            with opener.open(Request(url, data=data, headers=headers or {}), timeout=timeout) as response:
+                return response.url, response.read().decode("utf-8", "replace")
+        except HTTPError as error:
+            raise LoginError(f"登录过程返回 HTTP {error.code}") from None
+        except (URLError, OSError):
+            raise LoginError("登录过程网络请求失败") from None
+
+    login_url, html = read(site + entry)
+    if urlsplit(login_url).netloc != urlsplit(LOGIN).netloc:
+        raise LoginError("未到达 CORP 登录页")
+    form = fill_corp_form(corp_form(html), html, prefix, password)
+    try:
+        final_url, _ = read(login_url, urlencode(form).encode(), {"Origin": LOGIN, "Referer": login_url})
+    finally:
+        form.clear()
+    if urlsplit(final_url).netloc != urlsplit(site).netloc:
+        raise LoginError("登录未完成，可能需要验证码／二次验证或凭据有误；请在本机处理，不自动重试")
+    return opener
 
 
 class LoginForms(HTMLParser):
