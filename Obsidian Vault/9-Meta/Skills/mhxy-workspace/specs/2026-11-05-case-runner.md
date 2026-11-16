@@ -139,3 +139,4 @@
 - 2026-11-05（0.3.30）：新增 `pump`（真实战斗内注入技能表现）。
 - 2026-11-06（0.3.31）：新增开局整理 `clean_ui`、`finally` 步骤；长返回值另存；patch Mock 支持代理对象和数据描述符；主线程可直接跑新用例。
 - 2026-11-11（0.3.36）：用例归属字段（`issue`／`spec`／`targets`／`keywords`）、按工单或功能归档、通过记录 `cases/runs.json`、`search` 查工作区用例（按工单、文件、未提交改动）、报告字段 `sources`；test 结果增加候选原语 `candidates`。设计见 `specs/2026-11-11-case-reuse.md`。
+- 2026-11-16（0.3.49）：新增模板 `war/war_play_addon_record.json`（Mock 记录 `utils2.play_addon` 实际播放的资源再断言，真机跑通 2 次）；game-debugging.md 明确录像和截图同一用例只用一种，连续表现一律录像。

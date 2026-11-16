@@ -1,0 +1,27 @@
+{
+ "description": "进入机器人测试战斗，用 Mock 记录 utils2.play_addon 实际播放的特效（路径和文件名），再断言播了新资源、没播旧资源。用于确认换特效资源后各条表现路径都生效，不靠看图判断新旧。把 exec 里的触发代码、断言里的资源名换成自己的。",
+ "keywords": ["战斗", "特效", "资源替换", "play_addon", "Mock", "记录播放资源", "断言资源名", "斩杀", "受击特效"],
+ "case": {
+  "name": "战斗_记录并断言播放的特效资源",
+  "issue": null, "spec": null, "targets": ["<被测文件或模块>"], "keywords": [],
+  "ignore_errors": ["图标 NSRank 的size不对"],
+  "mocks": [
+   {"name": "记录 play_addon 播放的资源", "patch": "utils2.play_addon", "value": "(lambda orig: (lambda args, path, filename, *a, **k: (__import__('utils2').__dict__.setdefault('_addon_calls', []).append([path, filename]), orig(args, path, filename, *a, **k))[1]))(orig)"}
+  ],
+  "steps": [
+   {"assert": "not __import__('utils3').is_in_war()", "message": "开始前不在战斗中"},
+   {"gm": "$at fightN 3"},
+   {"wait_for": {"preset": "war_idle", "timeout": 60}},
+   {"exec": "def run():\n\timport war\n\timport world\n\timport utils2\n\tutils2.__dict__['_addon_calls'] = []\n\tenemies = sorted([o for o in list(world.Objects.values()) if getattr(o, 'type', None) == 'WARRIOR' and o.allied == 0], key=lambda o: (o.place, o.id))\n\tvictims = [o.id for o in enemies[:1]]\n\t# 在这里触发要看的表现，例如调用测试模块里构造指令的入口：\n\t# import t_xxx\n\t# t_xxx.t_some_perform(war.RoleID, victims[0])\n\treturn {'attacker': war.RoleID, 'victims': victims}\nrun()", "save_as": "ids"},
+   {"wait_for": {"expr": "not __import__('war').Cmds", "timeout": 30}},
+   {"exec": "list(__import__('utils2').__dict__.get('_addon_calls', []))", "save_as": "calls"},
+   {"assert": "{vars.calls}.count(['<新资源路径>', '<新资源文件名>']) >= 1", "message": "播放了新资源"},
+   {"assert": "not [c for c in {vars.calls} if '<旧资源名片段>' in c[1]]", "message": "没有再播放旧资源"}
+  ],
+  "finally": [
+   {"exec": "__import__('utils2').__dict__.pop('_addon_calls', None) is not False"},
+   {"gm": "$at kill"},
+   {"wait_for": {"preset": "war_out", "timeout": 30}}
+  ]
+ }
+}
