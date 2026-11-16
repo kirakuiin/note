@@ -75,6 +75,7 @@ Claude 主会话在第 2、4、6 步完成后和开始另一项功能前检查�
 | 查配置字段的含义，修改配置、初始化、清理 `.mhxy-workspace/` | `workspace-management.md` |
 | 提示词明确要求“按无人值守模式处理工单”；或用户要求生成工单处理报告 | `unattended.md` |
 | Claude 主会话：流程检查点的会话交接、提交后的记忆整理和经验沉淀 | `session.md` |
+| 处理 tcp／spr 资源：改 key 点、png 转 tcp、查 TCP 头参数、排查 pp 染色 | `C:/Users/wangzhuowei/note/Obsidian Vault/Netease/2-Wiki/梦幻西游客户端/TCP资源工具链速查.md`；不手写二进制改资源 |
 | 遇到疑难问题（定位、调试、工具或环境故障等） | 先查 `~/.mhxy-workspace/lessons/INDEX.md`（存在时），只读相关主题的文件 |
 
 ### 边界
