@@ -219,6 +219,41 @@ class MergeTest(unittest.TestCase):
         self.assertNotIn("AGENTS.md", self.log())
         self.assertIn("rules", self.text("AGENTS.md"))
 
+    def test_conflict_in_first_revision_then_continue_merges_the_rest(self):
+        """一次合多个修订时 svn 在第一个冲突处停下，后面的修订还没合；continue 要接着合完。"""
+        self.change(SHIP, {"a.py": "a = 100\n"})
+        svn("update", "-q", self.wc)
+        first = self.change(DEV, {"a.py": "a = 2\n"})
+        second = self.change(DEV, {"b.py": "b = 2\n"})
+        code, result = run("run", "--root", self.wc, "--source", DEV, "--revs", first, second, "--commit",
+                           "--message-file", self.say(f"finish #100 测试单：合并"))
+        self.assertEqual((code, result["status"]), (2, "conflict"), result)
+        (self.wc / "a.py").write_text("a = 102\n", encoding="utf-8")
+        svn("resolve", "--accept", "working", self.wc / "a.py")
+        code, result = run("continue", "--root", self.wc)
+        self.assertEqual((code, result["status"], result["verified"]), (0, "committed", True), result)
+        self.assertEqual(self.merged(DEV), {first, second})
+        self.assertEqual(self.text("b.py"), "b = 2\n")                    # 第二个修订的内容也合进来了
+
+    def test_subtree_mergeinfo_alone_is_not_an_extra_change(self):
+        """目标里有自带合并信息的子条目时，svn 也会在它上面记一笔；这不算多出来的改动，不挡自动提交。"""
+        added = self.change(DEV, {"sub/c.py": "c = 1\n"})
+        svn("merge", "-q", "-c", added, f"{self.repo.url}/{DEV}", self.wc)
+        svn("commit", "-q", "-m", "sync sub", self.wc)
+        svn("update", "-q", self.wc)
+        svn("propset", "-q", "svn:mergeinfo", "/wzimage/trunk/sub:1", self.wc / "sub")   # 子目录自带合并信息
+        svn("commit", "-q", "-m", "subtree mergeinfo", self.wc)
+        svn("update", "-q", self.wc)
+        rev = self.change(DEV, {"sub/c.py": "c = 2\n"})
+        code, result = run("run", "--root", self.wc, "--source", DEV, "--revs", rev, "--commit",
+                           "--message-file", self.say(f"finish #100 测试单：合并"))
+        self.assertEqual((code, result["status"]), (0, "committed"), result)
+        self.assertEqual(result["review"], [])
+        self.assertIn(rev, self.merged(DEV))
+        log = self.log()
+        self.assertIn("release2_2026_11_17/sub</path>", log)              # sub 确实只带着合并信息一起提交了
+        self.assertIn("sub/c.py", log)
+
     def test_conflict_markers_left_in_file_block_commit(self):
         self.change(SHIP, {"a.py": "a = 100\n"})
         svn("update", "-q", self.wc)

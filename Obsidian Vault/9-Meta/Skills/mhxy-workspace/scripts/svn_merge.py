@@ -509,6 +509,26 @@ def compiles(data, name):
         return False
 
 
+def mergeinfo_only(root, entry):
+    """内容没变、属性里只有 svn:mergeinfo 变了的条目。"""
+    if entry["item"] not in ("normal", "none") or entry["props"] != "modified" or entry["tree_conflicted"]:
+        return False
+    def props(*revision):
+        code, out, _ = svn_result(root, "proplist", "--xml", "-v", *revision, entry["path"] + "@")
+        if code:
+            return None
+        target = ElementTree.fromstring(out).find("target")
+        found = target.findall("property") if target is not None else []
+        return {item.get("name"): item.text or "" for item in found}
+
+    working, base = props(), props("-r", "BASE")
+    if working is None or base is None:
+        return False
+    working.pop("svn:mergeinfo", None)
+    base.pop("svn:mergeinfo", None)
+    return working == base
+
+
 def verify(root, state):
     """提交前的全部检查。返回 (硬性问题, 需要人看的差异, 这次合并改动的路径)。硬性问题不为空就不能提交。"""
     problems, entries = [], status(root)
@@ -542,7 +562,8 @@ def verify(root, state):
             if base is not None and compiles(base, relative) and not compiles(data, relative):
                 problems.append(f"处理冲突后 Python 语法不对了：{relative}")
     source_paths = set(state.get("source_paths", []))
-    target_paths = set(paths) - {"."}
+    # 子目录原来就带合并信息时，svn 会在它上面也记一笔；只改了 svn:mergeinfo 的条目不算多出来的改动
+    target_paths = {e["path"] for e in changed if not mergeinfo_only(root, e)} - {"."}
     review = []
     if source_paths - target_paths:
         review.append("源修订改了、但合并后目标没有变化的路径（可能目标已有相同内容）：" + "、".join(sorted(source_paths - target_paths)[:20]))
@@ -627,16 +648,45 @@ def do_commit(root, state, result):
             "verified": not errors, "errors": errors, "message": state["message"]}, (1 if errors else 0)
 
 
+def pending_revisions(root, state):
+    """工作副本的合并信息里还没有的修订。一次合多个修订时，svn 遇到冲突就停在那个修订，后面的还没合。"""
+    revs = state["revisions"]
+    merged = mergeinfo(root, "merged", state["source"], ".", revs[0], revs[-1])
+    return [rev for rev in revs if rev not in merged]
+
+
+def merge_revisions(root, state, revs):
+    """把 revs 合进工作副本。svn 报错但留下了冲突时交给冲突处理，其他错误直接报。"""
+    code, out, err = svn_result(root, "merge", "--accept", "postpone", "-c", ",".join(map(str, revs)),
+                                state["source"], ".", timeout=LONG_TIMEOUT)
+    if code and not any(is_conflicted(e) for e in versioned(status(root))):
+        return (err or out).strip() or f"svn merge 返回 {code}"
+    return None
+
+
 def after_merge(root, state):
-    conflicts = handle_conflicts(root, state)
-    if conflicts:
-        state["stage"] = "conflict"
-        save_state(root, state)
-        return {"status": "conflict", "committed": False, "source": state["source"],
-                "revisions": format_revisions(state["revisions"]), "conflicts": conflicts,
-                "auto_resolved": state.get("auto_resolved", []),
-                "next": "按 svn-merge.md「冲突处理」逐个处理并 svn resolve --accept working，然后运行 continue"}, 2
-    return finish(root, state)
+    tried = None
+    while True:
+        conflicts = handle_conflicts(root, state)
+        if conflicts:
+            state["stage"] = "conflict"
+            save_state(root, state)
+            return {"status": "conflict", "committed": False, "source": state["source"],
+                    "revisions": format_revisions(state["revisions"]), "conflicts": conflicts,
+                    "auto_resolved": state.get("auto_resolved", []),
+                    "next": "按 svn-merge.md「冲突处理」逐个处理并 svn resolve --accept working，然后运行 continue"}, 2
+        pending = pending_revisions(root, state)
+        if not pending or pending == tried:     # 都合完了；或刚合过仍没记录，交给校验报“没有记录合并信息”
+            return finish(root, state)
+        tried = pending
+        error = merge_revisions(root, state, pending)
+        if error:
+            state["stage"] = "conflict"
+            save_state(root, state)
+            return {"status": "blocked", "committed": False, "source": state["source"],
+                    "revisions": format_revisions(state["revisions"]),
+                    "problems": [f"接着合剩下的修订 {format_revisions(pending)} 失败：{error}"],
+                    "next": "排除原因后运行 continue；不要了运行 abort"}, 2
 
 
 def cmd_plan(root, args):
@@ -665,17 +715,16 @@ def cmd_run(root, args):
         svn(root, "update", "--ignore-externals", ".", timeout=LONG_TIMEOUT)
         state["externals"] = externals(root)
         save_state(root, state)
-        code, out, err = svn_result(root, "merge", "--accept", "postpone", "-c", ",".join(map(str, revs)),
-                                    state["source"], ".", timeout=LONG_TIMEOUT)
+        error = merge_revisions(root, state, revs)
     except Exception:
         restore(root, state)
         clear_state(root)
         raise
-    if code and not any(is_conflicted(e) for e in versioned(status(root))):
+    if error:
         svn_result(root, "revert", "-R", ".")
         restore(root, state)
         clear_state(root)
-        raise MergeError(f"svn merge 失败，工作副本已还原：{(err or out).strip()}")
+        raise MergeError(f"svn merge 失败，工作副本已还原：{error}")
     return after_merge(root, state)
 
 
