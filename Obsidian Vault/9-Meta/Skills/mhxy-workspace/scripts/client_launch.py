@@ -55,6 +55,9 @@ SERVER_INI = Path("common") / "server.ini"  # 客户端选服界面的大区和�
 EXE = "mhmain.exe"
 PROBE_TIMEOUT = 20  # 秒；单次 MCP 调用
 NO_DEVICE = "未找到任何在线设备"  # get_devices_by_ip 在本机没有设备时的报错文本
+# 本机只有不允许调试连接的客户端（如用户自己玩的外服端：非内测服且未配置 allow_game_mcp=1）时的报错文本。
+# 这些客户端测试用不了，也不占用内服测试账号，按没有可用设备处理，不挡住选设备和自动启动。
+NO_USABLE_DEVICE = "均不满足初始化条件"
 # 读设备当前登录的账号、加载的脚本位置（mainmenu 是登录流程必然加载的模块）和客户端类型
 DEVICE_PROBE = ('(lambda s: {"account": getattr(s.modules.get("loginenter"), "Account", None), '
                 '"source": getattr(s.modules.get("mainmenu"), "__file__", None), '
@@ -292,7 +295,8 @@ def list_devices():
     try:
         value = mcp("get_devices_by_ip", {"ip": ""})
     except LaunchError as error:
-        if NO_DEVICE in str(error):  # 没有在线设备时工具报错，而不是返回空列表
+        # 没有在线设备、或在线的都不允许调试连接时，工具报错而不是返回空列表
+        if NO_DEVICE in str(error) or NO_USABLE_DEVICE in str(error):
             return []
         raise
     devices = value.get("result", value) if isinstance(value, dict) else value

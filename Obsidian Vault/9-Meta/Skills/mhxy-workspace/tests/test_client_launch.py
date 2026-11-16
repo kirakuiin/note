@@ -168,6 +168,11 @@ class ClientLaunchTests(unittest.TestCase):
         error = c.LaunchError(f"get_devices_by_ip 返回错误：IP=1.2.3.4 {c.NO_DEVICE}", "mcp_error")
         with patch.object(c, "mcp", side_effect=error):
             self.assertEqual(c.list_devices(), [])
+        # 本机只有外服游玩端等不允许调试连接的客户端：同样按没有可用设备处理
+        error = c.LaunchError("get_devices_by_ip 返回错误：IP=1.2.3.4 上发现 1 台在线设备，但"
+                              f"{c.NO_USABLE_DEVICE}（非内测服，且未配置 [Net] allow_game_mcp=1）", "mcp_error")
+        with patch.object(c, "mcp", side_effect=error):
+            self.assertEqual(c.list_devices(), [])
         with patch.object(c, "mcp", side_effect=c.LaunchError("其他错误", "mcp_error")):
             with self.assertRaises(c.LaunchError):
                 c.list_devices()
