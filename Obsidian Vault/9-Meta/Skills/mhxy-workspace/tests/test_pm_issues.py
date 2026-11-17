@@ -237,6 +237,33 @@ class IssueTests(unittest.TestCase):
         self.assertEqual(json.loads(out.getvalue())["query"]["target_version"], "项目研发内容")
         self.assertNotIn("synthetic-password", out.getvalue())
 
+    def test_tracking_checks_out_svn_docs_and_refresh_updates_them(self):
+        url = "https://svn-xyq.gz.netease.com/svn/products/xy1/design/X/需求.xlsx"
+        self.save([["#123", "标题", f'<a href="{url}">{url}</a>'], ["#456", "标题二", f'<a href="{url}">x</a>']])
+        entry = {"url": url, "kind": "file", "name": "需求.xlsx", "path": "docs/X/需求.xlsx", "revision": "5",
+                 "updated": False, "skipped": [],
+                 "documents": [{"name": "需求.xlsx", "markdown": "docs/_converted/X/需求.xlsx.md"}]}
+        preview = w.track_tasks(self.root, self.config, ["123"])
+        self.assertEqual(preview["docs"], [{"issue_id": "123", "links": [url]}])
+        with patch("task_docs.sync_docs", return_value=([entry], [])) as sync:
+            result = w.track_tasks(self.root, self.config, ["123"], apply=True)
+        self.assertEqual(Path(sync.call_args.args[0]).resolve(), (self.personal / "tasks/123").resolve())
+        self.assertEqual(result["docs"][0]["docs"][0]["path"], "docs/X/需求.xlsx")
+        body = (self.personal / "tasks/123/issue.md").read_text(encoding="utf-8")
+        self.assertIn("](<docs/X/需求.xlsx>)", body)
+        self.assertIn("Markdown 版", body)
+
+        # 重新获取：只有追踪中的工单同步文档；失败时退出码按部分成功处理。
+        with patch.object(p.task_docs, "sync_docs", return_value=([{**entry, "updated": True}], [])) as sync:
+            result = self.save([["#123", "标题", f'<a href="{url}">{url}</a>'], ["#456", "标题二", "正文"]])
+        self.assertEqual(sync.call_count, 1)
+        self.assertTrue(result["docs"][0]["docs"][0]["updated"])
+        self.assertIn("](<docs/X/需求.xlsx>)", (self.personal / "tasks/123/issue.md").read_text(encoding="utf-8"))
+        with patch.object(p.task_docs, "sync_docs", return_value=([], [{"url": url, "reason": "权限不足"}])):
+            result = self.save([["#123", "标题", f'<a href="{url}">{url}</a>']])
+        self.assertEqual(result["status"], "partial")
+        self.assertEqual(result["doc_failures"], [{"issue_id": "123", "url": url, "reason": "权限不足"}])
+
     def test_invalid_id_and_unavailable_selection_cannot_write(self):
         for issue_id in ("../outside", "0", "1/2"):
             with self.assertRaises(w.WorkspaceError):

@@ -1,20 +1,23 @@
 """追踪工单的策划文档：把正文里的 SVN 链接检出到工单目录的 docs/，转成 Markdown，并改写 issue.md 的链接。
 
 布局（都在 .mhxy-workspace/tasks/<工单号>/ 下）：
-- docs/<目录名>/：SVN 稀疏工作副本。链接是文件时检出它所在目录（--depth empty）再只取这个文件；
-  链接是目录时检出该目录这一层的文件（--depth files）。同名目录对应不同 URL 时加 -2、-3 后缀。
-- docs/_converted/<目录名>/<文件名>.md 和 <文件名>_images/：xlsx 等转出的 Markdown，每次同步都重新生成。
+- docs/<目录名>/：SVN 稀疏工作副本（根目录 --depth empty）。链接是文件时只取这个文件；链接是目录时
+  按文件逐个取（svn update --parents），单个超过 FILE_LIMIT 或累计超过 TOTAL_LIMIT 的不下载，只列远端链接。
+  同名目录对应不同 URL 时加 -2、-3 后缀。
+- docs/_converted/<目录名>/<文件名>.md 和 _images/：单个文件链接转出的 Markdown（目录链接不转）；
+  xlsx 只转与客户端相关的工作表（SHEET_RULE），原件不动；源文件内容变了才重新生成。
 - docs/manifest.json：链接与本地路径、版本号的对应。
 
-只用标准库：xlsx 自己解析；docx、pptx、pdf、xls 在本机装有 markitdown 时才转换，否则注明未转换。
+只用标准库：xlsx 自己解析；docx、pptx、pdf、xls 在本机装有 markitdown 且不超过 CONVERT_LIMIT 时才转换，否则注明未转换。
 """
+import hashlib
 import json
 from pathlib import Path
 import posixpath
 import re
 import shutil
 import subprocess
-from urllib.parse import unquote, urlsplit
+from urllib.parse import quote, unquote, urlsplit
 from xml.etree import ElementTree
 import zipfile
 
@@ -25,6 +28,14 @@ SECTION_BEGIN = "<!-- task-docs:begin -->"
 SECTION_END = "<!-- task-docs:end -->"
 SVN_TIMEOUT = 1800
 INFO_TIMEOUT = 120
+MB = 2 ** 20
+FILE_LIMIT = 20 * MB  # 目录链接里单个文件的下载上限。
+TOTAL_LIMIT = 200 * MB  # 目录链接累计下载上限。
+CONVERT_LIMIT = 10 * MB  # markitdown 转换的单文件上限（大 PDF 转换很慢，内容多是图片）。
+SOURCE_HASH = re.compile(r"<!-- source-sha256: ([0-9a-f]{64}) -->")
+# 策划 xlsx 只把工作表名含这些词的转进 Markdown 版（客户端只关心玩法规则、UI 和美术需求）；
+# 数值、奖励、演算、成就、修改记录、思路等不转。原件仍完整检出。
+SHEET_RULE = re.compile(r"玩法|规则|UI|界面|美术|表现|交互", re.I)
 # 设计文档所在的 SVN 主机；正文里其他链接不处理。
 SVN_URL = re.compile(r"(?:https?|svn)://svn[\w.-]*\.netease\.com/svn/[^\s<>()\"'\]\[|]+")
 TRAILING = ".,;:!?，。；：！？、）)"
@@ -111,14 +122,24 @@ def link_issue(text, entries, failures):
     lines = [SECTION_BEGIN, "## 策划文档（本地检出）", ""]
     for entry in entries:
         kind = "目录" if entry["kind"] == "dir" else "文件"
-        if entry.get("depth") == "files":
-            kind += f"，超过 {DIR_LIMIT // 2 ** 20} MB，只检出了顶层文件"
         lines.append(f"- [{entry['name']}](<{entry['path']}>)（{kind}，r{entry['revision']}）")
+        skipped = entry.get("skipped") or []
+        if skipped:
+            lines.append(f"  - 未下载 {len(skipped)} 个文件（单个超过 {FILE_LIMIT // MB} MB 或目录累计超过 "
+                         f"{TOTAL_LIMIT // MB} MB），需要时从远端打开：")
+            lines += [f"    - [{item['path']}](<{item['url']}>)（{item['size'] / MB:.1f} MB）" for item in skipped[:20]]
+            if len(skipped) > 20:
+                lines.append(f"    - ……另有 {len(skipped) - 20} 个，见 docs/manifest.json")
         for doc in entry["documents"]:
             if doc.get("plain"):
                 continue  # md、txt 本身可读，目录或文件链接已经指向它。
             if doc.get("markdown"):
-                lines.append(f"  - Markdown 版：[{doc['name']}](<{doc['markdown']}>)")
+                scope = ""
+                if doc.get("dropped"):
+                    scope = f"（只含：{'、'.join(doc['sheets'])}；其余 {len(doc['dropped'])} 张工作表见原件）"
+                elif doc.get("fallback"):
+                    scope = "（没有名字含玩法、规则、UI、美术的工作表，转换了全部）"
+                lines.append(f"  - Markdown 版：[{doc['name']}](<{doc['markdown']}>){scope}")
             elif doc.get("note") and entry["kind"] == "file":
                 lines.append(f"  - {doc['name']}：{doc['note']}")
         lines.append(f"  - 远端：{entry['url']}")
@@ -182,21 +203,45 @@ def encoded(url):
     return quote(url, safe=":/@!$&'()*+,;=~-._")
 
 
-def tree_size(url):
-    """目录下全部文件的总字节数（svn list -R -v 的第 3 列）。"""
-    total = 0
-    for line in svn(None, "list", "-R", "-v", encoded(url), timeout=SVN_TIMEOUT).splitlines():
-        parts = line.split()
-        if len(parts) > 5 and parts[2].isdigit() and not line.rstrip().endswith("/"):
-            total += int(parts[2])
-    return total
+def tree_files(url):
+    """目录下的全部文件 [(相对路径, 字节数)]。用 --xml：输出固定 UTF-8，不受控制台代码页影响。"""
+    root = ElementTree.fromstring(svn(None, "list", "-R", "--xml", encoded(url), timeout=SVN_TIMEOUT))
+    return [(entry.findtext("name"), int(entry.findtext("size") or 0))
+            for entry in root.iter("entry") if entry.get("kind") == "file"]
 
 
-def sync_link(docs, url, used, previous=None):
+def pick_files(files):
+    """按路径顺序挑选要下载的文件；返回 (要下载的, 跳过的 [(路径, 大小, 原因)])。"""
+    picked, skipped, total = [], [], 0
+    for path, size in sorted(files):
+        if size > FILE_LIMIT:
+            skipped.append((path, size, f"超过 {FILE_LIMIT // MB} MB"))
+        elif total + size > TOTAL_LIMIT:
+            skipped.append((path, size, f"目录累计超过 {TOTAL_LIMIT // MB} MB"))
+        else:
+            picked.append(path)
+            total += size
+    return picked, skipped
+
+
+def update_paths(wc, paths):
+    """分批 svn update --parents，命令行别太长。"""
+    batch, length = [], 0
+    for path in paths:
+        if batch and length + len(path) > 6000:
+            svn(wc, "update", "--parents", *batch, timeout=SVN_TIMEOUT)
+            batch, length = [], 0
+        batch.append(path)
+        length += len(path) + 3
+    if batch:
+        svn(wc, "update", "--parents", *batch, timeout=SVN_TIMEOUT)
+
+
+def sync_link(docs, url, used):
     """检出或更新一个链接，返回 manifest 条目（不含转换结果）。
 
-    文件：检出所在目录（--depth empty）后只取这个文件。目录：默认整个检出；总大小超过 DIR_LIMIT 时
-    只检出顶层文件（--depth files）并在条目里注明。深度在首次检出时决定，之后沿用。
+    根目录一律 --depth empty 检出。文件链接只取这个文件；目录链接先 svn update 已有内容（服务器删掉的
+    文件随之删除），再用 --parents 补取新挑中的文件。
     """
     kind = svn(None, "info", "--show-item", "kind", encoded(url))
     if kind not in ("file", "dir"):
@@ -204,35 +249,34 @@ def sync_link(docs, url, used, previous=None):
     parent_url = posixpath.dirname(url) if kind == "file" else url
     name = checkout_dir(docs, parent_url, used)
     wc = docs / name
-    depth = "empty"
-    if kind == "dir":
-        depth = (previous or {}).get("depth") or ("infinity" if tree_size(url) <= DIR_LIMIT else "files")
-    if not wc.exists():
-        svn(docs, "checkout", "--depth", "empty" if kind == "file" else depth, encoded(parent_url), name,
-            timeout=SVN_TIMEOUT)
+    fresh = not wc.exists()
+    if fresh:
+        svn(docs, "checkout", "--depth", "empty", encoded(parent_url), name, timeout=SVN_TIMEOUT)
     filename = posixpath.basename(url) if kind == "file" else None
     target = wc / filename if filename else wc
-    if target.exists():
+    if target.exists() and not fresh:
         ensure_clean(target)
-    before = svn(wc, "info", "--show-item", "last-changed-revision", filename or ".") if target.exists() else None
+    exists = (wc / filename).exists() if filename else not fresh
+    before = svn(wc, "info", "--show-item", "last-changed-revision", filename or ".") if exists else None
+    skipped = []
     if kind == "file":
         svn(wc, "update", filename, timeout=SVN_TIMEOUT)
+        files = [target]
     else:
-        svn(wc, "update", "--set-depth", depth, ".", timeout=SVN_TIMEOUT)
+        picked, skipped = pick_files(tree_files(url))
+        if not fresh:
+            svn(wc, "update", ".", timeout=SVN_TIMEOUT)
+        update_paths(wc, [path for path in picked if not (wc / path).exists()])
+        files = [wc / path for path in picked if (wc / path).is_file()]
     if not target.exists():
         raise DocsError(f"更新后本地没有 {target.name}")
     revision = svn(wc, "info", "--show-item", "last-changed-revision", filename or ".")
-    if kind == "file":
-        files = [target]
-    else:
-        files = sorted(p for p in wc.rglob("*") if p.is_file() and ".svn" not in p.relative_to(wc).parts)
-    entry = {"url": url, "kind": kind, "name": target.name,
-             "path": f"{DOCS}/{name}" + (f"/{filename}" if filename else ""),
-             "revision": revision, "updated": before is not None and before != revision, "files": files,
-             "checkout": name}
-    if kind == "dir":
-        entry["depth"] = depth
-    return entry
+    return {"url": url, "kind": kind, "name": posixpath.basename(url),
+            "path": f"{DOCS}/{name}" + (f"/{filename}" if filename else ""),
+            "revision": revision, "updated": before is not None and before != revision, "files": files,
+            "checkout": name,
+            "skipped": [{"path": path, "size": size, "reason": reason, "url": f"{url}/{path}"}
+                        for path, size, reason in skipped]}
 
 
 def sync_docs(task_dir, text, markitdown=None):
@@ -255,16 +299,14 @@ def sync_docs(task_dir, text, markitdown=None):
     converter = markitdown if markitdown is not None else shutil.which("markitdown")
     for url in links:
         try:
-            entry = sync_link(docs, url, used, previous.get(url))
+            entry = sync_link(docs, url, used)
         except DocsError as error:
             failures.append({"url": url, "reason": str(error)})
             continue
-        documents = []
-        wc = docs / entry["checkout"]
-        for path in entry.pop("files"):
-            out_dir = docs / CONVERTED / entry["checkout"] / path.parent.relative_to(wc)
-            documents.append(convert(path, out_dir, converter, Path(task_dir)))
-        entry["documents"] = documents
+        # 只有单个文件的链接才转 Markdown；目录链接只检出，按需打开原件。
+        files = entry.pop("files")
+        entry["documents"] = [convert(path, docs / CONVERTED / entry["checkout"], converter, Path(task_dir))
+                              for path in files] if entry["kind"] == "file" else []
         entries.append(entry)
     write_manifest(docs, entries)
     return entries, failures
@@ -279,15 +321,33 @@ def convert(path, out_dir, markitdown, task_dir):
         return {"name": path.name, "markdown": path.relative_to(task_dir).as_posix(), "plain": True}
     target = out_dir / (path.name + ".md")
     images = out_dir / (path.name + "_images")
+    if suffix != ".xlsx" and suffix not in MARKITDOWN_SUFFIXES:
+        return {"name": path.name, "note": "不是可转换的文档，未转换"}
+    if suffix in MARKITDOWN_SUFFIXES and not markitdown:
+        return {"name": path.name, "note": "未转换（本机没有 markitdown）"}
+    if suffix in MARKITDOWN_SUFFIXES and path.stat().st_size > CONVERT_LIMIT:
+        return {"name": path.name, "note": f"超过 {CONVERT_LIMIT // MB} MB，未转换"}
+    # 哈希含筛选规则版本：规则调整后旧的 Markdown 版会重新生成。
+    source = hashlib.sha256(path.read_bytes() + SHEET_RULE.pattern.encode("utf-8")).hexdigest()
+    result = {"name": path.name, "markdown": target.relative_to(task_dir).as_posix()}
     try:
         if suffix == ".xlsx":
-            text, pictures = xlsx_markdown(path, images.name)
-        elif suffix in MARKITDOWN_SUFFIXES and markitdown:
-            text, pictures = run_markitdown(markitdown, path), {}
-        elif suffix in MARKITDOWN_SUFFIXES:
-            return {"name": path.name, "note": "未转换（本机没有 markitdown）"}
+            result.update(pick_sheets(sheet_titles(path)))
+    except (OSError, zipfile.BadZipFile, ElementTree.ParseError, KeyError) as error:
+        return {"name": path.name, "note": f"转换失败：{error}"}
+    if target.is_file():
+        match = SOURCE_HASH.search(target.read_text(encoding="utf-8", errors="replace")[:500])
+        if match and match[1] == source:
+            return result  # 源文件没变，沿用上次生成的 Markdown。
+    try:
+        if suffix == ".xlsx":
+            text, pictures = xlsx_markdown(path, images.name, set(result["sheets"]))
+            if result["dropped"]:
+                note = ("> 只转换了与客户端相关的工作表（玩法规则、UI、美术需求等）；"
+                        f"未转换：{'、'.join(result['dropped'])}，需要时看原件。\n\n")
+                text = text.replace("\n", "\n\n" + note, 1) if text.startswith("# ") else note + text
         else:
-            return {"name": path.name, "note": "不是可转换的文档，未转换"}
+            text, pictures = run_markitdown(markitdown, path), {}
     except (DocsError, OSError, zipfile.BadZipFile, ElementTree.ParseError, KeyError, ValueError) as error:
         return {"name": path.name, "note": f"转换失败：{error}"}
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -297,11 +357,11 @@ def convert(path, out_dir, markitdown, task_dir):
         images.mkdir()
         for name, data in pictures.items():
             (images / name).write_bytes(data)
-    header = f"<!-- 由 {path.name} 自动生成，重新获取任务时覆盖，不要手工修改 -->\n\n"
+    header = (f"<!-- 由 {path.name} 自动生成，源文件变化时重新生成，不要手工修改 -->\n"
+              f"<!-- source-sha256: {source} -->\n\n")
     data = (header + text).encode("utf-8")
-    if not target.is_file() or target.read_bytes() != data:
-        target.write_bytes(data)
-    return {"name": path.name, "markdown": target.relative_to(task_dir).as_posix()}
+    target.write_bytes(data)
+    return result
 
 
 def run_markitdown(command, path):
@@ -369,8 +429,26 @@ def table_cell(value):
     return value.replace("\\", "\\\\").replace("|", "\\|").replace("\r\n", "\n").replace("\n", "<br>").strip()
 
 
-def xlsx_markdown(path, images_dir):
-    """xlsx 转 Markdown：每个工作表一个表格，图片按锚点单元格放在表后（WPS 单元格图片放进单元格）。"""
+def sheet_titles(path):
+    """工作簿里的工作表名，按顺序。"""
+    with zipfile.ZipFile(path) as archive:
+        workbook = zip_xml(archive, "xl/workbook.xml")
+    return [sheet.get("name") for sheet in workbook.findall("m:sheets/m:sheet", NS)]
+
+
+def pick_sheets(titles):
+    """按 SHEET_RULE 挑出与客户端相关的工作表；一张都没命中时全部保留，避免生成空文档。"""
+    kept = [title for title in titles if SHEET_RULE.search(title)]
+    if not kept:
+        return {"sheets": list(titles), "dropped": [], "fallback": True}
+    return {"sheets": kept, "dropped": [title for title in titles if title not in kept]}
+
+
+def xlsx_markdown(path, images_dir, sheets=None):
+    """xlsx 转 Markdown：每个工作表一个表格，图片按锚点单元格放在表后（WPS 单元格图片放进单元格）。
+
+    sheets 给出时只转换这些工作表（按名字）。
+    """
     pictures = {}
     with zipfile.ZipFile(path) as archive:
         names = set(archive.namelist())
@@ -385,7 +463,7 @@ def xlsx_markdown(path, images_dir):
         for number, sheet in enumerate(workbook.findall("m:sheets/m:sheet", NS), 1):
             title = sheet.get("name")
             part = workbook_rels.get(sheet.get(R_ID))
-            if not part or part not in names:
+            if not part or part not in names or (sheets is not None and title not in sheets):
                 continue
             root = zip_xml(archive, part)
             grid = {}

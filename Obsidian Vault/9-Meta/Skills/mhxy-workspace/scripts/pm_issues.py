@@ -482,7 +482,7 @@ def save_issues(client, rows, root_arg, config_path, query):
     if len(set(ids)) != len(ids):
         raise QueryError("查询包含重复工单")
     local_links = {SITE + "/issues/" + issue_id: "../" + issue_id + "/issue.md" for issue_id in ids}
-    tracking_path, old, tracking = workspace.read_tracking(personal)
+    tracking_path, tracking_old, tracking = workspace.read_tracking(personal)
     tracked = {item["issue_id"] for item in tracking["tracked_tasks"]}
     docs, doc_failures = [], []
     for row in rows:
@@ -507,12 +507,12 @@ def save_issues(client, rows, root_arg, config_path, query):
     path = personal / "tasks/index.json"
     changes.append((path, workspace.read_bytes(path), workspace.json_bytes(index)))
     # 已追踪工单标题跟随本次实际返回值更新；缺席工单不自动取消追踪。
-    if old is not None:
+    if tracking_old is not None:
         available = {entry["issue_id"]: entry for entry in entries}
         tracking["tracked_tasks"] = [available.get(item["issue_id"], item) for item in tracking["tracked_tasks"]]
         new = workspace.json_bytes(tracking)
-        if old != new:
-            changes.append((tracking_path, old, new))
+        if tracking_old != new:
+            changes.append((tracking_path, tracking_old, new))
     workspace.apply_changes(changes)
     return {"status": "partial" if warnings or doc_failures else "saved", "query": query, "tasks": entries,
             "index_path": str(path), "image_failures": warnings, "docs": docs, "doc_failures": doc_failures}
