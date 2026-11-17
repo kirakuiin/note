@@ -395,6 +395,14 @@ class ConfigTest(unittest.TestCase):
             with self.assertRaises(workspace.WorkspaceError):
                 workspace.validate_config(bad, defaults, "x")
 
+    def test_work_issue_rules(self):
+        defaults = json.loads((Path(__file__).resolve().parents[1] / "config/defaults.json").read_text(encoding="utf-8"))
+        for good in ("870228", 870228, None):
+            workspace.validate_config({"work_issue": good}, defaults, "x")
+        for bad in ("", "0", "#870228", "87a", " 870228", -1, 1.5, True, "1" * 11):
+            with self.assertRaises(workspace.WorkspaceError):
+                workspace.validate_config({"work_issue": bad}, defaults, "x")
+
 
 if __name__ == "__main__":
     unittest.main()

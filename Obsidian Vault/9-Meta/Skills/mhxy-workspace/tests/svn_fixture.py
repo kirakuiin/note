@@ -5,7 +5,9 @@ import shutil
 import subprocess
 import unittest
 
-AVAILABLE = bool(shutil.which("svn") and shutil.which("svnadmin"))
+# MHXY_TEST_SKIP_SVN 不为空也不是 0 时跳过真实 svn 测试（tests/run.py --fast 设置），用于改动不涉及 SVN 时快速回归。
+SKIPPED_BY_ENV = os.environ.get("MHXY_TEST_SKIP_SVN", "") not in ("", "0")
+AVAILABLE = bool(shutil.which("svn") and shutil.which("svnadmin")) and not SKIPPED_BY_ENV
 FLAGS = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
 

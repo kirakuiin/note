@@ -229,6 +229,11 @@ def validate_config(config, keys, label):
             if value is not None and not valid_patch_template(value):
                 raise WorkspaceError(f"{label} 的 patch_template 必须是 1–64 字符的单行模板名或 null")
             continue
+        if key == "work_issue":
+            text = str(value) if type(value) in (int, str) else ""
+            if value is not None and not re.fullmatch(r"[1-9][0-9]{0,9}", text):
+                raise WorkspaceError(f"{label} 的 work_issue 必须是易协作工单号（正整数）或 null")
+            continue
         if value is not None and (not isinstance(value, str) or not value or
                                   not Path(value).is_absolute() or any(c in value for c in "\r\n\x00")):
             raise WorkspaceError(f"{label} 的 {key} 必须是绝对路径或 null")
