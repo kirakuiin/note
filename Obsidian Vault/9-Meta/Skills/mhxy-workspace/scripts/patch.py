@@ -181,8 +181,16 @@ class Remote:
             raise PatchError(f"{name} 返回无法解析：{text[:200]}") from None
 
 
+SVN_HTTPS_PREFIX = "https://svn-xyq.gz.netease.com/svn/"
+SVN_PREFIX = "svn://svn-xyq.gz.netease.com/svn/"
+
+
 def normalize(url):
-    return unquote((url or "").strip()).rstrip("/")
+    # 同一仓库可经 https:// 或 svn:// 检出（repos-uuid 相同），统一成 svn:// 再比较。
+    url = unquote((url or "").strip()).rstrip("/")
+    if url.startswith(SVN_HTTPS_PREFIX):
+        url = SVN_PREFIX + url[len(SVN_HTTPS_PREFIX):]
+    return url
 
 
 def dev_branch(root, result):
