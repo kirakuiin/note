@@ -3,7 +3,6 @@ import contextlib
 import io
 import json
 from pathlib import Path
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -13,6 +12,8 @@ from unittest.mock import patch
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import precommit as p  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import svn_fixture  # noqa: E402
 
 STATUS_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <status>
@@ -210,7 +211,7 @@ class PrecommitTests(unittest.TestCase):
         self.assertEqual((marked_at, changed), (None, []))
         self.assertIn("review 记录无法读取", warnings[0])
 
-    @unittest.skipUnless(shutil.which("svn") and shutil.which("svnadmin"), "需要本机 svn 和 svnadmin")
+    @svn_fixture.requires_svn
     def test_property_value_change_after_review_mark(self):
         """属性状态一直是 modified，但 mark 之后文件和目录的属性值变了，也要列为 review 之后的改动。"""
         seed, repository, root = self.root / "seed", self.root / "repo", self.root / "wc"

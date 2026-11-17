@@ -1,7 +1,6 @@
 """定向提交的范围、失败语义和临时 SVN 仓库集成测试，不连接业务仓库。"""
 import json
 from pathlib import Path
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -12,6 +11,8 @@ from xml.etree import ElementTree as ET
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import svn_commit as commit  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import svn_fixture  # noqa: E402
 
 MESSAGE = "finish #844233 【全部服务器放出】指挥系统设置界面描述优化：保留字体并调整留白"
 URL = "svn://example.test/products/wzimage/trunk"
@@ -282,7 +283,7 @@ class CommitTests(unittest.TestCase):
                 setattr(self, mode, False)
 
 
-@unittest.skipUnless(shutil.which("svn") and shutil.which("svnadmin"), "需要本机 svn 和 svnadmin")
+@svn_fixture.requires_svn
 class LocalRepositoryTests(unittest.TestCase):
     def test_real_dev_branch_commit(self):
         with tempfile.TemporaryDirectory(prefix="svn dev commit ") as directory:

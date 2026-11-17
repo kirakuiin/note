@@ -19,6 +19,8 @@ SOURCE = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location("workspace", SOURCE / "scripts/workspace.py")
 w = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(w)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import svn_fixture  # noqa: E402
 
 
 class WorkspaceTests(unittest.TestCase):
@@ -463,7 +465,7 @@ class WorkspaceTests(unittest.TestCase):
         result = w.context(self.root, self.global_config)
         self.assertEqual((result["index"]["svn"], result["index"]["specs"]), ("merge_pending", 0))
 
-    @unittest.skipUnless(shutil.which("svn") and shutil.which("svnadmin"), "需要本机 svn 命令行")
+    @svn_fixture.requires_svn
     def test_merge_pending_detected_in_real_working_copy(self):
         """在临时仓库里真实合并一次，确认合并进来的他人 spec 不被当作本地改动收录。"""
         self.svn_patch.stop()

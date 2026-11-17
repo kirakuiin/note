@@ -463,8 +463,9 @@ def test_silent_process_is_stopped(tmp_path):
 
 def test_output_refreshes_idle_and_records_session(tmp_path):
     code = ("import time,sys\nprint('{\"type\":\"thread.started\",\"thread_id\":\"T1\"}', flush=True)\n"
-            "for i in range(8):\n sys.stderr.write('x'); sys.stderr.flush(); time.sleep(.1)\n" + result_code(TEST_RESULT))
-    state = run_probe(tmp_path, code)
+            "for i in range(5):\n sys.stderr.write('x'); sys.stderr.flush(); time.sleep(.8)\n" + result_code(TEST_RESULT))
+    # 总时长约 4 秒超过 3 秒静默上限，但每次输出都刷新计时；上限留足余量，并行负载下子进程启动慢也不误判。
+    state = run_probe(tmp_path, code, idle=3)
     assert state["status"] == "completed" and state["result"] == TEST_RESULT
     assert state["restoration"] == "not_needed" and state["session_id"] == "T1"
 
@@ -579,7 +580,7 @@ def test_nonzero_exit_cannot_pass(tmp_path):
 
 
 def test_cancel_stops_process(tmp_path):
-    state = run_probe(tmp_path, "import time; time.sleep(10)", cancel=True)
+    state = run_probe(tmp_path, "import time; time.sleep(10)", cancel=True, idle=EXITS)
     assert state["status"] == "cancelled" and state["restoration"] == "unknown"
 
 

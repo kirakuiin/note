@@ -46,4 +46,8 @@ sync 会写入用户级配置、AGENTS.md 和 CLAUDE.md 的受管区段、Claude
 - 版本的唯一来源是 `config/version.json`。修改模板或行为时递增发布版本；结构不兼容时再递增结构版本（当前只支持 2）。
 - 升级 skill（递增发布版本）后，各工作区下次运行 `context`（Claude Code 是开会话时的 hook）会自动把入口文件的受管区段更新到新版本，不需要逐个 sync，见 workspace-management.md「入口规则自动更新」。所以改了入口模板一定要递增发布版本，否则已有工作区不会更新。references 直接从安装目录引用，改了立即生效。
 - 新能力放进 `references/` 和 `scripts/`，并在入口模板的「按需读取」表里加一行。保持只依赖标准库；`cryptography` 只是 OpenID 登录的可选依赖。
-- 测试：`python -B -m pytest -q -p no:cacheprovider tests`。
+- 测试需要 pytest、pytest-xdist（只用于测试；脚本本身仍只依赖标准库）：
+  - 全量：`python -B -m pytest -q -p no:cacheprovider -n auto --dist worksteal tests`（约 1.5 分钟）。
+  - 改动不涉及 SVN 时快速回归：在上面命令后加 `--skip-svn`（跳过真实调用 svn 的测试，约 40 秒）。
+  - 单文件调试或没有 xdist 时，去掉 `-n auto --dist worksteal`，串行运行（全量约 6 分钟），例如 `python -B -m pytest -q -p no:cacheprovider tests/test_svn_merge.py`。
+  - 新测试要能并行：只用临时目录，不写固定路径或用户级目录；等待子进程的静默/超时上限给足余量（并行负载下 Python 启动可能超过 1 秒）；真实调用 svn 的测试用 `svn_fixture.requires_svn` 标记。
