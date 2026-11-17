@@ -3,6 +3,7 @@
 import argparse
 from collections import Counter
 from datetime import date, datetime
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -528,6 +529,8 @@ def command_preview(step):
         return f"remove {step['path']} (set-aside old working copy, kept if status unavailable, not clean or removal fails)"
     if step["type"] == "clean_workspace":
         return f"clean {Path(step['path']) / workspace.DIRECTORY} (old branch's tracking, index, reports and other local data)"
+    if step["type"] == "remove_entry":
+        return f"remove {step['path']} (unversioned entry file holding only the managed block; sync recreates it)"
     return "svn " + " ".join(step["args"] + ["--non-interactive"])
 
 
@@ -549,10 +552,13 @@ def reuse_workspace_entries(reuse):
         raise BranchError(f"复用目录的 {workspace.DIRECTORY}/ 无法清理，拒绝复用：{error}") from None
 
 
-def checkout_plan(name, root, urls, reuse=None, replace=(), clean=False):
+def checkout_plan(name, root, urls, reuse=None, replace=(), clean=False, relocate=None, entry_steps=()):
     """构造新建或复用目录的操作计划，不产生文件系统副作用。
 
     clean 为真时（复用目录的个人目录里有内容），在全部 SVN 步骤成功后清理 mhimage/.mhxy-workspace/。
+
+    relocate 为 {子目录: (本地仓库根, 目标仓库根)}（见 relocations）：在 cleanup 之后、switch 之前改写访问地址。
+    entry_steps 是 mhimage 入口文件的还原或删除步骤（见 entry_file_steps），放在 mhimage 的 switch 之前。
 
     replace 中的复用子目录与目标不在同一仓库，无法 switch（见 cross_repository_folders）：先改名挪开再检出，
     全部步骤成功后最后删除挪开的旧目录。改名在文件被占用时会直接失败，不会留下删了一半的工作副本。
@@ -583,6 +589,13 @@ def checkout_plan(name, root, urls, reuse=None, replace=(), clean=False):
                 removals.append({"type": "remove", "path": str(aside)})
             elif local.is_dir():
                 steps.append(make_svn_step(["cleanup", folder], target, f"cleanup {folder}"))
+                if relocate and folder in relocate:
+                    source_root, target_root = relocate[folder]
+                    steps.append(make_svn_step(["relocate", source_root, target_root, folder], target,
+                                               f"relocate {folder}"))
+                if folder == "mhimage":
+                    steps += [{**step, "path": str(target / step["relative"])} if step["type"] == "remove_entry"
+                              else make_svn_step(step["args"], target, step["label"]) for step in entry_steps]
                 steps.append(make_svn_step(["switch", "-q", url, folder, "--force", "--ignore-ancestry"],
                                            target, f"switch {folder}"))
             else:
@@ -682,6 +695,92 @@ def cross_repository_folders(reuse, urls):
     return folders
 
 
+def relocations(reuse, urls, replace=()):
+    """返回需要先 relocate 再 switch 的子目录：{子目录: (本地仓库根, 目标仓库根)}。
+
+    svn switch 要求工作副本与目标的仓库根 URL 完全一致；同一仓库换了访问协议（svn:// 与 https://）时 UUID 相同、
+    根 URL 不同，直接 switch 会报 E155025。UUID 不同的是真正的跨仓库（资源子目录由 cross_repository_folders
+    挪开重检），不在这里处理。只改工作副本记录的地址，不动文件。
+    """
+    result = {}
+    for folder, url in [("mhimage", urls["script"]), *urls["resources"].items()]:
+        if folder in replace or not (reuse / folder).is_dir():
+            continue
+        local_root = svn_info(folder, item="repos-root-url", cwd=reuse)
+        target_root = svn_info(url, item="repos-root-url")
+        if not local_root or not target_root:
+            raise BranchError(f"无法读取 {folder} 或目标的仓库根 URL：{reuse / folder} -> {url}")
+        if local_root.rstrip("/") == target_root.rstrip("/"):
+            continue
+        local_uuid = svn_info(folder, item="repos-uuid", cwd=reuse)
+        if local_uuid and local_uuid == svn_info(url, item="repos-uuid"):
+            result[folder] = (local_root, target_root)
+    return result
+
+
+def without_block(data):
+    """入口文件去掉受管区段后的文本（忽略末尾空白和换行风格），用来判断区段之外有没有改动。
+
+    换行要统一：svn:eol-style=native 时工作副本是 CRLF，而 svn cat 取出的是仓库里的 LF。
+    """
+    text = workspace.decode_document(data)[0].replace("\r\n", "\n")
+    try:
+        info = workspace.block_info(text)
+    except workspace.WorkspaceError as error:
+        raise BranchError(f"入口文件的受管区段异常：{error}") from None
+    if info:
+        text = text[:info[0]] + text[info[1]:]
+    return text.rstrip()
+
+
+def entry_file_steps(reuse):
+    """mhimage 入口文件（AGENTS.md、CLAUDE.md）在 switch 前的处理步骤。
+
+    inspect_reuse 把入口文件当作 sync 维护的本地文件放行，但 switch 会把受管区段这处本地修改和新分支的版本
+    合并，双方都改了文件末尾时产生冲突。这里要求入口文件相对 BASE 只差受管区段：受版本控制的先 revert，
+    未纳管且只有受管区段的直接删除；区段由检出后的初始化 sync 重建。区段外有改动时拒绝复用。
+    """
+    steps = []
+    for name in workspace.ENTRY_FILES:
+        relative = f"mhimage/{name}"
+        path = reuse / relative
+        if not path.is_file():
+            continue
+        completed = run_svn("status", "--ignore-externals", relative, cwd=reuse, timeout=INFO_TIMEOUT)
+        if completed.returncode:
+            raise BranchError(svn_error(completed, "status"))
+        lines = [line for line in precommit.decode_output(completed.stdout).splitlines()
+                 if line.strip() and not line.startswith("--- Changelist")]
+        code = lines[0][0] if lines else " "
+        current = path.read_bytes()
+        if code == " ":
+            continue
+        if code == "?":
+            if without_block(current):
+                raise BranchError(f"未纳管的入口文件中有受管区段以外的内容，拒绝切换，请先由用户处理：{path}")
+            steps.append({"type": "remove_entry", "relative": relative,
+                          "sha256": hashlib.sha256(current).hexdigest()})
+            continue
+        if code != "M":
+            raise BranchError(f"入口文件状态为 {code}，拒绝切换，请先由用户处理：{path}")
+        base = run_svn("cat", "-r", "BASE", relative, cwd=reuse, timeout=INFO_TIMEOUT)
+        if base.returncode:
+            raise BranchError(svn_error(base, "cat"))
+        if without_block(current) != without_block(base.stdout):
+            raise BranchError(f"入口文件在受管区段以外有本地修改，拒绝切换，请先由用户处理：{path}")
+        steps.append({"type": "svn", "args": ["revert", relative], "label": f"revert {relative}"})
+    return steps
+
+
+def remove_entry_file(path, sha256):
+    """删除预览时确认过只含受管区段的未纳管入口文件；内容在预览后变过就拒绝。"""
+    path = Path(path)
+    if hashlib.sha256(path.read_bytes()).hexdigest() != sha256:
+        raise BranchError(f"入口文件在预览后被修改，未删除：{path}")
+    path.unlink()
+    return "removed"
+
+
 def remove_set_aside(path):
     """删除挪开的旧工作副本，返回结果说明；状态无法检查、不干净或删除失败时保留目录，不让已完成的检出失败。"""
     path = Path(path)
@@ -728,18 +827,27 @@ def build_checkout(name, root_arg=None, reuse_arg=None, config=None, rows=None):
     urls, warnings = resolve_branch_urls(name, rows)
     checks = {"root_exists": True, "script_url_exists": True,
               "resource_urls_exist": sorted(urls["resources"])}
-    replace = []
+    replace, relocate, entry_steps = [], {}, []
     if reuse is not None:
         checks["reuse_directory"] = str(reuse)
         checks["clean_working_copies"] = inspect_reuse(reuse)
         replace = cross_repository_folders(reuse, urls)
         if replace:
             checks["replaced_working_copies"] = replace
+        relocate = relocations(reuse, urls, replace)
+        if relocate:
+            checks["relocated_working_copies"] = {folder: f"{old} -> {new}" for folder, (old, new) in relocate.items()}
+        entry_steps = entry_file_steps(reuse)
+        if entry_steps:
+            checks["entry_files_reset"] = [step["relative"] if step["type"] == "remove_entry" else step["args"][1]
+                                           for step in entry_steps]
+            warnings = warnings + ["入口文件的受管区段会在切换前移除，检出后需要初始化工作区（sync）才会恢复入口规则"]
         warnings = warnings + stale_resource_warnings(reuse, urls)
         cleaned = reuse_workspace_entries(reuse)
         if cleaned:
             checks["workspace_clean"] = cleaned
-    steps = checkout_plan(name, root, urls, reuse, replace, clean=bool(reuse is not None and cleaned))
+    steps = checkout_plan(name, root, urls, reuse, replace, clean=bool(reuse is not None and cleaned),
+                          relocate=relocate, entry_steps=entry_steps)
     return {"action": "checkout", "preview": True, "applied": False, "branch": name,
             "root": str(root), "target": str(target), "reuse": str(reuse) if reuse else None,
             "urls": urls, "warnings": warnings, "checks": checks,
@@ -768,6 +876,8 @@ def execute_steps(result):
                 outcome = "set_aside"
             elif step["type"] == "remove":
                 outcome = remove_set_aside(step["path"])
+            elif step["type"] == "remove_entry":
+                outcome = remove_entry_file(step["path"], step["sha256"])
             elif step["type"] == "clean_workspace":
                 try:
                     workspace.clean(step["path"], CONFIG_PATH, apply=True)

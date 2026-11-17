@@ -540,6 +540,7 @@ class CheckoutTests(unittest.TestCase):
         with patch.object(b.Path, "cwd", return_value=self.root / "session"):
             with patch.object(b, "run_svn", return_value=subprocess.CompletedProcess([], 0, b"", b"")) as run, \
                     patch.object(b, "working_copy_url", return_value=SCRIPT_URL), \
+                    patch.object(b, "svn_info", return_value="svn://svn-xyq.gz.netease.com/svn"), \
                     patch.object(b, "resolve_branch_urls", side_effect=self.resolve_urls):
                 preview = b.checkout(NAME, str(self.root), str(target))
                 self.assertEqual(preview["steps"][0]["type"], "same_directory")
