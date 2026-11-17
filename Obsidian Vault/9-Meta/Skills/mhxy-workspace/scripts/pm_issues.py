@@ -28,6 +28,7 @@ from urllib.request import HTTPRedirectHandler, HTTPCookieProcessor, Request, bu
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import corp_login  # noqa: E402
+import task_docs  # noqa: E402
 from corp_login import LOGIN, account_prefix  # noqa: E402
 import workspace  # noqa: E402
 
@@ -481,21 +482,31 @@ def save_issues(client, rows, root_arg, config_path, query):
     if len(set(ids)) != len(ids):
         raise QueryError("查询包含重复工单")
     local_links = {SITE + "/issues/" + issue_id: "../" + issue_id + "/issue.md" for issue_id in ids}
+    tracking_path, old, tracking = workspace.read_tracking(personal)
+    tracked = {item["issue_id"] for item in tracking["tracked_tasks"]}
+    docs, doc_failures = [], []
     for row in rows:
         entry, files, failures = issue_document(client, row, local_links)
         entries.append(entry)
         warnings.extend(failures)
+        if entry["issue_id"] in tracked:
+            # 追踪中的工单：正文里的 SVN 策划文档检出或更新到 docs/，Markdown 版重新生成，链接指向本地。
+            text = files["issue.md"].decode("utf-8")
+            found, failed = task_docs.sync_docs(personal / "tasks" / entry["issue_id"], text)
+            files["issue.md"] = task_docs.link_issue(text, found, failed).encode("utf-8")
+            if found or failed:
+                docs.append(doc_summary(entry["issue_id"], found, failed))
+            doc_failures += [{"issue_id": entry["issue_id"], **item} for item in failed]
         for name, data in files.items():
             path = personal / "tasks" / entry["issue_id"] / name
             old = workspace.read_bytes(path)
             if old != data:
                 changes.append((path, old, data))
     index = {"fetched_at": datetime.now(timezone.utc).isoformat(), "query": query,
-             "tasks": entries, "image_failures": warnings}
+             "tasks": entries, "image_failures": warnings, "doc_failures": doc_failures}
     path = personal / "tasks/index.json"
     changes.append((path, workspace.read_bytes(path), workspace.json_bytes(index)))
     # 已追踪工单标题跟随本次实际返回值更新；缺席工单不自动取消追踪。
-    tracking_path, old, tracking = workspace.read_tracking(personal)
     if old is not None:
         available = {entry["issue_id"]: entry for entry in entries}
         tracking["tracked_tasks"] = [available.get(item["issue_id"], item) for item in tracking["tracked_tasks"]]
@@ -503,8 +514,17 @@ def save_issues(client, rows, root_arg, config_path, query):
         if old != new:
             changes.append((tracking_path, old, new))
     workspace.apply_changes(changes)
-    return {"status": "partial" if warnings else "saved", "query": query, "tasks": entries,
-            "index_path": str(path), "image_failures": warnings}
+    return {"status": "partial" if warnings or doc_failures else "saved", "query": query, "tasks": entries,
+            "index_path": str(path), "image_failures": warnings, "docs": docs, "doc_failures": doc_failures}
+
+
+def doc_summary(issue_id, entries, failures):
+    """输出用的策划文档摘要：本地路径、版本、本次是否有更新、Markdown 版和失败项。"""
+    return {"issue_id": issue_id, "failures": failures,
+            "docs": [{"name": item["name"], "path": item["path"], "revision": item["revision"],
+                      "updated": item["updated"],
+                      "markdown": [doc.get("markdown") or f"{doc['name']}：{doc.get('note')}"
+                                   for doc in item["documents"]]} for item in entries]}
 
 
 def credentials(config_path, username=None):
@@ -570,7 +590,7 @@ def main(argv=None):
                                   "title_tags_mode": args.title_tags_mode, "target_version": args.target_version})
             output = json.dumps(result, ensure_ascii=False, indent=2) + "\n"
         sys.stdout.write(output)
-        return 2 if result and result["image_failures"] else 0
+        return 2 if result and (result["image_failures"] or result["doc_failures"]) else 0
     except corp_login.LoginError as error:
         print(f"查询失败：{error}", file=sys.stderr)
         return 1

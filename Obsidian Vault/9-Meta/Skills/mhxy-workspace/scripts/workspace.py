@@ -1286,7 +1286,39 @@ def track_tasks(root_arg, global_arg, issue_ids, replace=False, remove=False, ap
                 raise WorkspaceError(f"工单 {issue_id} 不在当前清单或正文缺失，请重新获取")
             selected[issue_id] = available[issue_id]
         value["tracked_tasks"] = list(selected.values())
-    return save_tracking(path, old, value, "untrack" if remove else "track", apply)
+    result = save_tracking(path, old, value, "untrack" if remove else "track", apply)
+    if not remove:
+        result["docs"] = track_docs(personal, issue_ids, apply)
+    return result
+
+
+def track_docs(personal, issue_ids, apply):
+    """追踪时把工单正文里的 SVN 策划文档检出到 tasks/<工单号>/docs/，并让 issue.md 指向本地文件。
+
+    预览只列出识别到的链接；--apply 时检出（已检出的 svn update）、重新生成 Markdown 版并改写 issue.md。
+    单个链接失败不影响追踪本身，失败项在结果里列出，issue.md 保留远端链接。
+    """
+    import task_docs  # 延迟导入：只有追踪时才用到。
+
+    results = []
+    for issue_id in issue_ids:
+        task_dir = personal / "tasks" / issue_id
+        issue_path = task_dir / "issue.md"
+        text = issue_path.read_text(encoding="utf-8")
+        if not apply:
+            links = task_docs.svn_links(text)
+            if links:
+                results.append({"issue_id": issue_id, "links": links})
+            continue
+        entries, failures = task_docs.sync_docs(task_dir, text)
+        new = task_docs.link_issue(text, entries, failures)
+        if new != text:
+            apply_changes([(issue_path, issue_path.read_bytes(), new.encode("utf-8"))])
+        if entries or failures:
+            results.append({"issue_id": issue_id, "failures": failures,
+                            "docs": [{"name": item["name"], "path": item["path"], "revision": item["revision"]}
+                                     for item in entries]})
+    return results
 
 
 def record_coverage_task(root_arg, global_arg, task, apply=False):
